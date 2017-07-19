@@ -1,0 +1,106 @@
+#!/bin/sh
+#
+# This wrapper (rather naively) translates vanilla terraform commands, as
+# provided by kitchen-terraform, into terragrunt *-all commands.
+#
+# validate -> nothing -- terragrunt downloads modules into a tmp folder which
+# is not easy to get a hold of. For now, wel'l skip this step.
+#
+# plan -> nothing -- plan doesn't work when modules communicate via
+# remote_state, which only happens on apply.
+#
+# plan -destroy -> destroy-all -- Since we skip the plan phase anyway, we
+# invoke destroy-all immediately. We also write a signal file so that we skip
+# the next apply (designed to consume the output of `plan -destroy`, but in our
+# case it would just create the environment all over again).
+#
+# get -> nothing -- get doesn't work with terragrunt module style.
+#
+# show -> nothing -- show doesn't work with terragrunt module style. This is
+# used by `kitchen destroy`, whereas we just `destroy-all`.
+#
+# apply -> apply-all, removing path to terraform.tfplan file (since we skip the
+# plan step) and '-state-out=/path' (since it confuses our remote state
+# situation -- note that this removes the isolation kitchen provides by using
+# its own state file; i.e. kitchen will work directly on the user's
+# terraform-managed resources in this environment rather than spinning up a
+# separate environment).
+#
+# output -> output-all.
+#
+# Other subcommands are passed through as-is. 'version' is the only subcommand
+# called by kitchen that isn't described above.
+#
+# Other notes:
+#
+# * Be careful with debug statements: kitchen expects 'output' to emit json and
+# will complain if that doesn't happen.
+#
+# * This script should be a unit-tested ruby script but I'm hacking up this
+# quick shell script as a proof of concept.
+
+args="$*"
+DRY_RUN=""
+if echo "$args" | grep -Eq -- "--dry-run\b" ; then
+    DRY_RUN=1
+fi
+SKIP_NEXT_APPLY_FILE="terragrunt_wrapper.skip_next_apply"
+
+if echo "$args" | grep -Eq "\W-state(-out)*=" ; then
+    state_dir=$(echo "$args" | ruby -pe '$_.gsub! /.*\W-state(-out)*=(\S+).*/, "\\2"')
+    state_dir=$(dirname "$state_dir")
+fi
+if [ -n "$state_dir" ] && echo "$args" | grep -Eq "\W-destroy" ; then
+    if [ -n "$DRY_RUN" ] ; then
+        echo "Dry run! Would have created: $state_dir/$SKIP_NEXT_APPLY_FILE"
+    else
+        touch "$state_dir/$SKIP_NEXT_APPLY_FILE"
+    fi
+    args=$(echo "$args" \
+        | ruby -pe '$_.gsub! /(\b)plan(\b)/, "\\1destroy-all\\2"' \
+        | ruby -pe '$_.gsub! /(\s)-destroy/, "\\1"' \
+        | ruby -pe '$_.gsub! %r{(\s)/\S*}, "\\1"' \
+    )
+fi
+
+if echo "$args" | grep -Eq "\bapply\b" && [ -n "$state_dir" ] && [ -f "$state_dir/$SKIP_NEXT_APPLY_FILE" ] ; then
+    echo "terragrunt_wrapper: Skipping this apply because the previous run specified '-destroy'"
+    echo "(which caused $state_dir/$SKIP_NEXT_APPLY_FILE to be created)."
+    echo "I am removing this file now."
+    rm -f "$state_dir/$SKIP_NEXT_APPLY_FILE"
+    exit 0
+fi
+
+if echo "$args" | grep -Eq "\b(validate|plan|get|show)\b" ; then
+    echo "terragrunt_wrapper: Skipping subcommand: $args"
+    exit 0
+fi
+
+args=$(echo "$args" \
+    | ruby -pe '$_.gsub! /(\b)(apply)(\b)/, "\\1\\2-all\\3"' \
+    | ruby -pe '$_.gsub! /(\b)(output)(\b)/, "\\1\\2-all\\3"' \
+    | ruby -pe '$_.gsub! /\S*terraform.tfplan/, ""' \
+    | ruby -pe '$_.gsub! /-state=\S*/, ""' \
+)
+
+cmd="terragrunt $args --terragrunt-non-interactive --terragrunt-source-update"
+
+if echo "$cmd" | grep -Eq "\boutput-all\b" ; then
+    cmd="$cmd --terragrunt-ignore-dependency-errors"
+fi
+
+# This must go (almost) last since it introduces a pipeline.
+if echo "$cmd" | grep -Eq "\W-json\b" ; then
+    cmd="$cmd | jq -s 'add'"
+fi
+
+# Repeat this check because this trap for non-zero exit needs to be the very last thing.
+if echo "$cmd" | grep -Eq "\boutput-all\b" ; then
+    cmd="$cmd || >&2 echo \"Command ($cmd) exited non-zero. I'm returning zero anyway to cover failures in output-all.\""
+fi
+
+if [ -n "$DRY_RUN" ] ; then
+    echo "Dry run! Would have run: $cmd"
+else
+    eval $cmd
+fi

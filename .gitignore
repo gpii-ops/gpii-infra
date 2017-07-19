@@ -1,0 +1,9 @@
+.*.sw?
+.bundle/
+.kitchen/
+.terraform/
+graph*.png
+rake-tmp
+tags
+test/inspec.lock
+vendor/

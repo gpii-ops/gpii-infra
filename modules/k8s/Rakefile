@@ -1,0 +1,46 @@
+require 'rake/clean'
+
+task :default => :generate
+
+task :generate => "Rakefile" do
+  ENV["S3_BUCKET"] = "gpii-kubernetes-state"
+  ENV["KOPS_STATE_STORE"] = "s3://#{ENV['S3_BUCKET']}"
+  # This logic duplicates logic on the gpii-terraform-live side. I suspect this
+  # side will win in the long run, but I'm punting deduplication until the
+  # design is clearer.
+  if ENV["TF_VAR_environment"].nil?
+    if ENV["USER"].nil? || ENV["USER"].empty?
+      raise "ERROR: Please set $USER (or $TF_VAR_environment, if you're sure you know what you're doing)."
+    end
+    user = ENV["USER"]
+    ENV["TF_VAR_environment"] = "dev-#{user}"
+  end
+  if ENV["TF_VAR_cluster_name"].nil?
+    ENV["TF_VAR_cluster_name"] = "k8s-#{ENV["TF_VAR_environment"]}.gpii.net"
+  end
+  sh "kops delete cluster \
+    --yes \
+    --name=$TF_VAR_cluster_name \
+    --unregister \
+    || echo 'kops delete cluster failed, but that is ok.' \
+  "
+  sh "kops create cluster \
+    --name=$TF_VAR_cluster_name \
+    --channel=alpha \
+    --kubernetes-version=1.6.1 \
+    --cloud=aws \
+    --zones=us-east-2a,us-east-2b,us-east-2c \
+    --node-count=3 \
+    --master-zones=us-east-2a,us-east-2b,us-east-2c \
+    --node-size=t2.micro \
+    --master-size=t2.micro \
+    --target=terraform \
+    --out=. \
+    --ssh-public-key=~/.ssh/id_rsa.gpii-ci.pub
+  "
+end
+CLEAN << "kubernetes.tf"
+CLEAN << "data"
+
+
+# vim: ts=2 sw=2:
