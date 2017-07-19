@@ -2,17 +2,17 @@
 
 This repo is designed to fit into a CI/CD scheme: new commits are automatically tested and promoted through a pipeline.
 
-[High-level architecture diagram](https://docs.google.com/presentation/d/1sly5V5ayg0q5bnzkutIHslmDdjHeZZIIXbEBzbjEqTs/view)
+[High-level architecture diagram](https://docs.google.com/presentation/d/1vkVi1iCDSqdfC9YPmpd-xyUJORFtXE72soLtFLHEEcg/view)
 
 ## Configure Github
 
-   * Create a role account `gpii-bot` for use by `gitlab-runner`. Add it to the `gpii-ops` Organization. Add it to the `gpii-terraform` and `gpii-terraform-live` repos as a Collaborator with Write access.
+   * Create a role account `gpii-bot` for use by `gitlab-runner`. Add it to the `gpii-ops` Organization. Add it to the `gpii-terraform` repo as a Collaborator with Write access.
    * Create an ssh key. Associate the public key with the `gpii-bot` Github account. Save the private key as `~gitlab-runner/.ssh/id_rsa.gpii-ci`.
 
 ## Configure Gitlab
 
-   * Import `gpii-terraform` and `gpii-terraform-live` repos from Github into the `gpii-ops` Gitlab organization.
-      * In those repos, disable all Shared Runners. Ansible will enable Specific Runners later.
+   * Import the `gpii-terraform` repo from Github into the `gpii-ops` Gitlab organization.
+      * In that repo, disable all Shared Runners. Ansible will enable Specific Runners later.
    * Create a role account `gpii-bot` for use by `gitlab-runner`. Add it to the `gpii-ops` Organization with `Master` permissions.
    * Associate the public key above (from Github) with the `gpii-bot` Gitlab account.
 
@@ -21,9 +21,9 @@ This repo is designed to fit into a CI/CD scheme: new commits are automatically 
       * The [internal ansible repo](https://github.com/inclusive-design/ops) has a playbook to do this: `config_host_gpii_ci_worker.yml`.
 
 ### Set up credentials
-   * [Set up .ssh with gpii-key.pem](https://github.com/gpii-ops/gpii-terraform-live#configure-ssh).
+   * [Set up .ssh with gpii-key.pem](README.md#configure-ssh).
       * Make sure the private key associated with the gitlab-runner Github account is available at `~gitlab-runner/.ssh/id_rsa.gpii-ci`.
-   * [Configure AWS creds](https://github.com/gpii-ops/gpii-terraform-live#configure-your-machine) for `gitlab-runner`.
+   * [Configure AWS creds](README.md#install-packages) for `gitlab-runner`.
 
 ## Running manually in non-dev environments (stg, prd)
 
