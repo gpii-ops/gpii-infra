@@ -4,7 +4,7 @@ terragrunt = {
   }
 
   terraform {
-    source = "../../../../gpii-terraform/modules//k8s-cluster-dns"
+    source = "../../../modules//k8s-cluster-dns"
 
     # Force Terraform to keep trying to acquire a lock for up to 20 minutes if someone else already has the lock
     extra_arguments "retry_lock" {

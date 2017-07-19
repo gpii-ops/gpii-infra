@@ -23,7 +23,7 @@ ENV["TMPDIR"] = TMPDIR
 directory TMPDIR
 CLOBBER << TMPDIR
 
-RAKEFILES = FileList.new("../../gpii-terraform/modules/**/Rakefile")
+RAKEFILES = FileList.new("../modules/**/Rakefile")
 
 task :generate_modules => [TMPDIR, :apply_prereqs] do
   RAKEFILES.each do |rakefile|
