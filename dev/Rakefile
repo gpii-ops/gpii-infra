@@ -19,6 +19,7 @@ TMPDIR_PREREQS = File.absolute_path("../rake-tmp/#{ENV["TF_VAR_environment"]}-pr
 TMPDIR = File.absolute_path("../rake-tmp/#{ENV["TF_VAR_environment"]}")
 
 task :default => :dev
+task :destroy => :destroy_dev
 
 task :dev => :generate_modules do
   sh "bundle exec kitchen create -l debug"

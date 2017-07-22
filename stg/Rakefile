@@ -15,6 +15,7 @@ TMPDIR_PREREQS = File.absolute_path("../rake-tmp/#{ENV["TF_VAR_environment"]}-pr
 TMPDIR = File.absolute_path("../rake-tmp/#{ENV["TF_VAR_environment"]}")
 
 task :default => :stg
+task :destroy => :destroy_stg
 
 task :stg => :generate_modules do
   sh "terragrunt apply-all --terragrunt-non-interactive"
