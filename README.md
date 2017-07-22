@@ -10,12 +10,12 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 1. Install [terragrunt](https://github.com/gruntwork-io/terragrunt#install-terragrunt).
 1. Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
 1. Install [kops](https://github.com/kubernetes/kops#installing).
+1. Install the [AWS CLI](http://docs.aws.amazon.com/cli/latest/userguide/installing.html).
 1. Install Ruby and [Bundler](http://bundler.io/) (for [kitchen](https://github.com/test-kitchen/test-kitchen) and [kitchen-terraform](https://github.com/newcontext-oss/kitchen-terraform)).
    * I like [rvm](https://rvm.io/) for ruby management.
    * If you're using a package manager, you may need to install "ruby-devel" as well.
 1. Install [rake](https://github.com/ruby/rake), probably via `gem install rake`.
 1. Install [jq](https://stedolan.github.io/jq/).
-1. Install the [AWS CLI](http://docs.aws.amazon.com/cli/latest/userguide/installing.html).
 
 ### Configure cloud provider credentials
 
@@ -39,6 +39,7 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
    * `aws s3api put-bucket-versioning --bucket gpii-kubernetes-state --versioning-configuration Status=Enabled --region us-east-2`
 1. Clone this repo.
 1. `cd` into the `gpii-terraform/dev/` directory.
+1. `bundle install --path vendor/bundle`
 1. `rake`
    * This will create an independent dev environment called `dev-$USER`, run tests, and then **destroy the environment**.
    * Add `RAKE_NO_DESTROY=1` if you want the environment to stick around after tests run.
