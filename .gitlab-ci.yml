@@ -15,12 +15,15 @@ stages:
 setup:
   stage: setup
   script:
-    - kops version
     - terraform -version
     - terragrunt -version
+    - kubectl version
+    - kops version
+    - aws --version
     - jq --version
     - ruby --version
     - bundle version
+    - rake --version
 
 dev:
   stage: dev

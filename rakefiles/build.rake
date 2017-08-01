@@ -1,4 +1,4 @@
-require 'rake/clean'
+require "rake/clean"
 
 # We need a DNS zone before kops will do anything, so we have to create it in a
 # separate terraform run. We use a separate tmpdir so we don't mix up these
