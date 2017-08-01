@@ -17,7 +17,7 @@ setup:
   script:
     - terraform -version
     - terragrunt -version
-    - kubectl version
+    - kubectl version --client
     - kops version
     - aws --version
     - jq --version
