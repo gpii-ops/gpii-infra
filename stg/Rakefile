@@ -11,8 +11,12 @@ if ENV["RAKE_ENV_SHORT"].nil?
   ENV["RAKE_ENV_SHORT"] = File.basename(File.dirname(__FILE__))
 end
 
-TMPDIR_PREREQS = File.absolute_path("../rake-tmp/#{ENV["TF_VAR_environment"]}-prereqs")
-TMPDIR = File.absolute_path("../rake-tmp/#{ENV["TF_VAR_environment"]}")
+if ENV["TMPDIR"].nil?
+  ENV["TMPDIR"] = "/tmp"
+end
+BASE_TMPDIR = ENV["TMPDIR"]
+TMPDIR_PREREQS = File.absolute_path("#{ENV["TMPDIR"]}/rake-tmp/#{ENV["TF_VAR_environment"]}-prereqs")
+TMPDIR = File.absolute_path("#{ENV["TMPDIR"]}/rake-tmp/#{ENV["TF_VAR_environment"]}")
 
 task :default => :stg
 task :destroy => :destroy_stg
