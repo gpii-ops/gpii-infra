@@ -1,11 +1,3 @@
-variables:
-  # Ownership/permission conflicts in /tmp/terragrunt-download are possible, so set TMPDIR to a path inside the build.
-  TMPDIR: "$CI_PROJECT_DIR/gitlab-tmp"
-
-before_script:
-  - echo "$TMPDIR"  # So it's visible in the log
-  - mkdir "$TMPDIR"
-
 stages:
   - setup
   - dev
@@ -29,7 +21,7 @@ dev:
   stage: dev
   script:
     - cd dev
-    - bundle install --path "$TMPDIR/vendor/bundle"
+    - bundle install --path "vendor/bundle"
     - rake dev
 
 promote-to-stg:
