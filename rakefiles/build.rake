@@ -56,7 +56,7 @@ task :wait_for_api do
   puts
   puts "Waiting for API to have DNS..."
   puts "(Note that this will wait potentially forever for DNS records to appear.)"
-  puts "(You can Ctrl-C out of this safely. You may need to run :destroy_dev afterward.)"
+  puts "(You can Ctrl-C out of this safely. You may need to run :destroy afterward.)"
 
   api_hostname = "api.#{ENV['TF_VAR_cluster_name']}"
   sleep_secs = 20

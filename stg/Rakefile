@@ -27,9 +27,12 @@ end
 CLEAN << "#{TMPDIR}/terragrunt"
 
 task :destroy_stg do
-  unless ENV["RAKE_NO_DESTROY"]
+  if ENV["RAKE_DESTROY"]
     sh "terragrunt destroy-all --terragrunt-non-interactive"
     Rake::Task["destroy_prereqs"].invoke
+  else
+    puts "RAKE_DESTROY is not set so not destroying environment."
+    puts "Remember to `RAKE_DESTROY=1 rake destroy` when you're done."
   end
 end
 
