@@ -32,7 +32,7 @@ promote-to-stg:
     - git tag "deploy-stg-$DATESTAMP"
     # gitlab is not clever enough to clean up an added remote and git complains
     # if we add a remote that already exists.
-    - git remote | grep -q "^origin-rw" || git remote add origin-rw git@github.com:gpii-ops/gpii-terraform-live
+    - git remote | grep -q "^origin-rw" || git remote add origin-rw git@github.com:gpii-ops/gpii-terraform
     - git push --tags origin-rw
 
 stg:
