@@ -7,6 +7,7 @@ This repo is designed to fit into a CI/CD scheme: new commits are automatically 
 ## Configure Github
 
    * Create a role account `gpii-bot` for use by `gitlab-runner`. Add it to the `gpii-ops` Organization. Add it to the `gpii-terraform` repo as a Collaborator with Write access.
+      * You'll need to accept the invitation using `gpii-bot`'s Github account.
    * Create an ssh key. Associate the public key with the `gpii-bot` Github account. Save the private key as `~gitlab-runner/.ssh/id_rsa.gpii-ci`.
 
 ## Configure Gitlab
