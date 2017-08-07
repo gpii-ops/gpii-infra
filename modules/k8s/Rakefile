@@ -27,7 +27,7 @@ task :generate => "Rakefile" do
   sh "kops create cluster \
     --name=$TF_VAR_cluster_name \
     --channel=alpha \
-    --kubernetes-version=1.6.1 \
+    --kubernetes-version=1.7.3 \
     --cloud=aws \
     --zones=us-east-2a,us-east-2b,us-east-2c \
     --node-count=3 \

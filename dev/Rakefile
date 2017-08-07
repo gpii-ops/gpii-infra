@@ -43,7 +43,7 @@ task :destroy_dev do
     Rake::Task["destroy_prereqs"].invoke
   else
     puts "RAKE_DESTROY is not set so not destroying environment."
-    puts "Remember to `rake destroy` when you're done."
+    puts "Remember to `RAKE_DESTROY=1 rake destroy` when you're done."
   end
 end
 
