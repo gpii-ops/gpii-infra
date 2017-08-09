@@ -19,6 +19,8 @@ task :deploy => :configure_kubectl do
   sh "kubectl apply -f ../deploy_gpii/flowmanager-svc.yml"
 end
 
+# Shut things down via kubernetes, otherwise terraform destroy will get stuck
+# on left-behind resources, e.g. ELBs and IGs.
 task :undeploy => :configure_kubectl do
   ENV["S3_BUCKET"] = "gpii-kubernetes-state"
   ENV["KOPS_STATE_STORE"] = "s3://#{ENV['S3_BUCKET']}"
@@ -29,5 +31,5 @@ task :undeploy => :configure_kubectl do
   sh "kubectl delete -f ../deploy_gpii/dataloader-job.yml"
   sh "kubectl delete -f ../deploy_gpii/couchdb-svc.yml"
   sh "kubectl delete -f ../deploy_gpii/couchdb-deploy.yml"
-  # sh "kubectl delete -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/kubernetes-dashboard/v1.5.0.yaml"
+  # Don't delete dashboard. It doesn't impede anything and it can be useful even in an "undeployed" cluster.
 end
