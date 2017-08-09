@@ -1,5 +1,6 @@
 require "rake/clean"
 import "../rakefiles/build.rake"
+import "../rakefiles/deploy_gpii.rake"
 
 if ENV["TF_VAR_environment"].nil?
   if ENV["USER"].nil? || ENV["USER"].empty?
