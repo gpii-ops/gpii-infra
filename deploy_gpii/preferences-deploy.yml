@@ -1,0 +1,21 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: preferences
+spec:
+  replicas: 6
+  template:
+    metadata:
+      labels:
+        app: preferences
+    spec:
+      containers:
+      - name: preferences
+        image: gpii/preferences-server
+        ports:
+        - containerPort: 8081
+        env:
+        - name: COUCHDB_HOST_ADDRESS
+          value: couchdb.default.svc.cluster.local
+        - name: NODE_ENV
+          value: gpii.preferencesServer.config.production

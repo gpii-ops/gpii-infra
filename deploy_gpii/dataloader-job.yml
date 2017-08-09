@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: couchdb-dataloader
+spec:
+  template:
+    metadata:
+      labels:
+        app: couchdb-dataloader
+    spec:
+      containers:
+      - name: couchdb-dataloader
+        image: gpii/preferences-dataloader
+        env:
+        - name: COUCHDB_URL
+          value: http://couchdb.default.svc.cluster.local:5984/preferences
+        - name: CLEAR_INDEX
+          value: 'true'
+      restartPolicy: OnFailure

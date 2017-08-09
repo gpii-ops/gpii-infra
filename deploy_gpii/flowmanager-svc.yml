@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: flow-manager
+spec:
+  selector:
+    app: flow-manager
+  ports:
+  - port: 80
+    targetPort: 8081
+  type: LoadBalancer # exposed externally
