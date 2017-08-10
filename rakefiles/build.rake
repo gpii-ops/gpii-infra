@@ -3,29 +3,27 @@ require "rake/clean"
 # We need a DNS zone before kops will do anything, so we have to create it in a
 # separate terraform run. We use a separate tmpdir so we don't mix up these
 # downloaded modules with the main terraform run's downloaded modules.
-directory TMPDIR_PREREQS
-CLOBBER << TMPDIR_PREREQS
+directory @tmpdir_prereqs
+CLOBBER << @tmpdir_prereqs
 
-task :apply_prereqs => TMPDIR_PREREQS do
-  sh "cd ../prereqs/#{ENV["RAKE_ENV_SHORT"]}/k8s-cluster-dns && TMPDIR=#{TMPDIR_PREREQS} terragrunt apply-all --terragrunt-non-interactive"
+task :apply_prereqs => @tmpdir_prereqs do
+  sh "cd ../prereqs/#{ENV["RAKE_ENV_SHORT"]}/k8s-cluster-dns && TMPDIR=#{@tmpdir_prereqs} terragrunt apply-all --terragrunt-non-interactive"
 end
-CLEAN << "#{TMPDIR_PREREQS}/terragrunt"
+CLEAN << "#{@tmpdir_prereqs}/terragrunt"
 
-task :destroy_prereqs do
+task :destroy_prereqs => @tmpdir_prereqs do
   unless ENV["RAKE_NO_DESTROY"]
-    sh "cd ../prereqs/#{ENV["RAKE_ENV_SHORT"]}/k8s-cluster-dns && TMPDIR=#{TMPDIR_PREREQS} terragrunt destroy-all --terragrunt-non-interactive"
+    sh "cd ../prereqs/#{ENV["RAKE_ENV_SHORT"]}/k8s-cluster-dns && TMPDIR=#{@tmpdir_prereqs} terragrunt destroy-all --terragrunt-non-interactive"
   end
 end
 
 
-ENV["TMPDIR"] = TMPDIR
-
-directory TMPDIR
-CLOBBER << TMPDIR
+directory @tmpdir
+CLOBBER << @tmpdir
 
 RAKEFILES = FileList.new("../modules/**/Rakefile")
 
-task :generate_modules => [TMPDIR, :apply_prereqs] do
+task :generate_modules => [@tmpdir, :apply_prereqs] do
   RAKEFILES.each do |rakefile|
     sh "cd #{File.dirname(rakefile)} && rake generate"
   end

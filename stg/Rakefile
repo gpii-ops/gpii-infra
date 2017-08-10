@@ -1,31 +1,25 @@
 require "rake/clean"
+require_relative "../rakefiles/vars.rb"
 import "../rakefiles/build.rake"
 import "../rakefiles/deploy_gpii.rake"
 
-if ENV["TF_VAR_environment"].nil?
-  ENV["TF_VAR_environment"] = "stg"
-end
-if ENV["TF_VAR_cluster_name"].nil?
-  ENV["TF_VAR_cluster_name"] = "k8s-#{ENV["TF_VAR_environment"]}.gpii.net"
-end
 if ENV["RAKE_ENV_SHORT"].nil?
   ENV["RAKE_ENV_SHORT"] = File.basename(File.dirname(__FILE__))
 end
-
-if ENV["TMPDIR"].nil?
-  ENV["TMPDIR"] = "/tmp"
-end
-BASE_TMPDIR = ENV["TMPDIR"]
-TMPDIR_PREREQS = File.absolute_path("#{ENV["TMPDIR"]}/rake-tmp/#{ENV["TF_VAR_environment"]}-prereqs")
-TMPDIR = File.absolute_path("#{ENV["TMPDIR"]}/rake-tmp/#{ENV["TF_VAR_environment"]}")
+setup_vars(ENV["RAKE_ENV_SHORT"])
 
 task :default => :stg
-task :destroy => :destroy_stg
 
-task :stg => :generate_modules do
+task :stg => [@tmpdir, :generate_modules] do
   sh "terragrunt apply-all --terragrunt-non-interactive"
 end
-CLEAN << "#{TMPDIR}/terragrunt"
+CLEAN << "#{@tmpdir}/terragrunt"
+
+# If user invokes :destroy directly, really destroy.
+task :destroy do
+  ENV["RAKE_DESTROY"] = "true"
+  Rake::Task["destroy_stg"].invoke
+end
 
 # It seems weird to depend on :generate_modules, but it is needed for a common
 # scenario: CI deploys stg environment, an administrator wants to destroy it
@@ -33,16 +27,13 @@ CLEAN << "#{TMPDIR}/terragrunt"
 # run it.
 #
 # After the second time rake gave me inscrutable errors while trying to delete
-# a stg environment that was spun up, I added the dependency.
-task :destroy_stg => :generate_modules do
-  puts ENV["TF_VAR_environment"]
-  puts ENV["TF_VAR_cluster_name"]
+# a stg environment that was spun up elsewhere, I added the dependency.
+task :destroy_stg => [@tmpdir, :generate_modules] do
   if ENV["RAKE_DESTROY"]
     sh "terragrunt destroy-all --terragrunt-non-interactive"
     Rake::Task["destroy_prereqs"].invoke
   else
     puts "RAKE_DESTROY is not set so not destroying environment."
-    puts "Remember to `RAKE_DESTROY=1 rake destroy` when you're done."
   end
 end
 

@@ -1,32 +1,16 @@
 require "rake/clean"
+require_relative "../rakefiles/vars.rb"
 import "../rakefiles/build.rake"
 import "../rakefiles/deploy_gpii.rake"
 
-if ENV["TF_VAR_environment"].nil?
-  if ENV["USER"].nil? || ENV["USER"].empty?
-    raise "ERROR: Please set $USER (or $TF_VAR_environment, if you're sure you know what you're doing)."
-  end
-  user = ENV["USER"]
-  ENV["TF_VAR_environment"] = "dev-#{user}"
-end
-if ENV["TF_VAR_cluster_name"].nil?
-  ENV["TF_VAR_cluster_name"] = "k8s-#{ENV["TF_VAR_environment"]}.gpii.net"
-end
 if ENV["RAKE_ENV_SHORT"].nil?
   ENV["RAKE_ENV_SHORT"] = File.basename(File.dirname(__FILE__))
 end
-
-if ENV["TMPDIR"].nil?
-  ENV["TMPDIR"] = "/tmp"
-end
-BASE_TMPDIR = ENV["TMPDIR"]
-TMPDIR_PREREQS = File.absolute_path("#{ENV["TMPDIR"]}/rake-tmp/#{ENV["TF_VAR_environment"]}-prereqs")
-TMPDIR = File.absolute_path("#{ENV["TMPDIR"]}/rake-tmp/#{ENV["TF_VAR_environment"]}")
+setup_vars(ENV["RAKE_ENV_SHORT"])
 
 task :default => :dev
-task :destroy => :destroy_dev
 
-task :dev => :generate_modules do
+task :dev => [@tmpdir, :generate_modules] do
   sh "bundle exec kitchen create -l debug"
   begin
     sh "bundle exec kitchen converge -l debug"
@@ -36,15 +20,20 @@ task :dev => :generate_modules do
     Rake::Task["destroy_dev"].invoke
   end
 end
-CLEAN << "#{TMPDIR}/terragrunt"
+CLEAN << "#{@tmpdir}/terragrunt"
 
-task :destroy_dev do
+# If user invokes :destroy directly, really destroy.
+task :destroy do
+  ENV["RAKE_DESTROY"] = "true"
+  Rake::Task["destroy_dev"].invoke
+end
+
+task :destroy_dev => @tmpdir do
   if ENV["RAKE_DESTROY"]
     sh "bundle exec kitchen destroy -l debug"
     Rake::Task["destroy_prereqs"].invoke
   else
     puts "RAKE_DESTROY is not set so not destroying environment."
-    puts "Remember to `RAKE_DESTROY=1 rake destroy` when you're done."
   end
 end
 

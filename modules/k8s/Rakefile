@@ -1,22 +1,15 @@
 require "rake/clean"
+require_relative "../../rakefiles/vars.rb"
 import "../../rakefiles/kops.rake"
+
+if ENV["RAKE_ENV_SHORT"].nil?
+  ENV["RAKE_ENV_SHORT"] = "dev"
+end
+setup_vars(ENV["RAKE_ENV_SHORT"])
 
 task :default => :generate
 
-task :generate => ["Rakefile", :configure_kops] do
-  # This logic duplicates logic on the gpii-terraform-live side. I suspect this
-  # side will win in the long run, but I'm punting deduplication until the
-  # design is clearer.
-  if ENV["TF_VAR_environment"].nil?
-    if ENV["USER"].nil? || ENV["USER"].empty?
-      raise "ERROR: Please set $USER (or $TF_VAR_environment, if you're sure you know what you're doing)."
-    end
-    user = ENV["USER"]
-    ENV["TF_VAR_environment"] = "dev-#{user}"
-  end
-  if ENV["TF_VAR_cluster_name"].nil?
-    ENV["TF_VAR_cluster_name"] = "k8s-#{ENV["TF_VAR_environment"]}.gpii.net"
-  end
+task :generate => [@tmpdir, :configure_kops, "Rakefile"] do
   sh "kops delete cluster \
     --yes \
     --name=$TF_VAR_cluster_name \

@@ -1,7 +1,7 @@
 require "rake/clean"
 import "../rakefiles/kops.rake"
 
-task :configure_kubectl => [TMPDIR, :configure_kops] do
+task :configure_kubectl => [@tmpdir, :configure_kops] do
   sh "kops export kubecfg #{ENV["TF_VAR_cluster_name"]}"
 end
 
