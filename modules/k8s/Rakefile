@@ -1,10 +1,9 @@
 require "rake/clean"
+import "../../rakefiles/kops.rake"
 
 task :default => :generate
 
-task :generate => "Rakefile" do
-  ENV["S3_BUCKET"] = "gpii-kubernetes-state"
-  ENV["KOPS_STATE_STORE"] = "s3://#{ENV['S3_BUCKET']}"
+task :generate => ["Rakefile", :configure_kops] do
   # This logic duplicates logic on the gpii-terraform-live side. I suspect this
   # side will win in the long run, but I'm punting deduplication until the
   # design is clearer.
