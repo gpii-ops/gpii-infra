@@ -8,9 +8,9 @@ if ENV["RAKE_ENV_SHORT"].nil?
 end
 setup_vars(ENV["RAKE_ENV_SHORT"])
 
-task :default => :dev
+task :default => :apply
 
-task :dev => [@tmpdir, :generate_modules] do
+task :apply => [@tmpdir, :generate_modules] do
   sh "bundle exec kitchen create -l debug"
   begin
     sh "bundle exec kitchen converge -l debug"

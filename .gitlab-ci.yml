@@ -22,7 +22,7 @@ dev:
   script:
     - cd dev
     - bundle install --path "vendor/bundle"
-    - RAKE_DESTROY=1 rake dev
+    - RAKE_DESTROY=1 rake
 
 promote-to-stg:
   stage: promote-to-stg
@@ -39,4 +39,4 @@ stg:
   stage: stg
   script:
     - cd stg
-    - rake stg
+    - rake

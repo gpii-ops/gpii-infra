@@ -8,9 +8,9 @@ if ENV["RAKE_ENV_SHORT"].nil?
 end
 setup_vars(ENV["RAKE_ENV_SHORT"])
 
-task :default => :stg
+task :default => :apply
 
-task :stg => [@tmpdir, :generate_modules] do
+task :apply => [@tmpdir, :generate_modules] do
   sh "terragrunt apply-all --terragrunt-non-interactive"
 end
 CLEAN << "#{@tmpdir}/terragrunt"
