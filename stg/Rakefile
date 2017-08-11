@@ -1,7 +1,7 @@
 require "rake/clean"
 require_relative "../rakefiles/vars.rb"
 import "../rakefiles/build.rake"
-import "../rakefiles/deploy_gpii.rake"
+import "../rakefiles/deploy.rake"
 
 if ENV["RAKE_ENV_SHORT"].nil?
   ENV["RAKE_ENV_SHORT"] = File.basename(File.dirname(__FILE__))
