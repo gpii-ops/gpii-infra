@@ -1,0 +1,23 @@
+require "erb"
+require "rake/clean"
+require_relative "../../rakefiles/vars.rb"
+
+if ENV["RAKE_ENV_SHORT"].nil?
+  ENV["RAKE_ENV_SHORT"] = "dev"
+end
+setup_vars(ENV["RAKE_ENV_SHORT"])
+
+task :default => :generate
+
+SOURCE_FILES = FileList.new("./*.erb")
+task :generate => [@tmpdir, "Rakefile"] + SOURCE_FILES.ext(".yml")
+rule ".yml" => ".erb" do |t|
+  rendered = ERB.new(File.read(t.source)).result(binding)
+  File.open(t.name, "w") do |f|
+    f.puts rendered
+  end
+end
+CLEAN.include(SOURCE_FILES.ext(".yml"))
+
+
+# vim: ts=2 sw=2:
