@@ -5,7 +5,7 @@ metadata:
   labels:
     app: preferences
   annotations:
-    dns.alpha.kubernetes.io/external: "preferences.k8s-dev-tyler.gpii.net"
+    dns.alpha.kubernetes.io/external: "preferences.<%= ENV["TF_VAR_cluster_name"] %>"
 spec:
   selector:
     app: preferences

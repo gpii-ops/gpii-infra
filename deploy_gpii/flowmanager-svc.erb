@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: flow-manager
   annotations:
-    dns.alpha.kubernetes.io/external: "flow-manager.k8s-dev-tyler.gpii.net"
+    dns.alpha.kubernetes.io/external: "flow-manager.<%= ENV["TF_VAR_cluster_name"] %>"
 spec:
   selector:
     app: flow-manager
