@@ -3,6 +3,8 @@
 .kitchen/
 .terraform/
 graph*.png
+modules/deploy/flowmanager-svc.yml
+modules/deploy/preferences-svc.yml
 modules/k8s/data/
 modules/k8s/kubernetes.tf
 rake-tmp

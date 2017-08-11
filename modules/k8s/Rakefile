@@ -9,6 +9,9 @@ setup_vars(ENV["RAKE_ENV_SHORT"])
 
 task :default => :generate
 
+# This task always regenerates its output files, mainly to simplify management
+# of multiple environments (e.g. dev and stg) from a single working copy (which
+# would otherwise require a rake clean in between).
 task :generate => [@tmpdir, :configure_kops, "Rakefile"] do
   sh "kops delete cluster \
     --yes \

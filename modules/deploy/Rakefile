@@ -9,12 +9,17 @@ setup_vars(ENV["RAKE_ENV_SHORT"])
 
 task :default => :generate
 
+# This task always regenerates its output files, mainly to simplify management
+# of multiple environments (e.g. dev and stg) from a single working copy (which
+# would otherwise require a rake clean in between).
 SOURCE_FILES = FileList.new("./*.erb")
-task :generate => [@tmpdir, "Rakefile"] + SOURCE_FILES.ext(".yml")
-rule ".yml" => ".erb" do |t|
-  rendered = ERB.new(File.read(t.source)).result(binding)
-  File.open(t.name, "w") do |f|
-    f.puts rendered
+task :generate => [@tmpdir, "Rakefile"] do
+  SOURCE_FILES.each do |infile|
+    outfile = infile.gsub(".erb", ".yml")
+    rendered = ERB.new(File.read(infile)).result(binding)
+    File.open(outfile, "w") do |f|
+      f.puts rendered
+    end
   end
 end
 CLEAN.include(SOURCE_FILES.ext(".yml"))
