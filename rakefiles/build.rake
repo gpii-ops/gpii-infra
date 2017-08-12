@@ -1,4 +1,5 @@
 require "rake/clean"
+require_relative "./wait_for.rb"
 
 # We need a DNS zone before kops will do anything, so we have to create it in a
 # separate terraform run. We use a separate tmpdir so we don't mix up these
@@ -41,6 +42,12 @@ task :wait_for_api do
   zone.chomp!
   zone.gsub!(%r{"/hostedzone/(.*)"}, "\\1")
 
+  # Technically it would be more correct to get the name of the API record
+  # directly from the Terraform run that created the cluster (there is a
+  # dedicated output for this, consumed by kitchen-terraform). This is
+  # simpler, though.
+  api_hostname = "api.#{ENV['TF_VAR_cluster_name']}"
+
   puts "We must wait for:"
   puts "- the API server to come up and report itself to dns-controller"
   puts "- dns-controller to create api.* A records"
@@ -56,33 +63,15 @@ task :wait_for_api do
   puts "(Note that this will wait potentially forever for DNS records to appear.)"
   puts "(You can Ctrl-C out of this safely. You may need to run :destroy afterward.)"
 
-  api_hostname = "api.#{ENV['TF_VAR_cluster_name']}"
-  sleep_secs = 20
-  dns_ready = false
-  until dns_ready
-    # Technically it would be more correct to get the name of the API record
-    # directly from the Terraform run that created the cluster (there is a
-    # dedicated output for this, consumed by kitchen-terraform). This is
-    # simpler, though.
-    #
-    # I tried to do the filtering in the aws cli with:
-    #
-    # --max-items 1 --query\"ResourceRecordSets[?Name == '#{api_hostname}.']\"
-    #
-    # but I couldn't get it to work.
-    sh "aws route53 list-resource-record-sets \
-      --hosted-zone-id '#{zone.chomp}' \
-      | grep -q '#{api_hostname}' \
-    " do |ok, res|
-      if ok
-        puts "...ready!"
-        dns_ready = true
-      else
-        puts "...not ready yet. Sleeping #{sleep_secs}s..."
-        sleep sleep_secs
-      end
-    end
-  end
+  # I tried to do the filtering in the aws cli with:
+  #
+  # --max-items 1 --query\"ResourceRecordSets[?Name == '#{api_hostname}.']\"
+  #
+  # but I couldn't get it to work.
+  wait_for("aws route53 list-resource-record-sets \
+    --hosted-zone-id '#{zone}' \
+    | grep -q '#{api_hostname}' \
+  ")
 end
 
 task :clean_modules do
