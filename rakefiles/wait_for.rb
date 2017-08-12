@@ -1,5 +1,4 @@
-def wait_for(cmd)
-  sleep_secs = 20
+def wait_for(cmd, sleep_secs=20)
   ready = false
   until ready
     sh cmd do |ok, res|
