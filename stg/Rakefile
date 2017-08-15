@@ -8,10 +8,11 @@ if ENV["RAKE_ENV_SHORT"].nil?
 end
 setup_vars(ENV["RAKE_ENV_SHORT"])
 
-task :default => :apply
+task :default => :deploy
 
 task :apply => [@tmpdir, :generate_modules] do
   sh "terragrunt apply-all --terragrunt-non-interactive"
+  Rake::Task["wait_for_api"].invoke
 end
 CLEAN << "#{@tmpdir}/terragrunt"
 

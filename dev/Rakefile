@@ -8,7 +8,7 @@ if ENV["RAKE_ENV_SHORT"].nil?
 end
 setup_vars(ENV["RAKE_ENV_SHORT"])
 
-task :default => :apply
+task :default => :deploy
 
 task :apply => [@tmpdir, :generate_modules] do
   sh "bundle exec kitchen create -l debug"

@@ -14,7 +14,7 @@ task :wait_for_cluster_up => :configure_kubectl do
   wait_for("kops validate cluster")
 end
 
-task :deploy => [:configure_kubectl, :wait_for_cluster_up] do
+task :deploy => [:apply, :configure_kubectl, :wait_for_cluster_up] do
   sh "kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/kubernetes-dashboard/v1.5.0.yaml"
   sh "kubectl apply -f ../modules/deploy/couchdb-deploy.yml"
   sh "kubectl apply -f ../modules/deploy/couchdb-svc.yml"
