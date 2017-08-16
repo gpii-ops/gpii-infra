@@ -6,8 +6,8 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 
 ### Install packages
 
-1. Install [terraform](https://releases.hashicorp.com/terraform/).
-1. Install [terragrunt](https://github.com/gruntwork-io/terragrunt#install-terragrunt).
+1. Install [terraform](https://releases.hashicorp.com/terraform/) **< 0.10** (0.10 has significant architectural changes so I'm waiting on this (non backward-compatible) upgrade; also, kitchen-terraform doesn't support 0.10 yet).
+1. Install [terragrunt](https://github.com/gruntwork-io/terragrunt#install-terragrunt) **< 0.13** (0.13.0 doesn't work with terraform < 0.10 yet).
 1. Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
 1. Install [kops](https://github.com/kubernetes/kops#installing).
 1. Install the [AWS CLI](http://docs.aws.amazon.com/cli/latest/userguide/installing.html).
