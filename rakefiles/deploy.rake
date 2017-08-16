@@ -51,10 +51,6 @@ task :wait_for_cluster_down do
       '.TagDescriptions[].Tags[] | select(.Key==\"KubernetesCluster\") | .Value' \
       ; done \
     ) && \
-    echo \"elbs: $elbs\" && \
-    echo \"tags: $tags\" && \
-    echo \"cluster: $TF_VAR_cluster_name\" && \
-    echo \"grep: $(echo $tags | grep \"#{ENV["TF_VAR_cluster_name"]}\")\"
     [ \"$(echo $tags | grep \"#{ENV["TF_VAR_cluster_name"]}\")\" == \"\" ] \
   ")
 end
@@ -71,6 +67,7 @@ task :undeploy => :configure_kubectl do
   sh "kubectl delete -f ../modules/deploy/flowmanager-deploy.yml"
   sh "kubectl delete -f ../modules/deploy/preferences-deploy.yml"
   sh "kubectl delete -f ../modules/deploy/dataloader-job.yml"
-  sh "kubectl delete -f ../modules/deploy/couchdb-deploy.yml"
+  sh "kubectl delete -f ../modules/deploy/couchdb-deploy-persistent.yml"
+  sh "kubectl delete -f ../modules/deploy/couchdb-persistentvolumeclaim.yml"
   # Don't delete dashboard. It doesn't impede anything and it can be useful even in an "undeployed" cluster.
 end

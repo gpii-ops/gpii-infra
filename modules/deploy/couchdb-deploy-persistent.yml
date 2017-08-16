@@ -21,4 +21,3 @@ spec:
       - name: data
         persistentVolumeClaim:
           claimName: couchdb-pvc
-        
