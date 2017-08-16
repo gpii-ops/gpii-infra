@@ -16,7 +16,8 @@ end
 
 task :deploy => [:apply, :configure_kubectl, :wait_for_cluster_up] do
   sh "kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/kubernetes-dashboard/v1.5.0.yaml"
-  sh "kubectl apply -f ../modules/deploy/couchdb-deploy.yml"
+  sh "kubectl apply -f ../modules/deploy/couchdb-persistentvolumeclaim.yml"
+  sh "kubectl apply -f ../modules/deploy/couchdb-deploy-persistent.yml"
   sh "kubectl apply -f ../modules/deploy/couchdb-svc.yml"
   sh "kubectl apply -f ../modules/deploy/dataloader-job.yml"
   sh "kubectl apply -f ../modules/deploy/preferences-deploy.yml"
