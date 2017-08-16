@@ -25,15 +25,51 @@ task :deploy => [:apply, :configure_kubectl, :wait_for_cluster_up] do
   sh "kubectl apply -f ../modules/deploy/flowmanager-svc.yml"
 end
 
+task :wait_for_cluster_down do
+  # External-facing Services create ELBs, which will prevent terraform from
+  # destroying resources later. Before we delete the Deployments associated
+  # with the Service, give the Service time to shut down.
+  #
+  # Here's the best way I could figure to do that:
+  # * Get a list of the names of all ELBs
+  # * For each ELB, get the value of the "KubernetesCluster" Tag
+  # * Make sure $TF_VAR_cluster_name doesn't appear in the list
+  puts "Waiting for load balancers to be fully down..."
+  puts "(Note that this will wait potentially forever if this cluster's LBs are not all destroyed.)"
+  puts "(You can Ctrl-C out of this safely. You may need to re-run :undeploy afterward.)"
+  wait_for(" \
+    elbs=$(aws elb describe-load-balancers \
+      --region us-east-2 \
+      --query LoadBalancerDescriptions[*].LoadBalancerName \
+      --output text \
+    ) && \
+    tags=$(for elb in $elbs ; do \
+      aws elb describe-tags \
+      --region us-east-2 \
+      --load-balancer-names $elb | jq -r \
+      '.TagDescriptions[].Tags[] | select(.Key==\"KubernetesCluster\") | .Value' \
+      ; done \
+    ) && \
+    echo \"elbs: $elbs\" && \
+    echo \"tags: $tags\" && \
+    echo \"cluster: $TF_VAR_cluster_name\" && \
+    echo \"grep: $(echo $tags | grep \"#{ENV["TF_VAR_cluster_name"]}\")\"
+    [ \"$(echo $tags | grep \"#{ENV["TF_VAR_cluster_name"]}\")\" == \"\" ] \
+  ")
+end
+
 # Shut things down via kubernetes, otherwise terraform destroy will get stuck
 # on left-behind resources, e.g. ELBs and IGs.
 task :undeploy => :configure_kubectl do
-  sh "kubectl delete -f ../modules/deploy/flowmanager-svc.yml"
+  sh "kubectl delete -f ../modules/deploy/flowmanager-svc.yml || echo 'service delete failed but that is ok'"
+  sh "kubectl delete -f ../modules/deploy/preferences-svc.yml || echo 'service delete failed but that is ok'"
+  sh "kubectl delete -f ../modules/deploy/couchdb-svc.yml || echo 'service delete failed but that is ok'"
+
+  Rake::Task["wait_for_cluster_down"].invoke
+
   sh "kubectl delete -f ../modules/deploy/flowmanager-deploy.yml"
-  sh "kubectl delete -f ../modules/deploy/preferences-svc.yml"
   sh "kubectl delete -f ../modules/deploy/preferences-deploy.yml"
   sh "kubectl delete -f ../modules/deploy/dataloader-job.yml"
-  sh "kubectl delete -f ../modules/deploy/couchdb-svc.yml"
   sh "kubectl delete -f ../modules/deploy/couchdb-deploy.yml"
   # Don't delete dashboard. It doesn't impede anything and it can be useful even in an "undeployed" cluster.
 end
