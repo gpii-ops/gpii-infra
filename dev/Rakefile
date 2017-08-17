@@ -12,29 +12,15 @@ task :default => :deploy
 
 task :apply => [@tmpdir, :generate_modules] do
   sh "bundle exec kitchen create -l debug"
-  begin
-    sh "bundle exec kitchen converge -l debug"
-    Rake::Task["wait_for_api"].invoke
-    sh "bundle exec kitchen verify -l debug"
-  ensure
-    Rake::Task["destroy_dev"].invoke
-  end
+  sh "bundle exec kitchen converge -l debug"
+  Rake::Task["wait_for_api"].invoke
+  sh "bundle exec kitchen verify -l debug"
 end
 CLEAN << "#{@tmpdir}/terragrunt"
 
-# If user invokes :destroy directly, really destroy.
-task :destroy do
-  ENV["RAKE_DESTROY"] = "true"
-  Rake::Task["destroy_dev"].invoke
-end
-
-task :destroy_dev => @tmpdir do
-  if ENV["RAKE_DESTROY"]
-    sh "bundle exec kitchen destroy -l debug"
-    Rake::Task["destroy_prereqs"].invoke
-  else
-    puts "RAKE_DESTROY is not set so not destroying environment."
-  end
+task :destroy => [@tmpdir, :undeploy] do
+  sh "bundle exec kitchen destroy -l debug"
+  Rake::Task["destroy_prereqs"].invoke
 end
 
 

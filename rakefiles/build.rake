@@ -13,9 +13,7 @@ end
 CLEAN << "#{@tmpdir_prereqs}/terragrunt"
 
 task :destroy_prereqs => @tmpdir_prereqs do
-  unless ENV["RAKE_NO_DESTROY"]
-    sh "cd ../prereqs/#{ENV["RAKE_ENV_SHORT"]}/k8s-cluster-dns && TMPDIR=#{@tmpdir_prereqs} terragrunt destroy-all --terragrunt-non-interactive"
-  end
+  sh "cd ../prereqs/#{ENV["RAKE_ENV_SHORT"]}/k8s-cluster-dns && TMPDIR=#{@tmpdir_prereqs} terragrunt destroy-all --terragrunt-non-interactive"
 end
 
 

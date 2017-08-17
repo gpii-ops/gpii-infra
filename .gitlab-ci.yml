@@ -22,7 +22,11 @@ dev:
   script:
     - cd dev
     - bundle install --path "vendor/bundle"
-    - RAKE_DESTROY=1 rake
+    - rake
+  after_script:
+    # Clean up even if something failed.
+    - cd dev
+    - rake destroy
 
 promote-to-stg:
   stage: promote-to-stg
