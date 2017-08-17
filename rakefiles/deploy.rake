@@ -14,18 +14,6 @@ task :wait_for_cluster_up => :configure_kubectl do
   wait_for("kops validate cluster")
 end
 
-task :deploy => [:apply, :configure_kubectl, :wait_for_cluster_up] do
-  sh "kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/kubernetes-dashboard/v1.5.0.yaml"
-  sh "kubectl apply -f ../modules/deploy/couchdb-persistentvolumeclaim.yml"
-  sh "kubectl apply -f ../modules/deploy/couchdb-deploy-persistent.yml"
-  sh "kubectl apply -f ../modules/deploy/couchdb-svc.yml"
-  sh "kubectl apply -f ../modules/deploy/dataloader-job.yml"
-  sh "kubectl apply -f ../modules/deploy/preferences-deploy.yml"
-  sh "kubectl apply -f ../modules/deploy/preferences-svc.yml"
-  sh "kubectl apply -f ../modules/deploy/flowmanager-deploy.yml"
-  sh "kubectl apply -f ../modules/deploy/flowmanager-svc.yml"
-end
-
 task :wait_for_cluster_down do
   # External-facing Services create ELBs, which will prevent terraform from
   # destroying resources later. Before we delete the Deployments associated
@@ -55,19 +43,26 @@ task :wait_for_cluster_down do
   ")
 end
 
+GPII_COMPONENTS = FileList.new("../modules/deploy/*.yml").sort
+
+task :deploy => [:apply, :configure_kubectl, :wait_for_cluster_up] do
+  extra_components = [
+    "https://raw.githubusercontent.com/kubernetes/kops/master/addons/kubernetes-dashboard/v1.5.0.yaml",
+  ]
+  components = extra_components + GPII_COMPONENTS
+  components.each do |component|
+    sh "kubectl apply -f #{component}"
+  end
+end
+
 # Shut things down via kubernetes, otherwise terraform destroy will get stuck
 # on left-behind resources, e.g. ELBs and IGs.
 task :undeploy => :configure_kubectl do
-  sh "kubectl delete -f ../modules/deploy/flowmanager-svc.yml || echo 'service delete failed but that is ok'"
-  sh "kubectl delete -f ../modules/deploy/preferences-svc.yml || echo 'service delete failed but that is ok'"
-  sh "kubectl delete -f ../modules/deploy/couchdb-svc.yml || echo 'service delete failed but that is ok'"
-
+  # Don't delete dashboard. It doesn't impede anything and it can be useful
+  # even in an "undeployed" cluster.
+  GPII_COMPONENTS.reverse.each do |component|
+    # Allow deletes to fail, e.g. to clean up a cluster that never got fully deployed.
+    sh "kubectl delete -f #{component} || echo 'Failed to delete component #{component} but that might be ok'"
+  end
   Rake::Task["wait_for_cluster_down"].invoke
-
-  sh "kubectl delete -f ../modules/deploy/flowmanager-deploy.yml"
-  sh "kubectl delete -f ../modules/deploy/preferences-deploy.yml"
-  sh "kubectl delete -f ../modules/deploy/dataloader-job.yml"
-  sh "kubectl delete -f ../modules/deploy/couchdb-deploy-persistent.yml"
-  sh "kubectl delete -f ../modules/deploy/couchdb-persistentvolumeclaim.yml"
-  # Don't delete dashboard. It doesn't impede anything and it can be useful even in an "undeployed" cluster.
 end
