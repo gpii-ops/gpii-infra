@@ -6,10 +6,10 @@ terragrunt = {
   terraform {
     source = "../../modules//k8s"
 
-    # Force Terraform to keep trying to acquire a lock for up to 20 minutes if someone else already has the lock
+    # Force Terraform to keep trying to acquire a lock for up to 1 minute if someone else already has the lock
     extra_arguments "retry_lock" {
       arguments = [
-        "-lock-timeout=20m"
+        "-lock-timeout=1m"
       ]
       commands = [
         "init",
