@@ -68,6 +68,16 @@ The build process (orchestrated by `rake`) tries to provide isolation for differ
 1. `cd` into the `gpii-terraform/dev/` directory.
 1. `rake destroy`
 
+## Troubleshooting
+
+* Currently, this system builds everything in `us-east-2`. When inspecting cloud resources manually (e.g. via the AWS web dashboard), make sure this region is selected.
+* This system uses a lot of rapidly-evolving software. If a tool reports strange errors that look like incompatibilities, try downgrading to an earlier version. [ansible-gpii-ci-worker](https://github.com/idi-ops/ansible-gpii-ci-worker/) should always contain a working combination of versions -- see [defaults/main.yml](https://github.com/idi-ops/ansible-gpii-ci-worker/blob/master/defaults/main.yml)
+* Terraform uses [DynamoDB](https://aws.amazon.com/dynamodb/) for locking. An easy way to orphan a lock is to Ctrl-C out of Terraform in the middle of an operation. To delete the lock:
+   * From the component where you lost the lock: `terragrunt force-unlock anything`
+   * Terraform will tell you that `anything` doesn't match the lock ID and spit out a bunch of info including the correct lock ID.
+   * Copy this ID and: `terragrunt force-unlock <correct-lock-id>`
+   * You can also use the AWS web dashboard. Go to `DynamoDB -> Tables -> gpii-terraform-lock-table -> Items`. Select the lock(s) for your environment `-> Actions -> Delete`.
+
 ## Continuous Integration / Continuous Delivery
 
 See [CI-CD.md](CI-CD.md)
