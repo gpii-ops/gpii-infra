@@ -43,13 +43,15 @@ task :wait_for_cluster_down do
   ")
 end
 
-GPII_COMPONENTS = FileList.new("../modules/deploy/*.yml").sort
+task :find_gpii_components do
+  @gpii_components = FileList.new("../modules/deploy/*.yml").sort
+end
 
-task :deploy => [:apply, :configure_kubectl, :wait_for_cluster_up] do
+task :deploy => [:apply, :configure_kubectl, :wait_for_cluster_up, :find_gpii_components] do
   extra_components = [
     "https://raw.githubusercontent.com/kubernetes/kops/master/addons/kubernetes-dashboard/v1.5.0.yaml",
   ]
-  components = extra_components + GPII_COMPONENTS
+  components = extra_components + @gpii_components
   components.each do |component|
     sh "kubectl apply -f #{component}"
   end
@@ -57,10 +59,10 @@ end
 
 # Shut things down via kubernetes, otherwise terraform destroy will get stuck
 # on left-behind resources, e.g. ELBs and IGs.
-task :undeploy => :configure_kubectl do
+task :undeploy => [:configure_kubectl, :find_gpii_components] do
   # Don't delete dashboard. It doesn't impede anything and it can be useful
   # even in an "undeployed" cluster.
-  GPII_COMPONENTS.reverse.each do |component|
+  @gpii_components.reverse.each do |component|
     # Allow deletes to fail, e.g. to clean up a cluster that never got fully deployed.
     sh "kubectl delete -f #{component} || echo 'Failed to delete component #{component} but that might be ok'"
   end
