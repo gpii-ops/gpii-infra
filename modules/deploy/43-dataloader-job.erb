@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
       - name: couchdb-dataloader
-        image: gpii/preferences-dataloader
+        image: <%= @versions["preferences-dataloader"] %>
         env:
         - name: COUCHDB_URL
           value: http://couchdb.default.svc.cluster.local:5984/preferences

@@ -1,0 +1,4 @@
+---
+flow-manager: "gpii/universal@sha256:c956ee9c001dcbc15a2fb16f4b0cfd641947e0298160668a170bfff9b30223ac"
+preferences-dataloader: "gpii/preferences-dataloader@sha256:55e93d7065dd2c5e5a5b9fce978becde2d397a6b95e4533cd070ef3684bfa787"
+preferences: "gpii/universal@sha256:c956ee9c001dcbc15a2fb16f4b0cfd641947e0298160668a170bfff9b30223ac"
