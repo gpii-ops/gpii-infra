@@ -26,7 +26,7 @@ task :wait_for_cluster_down do
   puts "Waiting for load balancers to be fully down..."
   puts "(Note that this will wait potentially forever if this cluster's LBs are not all destroyed.)"
   puts "(You can Ctrl-C out of this safely. You may need to re-run :undeploy afterward.)"
-  wait_for(" \
+  wait_for("\
     elbs=$(aws elb describe-load-balancers \
       --region us-east-2 \
       --query LoadBalancerDescriptions[*].LoadBalancerName \
@@ -44,7 +44,7 @@ task :wait_for_cluster_down do
 end
 
 task :find_gpii_components do
-  @gpii_components = FileList.new("../modules/deploy/*.yml").sort
+  @gpii_components = FileList.new("../modules/deploy/[0-9]*.yml").sort
 end
 
 task :deploy => [:apply, :configure_kubectl, :wait_for_cluster_up, :find_gpii_components] do

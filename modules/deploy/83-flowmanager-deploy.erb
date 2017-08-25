@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
       - name: flow-manager
-        image: gpii/flow-manager
+        image: <%= @versions["flow-manager"] %>
         ports:
         - containerPort: 8081
         env:

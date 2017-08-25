@@ -3,8 +3,12 @@
 .kitchen/
 .terraform/
 graph*.png
-modules/deploy/87-flowmanager-svc.yml
+modules/deploy/25-couchdb-deploy-persistent.yml
+modules/deploy/43-dataloader-job.yml
+modules/deploy/63-preferences-deploy.yml
 modules/deploy/67-preferences-svc.yml
+modules/deploy/83-flowmanager-deploy.yml
+modules/deploy/87-flowmanager-svc.yml
 modules/k8s/data/
 modules/k8s/kubernetes.tf
 rake-tmp

@@ -1,5 +1,6 @@
 require "erb"
 require "rake/clean"
+require "yaml"
 require_relative "../../rakefiles/vars.rb"
 
 if ENV["RAKE_ENV_SHORT"].nil?
@@ -9,11 +10,16 @@ setup_vars(ENV["RAKE_ENV_SHORT"])
 
 task :default => :generate
 
+task :setup_versions do
+  version_yml = File.read("./version.yml")
+  @versions = YAML.load(version_yml)
+end
+
 # This task always regenerates its output files, mainly to simplify management
 # of multiple environments (e.g. dev and stg) from a single working copy (which
 # would otherwise require a rake clean in between).
 SOURCE_FILES = FileList.new("./*.erb")
-task :generate => [@tmpdir, "Rakefile"] do
+task :generate => [@tmpdir, "Rakefile", :setup_versions] do
   SOURCE_FILES.each do |infile|
     outfile = infile.gsub(".erb", ".yml")
     rendered = ERB.new(File.read(infile)).result(binding)
