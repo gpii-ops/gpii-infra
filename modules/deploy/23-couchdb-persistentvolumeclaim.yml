@@ -9,3 +9,8 @@ spec:
     requests:
       storage: 5Gi
   storageClassName: default
+# It's currently not possible to specify the reclaim policy for the underlying 
+# PhysicalVolume from the PersistentVolumeClaim manifest. This is being 
+# implemented in Kubernetes 1.8. The workaround is to find out the PV that was
+# created and change its reclaim policy like documented here:
+# https://kubernetes.io/docs/tasks/administer-cluster/change-pv-reclaim-policy

@@ -11,11 +11,13 @@ spec:
     spec:
       containers:
       - name: preferences
-        image: gpii/preferences-server
+        image: gpii/universal
         ports:
         - containerPort: 8081
         env:
-        - name: COUCHDB_HOST_ADDRESS
-          value: couchdb.default.svc.cluster.local
         - name: NODE_ENV
-          value: gpii.preferencesServer.config.production
+          value: gpii.config.preferencesServer.standalone.production
+        - name: GPII_PREFERENCES_DATASOURCE_URL
+          value: http://couchdb.default.svc.cluster.local:5984/preferences/%userToken
+        - name: GPII_PREFERENCES_LISTEN_PORT
+          value: '8081'
