@@ -19,10 +19,14 @@ end
 CLEAN << "#{@tmpdir}/terragrunt"
 
 task :destroy => [@tmpdir, :undeploy] do
+  Rake::Task["_destroy"].invoke
+end
+
+# Helper task without dependencies for cleaning up malformed clusters.
+task :_destroy do
   sh "bundle exec kitchen destroy -l debug"
   Rake::Task["destroy_prereqs"].invoke
 end
-
 
 
 # vim: ts=2 sw=2:
