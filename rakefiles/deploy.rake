@@ -11,7 +11,7 @@ task :wait_for_cluster_up => :configure_kubectl do
   puts "(Note that this will wait potentially forever if the cluster never becomes healthy.)"
   puts "(You can Ctrl-C out of this safely. You may need to run :destroy afterward.)"
 
-  wait_for("kops validate cluster")
+  wait_for("kops validate cluster --name #{ENV["TF_VAR_cluster_name"]}")
 end
 
 task :wait_for_cluster_down do
