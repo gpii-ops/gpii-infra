@@ -12,11 +12,20 @@ def setup_vars(env_short)
   end
   ENV["TF_VAR_cluster_name"] = "k8s-#{ENV["TF_VAR_environment"]}.gpii.net"
 
-  tmpdir_base = ENV["TMPDIR"] || "/tmp"
-  @tmpdir = File.absolute_path("#{tmpdir_base}/rake-tmp/#{ENV["TF_VAR_environment"]}")
+  # If rake has already set up TMPDIR, don't set it again. Otherwise, we end up
+  # with a second 'rake-tmp/environment' in the path.
+  if ENV["RAKE_TMPDIR_ALREADY_SET"]
+    tmpdir_base = ENV["TMPDIR"]
+    @tmpdir = tmpdir_base
+  else
+    tmpdir_base = ENV["TMPDIR"] || "/tmp"
+    @tmpdir = File.absolute_path("#{tmpdir_base}/rake-tmp/#{ENV["TF_VAR_environment"]}")
+  end
   @tmpdir_prereqs = "#{@tmpdir}-prereqs"
   ENV["TMPDIR"] = @tmpdir
 
   directory @tmpdir
   CLOBBER << @tmpdir
+
+  ENV["RAKE_TMPDIR_ALREADY_SET"] = "true"
 end

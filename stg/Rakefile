@@ -23,7 +23,7 @@ CLEAN << "#{@tmpdir}/terragrunt"
 #
 # After the second time rake gave me inscrutable errors while trying to delete
 # a stg environment that was spun up elsewhere, I added the dependency.
-task :destroy => [@tmpdir, :generate_modules] do
+task :destroy => [@tmpdir, :generate_modules, :undeploy] do
   sh "terragrunt destroy-all --terragrunt-non-interactive"
   Rake::Task["destroy_prereqs"].invoke
 end

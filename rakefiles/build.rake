@@ -17,9 +17,6 @@ task :destroy_prereqs => @tmpdir_prereqs do
 end
 
 
-directory @tmpdir
-CLOBBER << @tmpdir
-
 RAKEFILES = FileList.new("../modules/**/Rakefile")
 
 task :generate_modules => [@tmpdir, :apply_prereqs] do

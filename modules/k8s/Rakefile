@@ -9,16 +9,12 @@ setup_vars(ENV["RAKE_ENV_SHORT"])
 
 task :default => :generate
 
-# This task always regenerates its output files, mainly to simplify management
-# of multiple environments (e.g. dev and stg) from a single working copy (which
-# would otherwise require a rake clean in between).
-task :generate => [@tmpdir, :configure_kops, "Rakefile"] do
-  sh "kops delete cluster \
-    --yes \
-    --name=$TF_VAR_cluster_name \
-    --unregister \
-    || echo 'kops delete cluster failed, but that is ok.' \
-  "
+KOPS_OUT_DIR = "#{@tmpdir}-modules/k8s"
+directory KOPS_OUT_DIR
+CLOBBER << KOPS_OUT_DIR
+
+task :generate => [@tmpdir, :configure_kops, "Rakefile", "#{KOPS_OUT_DIR}/kubernetes.tf"]
+rule "#{KOPS_OUT_DIR}/kubernetes.tf" do
   sh "kops create cluster \
     --name=$TF_VAR_cluster_name \
     --channel=alpha \
@@ -30,12 +26,24 @@ task :generate => [@tmpdir, :configure_kops, "Rakefile"] do
     --node-size=t2.micro \
     --master-size=t2.micro \
     --target=terraform \
-    --out=. \
+    --out=#{KOPS_OUT_DIR} \
     --ssh-public-key=~/.ssh/id_rsa.gpii-ci.pub
   "
+  cp FileList.new("./*.tf"), "#{KOPS_OUT_DIR}/"
 end
-CLEAN << "kubernetes.tf"
-CLEAN << "data"
+CLEAN << KOPS_OUT_DIR
+
+task :kops_delete_cluster => :configure_kops do
+  sh "kops delete cluster \
+    --yes \
+    --name=$TF_VAR_cluster_name \
+    --unregister \
+    || echo 'kops delete cluster failed, but that is ok.' \
+  "
+end
+Rake::Task["clean"].enhance do
+  Rake::Task[:kops_delete_cluster].invoke
+end
 
 
 # vim: ts=2 sw=2:

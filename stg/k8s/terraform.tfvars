@@ -4,7 +4,7 @@ terragrunt = {
   }
 
   terraform {
-    source = "../../modules//k8s"
+    source = "${get_env("TMPDIR", "/tmp/GPII_TMPDIR_WASNT_SET")}-modules//k8s"
 
     # Force Terraform to keep trying to acquire a lock for up to 1 minute if someone else already has the lock
     extra_arguments "retry_lock" {
