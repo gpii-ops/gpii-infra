@@ -64,7 +64,7 @@ task :undeploy => [:configure_kubectl, :find_gpii_components] do
   # even in an "undeployed" cluster.
   @gpii_components.reverse.each do |component|
     # Allow deletes to fail, e.g. to clean up a cluster that never got fully deployed.
-    sh "kubectl delete -f #{component} || echo 'Failed to delete component #{component} but that might be ok'"
+    sh "kubectl delete -f #{component} --ignore-not-found"
   end
   Rake::Task["wait_for_cluster_down"].invoke
 end

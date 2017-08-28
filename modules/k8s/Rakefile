@@ -15,23 +15,46 @@ CLOBBER << KOPS_OUT_DIR
 
 task :generate => [@tmpdir, :configure_kops, "Rakefile", "#{KOPS_OUT_DIR}/kubernetes.tf"]
 rule "#{KOPS_OUT_DIR}/kubernetes.tf" do
-  sh "kops create cluster \
-    --name=$TF_VAR_cluster_name \
-    --channel=alpha \
-    --kubernetes-version=1.7.3 \
-    --cloud=aws \
-    --zones=us-east-2a,us-east-2b,us-east-2c \
-    --node-count=3 \
-    --master-zones=us-east-2a,us-east-2b,us-east-2c \
-    --node-size=t2.micro \
-    --master-size=t2.micro \
-    --target=terraform \
-    --out=#{KOPS_OUT_DIR} \
-    --ssh-public-key=~/.ssh/id_rsa.gpii-ci.pub
-  "
+  sh "kops get cluster #{ENV["TF_VAR_cluster_name"]}" do |ok, res|
+    unless ok
+      sh "kops create cluster \
+        --name=#{ENV["TF_VAR_cluster_name"]} \
+        --channel=alpha \
+        --kubernetes-version=1.7.3 \
+        --node-count=3 \
+        --node-size=t2.micro \
+        --master-size=t2.micro \
+        --zones=us-east-2a,us-east-2b,us-east-2c \
+        --master-zones=us-east-2a,us-east-2b,us-east-2c \
+        --cloud=aws \
+        --target=terraform \
+        --out=#{KOPS_OUT_DIR} \
+        --ssh-public-key=~/.ssh/id_rsa.gpii-ci.pub \
+      "
+    else
+      puts "Cluster #{ENV["TF_VAR_cluster_name"]} already exists."
+      puts "If you want to change its configuration, you'll need to:"
+      puts "* rake destroy"
+      puts "* rake clean"
+      puts "(Note that this DESTROYS THE CLUSTER.)"
+      puts "--OR--"
+      puts "* Upgrade manually. See https://github.com/kubernetes/kops/blob/master/docs/upgrade.md."
+      puts "(This is not recommended except for testing.)"
+      puts
+      puts "Updating an existing cluster is a planned feature."
+      sh "kops update cluster \
+        --name=#{ENV["TF_VAR_cluster_name"]} \
+        --target=terraform \
+        --out=#{KOPS_OUT_DIR} \
+      "
+    end
+  end
   cp FileList.new("./*.tf"), "#{KOPS_OUT_DIR}/"
 end
 CLEAN << KOPS_OUT_DIR
+Rake::Task["clean"].enhance do
+  Rake::Task[:kops_delete_cluster].invoke
+end
 
 task :kops_delete_cluster => :configure_kops do
   sh "kops delete cluster \
@@ -40,9 +63,6 @@ task :kops_delete_cluster => :configure_kops do
     --unregister \
     || echo 'kops delete cluster failed, but that is ok.' \
   "
-end
-Rake::Task["clean"].enhance do
-  Rake::Task[:kops_delete_cluster].invoke
 end
 
 
