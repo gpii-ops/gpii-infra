@@ -1,0 +1,11 @@
+#!/bin/sh
+
+export GIT_SSH_COMMAND='ssh -i ~/.ssh/id_rsa.gpii-ci'
+git clone --depth 1 git@github.com:gpii-ops/gpii-terraform
+cd gpii-terraform/modules/deploy
+while true ; do
+    git fetch origin
+    git reset --hard origin/master
+    ./update-version
+    sleep 5
+done
