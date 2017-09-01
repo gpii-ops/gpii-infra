@@ -11,6 +11,7 @@ cd gpii-terraform/modules/deploy
 git remote add gitlab git@gitlab.com:gpii-ops/gpii-terraform
 
 while true ; do
+    echo "Starting version check at $(date)"
     git fetch --all --tags -p
     git reset --hard origin/master
 
@@ -22,5 +23,7 @@ while true ; do
         git push gitlab HEAD
     fi
 
-    sleep 300
+    sleep_secs=300
+    echo "Sleeping $sleep_secs..."
+    sleep $sleep_secs
 done
