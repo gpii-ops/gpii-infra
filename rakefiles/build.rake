@@ -7,13 +7,13 @@ require_relative "./wait_for.rb"
 directory @tmpdir_prereqs
 CLOBBER << @tmpdir_prereqs
 
-desc "Create or update cluster prereqs (e.g. DNS for cluster)"
+desc "Create or update cluster prereqs (e.g DNS for cluster)"
 task :apply_prereqs => @tmpdir_prereqs do
   sh "cd ../prereqs/#{ENV["RAKE_ENV_SHORT"]}/k8s-cluster-dns && TMPDIR=#{@tmpdir_prereqs} terragrunt apply-all --terragrunt-non-interactive"
 end
 CLEAN << "#{@tmpdir_prereqs}/terragrunt"
 
-desc "Destroy cluster prereqs (e.g. DNS for cluster)"
+desc "Destroy cluster prereqs (e.g DNS for cluster)"
 task :destroy_prereqs => @tmpdir_prereqs do
   sh "cd ../prereqs/#{ENV["RAKE_ENV_SHORT"]}/k8s-cluster-dns && TMPDIR=#{@tmpdir_prereqs} terragrunt destroy-all --terragrunt-non-interactive"
 end
