@@ -2,10 +2,12 @@ require "rake/clean"
 require_relative "./wait_for.rb"
 import "../rakefiles/kops.rake"
 
+desc "Configure kubectl to know about cluster"
 task :configure_kubectl => [@tmpdir, :configure_kops] do
   sh "kops export kubecfg #{ENV["TF_VAR_cluster_name"]}"
 end
 
+desc "Wait until cluster has converged and is ready to receive components"
 task :wait_for_cluster_up => :configure_kubectl do
   puts "Waiting for Kubernetes cluster to be fully up..."
   puts "(Note that this will wait potentially forever if the cluster never becomes healthy.)"
@@ -14,6 +16,7 @@ task :wait_for_cluster_up => :configure_kubectl do
   wait_for("kops validate cluster --name #{ENV["TF_VAR_cluster_name"]}")
 end
 
+desc "Wait until cluster has undeployed components and is ready to shut down"
 task :wait_for_cluster_down do
   # External-facing Services create ELBs, which will prevent terraform from
   # destroying resources later. Before we delete the Deployments associated
@@ -47,6 +50,7 @@ task :find_gpii_components do
   @gpii_components = FileList.new("../modules/deploy/[0-9]*.yml").sort
 end
 
+desc "Deploy GPII components to cluster"
 task :deploy => [:apply, :configure_kubectl, :wait_for_cluster_up, :find_gpii_components] do
   extra_components = [
     "https://raw.githubusercontent.com/kubernetes/kops/master/addons/kubernetes-dashboard/v1.5.0.yaml",
@@ -59,6 +63,7 @@ end
 
 # Shut things down via kubernetes, otherwise terraform destroy will get stuck
 # on left-behind resources, e.g. ELBs and IGs.
+desc "Delete GPII components from cluster"
 task :undeploy => [:configure_kubectl, :find_gpii_components] do
   # Don't delete dashboard. It doesn't impede anything and it can be useful
   # even in an "undeployed" cluster.

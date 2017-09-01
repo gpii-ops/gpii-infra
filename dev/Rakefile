@@ -10,6 +10,7 @@ setup_vars(ENV["RAKE_ENV_SHORT"])
 
 task :default => :deploy
 
+desc "Create or update cluster"
 task :apply => [@tmpdir, :generate_modules] do
   sh "bundle exec kitchen create -l debug"
   sh "bundle exec kitchen converge -l debug"
@@ -18,11 +19,12 @@ task :apply => [@tmpdir, :generate_modules] do
 end
 CLEAN << "#{@tmpdir}/terragrunt"
 
+desc "Destroy cluster"
 task :destroy => [@tmpdir, :undeploy] do
   Rake::Task["_destroy"].invoke
 end
 
-# Helper task without dependencies for cleaning up malformed clusters.
+# Helper task without dependencies. Useful for cleaning up malformed clusters.
 task :_destroy do
   sh "bundle exec kitchen destroy -l debug"
   Rake::Task["destroy_prereqs"].invoke

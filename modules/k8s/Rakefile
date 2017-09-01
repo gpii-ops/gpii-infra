@@ -13,6 +13,7 @@ KOPS_OUT_DIR = "#{@tmpdir}-modules/k8s"
 directory KOPS_OUT_DIR
 CLOBBER << KOPS_OUT_DIR
 
+desc "Generate config for cluster, including terraform files and kops cluster definition in S3"
 task :generate => [@tmpdir, :configure_kops, "Rakefile", "#{KOPS_OUT_DIR}/kubernetes.tf"]
 rule "#{KOPS_OUT_DIR}/kubernetes.tf" do
   sh "kops get cluster #{ENV["TF_VAR_cluster_name"]}" do |ok, res|

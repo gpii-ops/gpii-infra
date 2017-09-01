@@ -41,12 +41,9 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 1. `cd` into the `gpii-terraform/dev/` directory.
 1. `bundle install --path vendor/bundle`
 1. `rake`
-   * This will create an independent dev environment called `dev-$USER`, run tests, and then **destroy the environment**.
-   * Add `RAKE_NO_DESTROY=1` if you want the environment to stick around after tests run.
-
-#### Warning about simultaneous runs
-
-The build process (orchestrated by `rake`) tries to provide isolation for different environments. However, there is only one `modules/` directory in the source tree where dynamic code generation occurs. Hence, use caution running, say, `rake dev` and `rake stg` from the same working copy.
+   * This will create an independent dev environment called `dev-$USER` and run tests.
+1. When you are done with this environment: `rake destroy`
+1. To see a list of other commands you can try: `rake -T`
 
 ### Manual testing
 
@@ -60,8 +57,9 @@ The build process (orchestrated by `rake`) tries to provide isolation for differ
 #### On the remote machine
 
 1. Configure ssh, as described in [Configure SSH](#configure-ssh).
-1. `ssh admin@api.<your cluster name>` e.g. `ssh admin@api.k8s-dev-mrtyler.gpii.net`
-1. `sudo docker ps` to see that Kubernetes containers are running
+1. `ssh admin@api.<your cluster name>` e.g. `ssh -i ~/.ssh/id_rsa.gpii-ci -o StrictHostKeyChecking=no admin@api.k8s-stg.gpii.net
+1. `sudo docker ps` to see that Kubernetes containers are running.
+1. `/var/log/kube-apiserver.log` is a good place to look if things aren't working.
 
 ### Cleaning up
 

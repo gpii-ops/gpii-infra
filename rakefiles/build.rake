@@ -7,11 +7,13 @@ require_relative "./wait_for.rb"
 directory @tmpdir_prereqs
 CLOBBER << @tmpdir_prereqs
 
+desc "Create or update cluster prereqs (e.g. DNS for cluster)"
 task :apply_prereqs => @tmpdir_prereqs do
   sh "cd ../prereqs/#{ENV["RAKE_ENV_SHORT"]}/k8s-cluster-dns && TMPDIR=#{@tmpdir_prereqs} terragrunt apply-all --terragrunt-non-interactive"
 end
 CLEAN << "#{@tmpdir_prereqs}/terragrunt"
 
+desc "Destroy cluster prereqs (e.g. DNS for cluster)"
 task :destroy_prereqs => @tmpdir_prereqs do
   sh "cd ../prereqs/#{ENV["RAKE_ENV_SHORT"]}/k8s-cluster-dns && TMPDIR=#{@tmpdir_prereqs} terragrunt destroy-all --terragrunt-non-interactive"
 end
@@ -19,12 +21,14 @@ end
 
 RAKEFILES = FileList.new("../modules/**/Rakefile")
 
+desc "Run each module's :generate task"
 task :generate_modules => [@tmpdir, :apply_prereqs] do
   RAKEFILES.each do |rakefile|
     sh "cd #{File.dirname(rakefile)} && rake generate"
   end
 end
 
+desc "Wait until cluster has converged enough to set up DNS for API servers"
 task :wait_for_api do
   # Technically it would be more correct to get this value directly from
   # the Terraform run that created the zone. This is simpler, though.
@@ -69,6 +73,7 @@ task :wait_for_api do
   ")
 end
 
+desc "Run each module's :clean task"
 task :clean_modules do
   RAKEFILES.each do |rakefile|
     sh "cd #{File.dirname(rakefile)} && rake clean"
@@ -78,6 +83,7 @@ Rake::Task["clean"].enhance do
     Rake::Task["clean_modules"].invoke
 end
 
+desc "Run each module's :clobber task"
 task :clobber_modules do
   RAKEFILES.each do |rakefile|
     sh "cd #{File.dirname(rakefile)} && rake clobber"

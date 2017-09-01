@@ -19,6 +19,7 @@ end
 # of multiple environments (e.g. dev and stg) from a single working copy (which
 # would otherwise require a rake clean in between).
 SOURCE_FILES = FileList.new("./*.erb")
+desc "Generate GPII component configs for cluster"
 task :generate => [@tmpdir, "Rakefile", :setup_versions] do
   SOURCE_FILES.each do |infile|
     outfile = infile.gsub(".erb", ".yml")
