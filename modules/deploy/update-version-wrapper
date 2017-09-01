@@ -1,11 +1,23 @@
 #!/bin/sh
 
 export GIT_SSH_COMMAND='ssh -i ~/.ssh/id_rsa.gpii-ci'
+git config --global user.email "gpii-bot@gpii.net"
+git config --global user.name "GPII Bot"
 git clone --depth 1 git@github.com:gpii-ops/gpii-terraform
 cd gpii-terraform/modules/deploy
+git remote add gitlab git@gitlab.com:gpii-ops/gpii-terraform
+
 while true ; do
     git fetch origin
     git reset --hard origin/master
+
     ./update-version
-    sleep 5
+    if [ -n "$(git status --porcelain -- version.yml)" ]; then
+        git add version.yml
+        git commit -m"[auto] Update version.yml"
+        git push origin HEAD
+        git push gitlab HEAD
+    fi
+
+    sleep 300
 done
