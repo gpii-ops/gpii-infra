@@ -60,7 +60,7 @@ end
 task :kops_delete_cluster => :configure_kops do
   sh "kops delete cluster \
     --yes \
-    --name=$TF_VAR_cluster_name \
+    --name=#{ENV["TF_VAR_cluster_name"]} \
     --unregister \
     || echo 'kops delete cluster failed, but that is ok.' \
   "
