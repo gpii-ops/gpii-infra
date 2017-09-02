@@ -10,8 +10,7 @@ def wait_for(cmd, sleep_secs=20, max_wait_secs=15*60)
         puts "...not ready yet. Sleeping #{sleep_secs}s..."
         total_time += sleep_secs
         if total_time >= max_wait_secs
-          puts "Max wait time of #{max_wait_secs}s reached. Giving up."
-          return false
+          raise "Max wait time of #{max_wait_secs}s reached. Giving up."
         end
         sleep sleep_secs
       end
