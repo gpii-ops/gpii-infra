@@ -60,6 +60,13 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 1. `ssh admin@api.<your cluster name>` e.g. `ssh -i ~/.ssh/id_rsa.gpii-ci -o StrictHostKeyChecking=no admin@api.k8s-stg.gpii.net
 1. `sudo docker ps` to see that Kubernetes containers are running.
 1. `/var/log/kube-apiserver.log` is a good place to look if things aren't working.
+1. This [overview of how a Kubernetes cluster comes up when using kops](https://github.com/kubernetes/kops/blob/master/docs/boot-sequence.md) is helpful for low-level cluster debugging, e.g. "Why isn't my cluster coming up?!"
+
+#### The Kubernetes dashboard
+
+1. Go to https://api.<your cluster name>.gpii.net/ui
+   * Login is `admin`.
+   * Password is the output of `KOPS_STATE_STORE=s3://gpii-kubernetes-state kops get secrets kube --type secret -oplaintext --name <your cluster name>.gpii.net`.
 
 ### Cleaning up
 
