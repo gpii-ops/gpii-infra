@@ -10,7 +10,6 @@ end
 desc "Wait until cluster has converged and is ready to receive components"
 task :wait_for_cluster_up => :configure_kubectl do
   puts "Waiting for Kubernetes cluster to be fully up..."
-  puts "(Note that this will wait potentially forever if the cluster never becomes healthy.)"
   puts "(You can Ctrl-C out of this safely. You may need to run :destroy afterward.)"
 
   wait_for("kops validate cluster --name #{ENV["TF_VAR_cluster_name"]}")
@@ -27,8 +26,7 @@ task :wait_for_cluster_down do
   # * For each ELB, get the value of the "KubernetesCluster" Tag
   # * Make sure $TF_VAR_cluster_name doesn't appear in the list
   puts "Waiting for load balancers to be fully down..."
-  puts "(Note that this will wait potentially forever if this cluster's LBs are not all destroyed.)"
-  puts "(You can Ctrl-C out of this safely. You may need to re-run :undeploy afterward.)"
+  puts "(You can Ctrl-C out of this safely. You may need to re-run :undeploy and/or :destroy afterward.)"
   wait_for("\
     elbs=$(aws elb describe-load-balancers \
       --region us-east-2 \

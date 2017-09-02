@@ -59,7 +59,6 @@ task :wait_for_api do
   puts "It usually takes about 3 minutes for the cluster to converge and DNS records to appear."
   puts
   puts "Waiting for API to have DNS..."
-  puts "(Note that this will wait potentially forever for DNS records to appear.)"
   puts "(You can Ctrl-C out of this safely. You may need to run :destroy afterward.)"
 
   # I tried to do the filtering in the aws cli with:
