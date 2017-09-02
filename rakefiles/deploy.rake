@@ -50,6 +50,11 @@ end
 
 desc "Deploy GPII components to cluster"
 task :deploy => [:apply, :configure_kubectl, :wait_for_cluster_up, :find_gpii_components] do
+  Rake::Task["deploy_only"].invoke
+end
+
+desc "Deploy GPII components to existing cluster without creating/updating infrastructure"
+task :deploy_only => [:configure_kubectl, :find_gpii_components] do
   extra_components = [
     "https://raw.githubusercontent.com/kubernetes/kops/master/addons/kubernetes-dashboard/v1.5.0.yaml",
   ]
