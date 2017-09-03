@@ -42,6 +42,18 @@ task :wait_for_cluster_down do
     ) && \
     [ \"$(echo $tags | grep \"#{ENV["TF_VAR_cluster_name"]}\")\" == \"\" ] \
   ")
+  puts "Waiting for load balancer security groups to be fully down..."
+  puts "(You can Ctrl-C out of this safely. You may need to re-run :undeploy and/or :destroy afterward.)"
+  # We only want to wait for SGs dynamically created by Kubernetes. Permanent
+  # SGs (e.g. SGs for nodes and masters) are managed by kops/terraform.
+  wait_for("\
+    sgs=$(aws ec2 describe-security-groups \
+      --region us-east-2 \
+      | jq -r \
+      '.SecurityGroups[] | select(.Tags != null and .Tags[].Key==\"KubernetesCluster\" and .Tags[].Value == \"#{ENV["TF_VAR_cluster_name"]}\") | select(.Description | startswith(\"Security group for Kubernetes\")) | .GroupId' \
+    ) && \
+    [ \"$sgs\" == \"\" ] \
+  ")
 end
 
 task :find_gpii_components do
