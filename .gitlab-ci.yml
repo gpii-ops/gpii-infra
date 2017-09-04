@@ -22,6 +22,7 @@ dev:
   script:
     - cd dev
     - bundle install --path "vendor/bundle"
+    - rake clean
     - rake
   after_script:
     # Clean up even if something failed.
@@ -43,4 +44,5 @@ stg:
   stage: stg
   script:
     - cd stg
+    - rake clean
     - rake
