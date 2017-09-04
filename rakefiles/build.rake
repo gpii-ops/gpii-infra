@@ -72,6 +72,11 @@ task :wait_for_api do
   ")
 end
 
+desc "[ADVANCED] Delete kops state for this cluster; will make an existing cluster unusable without S3 rollback"
+task :kops_delete_cluster do
+  sh "cd ../modules/k8s && rake kops_delete_cluster"
+end
+
 desc "Run each module's :clean task"
 task :clean_modules do
   RAKEFILES.each do |rakefile|

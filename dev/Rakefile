@@ -24,9 +24,10 @@ task :destroy => [@tmpdir, :undeploy] do
   Rake::Task["_destroy"].invoke
 end
 
-# Helper task without dependencies. Useful for cleaning up malformed clusters.
-task :_destroy do
+desc "[ADVANCED] Helper for :destroy that ignores dependencies; useful for cleaning up malformed clusters."
+task :_destroy => @tmpdir do
   sh "bundle exec kitchen destroy -l debug"
+  Rake::Task["kops_delete_cluster"].invoke
   Rake::Task["destroy_prereqs"].invoke
 end
 

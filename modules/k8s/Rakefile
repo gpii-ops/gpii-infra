@@ -53,10 +53,8 @@ rule "#{KOPS_OUT_DIR}/kubernetes.tf" do
   cp FileList.new("./*.tf"), "#{KOPS_OUT_DIR}/"
 end
 CLEAN << KOPS_OUT_DIR
-Rake::Task["clean"].enhance do
-  Rake::Task[:kops_delete_cluster].invoke
-end
 
+desc "[ADVANCED] Delete kops state for this cluster; will make an existing cluster unusable without S3 rollback"
 task :kops_delete_cluster => :configure_kops do
   sh "kops delete cluster \
     --yes \
