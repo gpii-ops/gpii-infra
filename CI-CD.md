@@ -31,7 +31,6 @@ This repo is designed to fit into a CI/CD scheme: new commits are automatically 
    * [Set up .ssh with gpii-key.pem](README.md#configure-ssh).
       * Make sure the private key associated with the gitlab-runner Github account is available at `~gitlab-runner/.ssh/id_rsa.gpii-ci`.
    * [Configure AWS creds](README.md#install-packages) for `gitlab-runner`.
-   * Configure Docker Hub creds: `docker login` using the `gpiibot` login and password.
 
 ## gpii-version-updater
    * There is a standalone system for managing the versions of GPII components running on this infrastructure, via [version.yml](https://github.com/gpii-ops/gpii-terraform/blob/master/modules/deploy/version.yml). See the [gpii-version-updater repo](https://github.com/gpii-ops/gpii-version-updater).
