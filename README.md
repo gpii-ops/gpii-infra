@@ -83,6 +83,7 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
    * Terraform will tell you that `anything` doesn't match the lock ID and spit out a bunch of info including the correct lock ID.
    * Copy this ID and: `terragrunt force-unlock <correct-lock-id>`
    * You can also use the AWS web dashboard. Go to `DynamoDB -> Tables -> gpii-terraform-lock-table -> Items`. Select the lock(s) for your environment `-> Actions -> Delete`.
+   * Sometimes you need to check if all the resources associated to a deployment are up or, when a `destroy` command is launched, check if everything is cleaned properly. A way to see all the resources managed by a deployment and their status is using the *Resource Groups* where you can do searchs and filter based on the tags. For example, in the case of `dev-alf` deployment we can use that string to search all the resoures that have that strings in their tags.
 * The system -- terraform and kops, e.g. -- stores various kinds of state in S3. All environments share a single Bucket, but have separate Keys (directories, basically). If you are manipulating this state directly (experts only! but sometimes needed, e.g. to recover from upgrading to a non-backward compatible version of Terraform), take care to only make changes to the Keys related to your environment. Modifying the Bucket will affect other developers' environments as well as shared environments like `prd`!
 
 ## Continuous Integration / Continuous Delivery
