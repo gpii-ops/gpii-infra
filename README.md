@@ -42,10 +42,18 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 1. `bundle install --path vendor/bundle`
 1. `rake`
    * This will create an independent dev environment called `dev-$USER` and run tests.
-1. When you are done with this environment: `rake destroy`
+1. When you are done with this environment: `rake destroy` and then `rake clobber`
 1. To see a list of other commands you can try: `rake -T`
+1. If something didn't work, see [Troubleshooting](#troubleshooting).
 
 ### Manual testing
+
+#### The Kubernetes dashboard
+
+1. Go to `https://api.<your cluster name>.gpii.net/ui`
+   * Login is `admin`.
+   * Password is the output of `KOPS_STATE_STORE=s3://gpii-kubernetes-state kops get secrets kube --type secret -oplaintext --name <your cluster name>.gpii.net`.
+1. Click "Workloads" for a good overview of what's happening in the cluster.
 
 #### On the local machine
 
@@ -57,22 +65,16 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 #### On the remote machine
 
 1. Configure ssh, as described in [Configure SSH](#configure-ssh).
-1. `ssh admin@api.<your cluster name>` e.g. `ssh -i ~/.ssh/id_rsa.gpii-ci -o StrictHostKeyChecking=no admin@api.k8s-stg.gpii.net
+1. `ssh admin@api.<your cluster name>` e.g. `ssh -i ~/.ssh/id_rsa.gpii-ci -o StrictHostKeyChecking=no admin@api.k8s-stg.gpii.net`
 1. `sudo docker ps` to see that Kubernetes containers are running.
 1. `/var/log/kube-apiserver.log` is a good place to look if things aren't working.
 1. This [overview of how a Kubernetes cluster comes up when using kops](https://github.com/kubernetes/kops/blob/master/docs/boot-sequence.md) is helpful for low-level cluster debugging, e.g. "Why isn't my cluster coming up?!"
-
-#### The Kubernetes dashboard
-
-1. Go to https://api.<your cluster name>.gpii.net/ui
-   * Login is `admin`.
-   * Password is the output of `KOPS_STATE_STORE=s3://gpii-kubernetes-state kops get secrets kube --type secret -oplaintext --name <your cluster name>.gpii.net`.
-1. Click "Workloads" for a good overview of what's happening in the cluster.
 
 ### Cleaning up
 
 1. `cd` into the `gpii-terraform/dev/` directory.
 1. `rake destroy`
+1. `rake clobber`
 
 ## Troubleshooting
 
@@ -83,8 +85,29 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
    * Terraform will tell you that `anything` doesn't match the lock ID and spit out a bunch of info including the correct lock ID.
    * Copy this ID and: `terragrunt force-unlock <correct-lock-id>`
    * You can also use the AWS web dashboard. Go to `DynamoDB -> Tables -> gpii-terraform-lock-table -> Items`. Select the lock(s) for your environment `-> Actions -> Delete`.
-   * Sometimes you need to check if all the resources associated to a deployment are up or, when a `destroy` command is launched, check if everything is cleaned properly. A way to see all the resources managed by a deployment and their status is using the *Resource Groups* where you can do searchs and filter based on the tags. For example, in the case of `dev-alf` deployment we can use that string to search all the resoures that have that strings in their tags.
 * The system -- terraform and kops, e.g. -- stores various kinds of state in S3. All environments share a single Bucket, but have separate Keys (directories, basically). If you are manipulating this state directly (experts only! but sometimes needed, e.g. to recover from upgrading to a non-backward compatible version of Terraform), take care to only make changes to the Keys related to your environment. Modifying the Bucket will affect other developers' environments as well as shared environments like `prd`!
+
+### My cluster is messed up and I just want to get rid of it so I can start over
+
+1. `rake destroy` - the cleanest way to terminate a cluster. However, it may fail if the cluster never converged.
+1. `rake _destroy` - destroys cloud resources but does not undeploy GPII components. This can cause `_destroy` to get stuck: Rake and Terraform don't know about resources created by Kubernetes, such as load balancers. These Kubernetes-managed resources will block Terraform from deleting, e.g. the network in which the load balancer resides.
+1. The AWS dashboard - I'm sorry that you're here, but the last step is manually deleting orphaned resources.
+   * One helpful trick is to make a Resource Group (top bar `->` Resource Groups `->` Create a Resource Group) and find resources Tagged with `KubernetesCluster: k8s-dev-mrtyler.gpii.net`. [Here is one I made for my dev environment](https://resources.console.aws.amazon.com/r/group#sharedgroup=%7B%22name%22%3A%22k8s-dev-tyler%22%2C%22regions%22%3A%22all%22%2C%22resourceTypes%22%3A%22all%22%2C%22tagFilters%22%3A%5B%7B%22key%22%3A%22KubernetesCluster%22%2C%22values%22%3A%5B%22k8s-dev-tyler.gpii.net%22%5D%7D%5D%7D).
+   * Not all cloud resources care Taggable so you may need to explore a little, but the Resource Group report should give you an idea of what kinds of resources are getting stuck.
+   * Eventually, I plan to add a `rake exterminate` to automate the destruction of wayward resources.
+1. The AWS dashboard, part 2 - various tools in the system store state in S3 and DynamoDB. If you encounter weird mismatch errors, you may need to perform more manual cleanup.
+   * Check S3 Bucket `gpii-terraform-state` for Keys named after your environment (`k8s-dev-mrtyler.gpii.net`) and delete only those keys. Remember to check non-environment subdirectories like `prereqs`.
+   * Check S3 Bucket `gpii-kubernetes-state` for Keys named after your environment (`k8s-dev-mrtyler.gpii.net`) and delete only those keys.
+   * Check DynamoDB for orphaned locks. See section in [Troubleshooting](#troubleshooting).
+1. Other stuff - a few more things to clean if you're still having problems.
+   * Check for orphaned IAM Roles using the AWS dashboard and delete them.
+   * Delete `$TMPDIR/rake-tmp` (`rake clobber` should take care of this but just in case).
+   * Delete `~/.terraform.d` and any directories in your `gpii-terraform` sandbox named `.bundle`, `.kitchen`, or `.terraform`.
+
+#### After everything is cleaned up
+
+1. Run `rake _destroy` again afterwards to make sure Terraform agrees that all the old resources are gone and to clean up DNS entries.
+1. `rake clobber` - cleans up generated files.
 
 ## Continuous Integration / Continuous Delivery
 
