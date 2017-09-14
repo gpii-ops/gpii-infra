@@ -20,7 +20,7 @@ end
 CLEAN << "#{@tmpdir}/terragrunt"
 
 desc "Destroy cluster"
-task :destroy => [@tmpdir, :undeploy] do
+task :destroy => [@tmpdir, :generate_modules, :undeploy] do
   Rake::Task["_destroy"].invoke
 end
 

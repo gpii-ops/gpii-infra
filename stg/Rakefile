@@ -17,20 +17,13 @@ task :apply => [@tmpdir, :generate_modules] do
 end
 CLEAN << "#{@tmpdir}/terragrunt"
 
-# It seems weird to depend on :generate_modules, but it is needed for a common
-# scenario: CI deploys stg environment, an administrator wants to destroy it
-# manually. To do this, modules must generate their terraform code so we can
-# run it.
-#
-# After the second time rake gave me inscrutable errors while trying to delete
-# a stg environment that was spun up elsewhere, I added the dependency.
 desc "Destroy cluster"
 task :destroy => [@tmpdir, :generate_modules, :undeploy] do
   Rake::Task["_destroy"].invoke
 end
 
 desc "[ADVANCED] Helper for :destroy that ignores dependencies; useful for cleaning up malformed clusters."
-task :_destroy do
+task :_destroy => @tmpdir do
   sh "terragrunt destroy-all --terragrunt-non-interactive"
   Rake::Task["kops_delete_cluster"].invoke
   Rake::Task["destroy_prereqs"].invoke
