@@ -22,12 +22,13 @@ dev:
   script:
     - cd dev
     - bundle install --path "vendor/bundle"
-    - rake clean
+    - rake clobber
     - rake
   after_script:
     # Clean up even if something failed.
     - cd dev
     - rake destroy
+    - rake clobber
 
 promote-to-stg:
   stage: promote-to-stg
@@ -44,5 +45,5 @@ stg:
   stage: stg
   script:
     - cd stg
-    - rake clean
+    - rake clobber
     - rake

@@ -36,7 +36,7 @@ rule "#{KOPS_OUT_DIR}/kubernetes.tf" do
       puts "Cluster #{ENV["TF_VAR_cluster_name"]} already exists."
       puts "If you want to change its configuration, you'll need to:"
       puts "* rake destroy"
-      puts "* rake clean"
+      puts "* rake clobber"
       puts "(Note that this DESTROYS THE CLUSTER.)"
       puts "--OR--"
       puts "* Upgrade manually. See https://github.com/kubernetes/kops/blob/master/docs/upgrade.md."
@@ -62,6 +62,9 @@ task :kops_delete_cluster => :configure_kops do
     --unregister \
     || echo 'kops delete cluster failed, but that is ok.' \
   "
+  # Once the cluster state has been deleted, our generated files are invalid
+  # (and often break subsequent runs). So, clean up now.
+  Rake::Task["clean"].invoke
 end
 
 

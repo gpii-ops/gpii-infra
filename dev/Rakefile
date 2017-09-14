@@ -29,6 +29,7 @@ task :_destroy => @tmpdir do
   sh "bundle exec kitchen destroy -l debug"
   Rake::Task["kops_delete_cluster"].invoke
   Rake::Task["destroy_prereqs"].invoke
+  Rake::Task["clean_modules"].invoke
 end
 
 
