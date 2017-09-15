@@ -1,4 +1,5 @@
 require "rake/clean"
+require_relative "./dns_lookup.rb"
 require_relative "./wait_for.rb"
 
 # We need a DNS zone before kops will do anything, so we have to create it in a
@@ -28,8 +29,14 @@ task :generate_modules => [@tmpdir, :apply_prereqs] do
   end
 end
 
-desc "Wait until cluster has converged enough to set up DNS for API servers"
-task :wait_for_api do
+# Technically it would be more correct to get the name of the API record
+# directly from the Terraform run that created the cluster (there is a
+# dedicated output for this, consumed by kitchen-terraform). This is
+# simpler, though.
+@api_hostname = "api.#{ENV['TF_VAR_cluster_name']}"
+
+desc "Wait until cluster has converged enough to create DNS records for API servers"
+task :wait_for_api_dns do
   # Technically it would be more correct to get this value directly from
   # the Terraform run that created the zone. This is simpler, though.
   zone = `aws route53 list-hosted-zones \
@@ -41,35 +48,42 @@ task :wait_for_api do
   zone.chomp!
   zone.gsub!(%r{"/hostedzone/(.*)"}, "\\1")
 
-  # Technically it would be more correct to get the name of the API record
-  # directly from the Terraform run that created the cluster (there is a
-  # dedicated output for this, consumed by kitchen-terraform). This is
-  # simpler, though.
-  api_hostname = "api.#{ENV['TF_VAR_cluster_name']}"
-
   puts "We must wait for:"
   puts "- the API server to come up and report itself to dns-controller"
   puts "- dns-controller to create api.* A records"
-  puts "- A records to propagate so that the local machine can see them"
   puts "(More info: https://github.com/kubernetes/kops/blob/master/docs/boot-sequence.md)"
-  puts
-  puts "If we look up api.* records too early, local DNS may cache the negative lookup and things will break."
-  puts "On my home internet, behind an AirPort, it takes 10 minutes for the bad result to clear and things to work again."
   puts
   puts "It usually takes about 3 minutes for the cluster to converge and DNS records to appear."
   puts
-  puts "Waiting for API to have DNS..."
+  puts "Waiting for DNS records for #{@api_hostname} to exist..."
   puts "(You can Ctrl-C out of this safely. You may need to run :destroy afterward.)"
 
   # I tried to do the filtering in the aws cli with:
   #
-  # --max-items 1 --query\"ResourceRecordSets[?Name == '#{api_hostname}.']\"
+  # --max-items 1 --query\"ResourceRecordSets[?Name == '#{@api_hostname}.']\"
   #
   # but I couldn't get it to work.
   wait_for("aws route53 list-resource-record-sets \
     --hosted-zone-id '#{zone}' \
-    | grep -q '#{api_hostname}' \
+    | grep -q '#{@api_hostname}' \
   ")
+end
+
+desc "Wait until DNS records for API servers are available locally"
+task :wait_for_api_dns_local do
+  # A DNS lookup miss is pretty expensive -- many resolvers seem to cache
+  # NXDOMAIN for ten minutes. This is why :wait_for_api_dns watches Route 53
+  # directly: to avoid an early lookup producing a long-lived lookup miss.
+  #
+  # However, a lot of stuff will fail unless we can actually resolve those DNS
+  # records locally. Since awkward failures are worse than long delays, we wait
+  # for the local resolver to catch up to Route 53.
+  puts "If we look up api.* records too early, local DNS may cache the negative lookup and things will break."
+  puts "On my home internet, behind an AirPort, it takes 10 minutes for the bad result to clear and things to work again."
+  puts
+  puts "Waiting for DNS records for #{@api_hostname} to be resolvable locally..."
+  puts "(You can Ctrl-C out of this safely. You may need to run :destroy afterward.)"
+  wait_for(@api_hostname, run_with=method(:dns_lookup))
 end
 
 desc "[ADVANCED] Delete kops state for this cluster; will make an existing cluster unusable without S3 rollback"
