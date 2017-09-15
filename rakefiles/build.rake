@@ -86,6 +86,11 @@ task :wait_for_api_dns_local do
   wait_for(@api_hostname, run_with=method(:dns_lookup))
 end
 
+desc "Display admin password for cluster"
+task :display_admin_password do
+  sh "cd ../modules/k8s && rake display_admin_password"
+end
+
 desc "[ADVANCED] Delete kops state for this cluster; will make an existing cluster unusable without S3 rollback"
 task :kops_delete_cluster do
   sh "cd ../modules/k8s && rake kops_delete_cluster"

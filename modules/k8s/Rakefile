@@ -54,6 +54,11 @@ rule "#{KOPS_OUT_DIR}/kubernetes.tf" do
 end
 CLEAN << KOPS_OUT_DIR
 
+desc "Display admin password for cluster"
+task :display_admin_password => :configure_kops do
+  sh "kops get secrets kube --name #{ENV["TF_VAR_cluster_name"]} --type secret -oplaintext"
+end
+
 desc "[ADVANCED] Delete kops state for this cluster; will make an existing cluster unusable without S3 rollback"
 task :kops_delete_cluster => :configure_kops do
   sh "kops delete cluster \

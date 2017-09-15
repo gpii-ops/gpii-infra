@@ -52,7 +52,7 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 
 1. Go to `https://api.<your cluster name>.gpii.net/ui`
    * Login is `admin`.
-   * Password is the output of `KOPS_STATE_STORE=s3://gpii-kubernetes-state kops get secrets kube --type secret -oplaintext --name <your cluster name>.gpii.net`.
+   * Get the password from `rake display_admin_password`.
 1. Click "Workloads" for a good overview of what's happening in the cluster.
 
 #### On the local machine
