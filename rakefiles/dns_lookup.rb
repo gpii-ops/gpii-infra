@@ -3,7 +3,8 @@ require "resolv"
 def dns_lookup(hostname, &block)
   ok = false
   begin
-    res = Resolv.getaddress(hostname + "asdf")
+    puts "Looking up #{hostname}"
+    res = Resolv.getaddress(hostname)
     ok = true
   rescue Resolv::ResolvError => err
     res = err.message
