@@ -9,5 +9,6 @@ def dns_lookup(hostname, &block)
   rescue Resolv::ResolvError => err
     res = err.message
   end
+  puts res
   block.call(ok, res)
 end
