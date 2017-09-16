@@ -70,6 +70,26 @@ task :wait_for_gpii_ready => :configure_kubectl do
   # We use /preferences/carla as a proxy for the overall health of the system.
   # It's not perfect but it's a good start.
   wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' http://preferences.#{ENV["TF_VAR_cluster_name"]}/preferences/carla | grep -q ^2")
+  Rake::Task["display_cluster_info"].invoke
+end
+
+desc "Display some handy info about the cluster"
+task :display_cluster_info do
+  puts
+  puts
+  puts "******************************************"
+  puts "Congratulations! Your GPII Cloud is ready!"
+  puts "******************************************"
+  puts
+  puts "AWS Dashboard Resource Group:"
+  puts "  https://resources.console.aws.amazon.com/r/group#sharedgroup=%7B%22name%22%3A%22#{ ENV["TF_VAR_cluster_name"] }%22%2C%22regions%22%3A%22all%22%2C%22resourceTypes%22%3A%22all%22%2C%22tagFilters%22%3A%5B%7B%22key%22%3A%22KubernetesCluster%22%2C%22values%22%3A%5B%22#{ ENV["TF_VAR_cluster_name"] }%22%5D%7D%5D%7D"
+  puts
+  puts "Kubernetes Dashboard:"
+  puts "  https://#{@api_hostname}/ui"
+  puts "    user: admin"
+  puts "    pass: `rake display_admin_password`"
+  puts
+
 end
 
 task :find_gpii_components do
