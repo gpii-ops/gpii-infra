@@ -56,9 +56,27 @@ task :wait_for_cluster_down => :configure_kubectl do
   ")
 end
 
+desc "Wait until cluster has converged enough to create DNS records for GPII components"
+task :wait_for_gpii_dns => :find_zone_id do
+  preferences_hostname = "preferences.#{ENV["TF_VAR_cluster_name"]}"
+
+  puts "Waiting for DNS records for #{preferences_hostname} to exist..."
+  puts "(You can Ctrl-C out of this safely. You may need to re-run :deploy_only afterward.)"
+
+  # I tried to do the filtering in the aws cli with:
+  #
+  # --max-items 1 --query\"ResourceRecordSets[?Name == '#{preferences_hostname}.']\"
+  #
+  # but I couldn't get it to work.
+  wait_for("aws route53 list-resource-record-sets \
+    --hosted-zone-id '#{@zone_id}' \
+    | grep -q '#{preferences_hostname}' \
+  ")
+end
+
 desc "Wait until GPII components have been deployed"
 task :wait_for_gpii_ready => :configure_kubectl do
-  puts "Waiting for GPII componeents to be fully deployed..."
+  puts "Waiting for GPII components to be fully deployed..."
   puts "(You can Ctrl-C out of this safely. You may need to re-run :deploy_only afterward.)"
 
   # This is the simplest one-liner I could find to GET a url and return just
@@ -70,7 +88,6 @@ task :wait_for_gpii_ready => :configure_kubectl do
   # We use /preferences/carla as a proxy for the overall health of the system.
   # It's not perfect but it's a good start.
   wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' http://preferences.#{ENV["TF_VAR_cluster_name"]}/preferences/carla | grep -q ^2")
-  Rake::Task["display_cluster_info"].invoke
 end
 
 desc "Display some handy info about the cluster"
@@ -112,7 +129,11 @@ task :deploy_only => [:configure_kubectl, :find_gpii_components] do
     ENV["RAKE_DEPLOY_WARNING_MSG"] = "WARNING: Failed to deploy #{component}. Run 'rake deploy_only' to try again. Continuing."
     sh "kubectl apply -f #{component} || echo \"$RAKE_DEPLOY_WARNING_MSG\""
   end
+  Rake::Task["wait_for_gpii_dns"].invoke
+  puts "Waiting 60s to give local DNS a chance to catch up..."
+  sleep 60
   Rake::Task["wait_for_gpii_ready"].invoke
+  Rake::Task["display_cluster_info"].invoke
 end
 
 # Shut things down via kubernetes, otherwise terraform destroy will get stuck
