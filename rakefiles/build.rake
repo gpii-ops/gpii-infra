@@ -29,6 +29,20 @@ task :generate_modules => [@tmpdir, :apply_prereqs] do
   end
 end
 
+task :find_zone_id do
+  # Technically it would be more correct to get this value directly from
+  # the Terraform run that created the zone. This is simpler, though.
+  @zone_id = `aws route53 list-hosted-zones \
+    | jq '.HostedZones[] | select(.Name=="#{ENV["TF_VAR_cluster_name"]}.") | .Id' \
+  `
+  if @zone_id.empty?
+    raise "Could not find route53 zone for cluster #{ENV['TF_VAR_cluster_name']}. Make sure :apply_prereqs has run successfully."
+  end
+  @zone_id.chomp!
+  @zone_id.gsub!(%r{"/hostedzone/(.*)"}, "\\1")
+
+end
+
 # Technically it would be more correct to get the name of the API record
 # directly from the Terraform run that created the cluster (there is a
 # dedicated output for this, consumed by kitchen-terraform). This is
@@ -36,18 +50,7 @@ end
 @api_hostname = "api.#{ENV['TF_VAR_cluster_name']}"
 
 desc "Wait until cluster has converged enough to create DNS records for API servers"
-task :wait_for_api_dns do
-  # Technically it would be more correct to get this value directly from
-  # the Terraform run that created the zone. This is simpler, though.
-  zone = `aws route53 list-hosted-zones \
-    | jq '.HostedZones[] | select(.Name=="#{ENV["TF_VAR_cluster_name"]}.") | .Id' \
-  `
-  if zone.empty?
-    raise "Could not find route53 zone for cluster #{ENV['TF_VAR_cluster_name']}. Make sure :apply_prereqs has run successfully."
-  end
-  zone.chomp!
-  zone.gsub!(%r{"/hostedzone/(.*)"}, "\\1")
-
+task :wait_for_api_dns => :find_zone_id do
   puts "We must wait for:"
   puts "- the API server to come up and report itself to dns-controller"
   puts "- dns-controller to create api.* A records"
@@ -64,7 +67,7 @@ task :wait_for_api_dns do
   #
   # but I couldn't get it to work.
   wait_for("aws route53 list-resource-record-sets \
-    --hosted-zone-id '#{zone}' \
+    --hosted-zone-id '#{@zone_id}' \
     | grep -q '#{@api_hostname}' \
   ")
 end
