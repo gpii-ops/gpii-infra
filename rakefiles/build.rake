@@ -40,7 +40,18 @@ task :find_zone_id do
   end
   @zone_id.chomp!
   @zone_id.gsub!(%r{"/hostedzone/(.*)"}, "\\1")
+end
 
+task :wait_for_dns, [:hostname] => :find_zone_id do |taskname, args|
+  # I tried to do the filtering in the aws cli with:
+  #
+  # --max-items 1 --query\"ResourceRecordSets[?Name == '#{hostname}.']\"
+  #
+  # but I couldn't get it to work.
+  wait_for("aws route53 list-resource-record-sets \
+    --hosted-zone-id '#{@zone_id}' \
+    | grep -q '#{args[:hostname]}' \
+  ")
 end
 
 # Technically it would be more correct to get the name of the API record
@@ -50,7 +61,7 @@ end
 @api_hostname = "api.#{ENV['TF_VAR_cluster_name']}"
 
 desc "Wait until cluster has converged enough to create DNS records for API servers"
-task :wait_for_api_dns => :find_zone_id do
+task :wait_for_api_dns do
   puts "We must wait for:"
   puts "- the API server to come up and report itself to dns-controller"
   puts "- dns-controller to create api.* A records"
@@ -60,16 +71,7 @@ task :wait_for_api_dns => :find_zone_id do
   puts
   puts "Waiting for DNS records for #{@api_hostname} to exist..."
   puts "(You can Ctrl-C out of this safely. You may need to run :destroy afterward.)"
-
-  # I tried to do the filtering in the aws cli with:
-  #
-  # --max-items 1 --query\"ResourceRecordSets[?Name == '#{@api_hostname}.']\"
-  #
-  # but I couldn't get it to work.
-  wait_for("aws route53 list-resource-record-sets \
-    --hosted-zone-id '#{@zone_id}' \
-    | grep -q '#{@api_hostname}' \
-  ")
+  Rake::Task["wait_for_dns"].invoke(@api_hostname)
 end
 
 desc "Wait until DNS records for API servers are available locally"

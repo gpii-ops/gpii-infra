@@ -63,15 +63,7 @@ task :wait_for_gpii_dns => :find_zone_id do
   puts "Waiting for DNS records for #{preferences_hostname} to exist..."
   puts "(You can Ctrl-C out of this safely. You may need to re-run :deploy_only afterward.)"
 
-  # I tried to do the filtering in the aws cli with:
-  #
-  # --max-items 1 --query\"ResourceRecordSets[?Name == '#{preferences_hostname}.']\"
-  #
-  # but I couldn't get it to work.
-  wait_for("aws route53 list-resource-record-sets \
-    --hosted-zone-id '#{@zone_id}' \
-    | grep -q '#{preferences_hostname}' \
-  ")
+  Rake::Task["wait_for_dns"].invoke(preferences_hostname)
 end
 
 desc "Wait until GPII components have been deployed"
