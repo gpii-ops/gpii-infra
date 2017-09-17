@@ -10,7 +10,7 @@ def setup_vars(env_short)
       ENV["TF_VAR_environment"] = "#{env_short}-#{ENV["USER"]}"
     end
   end
-  ENV["TF_VAR_cluster_name"] = "k8s-#{ENV["TF_VAR_environment"]}.gpii.net"
+  ENV["TF_VAR_cluster_name"] = "#{ENV["TF_VAR_environment"]}.gpii.net"
 
   # If rake has already set up TMPDIR, don't set it again. Otherwise, we end up
   # with a second 'rake-tmp/environment' in the path.

@@ -1,5 +1,5 @@
 resource "aws_route53_zone" "main" {
-  name = "k8s-${var.environment}.gpii.net"
+  name = "${var.environment}.gpii.net"
   force_destroy = true
 
   tags {

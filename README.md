@@ -58,14 +58,14 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 #### On the local machine
 
 1. `KOPS_STATE_STORE=s3://gpii-kubernetes-state kops validate cluster`
-   * Add `--name k8s-dev-mrtyler.gpii.net` if you have multiple clusters configured.
+   * Add `--name dev-mrtyler.gpii.net` if you have multiple clusters configured.
 1. `kubectl get nodes --show-labels`
-   * Add `--context k8s-dev-mrtyler.gpii.net` if you have multiple clusters configured.
+   * Add `--context dev-mrtyler.gpii.net` if you have multiple clusters configured.
 
 #### On the remote machine
 
 1. Configure ssh, as described in [Configure SSH](#configure-ssh).
-1. `ssh admin@api.<your cluster name>` e.g. `ssh -i ~/.ssh/id_rsa.gpii-ci -o StrictHostKeyChecking=no admin@api.k8s-stg.gpii.net`
+1. `ssh admin@api.<your cluster name>` e.g. `ssh -i ~/.ssh/id_rsa.gpii-ci -o StrictHostKeyChecking=no admin@api.stg.gpii.net`
 1. `sudo docker ps` to see that Kubernetes containers are running.
 1. `/var/log/kube-apiserver.log` is a good place to look if things aren't working.
 1. This [overview of how a Kubernetes cluster comes up when using kops](https://github.com/kubernetes/kops/blob/master/docs/boot-sequence.md) is helpful for low-level cluster debugging, e.g. "Why isn't my cluster coming up?!"
@@ -92,12 +92,12 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 1. `rake destroy` - the cleanest way to terminate a cluster. However, it may fail if the cluster never converged.
 1. `rake _destroy` - destroys cloud resources but does not undeploy GPII components. This can cause `_destroy` to get stuck: Rake and Terraform don't know about resources created by Kubernetes, such as load balancers. These Kubernetes-managed resources will block Terraform from deleting, e.g. the network in which the load balancer resides.
 1. The AWS dashboard - I'm sorry that you're here, but the last step is manually deleting orphaned resources.
-   * One helpful trick is to make a Resource Group (top bar `->` Resource Groups `->` Create a Resource Group) and find resources Tagged with `KubernetesCluster: k8s-dev-mrtyler.gpii.net`. [Here is one I made for my dev environment](https://resources.console.aws.amazon.com/r/group#sharedgroup=%7B%22name%22%3A%22k8s-dev-tyler%22%2C%22regions%22%3A%22all%22%2C%22resourceTypes%22%3A%22all%22%2C%22tagFilters%22%3A%5B%7B%22key%22%3A%22KubernetesCluster%22%2C%22values%22%3A%5B%22k8s-dev-tyler.gpii.net%22%5D%7D%5D%7D).
+   * One helpful trick is to make a Resource Group (top bar `->` Resource Groups `->` Create a Resource Group) and find resources Tagged with `KubernetesCluster: dev-mrtyler.gpii.net`. [Here is one I made for my dev environment](https://resources.console.aws.amazon.com/r/group#sharedgroup=%7B%22name%22%3A%22dev-mrtyler%22%2C%22regions%22%3A%22all%22%2C%22resourceTypes%22%3A%22all%22%2C%22tagFilters%22%3A%5B%7B%22key%22%3A%22KubernetesCluster%22%2C%22values%22%3A%5B%22dev-mrtyler.gpii.net%22%5D%7D%5D%7D).
    * Not all cloud resources care Taggable so you may need to explore a little, but the Resource Group report should give you an idea of what kinds of resources are getting stuck.
    * Eventually, I plan to add a `rake exterminate` to automate the destruction of wayward resources.
 1. The AWS dashboard, part 2 - various tools in the system store state in S3 and DynamoDB. If you encounter weird mismatch errors, you may need to perform more manual cleanup.
-   * Check S3 Bucket `gpii-infra-state` for Keys named after your environment (`k8s-dev-mrtyler.gpii.net`) and delete only those keys. Remember to check non-environment subdirectories like `prereqs`.
-   * Check S3 Bucket `gpii-kubernetes-state` for Keys named after your environment (`k8s-dev-mrtyler.gpii.net`) and delete only those keys.
+   * Check S3 Bucket `gpii-infra-state` for Keys named after your environment (`dev-mrtyler.gpii.net`) and delete only those keys. Remember to check non-environment subdirectories like `prereqs`.
+   * Check S3 Bucket `gpii-kubernetes-state` for Keys named after your environment (`dev-mrtyler.gpii.net`) and delete only those keys.
    * Check DynamoDB for orphaned locks. See section in [Troubleshooting](#troubleshooting).
 1. Other stuff - a few more things to clean if you're still having problems.
    * Check for orphaned IAM Roles using the AWS dashboard and delete them.
