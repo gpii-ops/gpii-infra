@@ -12,13 +12,13 @@ This repo is designed to fit into a CI/CD scheme: new commits are automatically 
 
 ## Configure Github
 
-   * Create a role account `gpii-bot` for use by `gitlab-runner`. Add it to the `gpii-ops` Organization. Add it to the `gpii-terraform` repo as a Collaborator with Write access.
+   * Create a role account `gpii-bot` for use by `gitlab-runner`. Add it to the `gpii-ops` Organization. Add it to the `gpii-infra` repo as a Collaborator with Write access.
       * You'll need to accept the invitation using `gpii-bot`'s Github account.
    * Create an ssh key. Associate the public key with the `gpii-bot` Github account. Save the private key as `~gitlab-runner/.ssh/id_rsa.gpii-ci`.
 
 ## Configure Gitlab
 
-   * Import the `gpii-terraform` repo from Github into the `gpii-ops` Gitlab organization.
+   * Import the `gpii-infra` repo from Github into the `gpii-ops` Gitlab organization.
       * In that repo, disable all Shared Runners.
       * Note the Registration Token for this project. You'll need to give it to Ansible later.
    * Create a role account `gpii-bot` for use by `gitlab-runner`. Add it to the `gpii-ops` Organization with `Master` permissions.
@@ -42,7 +42,7 @@ This repo is designed to fit into a CI/CD scheme: new commits are automatically 
 
 ## gpii-version-updater
 
-   * There is a standalone system for managing the versions of GPII components running on this infrastructure, via [version.yml](https://github.com/gpii-ops/gpii-terraform/blob/master/modules/deploy/version.yml). See the [gpii-version-updater repo](https://github.com/gpii-ops/gpii-version-updater).
+   * There is a standalone system for managing the versions of GPII components running on this infrastructure, via [version.yml](https://github.com/gpii-ops/gpii-infra/blob/master/modules/deploy/version.yml). See the [gpii-version-updater repo](https://github.com/gpii-ops/gpii-version-updater).
 
 ## Running manually in non-dev environments (stg, prd)
 

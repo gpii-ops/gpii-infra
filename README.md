@@ -1,4 +1,4 @@
-# gpii-terraform
+# gpii-infra
 
 Following the pattern laid out in "[How to create reusable infrastructure with Terraform modules](https://blog.gruntwork.io/how-to-create-reusable-infrastructure-with-terraform-modules-25526d65f73d)" and "[Terragrunt: Remote Terraform configurations](https://github.com/gruntwork-io/terragrunt#keep-your-remote-state-configuration-dry)", this repo describes both the state of deployed infrastructure ("houses") and the modules ("blueprints") that comprise the [GPII](http://gpii.net/).
 
@@ -38,7 +38,7 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
    * `aws s3api create-bucket --bucket gpii-kubernetes-state --region us-east-2 --create-bucket-configuration LocationConstraint=us-east-2`
    * `aws s3api put-bucket-versioning --bucket gpii-kubernetes-state --versioning-configuration Status=Enabled --region us-east-2`
 1. Clone this repo.
-1. `cd` into the `gpii-terraform/dev/` directory.
+1. `cd` into the `gpii-infra/dev/` directory.
 1. `bundle install --path vendor/bundle`
 1. `rake`
    * This will create an independent dev environment called `dev-$USER` and run tests.
@@ -72,7 +72,7 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 
 ### Cleaning up
 
-1. `cd` into the `gpii-terraform/dev/` directory.
+1. `cd` into the `gpii-infra/dev/` directory.
 1. `rake destroy`
 1. `rake clobber`
 
@@ -84,7 +84,7 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
    * From the component where you lost the lock: `terragrunt force-unlock anything`
    * Terraform will tell you that `anything` doesn't match the lock ID and spit out a bunch of info including the correct lock ID.
    * Copy this ID and: `terragrunt force-unlock <correct-lock-id>`
-   * You can also use the AWS web dashboard. Go to `DynamoDB -> Tables -> gpii-terraform-lock-table -> Items`. Select the lock(s) for your environment `-> Actions -> Delete`.
+   * You can also use the AWS web dashboard. Go to `DynamoDB -> Tables -> gpii-infra-lock-table -> Items`. Select the lock(s) for your environment `-> Actions -> Delete`.
 * The system -- terraform and kops, e.g. -- stores various kinds of state in S3. All environments share a single Bucket, but have separate Keys (directories, basically). If you are manipulating this state directly (experts only! but sometimes needed, e.g. to recover from upgrading to a non-backward compatible version of Terraform), take care to only make changes to the Keys related to your environment. Modifying the Bucket will affect other developers' environments as well as shared environments like `prd`!
 
 ### My cluster is messed up and I just want to get rid of it so I can start over
@@ -96,13 +96,13 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
    * Not all cloud resources care Taggable so you may need to explore a little, but the Resource Group report should give you an idea of what kinds of resources are getting stuck.
    * Eventually, I plan to add a `rake exterminate` to automate the destruction of wayward resources.
 1. The AWS dashboard, part 2 - various tools in the system store state in S3 and DynamoDB. If you encounter weird mismatch errors, you may need to perform more manual cleanup.
-   * Check S3 Bucket `gpii-terraform-state` for Keys named after your environment (`k8s-dev-mrtyler.gpii.net`) and delete only those keys. Remember to check non-environment subdirectories like `prereqs`.
+   * Check S3 Bucket `gpii-infra-state` for Keys named after your environment (`k8s-dev-mrtyler.gpii.net`) and delete only those keys. Remember to check non-environment subdirectories like `prereqs`.
    * Check S3 Bucket `gpii-kubernetes-state` for Keys named after your environment (`k8s-dev-mrtyler.gpii.net`) and delete only those keys.
    * Check DynamoDB for orphaned locks. See section in [Troubleshooting](#troubleshooting).
 1. Other stuff - a few more things to clean if you're still having problems.
    * Check for orphaned IAM Roles using the AWS dashboard and delete them.
    * Delete `$TMPDIR/rake-tmp` (`rake clobber` should take care of this but just in case).
-   * Delete `~/.terraform.d` and any directories in your `gpii-terraform` sandbox named `.bundle`, `.kitchen`, or `.terraform`.
+   * Delete `~/.terraform.d` and any directories in your `gpii-infra` sandbox named `.bundle`, `.kitchen`, or `.terraform`.
 
 #### After everything is cleaned up
 
