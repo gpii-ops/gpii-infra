@@ -102,7 +102,7 @@ task :display_cluster_info do
 end
 
 task :find_gpii_components do
-  @gpii_components = FileList.new("../modules/deploy/[0-9]*.yml").sort
+  @gpii_components = FileList.new("#{@tmpdir}-modules/deploy/[0-9]*.yml").sort
 end
 
 desc "Deploy GPII components to cluster"
