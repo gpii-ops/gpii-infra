@@ -118,8 +118,8 @@ task :deploy_only => [:configure_kubectl, :find_gpii_components] do
   components = extra_components + @gpii_components
   components.each do |component|
     # Reduce clutter in the output by "hiding" this message in an environment variable.
-    ENV["RAKE_DEPLOY_WARNING_MSG"] = "WARNING: Failed to deploy #{component}. Run 'rake deploy_only' to try again. Continuing."
-    sh "kubectl --context #{ENV["TF_VAR_cluster_name"]} apply -f #{component} || echo \"$RAKE_DEPLOY_WARNING_MSG\""
+    ENV["rake_deploy_warning_msg"] = "WARNING: Failed to deploy #{component}. Run 'rake deploy_only' to try again. Continuing."
+    sh "kubectl --context #{ENV["TF_VAR_cluster_name"]} apply -f #{component} || echo \"$rake_deploy_warning_msg\""
   end
   Rake::Task["wait_for_gpii_dns"].invoke
   puts "Waiting 60s to give local DNS a chance to catch up..."
@@ -136,9 +136,9 @@ task :undeploy => [:configure_kubectl, :find_gpii_components] do
   # even in an "undeployed" cluster.
   @gpii_components.reverse.each do |component|
     # Reduce clutter in the output by "hiding" this message in an environment variable.
-    ENV["RAKE_UNDEPLOY_WARNING_MSG"] = "WARNING: Failed to undeploy #{component}. Run 'rake undeploy' to try again. Continuing.\nWARNING: An incomplete undeploy can prevent 'rake destroy' from succeeding."
+    ENV["rake_undeploy_warning_msg"] = "WARNING: Failed to undeploy #{component}. Run 'rake undeploy' to try again. Continuing.\nWARNING: An incomplete undeploy can prevent 'rake destroy' from succeeding."
     # Allow deletes to fail, e.g. to clean up a cluster that never got fully deployed.
-    sh "kubectl --context #{ENV["TF_VAR_cluster_name"]} delete -f #{component} || echo \"$RAKE_UNDEPLOY_WARNING_MSG\""
+    sh "kubectl --context #{ENV["TF_VAR_cluster_name"]} delete -f #{component} || echo \"$rake_undeploy_warning_msg\""
   end
   Rake::Task["wait_for_cluster_down"].invoke
 end
