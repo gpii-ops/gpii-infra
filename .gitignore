@@ -2,6 +2,7 @@
 .bundle/
 .kitchen/
 .terraform/
+dev/terraform.tfstate*
 graph*.png
 modules/deploy/25-couchdb-deploy-persistent.yml
 modules/deploy/43-dataloader-job.yml
