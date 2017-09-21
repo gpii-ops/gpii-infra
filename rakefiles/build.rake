@@ -88,7 +88,7 @@ task :wait_for_api_dns_local do
   puts
   puts "Waiting for DNS records for #{@api_hostname} to be resolvable locally..."
   puts "(You can Ctrl-C out of this safely. You may need to run :destroy afterward.)"
-  wait_for(@api_hostname, run_with=method(:dns_lookup))
+  wait_for(@api_hostname, run_with: method(:dns_lookup))
 end
 
 desc "Display admin password for cluster"

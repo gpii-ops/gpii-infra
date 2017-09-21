@@ -1,4 +1,4 @@
-def wait_for(args, run_with=method(:sh), sleep_secs=20, max_wait_secs=15*60)
+def wait_for(args, run_with: method(:sh), sleep_secs: 20, max_wait_secs: 15*60)
   ready = false
   total_time = 0
   until ready
