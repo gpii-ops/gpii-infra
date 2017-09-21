@@ -1,0 +1,18 @@
+# NOTE! This file is generated!
+
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: infra-fake-component
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: infra-fake-component
+    spec:
+      containers:
+      - name: infra-fake-component
+        image: <%= @versions["infra-fake-component"] %>
+        ports:
+        - containerPort: 80

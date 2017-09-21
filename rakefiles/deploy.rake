@@ -101,7 +101,7 @@ task :display_cluster_info do
 
 end
 
-task :find_gpii_components do
+task :find_gpii_components => :generate_modules do
   @gpii_components = FileList.new("#{@tmpdir}-modules/deploy/[0-9]*.yml").sort
 end
 
@@ -138,7 +138,7 @@ task :undeploy => [:configure_kubectl, :find_gpii_components] do
     # Reduce clutter in the output by "hiding" this message in an environment variable.
     ENV["rake_undeploy_warning_msg"] = "WARNING: Failed to undeploy #{component}. Run 'rake undeploy' to try again. Continuing.\nWARNING: An incomplete undeploy can prevent 'rake destroy' from succeeding."
     # Allow deletes to fail, e.g. to clean up a cluster that never got fully deployed.
-    sh "kubectl --context #{ENV["TF_VAR_cluster_name"]} delete -f #{component} || echo \"$rake_undeploy_warning_msg\""
+    sh "kubectl --context #{ENV["TF_VAR_cluster_name"]} delete --ignore-not-found -f #{component} || echo \"$rake_undeploy_warning_msg\""
   end
   Rake::Task["wait_for_cluster_down"].invoke
 end

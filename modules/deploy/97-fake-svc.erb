@@ -1,0 +1,14 @@
+# NOTE! This file is generated!
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: infra-fake-component
+  annotations:
+    dns.alpha.kubernetes.io/external: "infra-fake-component.<%= ENV["TF_VAR_cluster_name"] %>"
+spec:
+  selector:
+    app: infra-fake-component
+  ports:
+  - port: 80
+  type: LoadBalancer # exposed externally
