@@ -144,7 +144,7 @@ task :undeploy => [:configure_kubectl, :find_gpii_components] do
     begin
       wait_for(
         "kubectl --context #{ENV["TF_VAR_cluster_name"]} delete --ignore-not-found -f #{component}",
-        max_wait_secs: 60,
+        max_wait_secs: 120,
       )
     rescue
       puts "WARNING: Failed to undeploy #{component}. Run 'rake undeploy' to try again. Continuing."
