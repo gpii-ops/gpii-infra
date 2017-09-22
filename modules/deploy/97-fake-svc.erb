@@ -6,9 +6,24 @@ metadata:
   name: infra-fake-component
   annotations:
     dns.alpha.kubernetes.io/external: "infra-fake-component.<%= ENV["TF_VAR_cluster_name"] %>"
+  <% if ENV["TF_VAR_cluster_name"] == "stg.gpii.net" %>
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
+    # Hardcoded reference to *.stg.gpii.net cert in ACM.
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:us-east-2:478785806711:certificate/6b326073-a2a2-4c92-b5b5-addd302ad79c"
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "http"
+  <% end %>
 spec:
   selector:
     app: infra-fake-component
   ports:
-  - port: 80
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+  <% if ENV["TF_VAR_cluster_name"] == "stg.gpii.net" %>
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: 80
+  <% end %>
   type: LoadBalancer # exposed externally
