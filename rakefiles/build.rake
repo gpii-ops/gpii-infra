@@ -1,24 +1,24 @@
 require "rake/clean"
 require_relative "./dns_lookup.rb"
+import "../rakefiles/prereqs.rake"
+require_relative "./terraform_output.rb"
 require_relative "./wait_for.rb"
 
-# We need a DNS zone before kops will do anything, so we have to create it in a
-# separate terraform run. We use a separate tmpdir so we don't mix up these
-# downloaded modules with the main terraform run's downloaded modules.
-directory @tmpdir_prereqs
-CLOBBER << @tmpdir_prereqs
+PREREQS_DIR = "../prereqs/#{ENV["RAKE_ENV_SHORT"]}"
 
 desc "Create or update cluster prereqs (e.g DNS for cluster)"
 task :apply_prereqs => @tmpdir_prereqs do
-  sh "cd ../prereqs/#{ENV["RAKE_ENV_SHORT"]}/k8s-cluster-dns && TMPDIR=#{@tmpdir_prereqs} terragrunt apply-all --terragrunt-non-interactive"
+  Rake::Task["_apply_prereqs"].invoke(PREREQS_DIR, @tmpdir_prereqs)
 end
-CLEAN << "#{@tmpdir_prereqs}/terragrunt"
 
 desc "Destroy cluster prereqs (e.g DNS for cluster)"
 task :destroy_prereqs => @tmpdir_prereqs do
-  sh "cd ../prereqs/#{ENV["RAKE_ENV_SHORT"]}/k8s-cluster-dns && TMPDIR=#{@tmpdir_prereqs} terragrunt destroy-all --terragrunt-non-interactive"
+  Rake::Task["_destroy_prereqs"].invoke(PREREQS_DIR, @tmpdir_prereqs)
 end
 
+task :setup_prereqs_output => :apply_prereqs do
+  @prereqs_output = terraform_output(PREREQS_DIR, @tmpdir_prereqs)
+end
 
 RAKEFILES = FileList.new("../modules/**/Rakefile")
 
@@ -29,17 +29,8 @@ task :generate_modules => [@tmpdir, :apply_prereqs] do
   end
 end
 
-task :find_zone_id do
-  # Technically it would be more correct to get this value directly from
-  # the Terraform run that created the zone. This is simpler, though.
-  @zone_id = `aws route53 list-hosted-zones \
-    | jq '.HostedZones[] | select(.Name=="#{ENV["TF_VAR_cluster_name"]}.") | .Id' \
-  `
-  if @zone_id.empty?
-    raise "Could not find route53 zone for cluster #{ENV['TF_VAR_cluster_name']}. Make sure :apply_prereqs has run successfully."
-  end
-  @zone_id.chomp!
-  @zone_id.gsub!(%r{"/hostedzone/(.*)"}, "\\1")
+task :find_zone_id => :setup_prereqs_output do
+  @zone_id = @prereqs_output["cluster_dns_zone_id"]["value"]
 end
 
 task :wait_for_dns, [:hostname] => :find_zone_id do |taskname, args|

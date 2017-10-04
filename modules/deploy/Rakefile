@@ -1,6 +1,8 @@
 require "erb"
 require "rake/clean"
 require "yaml"
+import "../../rakefiles/prereqs.rake"
+require_relative "../../rakefiles/terraform_output.rb"
 require_relative "../../rakefiles/vars.rb"
 
 if ENV["RAKE_ENV_SHORT"].nil?
@@ -9,6 +11,22 @@ end
 setup_vars(ENV["RAKE_ENV_SHORT"])
 
 task :default => :generate
+
+PREREQS_DIR = "../../prereqs/#{ENV["RAKE_ENV_SHORT"]}"
+
+desc "Create or update cluster prereqs (e.g DNS for cluster)"
+task :apply_prereqs => @tmpdir_prereqs do
+  Rake::Task["_apply_prereqs"].invoke(PREREQS_DIR, @tmpdir_prereqs)
+end
+
+desc "Destroy cluster prereqs (e.g DNS for cluster)"
+task :destroy_prereqs => @tmpdir_prereqs do
+  Rake::Task["_destroy_prereqs"].invoke(PREREQS_DIR, @tmpdir_prereqs)
+end
+
+task :setup_prereqs_output => :apply_prereqs do
+  @prereqs_output = terraform_output(PREREQS_DIR, @tmpdir_prereqs)
+end
 
 DEPLOY_OUT_DIR = "#{@tmpdir}-modules/deploy"
 directory DEPLOY_OUT_DIR
@@ -24,7 +42,7 @@ DEST_FILES = SOURCE_FILES.ext(".yml")
 DEST_FILES_WITH_PATH = SOURCE_FILES.ext(".yml").map { |f| File.join(DEPLOY_OUT_DIR, f) }
 
 desc "Generate GPII component configs for cluster"
-task :generate => [DEPLOY_OUT_DIR, "Rakefile", :setup_versions] + DEST_FILES do
+task :generate => [DEPLOY_OUT_DIR, "Rakefile", :setup_versions, :setup_prereqs_output] + DEST_FILES do
   cp FileList.new("./*.yml"), "#{DEPLOY_OUT_DIR}/"
 end
 

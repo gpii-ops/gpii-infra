@@ -27,5 +27,10 @@ def setup_vars(env_short)
   directory @tmpdir
   CLOBBER << @tmpdir
 
+  # We use a separate tmpdir so we don't mix up the prereq terraform run's
+  # downloaded modules with the main terraform run's downloaded modules.
+  directory @tmpdir_prereqs
+  CLOBBER << @tmpdir_prereqs
+
   ENV["RAKE_TMPDIR_ALREADY_SET"] = "true"
 end
