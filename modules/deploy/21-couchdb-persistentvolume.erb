@@ -1,0 +1,14 @@
+# NOTE! This file is generated!
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: couchdb-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  awsElasticBlockStore:
+    volumeID: <%= @prereqs_output["couchdb_volume_id"]["value"] %>
+  storageClassName: gpii-default
