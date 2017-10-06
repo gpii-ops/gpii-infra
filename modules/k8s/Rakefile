@@ -21,7 +21,7 @@ rule "#{KOPS_OUT_DIR}/kubernetes.tf" do
       sh "kops create cluster \
         --name=#{ENV["TF_VAR_cluster_name"]} \
         --channel=alpha \
-        --kubernetes-version=1.7.4 \
+        --kubernetes-version=1.8.0 \
         --node-count=3 \
         --node-size=t2.micro \
         --master-size=t2.micro \
