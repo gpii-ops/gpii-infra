@@ -2,11 +2,6 @@ require "rake/clean"
 require_relative "./wait_for.rb"
 import "../rakefiles/kops.rake"
 
-desc "Configure kubectl to know about cluster"
-task :configure_kubectl => [@tmpdir, :configure_kops] do
-  sh "kops export kubecfg #{ENV["TF_VAR_cluster_name"]}"
-end
-
 desc "Wait until cluster has converged and is ready to receive components"
 task :wait_for_cluster_up => :configure_kubectl do
   puts "Waiting for Kubernetes cluster to be fully up..."
