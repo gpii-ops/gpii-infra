@@ -109,6 +109,52 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 1. Run `rake _destroy` again afterwards to make sure Terraform agrees that all the old resources are gone and to clean up DNS entries.
 1. `rake clobber` - cleans up generated files.
 
+### Restoring a volume from a backup/snapshot
+
+1. We use [k8s-snapshots](https://github.com/miracle2k/k8s-snapshots) to periodically snapshot Kubernetes Persistent Volumes.
+1. Find the Snapshot you want to restore: AWS Dashboard `->` EC2 `->` Snapshots.
+1. Create a new Volume from that Snapshot: Select Snapshot `->` Actions `->` Create Volume.
+   * Most defaults should be correct.
+   * Make sure to create the new Volume in the same Availability Zone as the old Volume.
+   * Don't worry about changing Name or other Tags. Terraform will add them shortly.
+   * Note the Volume ID of the new Volume.
+1. For clarity, rename the old Volume. Prepend something like `REPLACED WITH vol-ffedcba BY MRTYLER 2017-10-06`.
+1. `cd dev && rake import_couchdb_volume[vol-0123456789abcdeff]`. Use the new Volume ID from earlier.
+1. Relaunch the Pod so that the component starts using the new Volume: Kubernetes Dashboard `->` Pods `->` (find in list) `->` ... Menu on right `->` Delete. Or, `kubectl delete pods -l app=couchdb`
+1. Relaunch the k8s-snapshots Pod. Otherwise it will continue to back up the old Volume.
+   * Also, Snapshots for the old Volume will not be expired automatically. They will need to be managed by hand.
+
+#### Hack: Adding data to CouchDB
+
+This is what I used to create a fake preference while verifying that volumes are restored correctly.
+
+1. Run a container inside the cluster: `kubectl run -i -t alpine --image=alpine --restart=Never`
+1. From inside the container, install some tools: `apk update && apk add curl`
+1. Define a record:
+```
+# copied and modified from vicky.json
+data='
+{
+  "_id": "tyler",
+  "value": {
+    "flat": {
+      "contexts": {
+        "gpii-default": {
+          "name": "HI EVERYBODY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+          "preferences": {
+            "http://registry.gpii.net/common/stickyKeys": true
+          }
+        }
+      }
+    }
+  }
+}
+'
+```
+1. Add the record: `curl -f -H 'Content-Type: application/json' -X POST http://couchdb.default.svc.cluster.local:5984/preferences -d "$data"`
+1. Before the restore: verify that the new record is present.
+1. After the restore: verify that the new record is no longer present.
+
 ## Continuous Integration / Continuous Delivery
 
 See [CI-CD.md](CI-CD.md)
