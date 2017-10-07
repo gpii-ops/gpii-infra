@@ -4,12 +4,12 @@ task :configure_kops do
 end
 
 desc "Configure kubectl to know about cluster"
-task :configure_kubectl => :configure_kops do
+task :configure_kubectl => [@tmpdir, :configure_kops] do
   sh "kops export kubecfg #{ENV["TF_VAR_cluster_name"]}"
 end
 
 desc "[EXPERIMENTAL] [ADVANCED] Edit cluster using kops"
-task :kops_edit_cluster => :configure_kops do
+task :kops_edit_cluster => [@tmpdir, :configure_kops] do
   sh "kops edit cluster #{ENV["TF_VAR_cluster_name"]}"
   puts
   puts "Here's what 'kops update cluster' will do:"
