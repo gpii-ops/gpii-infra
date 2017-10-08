@@ -80,7 +80,7 @@ task :wait_for_gpii_ready => :configure_kubectl do
   if ENV["TF_VAR_cluster_name"].start_with? "stg."
     preferences_url.gsub! "http://", "https://"
   end
-  wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' #{preferences_url} | grep -q ^2")
+  wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' '#{preferences_url}' | grep -q ^2")
 end
 
 desc "Display some handy info about the cluster"
