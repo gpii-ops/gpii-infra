@@ -3,14 +3,14 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: couchdb-us-east-2a-pv
+  name: couchdb-us-east-2b-pv
   labels:
-    couchdb-pv: us-east-2a
+    couchdb-pv: us-east-2b
 spec:
   capacity:
     storage: 5Gi
   accessModes:
     - ReadWriteOnce
   awsElasticBlockStore:
-    volumeID: <%= @prereqs_output["couchdb_us-east-2a_volume_id"]["value"] %>
+    volumeID: <%= @prereqs_output["couchdb_us-east-2b_volume_id"]["value"] %>
   storageClassName: gpii-default
