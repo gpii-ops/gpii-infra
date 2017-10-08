@@ -74,7 +74,13 @@ task :wait_for_gpii_ready => :configure_kubectl do
   #
   # We use /preferences/carla as a proxy for the overall health of the system.
   # It's not perfect but it's a good start.
-  wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' http://preferences.#{ENV["TF_VAR_cluster_name"]}/preferences/carla | grep -q ^2")
+  #
+  # Currently we only deploy SSL to shared environemnts (stg, prd).
+  preferences_url = "http://preferences.#{ENV["TF_VAR_cluster_name"]}/preferences/carla"
+  if ENV["TF_VAR_cluster_name"].start_with? "stg."
+    preferences_url.gsub! "http://", "https://"
+  end
+  wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' #{preferences_url} | grep -q ^2")
 end
 
 desc "Display some handy info about the cluster"
