@@ -7,6 +7,8 @@ metadata:
   annotations:
   <% if ENV["TF_VAR_cluster_name"].start_with? "stg." or ENV["TF_VAR_cluster_name"].start_with? "prd." %>
     backup.kubernetes.io/deltas: "PT15M PT60M PT4H PT24H"
+  <% elsif ENV["TF_VAR_cluster_name"].start_with? "dev-gitlab-runner." %>
+    # No backups in dev-gitlab-runner.
   <% else %>
     backup.kubernetes.io/deltas: "PT5M PT15M PT45M"
   <% end %>
