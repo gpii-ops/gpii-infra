@@ -3,12 +3,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: flow-manager
+  name: flowmanager
   annotations:
-    dns.alpha.kubernetes.io/external: "flow-manager.<%= ENV["TF_VAR_cluster_name"] %>"
+    dns.alpha.kubernetes.io/external: "flowmanager.<%= ENV["TF_VAR_cluster_name"] %>"
 spec:
   selector:
-    app: flow-manager
+    app: flowmanager
   ports:
   - port: 80
     targetPort: 8081

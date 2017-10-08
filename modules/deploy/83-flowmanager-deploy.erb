@@ -3,17 +3,17 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: flow-manager
+  name: flowmanager
 spec:
   replicas: 6
   template:
     metadata:
       labels:
-        app: flow-manager
+        app: flowmanager
     spec:
       containers:
-      - name: flow-manager
-        image: <%= @versions["flow-manager"] %>
+      - name: flowmanager
+        image: <%= @versions["flowmanager"] %>
         ports:
         - containerPort: 8081
         env:
