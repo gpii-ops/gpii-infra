@@ -12,13 +12,25 @@ end
 
 DEFAULT_PREREQS_DIR = "../prereqs/#{ENV["RAKE_ENV_SHORT"]}"
 
-desc "[ADVANCED] Change the EBS Volume used by CouchDB, e.g after restoring from a Snapshot"
-task :import_couchdb_volume, [:new_volumd_id] do |taskname, args|
+desc "[ADVANCED] Change the EBS Volume used by CouchDB in us-east-2a, e.g after restoring from a Snapshot"
+task :import_couchdb_us_east_2a_volume, [:new_volumd_id] do |taskname, args|
+  Rake::Task["_import_couchdb_volume"].invoke(args[:new_volumd_id], "us-east-2a")
+end
+
+desc "[ADVANCED] Change the EBS Volume used by CouchDB in us-east-2b, e.g after restoring from a Snapshot"
+task :import_couchdb_us_east_2b_volume, [:new_volumd_id] do |taskname, args|
+  Rake::Task["_import_couchdb_volume"].invoke(args[:new_volumd_id], "us-east-2b")
+end
+
+task :_import_couchdb_volume, [:new_volumd_id, :availability_zone] do |taskname, args|
   unless args[:new_volumd_id]
     raise "Argument :new_volume_id is required."
   end
+  unless args[:availability_zone]
+    raise "Argument :availability_zone is required."
+  end
   sh "cd #{DEFAULT_PREREQS_DIR}/volume && TMPDIR=#{@tmpdir_prereqs} \
-    terragrunt state rm aws_ebs_volume.couchdb"
+    terragrunt state rm aws_ebs_volume.couchdb_#{args[:availability_zone]}"
   sh "cd #{DEFAULT_PREREQS_DIR}/volume && TMPDIR=#{@tmpdir_prereqs} \
-    terragrunt import aws_ebs_volume.couchdb #{args[:new_volumd_id]}"
+    terragrunt import aws_ebs_volume.couchdb_#{args[:availability_zone]} #{args[:new_volumd_id]}"
 end

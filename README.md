@@ -119,9 +119,15 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
    * Don't worry about changing Name or other Tags. Terraform will add them shortly.
    * Note the Volume ID of the new Volume.
 1. For clarity, rename the old Volume. Prepend something like `REPLACED WITH vol-ffedcba BY MRTYLER 2017-10-06`.
-1. `cd dev && rake import_couchdb_volume[vol-0123456789abcdeff]`. Use the new Volume ID from earlier.
-1. Relaunch the Pod so that the component starts using the new Volume: Kubernetes Dashboard `->` Pods `->` (find in list) `->` ... Menu on right `->` Delete. Or, `kubectl delete pods -l app=couchdb`
-1. Relaunch the k8s-snapshots Pod. Otherwise it will continue to back up the old Volume.
+1. `cd dev && rake import_couchdb_us_east_2a_volume[vol-0123456789abcdeff]`. Use the new Volume ID from earlier.
+1. Delete all affected resources so that the component starts using the new Volume: Kubernetes Dashboard `->` Workloads (or whatever) `->` (find in list) `->` ... Menu on right `->` Delete. Or, use `kubectl delete`.
+   * At this point, the health of the cluster will be impacted until it re-converges with the new Volume in place.
+   * Affected resources include anything that touches the Volume:
+      * The Persistent Volume and Persistent Volume Claim associated with the Volume
+         * Do this first so that anything relying on the Volume won't re-attach to the old Volume before the new one is in place.
+      * The Pod attached to the Volume
+1. Run `rake` in the appropriate environment directory to re-deploy the resources you just deleted.
+1. Relaunch the k8s-snapshots Pod (delete and let the Replica Set respawn it). It will continue to back up the old Volume until you do.
    * Also, Snapshots for the old Volume will not be expired automatically. They will need to be managed by hand.
 
 #### Hack: Adding data to CouchDB
