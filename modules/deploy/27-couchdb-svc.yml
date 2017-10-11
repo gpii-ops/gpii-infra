@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: couchdb-lb
+  name: couchdb
   labels:
     app: couchdb
     project: gpii
