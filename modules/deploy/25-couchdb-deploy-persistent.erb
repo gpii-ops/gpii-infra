@@ -1,25 +1,114 @@
-# NOTE! This file is generated!
-
 apiVersion: apps/v1beta1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: couchdb
+  labels:
+    app: couchdb
+    project: gpii
+    environment: production
 spec:
-  replicas: 1
+  serviceName: couchdb
+  replicas: 3
   template:
     metadata:
       labels:
         app: couchdb
+        project: gpii
+        environment: production
     spec:
+      terminationGracePeriodSeconds: 30
       containers:
       - name: couchdb
-        image: couchdb:1
+        image: gpii/couchdb:latest
+        env:
+        - name: COUCHDB_USER
+          value: <%= @devsecrets["couchdb_dev_user"] %>
+          # 
+          # The username should come from a Secret variable
+          #
+          # valueFrom:
+          #   secretKeyRef:
+          #     name: couchdb-creds
+          #     key: couchdb.user
+        - name: COUCHDB_PASSWORD
+          value: <%= @devsecrets["couchdb_dev_password"] %>
+          # 
+          # The password should come from a Secret variable
+          #
+          # valueFrom:
+          #   secretKeyRef:
+          #     name: couchdb-creds
+          #     key: couchdb.pass
+        #
+        # This is the database that is going to be created befor the
+        # replication for CouchDB 1.X is configured
+        #
+        # - name: INITIAL_DB
+        #   value: "preferences"
         ports:
-        - containerPort: 5984
+        - name: data
+          containerPort: 5984
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 5
+          timeoutSeconds: 2
+          successThreshold: 1
+          failureThreshold: 5
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          timeoutSeconds: 2
+          successThreshold: 1
+          failureThreshold: 5
         volumeMounts:
-        - mountPath: /usr/local/var/lib/couchdb
-          name: data
+        - name: couchdb-data
+          mountPath: /opt/couchdb/data
+        imagePullPolicy: Always
+      - name: healthz-ready
+        image: gpii/goss
+        imagePullPolicy: IfNotPresent
+        command:
+        - healthz
+        ports:
+        - name: healthz-ready
+          containerPort: 8080
+        volumeMounts:
+        - name: healthz
+          mountPath: /goss
+      - name: healthz-live
+        image: gpii/goss
+        imagePullPolicy: IfNotPresent
+        command:
+        - healthz
+        - liveness
+        ports:
+        - name: healthz-live
+          containerPort: 8081
+        volumeMounts:
+        - name: healthz
+          mountPath: /goss
+      - name: couchdiscover
+        image: amatas/couchdiscover
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: LOG_LEVEL
+          value: debug
       volumes:
-      - name: data
-        persistentVolumeClaim:
-          claimName: couchdb-us-east-2a-pvc
+      - name: config
+        emptyDir: {}
+      - name: healthz
+        configMap:
+          name: couchdb-healthz
+  volumeClaimTemplates:
+  - metadata:
+      name: couchdb-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
