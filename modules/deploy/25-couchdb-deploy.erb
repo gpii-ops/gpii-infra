@@ -85,6 +85,10 @@ spec:
     spec:
       accessModes:
       - ReadWriteOnce
+      storageClassName: gpii-default
       resources:
         requests:
           storage: 1Gi
+      selector:
+        matchLabels:
+          couchdb-pv: us-east
