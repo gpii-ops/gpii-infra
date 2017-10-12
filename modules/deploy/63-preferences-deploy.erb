@@ -20,6 +20,6 @@ spec:
         - name: NODE_ENV
           value: gpii.config.preferencesServer.standalone.production
         - name: GPII_PREFERENCES_DATASOURCE_URL
-          value: http://couchdb.default.svc.cluster.local:5984/preferences/%userToken
+          value: http://<%= @secrets[:couchdb_user] %>:<%= @secrets[:couchdb_password] %>@couchdb.default.svc.cluster.local:5984/preferences/%userToken
         - name: GPII_PREFERENCES_LISTEN_PORT
           value: '8081'

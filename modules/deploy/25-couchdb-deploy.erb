@@ -18,29 +18,9 @@ spec:
         image: gpii/couchdb:latest
         env:
         - name: COUCHDB_USER
-          value: <%= @devsecrets["couchdb_dev_user"] %>
-          # 
-          # The username should come from a Secret variable
-          #
-          # valueFrom:
-          #   secretKeyRef:
-          #     name: couchdb-creds
-          #     key: couchdb.user
+          value: <%= @secrets[:couchdb_user] %>
         - name: COUCHDB_PASSWORD
-          value: <%= @devsecrets["couchdb_dev_password"] %>
-          # 
-          # The password should come from a Secret variable
-          #
-          # valueFrom:
-          #   secretKeyRef:
-          #     name: couchdb-creds
-          #     key: couchdb.pass
-        #
-        # This is the database that is going to be created befor the
-        # replication for CouchDB 1.X is configured
-        #
-        # - name: INITIAL_DB
-        #   value: "preferences"
+          value: <%= @secrets[:couchdb_password] %>
         ports:
         - name: data
           containerPort: 5984

@@ -37,9 +37,21 @@ task :setup_versions do
   @versions = YAML.load(version_yml)
 end
 
-task :setup_devsecrets do
-  devsecrets_yml = File.read("./dev-secrets.yml")
-  @devsecrets = YAML.load(devsecrets_yml)
+task :setup_secrets do
+  @secrets = Hash.new
+  if not ENV["COUCHDB_USER"].nil?
+    @secrets[:couchdb_user] = ENV["COUCHDB_USER"]
+  else
+    puts "WARNING: setting 'couchdb_user' to default, don't use it at production"
+    @secrets[:couchdb_user] = "gpii"
+  end
+  if not ENV["COUCHDB_PASSWORD"].nil?
+    @secrets[:couchdb_password] = ENV["COUCHDB_PASSWORD"]
+  else
+    puts "WARNING: COUCHDB_PASSWORD env variable is not set, setting it to a random string"
+    require 'securerandom'
+    @secrets[:couchdb_password] = SecureRandom.hex
+  end
 end
  
 SOURCE_FILES = FileList.new("*.erb")
@@ -47,7 +59,7 @@ DEST_FILES = SOURCE_FILES.ext(".yml")
 DEST_FILES_WITH_PATH = SOURCE_FILES.ext(".yml").map { |f| File.join(DEPLOY_OUT_DIR, f) }
 
 desc "Generate GPII component configs for cluster"
-task :generate => [DEPLOY_OUT_DIR, "Rakefile", :setup_versions, :setup_devsecrets, :setup_prereqs_output] + DEST_FILES do
+task :generate => [DEPLOY_OUT_DIR, "Rakefile", :setup_versions, :setup_secrets, :setup_prereqs_output] + DEST_FILES do
   cp FileList.new("./*.yml"), "#{DEPLOY_OUT_DIR}/"
 end
 
