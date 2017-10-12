@@ -4,8 +4,6 @@ metadata:
   name: couchdb
   labels:
     app: couchdb
-    project: gpii
-    environment: production
 spec:
   serviceName: couchdb
   replicas: 2
@@ -13,8 +11,6 @@ spec:
     metadata:
       labels:
         app: couchdb
-        project: gpii
-        environment: production
     spec:
       terminationGracePeriodSeconds: 30
       containers:

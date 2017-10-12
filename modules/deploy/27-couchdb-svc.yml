@@ -4,16 +4,12 @@ metadata:
   name: couchdb
   labels:
     app: couchdb
-    project: gpii
-    environment: production
   annotations:
     service.alpha.kubernetes.io/tolerate-unready-endpoints: 'true'
 spec:
   clusterIP: None
   selector:
     app: couchdb
-    project: gpii
-    environment: production
   ports:
   - name: data
     port: 5984
