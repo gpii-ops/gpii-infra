@@ -39,25 +39,25 @@ end
 
 task :setup_secrets do
   @secrets = Hash.new
-  if not ENV["COUCHDB_USER"].nil?
-    @secrets[:couchdb_user] = ENV["COUCHDB_USER"]
-  else
+  if ENV["COUCHDB_USER"].nil?
     puts "WARNING: setting 'couchdb_user' to default, don't use it at production"
     @secrets[:couchdb_user] = "gpii"
-  end
-  if not ENV["COUCHDB_PASSWORD"].nil?
-    @secrets[:couchdb_password] = ENV["COUCHDB_PASSWORD"]
   else
+    @secrets[:couchdb_user] = ENV["COUCHDB_USER"]
+  end
+  if ENV["COUCHDB_PASSWORD"].nil?
     puts "WARNING: COUCHDB_PASSWORD env variable is not set, setting it to a random string"
     require 'securerandom'
     @secrets[:couchdb_password] = SecureRandom.hex
-  end
-  if not ENV["ERLANG_COOKIE"].nil?
-    @secrets[:erlang_cookie] = ENV["ERLANG_COOKIE"]
   else
+    @secrets[:couchdb_password] = ENV["COUCHDB_PASSWORD"]
+  end
+  if ENV["ERLANG_COOKIE"].nil?
     puts "WARNING: ERLANG_COOKIE env variable is not set, setting it to a random string"
     require 'securerandom'
     @secrets[:erlang_cookie] = SecureRandom.hex
+  else
+    @secrets[:erlang_cookie] = ENV["ERLANG_COOKIE"]
   end
 end
 
