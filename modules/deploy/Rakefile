@@ -52,8 +52,15 @@ task :setup_secrets do
     require 'securerandom'
     @secrets[:couchdb_password] = SecureRandom.hex
   end
+  if not ENV["ERLANG_COOKIE"].nil?
+    @secrets[:erlang_cookie] = ENV["ERLANG_COOKIE"]
+  else
+    puts "WARNING: ERLANG_COOKIE env variable is not set, setting it to a random string"
+    require 'securerandom'
+    @secrets[:erlang_cookie] = SecureRandom.hex
+  end
 end
- 
+
 SOURCE_FILES = FileList.new("*.erb")
 DEST_FILES = SOURCE_FILES.ext(".yml")
 DEST_FILES_WITH_PATH = SOURCE_FILES.ext(".yml").map { |f| File.join(DEPLOY_OUT_DIR, f) }

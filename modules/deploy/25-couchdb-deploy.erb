@@ -21,6 +21,8 @@ spec:
           value: <%= @secrets[:couchdb_user] %>
         - name: COUCHDB_PASSWORD
           value: <%= @secrets[:couchdb_password] %>
+        - name: ERLANG_COOKIE
+          value: <%= @secrets[:erlang_cookie] %>
         ports:
         - name: data
           containerPort: 5984
