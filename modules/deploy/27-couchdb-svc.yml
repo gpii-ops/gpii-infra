@@ -7,8 +7,6 @@ metadata:
   name: couchdb
   labels:
     app: couchdb
-  annotations:
-    service.alpha.kubernetes.io/tolerate-unready-endpoints: 'true'
 spec:
   clusterIP: None
   selector:
