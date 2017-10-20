@@ -6,7 +6,7 @@ metadata:
     app: couchdb
 spec:
   serviceName: couchdb
-  replicas: 2
+  replicas: <%= ENV["TF_VAR_cluster_name"].start_with?("stg.","prd.") ? '3' : '2' %>
   template:
     metadata:
       labels:
