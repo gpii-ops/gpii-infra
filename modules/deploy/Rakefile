@@ -1,5 +1,6 @@
 require "erb"
 require "rake/clean"
+require "securerandom"
 require "yaml"
 import "../../rakefiles/prereqs.rake"
 require_relative "../../rakefiles/terraform_output.rb"
@@ -47,14 +48,12 @@ task :setup_secrets do
   end
   if ENV["COUCHDB_PASSWORD"].nil?
     puts "WARNING: COUCHDB_PASSWORD env variable is not set, setting it to a random string"
-    require 'securerandom'
     @secrets[:couchdb_password] = SecureRandom.hex
   else
     @secrets[:couchdb_password] = ENV["COUCHDB_PASSWORD"]
   end
   if ENV["ERLANG_COOKIE"].nil?
     puts "WARNING: ERLANG_COOKIE env variable is not set, setting it to a random string"
-    require 'securerandom'
     @secrets[:erlang_cookie] = SecureRandom.hex
   else
     @secrets[:erlang_cookie] = ENV["ERLANG_COOKIE"]
