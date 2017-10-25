@@ -187,6 +187,19 @@ data='
 1. Before the restore: verify that the new record is present.
 1. After the restore: verify that the new record is no longer present.
 
+### I want to work on a different dev cluster
+
+**Note: this is an advanced / non-standard workflow.** There aren't a lot of guard rails to prevent you from making a mistake. User discretion is advised.
+
+Examples of when you might want to do this:
+* (Most common) Cleaning up when CI ends up with a broken `dev-gitlab-runner` cluster, e.g. the CI server reboots and orphans a Terraform lock.
+* Collaborating with another developer in their dev cluster.
+* Running multiple personal dev clusters (e.g. `dev-mrtyler-experiment1`).
+
+1. Prepend `USER=gitlab-runner TF_VAR_environment=dev-gitlab-runner` to all `rake` commands.
+   * Or, to add an additional dev cluster: `USER=mrtyler-experiment1 TF_VAR_environment=dev-mrtyler-experiment1`
+   * `TF_VAR_environment` must contain `USER` as above. Otherwise, behavior is undefined.
+
 ## Continuous Integration / Continuous Delivery
 
 See [CI-CD.md](CI-CD.md)
