@@ -112,23 +112,32 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 ### Restoring a volume from a backup/snapshot
 
 1. We use [k8s-snapshots](https://github.com/miracle2k/k8s-snapshots) to periodically snapshot Kubernetes Persistent Volumes.
-1. Find the Snapshot you want to restore: AWS Dashboard `->` EC2 `->` Snapshots.
-1. Create a new Volume from that Snapshot: Select Snapshot `->` Actions `->` Create Volume.
+1. If you are reading this because of a **real outage**:
+   * I'm sorry :( but know that everything will be ok! :)
+   * Consider when to shut down the affected resources:
+      * Waiting reduces downtime and may be a better choice if you will perform surgery to merge data accrued after the Snapshot was created.
+      * Doing it now reduces the potential delta between the existing Volumes and the new Volumes from Snapshots, but increases downtime.
+1. If you're ready, delete all affected resources so that the component stops using the old Volumes: Kubernetes Dashboard `->` Workloads (or whatever) `->` (find in list) `->` ... Menu on right `->` Delete. Or, use `kubectl delete`.
+   * At this point, the **health of the cluster will be impacted** until it re-converges with the new Volumes in place.
+   * Affected resources include anything that touches the Volumes:
+      * The Persistent Volumes and Persistent Volume Claims associated with the Volumes
+         * Delete these first so that anything relying on the Volumes won't re-attach to the old Volumes before the new ones are in place.
+      * The StatefulSet or Deployment that manage the Pods that are attached to the Volumes
+1. Find the set of Snapshots you want to restore: AWS Dashboard `->` EC2 `->` Snapshots.
+   * We must restore all of the Volumes together. Otherwise, the cluster will perceive the new Volume as being out-of-date from the old Volumes and will sync (bad) data to the new Volume.
+1. Create a new Volume from each Snapshot: Select Snapshot `->` Actions `->` Create Volume.
    * Most defaults should be correct.
-   * Make sure to create the new Volume in the same Availability Zone as the old Volume.
+   * Make sure to create the new Volume in the **same Availability Zone** as the old Volume.
    * Don't worry about changing Name or other Tags. Terraform will add them shortly.
    * Note the Volume ID of the new Volume.
 1. For clarity, rename the old Volume. Prepend something like `REPLACED WITH vol-ffedcba BY MRTYLER 2017-10-06`.
-1. `cd dev && rake import_couchdb_us_east_2a_volume[vol-0123456789abcdeff]`. Use the new Volume ID from earlier.
-1. Delete all affected resources so that the component starts using the new Volume: Kubernetes Dashboard `->` Workloads (or whatever) `->` (find in list) `->` ... Menu on right `->` Delete. Or, use `kubectl delete`.
-   * At this point, the health of the cluster will be impacted until it re-converges with the new Volume in place.
-   * Affected resources include anything that touches the Volume:
-      * The Persistent Volume and Persistent Volume Claim associated with the Volume
-         * Do this first so that anything relying on the Volume won't re-attach to the old Volume before the new one is in place.
-      * The Pod attached to the Volume
+1. In the appropriate environment directory: `rake import_couchdb_volume[vol-0123456789abcdeff, us-east-9z]`.
+   * Use the new Volume ID from earlier.
+   * Use the Availability Zone you selected earlier.
+1. If you haven't deleted affected resources yet, delete them now (see above).
 1. Run `rake` in the appropriate environment directory to re-deploy the resources you just deleted.
-1. Relaunch the k8s-snapshots Pod (delete and let the Replica Set respawn it). It will continue to back up the old Volume until you do.
-   * Also, Snapshots for the old Volume will not be expired automatically. They will need to be managed by hand.
+1. Relaunch the k8s-snapshots Pod (delete and let the Replica Set respawn it). It will continue to back up the old Volume (and fail to back up the new Volume) until you do.
+1. Snapshots for the old Volume will not be expired automatically. They will need to be managed by hand.
 
 #### Hack: Adding data to CouchDB
 
