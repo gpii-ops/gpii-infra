@@ -29,6 +29,28 @@ task :generate_modules => [@tmpdir, :apply_prereqs] do
   end
 end
 
+desc "[ADVANCED] Delete a Terraform lock; use if you encounter 'Error acquiring the state lock'"
+task :force_unlock, [:id, :path] => @tmpdir do |taskname, args|
+  puts "NOTE: You must run `rake generate_modules` before running this task."
+  puts "I can't do it for you because it prevents me from deleting locks in prereqs, which are a prereq of running `rake generate_modules`."
+  puts "(Sorry about that.)"
+  unless args[:id]
+    raise "Argument :id is required. Get it from the error message ('Failed to unlock state')."
+  end
+  unless args[:path]
+    raise "Argument :path is required. Get it from the error message ('Failed to unlock state')."
+  end
+
+  # The goal is to reverse engineer the path in the repo from the path to the
+  # lock.
+  path_to_component = args[:path].dup
+  path_to_component.gsub!(%r{^gpii-terraform-state/}, "../")
+  path_to_component.gsub!(%r{/dev-[^/]+/}, "/dev/")
+  path_to_component.gsub!(%r{/terraform.tfstate$}, "")
+  puts "Calculated path_to_component '#{path_to_component}' from path '#{args[:path]}'."
+  sh "cd #{path_to_component} && terragrunt force-unlock -force #{args[:id]}"
+end
+
 task :find_zone_id => :setup_prereqs_output do
   @zone_id = @prereqs_output["cluster_dns_zone_id"]["value"]
 end
@@ -36,7 +58,7 @@ end
 task :wait_for_dns, [:hostname] => :find_zone_id do |taskname, args|
   # I tried to do the filtering in the aws cli with:
   #
-  # --max-items 1 --query\"ResourceRecordSets[?Name == '#{hostname}.']\"
+  # --max-items 1 --query\"ResourceRecordSets[?Name == '#{args[:hostname]}.']\"
   #
   # but I couldn't get it to work.
   wait_for("aws route53 list-resource-record-sets \

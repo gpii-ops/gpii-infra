@@ -80,12 +80,29 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 
 * Currently, this system builds everything in `us-east-2`. When inspecting cloud resources manually (e.g. via the AWS web dashboard), make sure this region is selected.
 * This system uses a lot of rapidly-evolving software. If a tool reports strange errors that look like incompatibilities, try downgrading to an earlier version. [ansible-gpii-ci-worker](https://github.com/idi-ops/ansible-gpii-ci-worker/) should always contain a working combination of versions -- see [defaults/main.yml](https://github.com/idi-ops/ansible-gpii-ci-worker/blob/master/defaults/main.yml)
-* Terraform uses [DynamoDB](https://aws.amazon.com/dynamodb/) for locking. An easy way to orphan a lock is to Ctrl-C out of Terraform in the middle of an operation. To delete the lock:
-   * From the component where you lost the lock: `terragrunt force-unlock anything`
-   * Terraform will tell you that `anything` doesn't match the lock ID and spit out a bunch of info including the correct lock ID.
-   * Copy this ID and: `terragrunt force-unlock <correct-lock-id>`
-   * You can also use the AWS web dashboard. Go to `DynamoDB -> Tables -> gpii-infra-lock-table -> Items`. Select the lock(s) for your environment `-> Actions -> Delete`.
 * The system -- terraform and kops, e.g. -- stores various kinds of state in S3. All environments share a single Bucket, but have separate Keys (directories, basically). If you are manipulating this state directly (experts only! but sometimes needed, e.g. to recover from upgrading to a non-backward compatible version of Terraform), take care to only make changes to the Keys related to your environment. Modifying the Bucket will affect other developers' environments as well as shared environments like `prd`!
+
+### Error acquiring the state lock
+
+Terraform uses [DynamoDB](https://aws.amazon.com/dynamodb/) for locking. An easy way to orphan a lock is to Ctrl-C out of Terraform in the middle of an operation. The error looks like this:
+
+```
+Error locking state: Error acquiring the state lock: ConditionalCheckFailedException: The conditional request failed
+        status code: 400, request id: FA9FPD3LLHMKMHPR4D7M73V303VV4KQNSO5AEMVJF66Q9ASUAAJG
+Lock Info:
+  ID:        c785778e-0b67-0bcf-88fd-8c03045a045b
+  Path:      gpii-terraform-state/dev-mrtyler/k8s/terraform.tfstate
+  Operation: OperationTypeApply
+  Who:       mrtyler@somehost
+  Version:   0.9.11
+  Created:   2017-10-25 01:58:19.820236816 +0000 UTC
+  Info:
+```
+
+To delete the lock:
+1. Find the ID and Path from the error message (see above)
+1. `rake "force_unlock[c785778e-0b67-0bcf-88fd-8c03045a045b, gpii-terraform-state/dev-mrtyler/k8s/terraform.tfstate]"`
+1. You can also use the AWS web dashboard. Go to `DynamoDB -> Tables -> gpii-infra-lock-table -> Items`. Select the lock(s) for your environment `-> Actions -> Delete`.
 
 ### My cluster is messed up and I just want to get rid of it so I can start over
 
