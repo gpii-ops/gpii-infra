@@ -100,6 +100,7 @@ Lock Info:
 ```
 
 To delete the lock:
+1. **Make sure the lock is really orphaned!** This is especially important in shared environments like `stg` where CI or other developers could be making changes. The `Who` value in the error message gives you a clue about this.
 1. Find the ID and Path from the error message (see above)
 1. `rake "force_unlock[c785778e-0b67-0bcf-88fd-8c03045a045b, gpii-terraform-state/dev-mrtyler/k8s/terraform.tfstate]"`
 1. You can also use the AWS web dashboard. Go to `DynamoDB -> Tables -> gpii-infra-lock-table -> Items`. Select the lock(s) for your environment `-> Actions -> Delete`.
