@@ -149,7 +149,8 @@ To delete the lock:
    * Don't worry about changing Name or other Tags. Terraform will add them shortly.
    * Note the Volume ID of the new Volume.
 1. For clarity, rename the old Volume. Prepend something like `REPLACED WITH vol-ffedcba BY MRTYLER 2017-10-06`.
-1. In the appropriate environment directory: `rake "import_couchdb_volume[vol-0123456789abcdeff, us-east-9z]"`.
+1. Determine the name of the component associated with this volume (e.g. `couchdb` for couchdb, `prometheus` for prometheus). Consult [modules/volume/vars.tf](modules/volume/vars.tf) if you're unsure.
+1. In the appropriate environment directory: `rake "import_volume[couchdb, vol-0123456789abcdeff, us-east-9z]"`.
    * Use the new Volume ID from earlier.
    * Use the Availability Zone you selected earlier.
 1. If you haven't deleted affected resources yet, delete them now (see above).
