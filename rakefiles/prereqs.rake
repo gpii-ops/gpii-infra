@@ -12,8 +12,11 @@ end
 
 DEFAULT_PREREQS_DIR = "../prereqs/#{ENV["RAKE_ENV_SHORT"]}"
 
-desc "[ADVANCED] Change the EBS Volume used by CouchDB, e.g after restoring from a Snapshot"
-task :import_couchdb_volume, [:new_volumd_id, :availability_zone] do |taskname, args|
+desc "[ADVANCED] Change the EBS Volume used by a component (couchdb, prometheus), e.g after restoring from a Snapshot"
+task :import_volume, [:component, :new_volumd_id, :availability_zone] do |taskname, args|
+  unless args[:component]
+    raise "Argument :component is required."
+  end
   unless args[:new_volumd_id]
     raise "Argument :new_volume_id is required."
   end
@@ -21,7 +24,7 @@ task :import_couchdb_volume, [:new_volumd_id, :availability_zone] do |taskname, 
     raise "Argument :availability_zone is required."
   end
   sh "cd #{DEFAULT_PREREQS_DIR}/volume && TMPDIR=#{@tmpdir_prereqs} \
-    terragrunt state rm aws_ebs_volume.couchdb_#{args[:availability_zone]}"
+    terragrunt state rm aws_ebs_volume.#{args[:component]}_#{args[:availability_zone]}"
   sh "cd #{DEFAULT_PREREQS_DIR}/volume && TMPDIR=#{@tmpdir_prereqs} \
-    terragrunt import aws_ebs_volume.couchdb_#{args[:availability_zone]} #{args[:new_volumd_id]}"
+    terragrunt import aws_ebs_volume.#{args[:component]}_#{args[:availability_zone]} #{args[:new_volumd_id]}"
 end
