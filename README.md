@@ -11,7 +11,7 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 1. Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
 1. Install [kops](https://github.com/kubernetes/kops#installing) **>= 1.7.1** (< 1.7.0 has a security vulnerability in dnsmasq).
 1. Install the [AWS CLI](http://docs.aws.amazon.com/cli/latest/userguide/installing.html).
-1. Install Ruby and [Bundler](http://bundler.io/) (for [kitchen](https://github.com/test-kitchen/test-kitchen) and [kitchen-terraform](https://github.com/newcontext-oss/kitchen-terraform)).
+1. Install Ruby **>=2.4.0** and [Bundler](http://bundler.io/) (for [kitchen](https://github.com/test-kitchen/test-kitchen) and [kitchen-terraform](https://github.com/newcontext-oss/kitchen-terraform)).
    * I like [rvm](https://rvm.io/) for ruby management.
    * If you're using a package manager, you may need to install "ruby-devel" as well.
 1. Install [rake](https://github.com/ruby/rake), probably via `gem install rake`.
@@ -28,6 +28,7 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 ### Configure SSH
 
 1. Get a copy of `id_rsa.gpii-ci` from `~deploy/.ssh` on `i40`. Put it at `~/.ssh/id_rsa.gpii-ci`.
+   * Alternately, if all you want is to test your own personal dev cluster, you can generate your own key and call it `~/.ssh/id_rsa.gpii-ci`. Remember that your "fake" key won't let you log into shared environments like `stg`, or allow other developers to ssh to your cluster's nodes.
    * The destination path is hardcoded into `.kitchen.yml` and the code responsible for provisioning instances.
    * The configuration process could create user accounts (there is already ansible code in the `ops` repo to do this) but for now we'll use this shared key.
 1. For ad-hoc debugging and ansible: `ssh-add ~/.ssh/id_rsa.gpii-ci`
@@ -141,8 +142,10 @@ To delete the lock:
       * The Persistent Volumes and Persistent Volume Claims associated with the Volumes
          * Delete these first so that anything relying on the Volumes won't re-attach to the old Volumes before the new ones are in place.
       * The StatefulSet or Deployment that manage the Pods that are attached to the Volumes
-1. Find the set of Snapshots you want to restore: AWS Dashboard `->` EC2 `->` Snapshots.
-   * We must restore all of the Volumes together. Otherwise, the cluster will perceive the new Volume as being out-of-date from the old Volumes and will sync (bad) data to the new Volume.
+         * Note that if you just delete a Pod, the StatefulSet or Deployment will respawn it automatically.
+1. Find the Snapshot or set of Snapshots you want to restore: AWS Dashboard `->` EC2 `->` Snapshots.
+   * For clusters that replicate data (e.g. couchdb), we must restore all of the Volumes together. Otherwise, the cluster will perceive the new Volume as being out-of-date from the old Volumes and will sync (bad) data to the new Volume.
+   * For "clusters" that don't replicate data (e.g. prometheus), we may wish to restore all of the Volumes together anyway to prevent inconsistency (e.g. Grafana graphs may be inconsistent if the backing Prometheus databases are out-of-sync).
 1. Create a new Volume from each Snapshot: Select Snapshot `->` Actions `->` Create Volume.
    * Most defaults should be correct.
    * Make sure to create the new Volume in the **same Availability Zone** as the old Volume.
@@ -150,12 +153,12 @@ To delete the lock:
    * Note the Volume ID of the new Volume.
 1. For clarity, rename the old Volume. Prepend something like `REPLACED WITH vol-ffedcba BY MRTYLER 2017-10-06`.
 1. Determine the name of the component associated with this volume (e.g. `couchdb` for couchdb, `prometheus` for prometheus). Consult [modules/volume/vars.tf](modules/volume/vars.tf) if you're unsure.
-1. In the appropriate environment directory: `rake "import_volume[couchdb, vol-0123456789abcdeff, us-east-9z]"`.
+1. In the appropriate environment directory: `rake "import_volume[some-component, vol-0123456789abcdeff, us-east-9z]"`.
    * Use the new Volume ID from earlier.
    * Use the Availability Zone you selected earlier.
-1. If you haven't deleted affected resources yet, delete them now (see above).
-1. Run `rake` in the appropriate environment directory to re-deploy the resources you just deleted.
-1. Relaunch the k8s-snapshots Pod (delete and let the Replica Set respawn it). It will continue to back up the old Volume (and fail to back up the new Volume) until you do.
+1. If you haven't yet deleted affected resources, delete them now (see above).
+1. Run `rake` in the appropriate environment directory (e.g `dev`) to re-deploy the resources you just deleted.
+1. Relaunch k8s-snapshots (delete the Pod and let the Replica Set respawn it). It will continue to back up the old Volume (and fail to back up the new Volume) until you do.
 1. Snapshots for the old Volume will not be expired automatically. They will need to be managed by hand.
 
 #### Hack: Adding data to CouchDB
@@ -201,6 +204,32 @@ Examples of when you might want to do this:
 1. Prepend `USER=gitlab-runner TF_VAR_environment=dev-gitlab-runner` to all `rake` commands.
    * Or, to add an additional dev cluster: `USER=mrtyler-experiment1 TF_VAR_environment=dev-mrtyler-experiment1`
    * `TF_VAR_environment` must contain `USER` as above. Otherwise, behavior is undefined.
+
+### I accidentally deleted my kops state from S3 [experimental]
+
+**Note: this is an advanced workflow and it is incomplete.** User discretion is advised.
+
+kops stores state in S3, so if you delete your cluster's entry in `s3://gpii-kubernetes-state`, you will be unable to use Kubernetes commands (`kops`, `kubectl`) to interact with your cluster. Thanks to S3 Bucket Versioning, you can recover from this by undeleting your cluster's folder (`s3://gpii-kubernetes-state/dev-mrtyler.gpii.net`).
+
+Here is an example that needs customization. Some notes:
+   * Inspired by [How to Undelete Files in Amazon S3](http://www.dmuth.org/node/1472/how-undelete-files-amazon-s3)
+   * The `grep '\tTrue'` is to find the latest version (in this case, the most recently deleted version) of a file
+   * The `grep` for datestamp limits the undelete to the last set of files that were deleted. This avoids undeleting really old files with slightly different auto-generated names (e.g. 6474602931679620185804047508.crt).
+
+```
+aws \
+  --region us-east-2 \
+  s3api list-object-versions \
+  --bucket gpii-kubernetes-state \
+  --prefix dev-mrtyler.gpii.net/ \
+  --output text \
+  | grep '\tTrue' \
+  | grep '\t2017-11-06T19' \
+  | awk \
+  '{print "aws --region us-east-2 s3api delete-object --bucket gpii-kubernetes-state --key """$3""" --version-id """$5""""}' \
+  > undelete.sh
+sh undelete.sh
+```
 
 ## Continuous Integration / Continuous Delivery
 
