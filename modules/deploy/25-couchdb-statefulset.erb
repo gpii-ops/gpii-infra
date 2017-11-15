@@ -1,0 +1,68 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: couchdb
+  labels:
+    app: couchdb
+spec:
+  serviceName: couchdb
+  replicas: <%= ENV["TF_VAR_cluster_name"].start_with?("stg.","prd.") ? '3' : '2' %>
+  template:
+    metadata:
+      labels:
+        app: couchdb
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: couchdb
+        image: gpii/couchdb:latest
+        env:
+        - name: COUCHDB_USER
+          value: <%= @secrets[:couchdb_user] %>
+        - name: COUCHDB_PASSWORD
+          value: <%= @secrets[:couchdb_password] %>
+        - name: ERLANG_COOKIE
+          value: <%= @secrets[:erlang_cookie] %>
+        ports:
+        - name: data
+          containerPort: 5984
+        readinessProbe:
+          httpGet:
+            path: /_up/
+            port: 5984
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
+          periodSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /_up/
+            port: 5984
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
+          periodSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        volumeMounts:
+        - name: couchdb-data
+          mountPath: /opt/couchdb/data
+      - name: couchdiscover
+        image: gpii/couchdiscover
+        imagePullPolicy: Always
+        env:
+        - name: LOG_LEVEL
+          value: debug
+  volumeClaimTemplates:
+  - metadata:
+      name: couchdb-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      storageClassName: gpii-default
+      resources:
+        requests:
+          storage: 1Gi
+      selector:
+        matchLabels:
+          couchdb-pv: us-east

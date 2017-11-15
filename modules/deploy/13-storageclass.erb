@@ -6,5 +6,6 @@ metadata:
   name: gpii-default
 provisioner: kubernetes.io/aws-ebs
 parameters:
+  type: "gp2"
   encrypted: "true"
 reclaimPolicy: Retain

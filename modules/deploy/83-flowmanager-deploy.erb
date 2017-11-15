@@ -5,7 +5,7 @@ kind: Deployment
 metadata:
   name: flowmanager
 spec:
-  replicas: 6
+  replicas: <%= ENV["TF_VAR_cluster_name"].start_with?("stg.","prd.") ? '6' : '2' %>
   template:
     metadata:
       labels:

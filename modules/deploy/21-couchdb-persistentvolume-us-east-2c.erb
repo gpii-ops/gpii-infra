@@ -3,13 +3,13 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: couchdb-us-east-2b-pv
+  name: couchdb-us-east-2c-pv
   annotations:
 <% if ENV["TF_VAR_cluster_name"].start_with? "stg." or ENV["TF_VAR_cluster_name"].start_with? "prd." %>
     backup.kubernetes.io/deltas: "PT15M PT60M PT4H PT24H"
 <% else %>
     backup.kubernetes.io/deltas: "PT5M PT15M PT45M"
-<% end %> 
+<% end %>   
   labels:
     couchdb-pv: us-east
 spec:
@@ -18,5 +18,5 @@ spec:
   accessModes:
     - ReadWriteOnce
   awsElasticBlockStore:
-    volumeID: <%= @prereqs_output["couchdb_us-east-2b_volume_id"]["value"] %>
+    volumeID: <%= @prereqs_output["couchdb_us-east-2c_volume_id"]["value"] %>
   storageClassName: gpii-default

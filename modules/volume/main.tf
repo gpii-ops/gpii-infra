@@ -19,3 +19,14 @@ resource "aws_ebs_volume" "couchdb_us-east-2b" {
     Terraform = true
   }
 }
+
+resource "aws_ebs_volume" "couchdb_us-east-2c" {
+  availability_zone = "us-east-2c"
+  size = 5
+  encrypted = true
+  tags {
+    Name = "${var.environment} couchdb us-east-2c pv"
+    Environment = "${var.environment}"
+    Terraform = true
+  }
+}
