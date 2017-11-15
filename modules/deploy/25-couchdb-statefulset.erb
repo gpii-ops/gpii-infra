@@ -28,61 +28,31 @@ spec:
           containerPort: 5984
         readinessProbe:
           httpGet:
-            path: /healthz
-            port: 8080
-          initialDelaySeconds: 5
-          timeoutSeconds: 1
-          periodSeconds: 1
-          successThreshold: 1
-          failureThreshold: 1
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 8081
+            path: /_up/
+            port: 5984
           initialDelaySeconds: 15
           timeoutSeconds: 1
-          periodSeconds: 1
+          periodSeconds: 5
           successThreshold: 1
-          failureThreshold: 1
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /_up/
+            port: 5984
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
+          periodSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
         volumeMounts:
         - name: couchdb-data
           mountPath: /opt/couchdb/data
-        imagePullPolicy: Always
-      - name: healthz-ready
-        image: gpii/goss
-        imagePullPolicy: IfNotPresent
-        command:
-        - healthz
-        ports:
-        - name: healthz-ready
-          containerPort: 8080
-        volumeMounts:
-        - name: healthz
-          mountPath: /goss
-      - name: healthz-live
-        image: gpii/goss
-        imagePullPolicy: IfNotPresent
-        command:
-        - healthz
-        - liveness
-        ports:
-        - name: healthz-live
-          containerPort: 8081
-        volumeMounts:
-        - name: healthz
-          mountPath: /goss
       - name: couchdiscover
         image: gpii/couchdiscover
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         env:
         - name: LOG_LEVEL
           value: debug
-      volumes:
-      - name: config
-        emptyDir: {}
-      - name: healthz
-        configMap:
-          name: couchdb-healthz
   volumeClaimTemplates:
   - metadata:
       name: couchdb-data
