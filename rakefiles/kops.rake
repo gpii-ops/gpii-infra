@@ -1,6 +1,6 @@
 task :configure_kops do
   ENV["S3_BUCKET"] = "gpii-kubernetes-state"
-  ENV["KOPS_STATE_STORE"] = "s3://#{ENV['S3_BUCKET']}"
+  ENV["KOPS_STATE_STORE"] = "s3://#{ENV["S3_BUCKET"]}"
 end
 
 desc "Configure kubectl to know about cluster"
@@ -10,9 +10,13 @@ end
 
 desc "[EXPERIMENTAL] [ADVANCED] Edit cluster using kops"
 task :kops_edit_cluster => [@tmpdir, :configure_kops] do
+  puts "Running 'kops edit cluster'"
   sh "kops edit cluster #{ENV["TF_VAR_cluster_name"]}"
   puts
-  puts "Here's what 'kops update cluster' will do:"
+  puts "Running 'kops edit cluster'"
+  sh "kops edit instancegroups nodes --name #{ENV["TF_VAR_cluster_name"]}"
+  puts
+  puts "Here's what 'kops update cluster' and 'kops rolling-update cluster' will do:"
   sh "kops update cluster #{ENV["TF_VAR_cluster_name"]} --target terraform"
   sh "kops rolling-update cluster #{ENV["TF_VAR_cluster_name"]}"
   puts
