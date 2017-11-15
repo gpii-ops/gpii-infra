@@ -23,7 +23,7 @@ rule "#{KOPS_OUT_DIR}/kubernetes.tf" do
         --channel=alpha \
         --kubernetes-version=1.8.0 \
         --node-count=3 \
-        --node-size=t2.micro \
+        --node-size=t2.medium \
         --master-size=t2.micro \
         --zones=us-east-2a,us-east-2b,us-east-2c \
         --master-zones=us-east-2a,us-east-2b,us-east-2c \
