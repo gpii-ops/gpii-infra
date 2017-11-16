@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   labels:
     k8s-app: prometheus-operator
+  #$#
   name: prometheus-operator
 spec:
   replicas: 1

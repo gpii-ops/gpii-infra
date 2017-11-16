@@ -9,4 +9,5 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: prometheus-operator
+  #$#
   namespace: default
