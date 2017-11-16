@@ -1,6 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  namespace: monitoring
   name: grafana-dashboards-0
 data:
   deployment-dashboard.json: |+
@@ -6027,8 +6028,6 @@ data:
         "basicAuth": false,
         "name": "prometheus",
         "type": "prometheus",
-        "url": "http://prometheus-k8s.default.svc:9090"
+        "url": "http://prometheus-k8s.monitoring.svc:9090"
     }
 ---
-#@# fix url above
-#@#"url": "http://prometheus-k8s.monitoring.svc"

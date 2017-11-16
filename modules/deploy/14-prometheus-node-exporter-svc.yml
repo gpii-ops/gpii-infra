@@ -4,6 +4,7 @@ metadata:
   labels:
     app: node-exporter
     k8s-app: node-exporter
+  namespace: monitoring
   name: node-exporter
 spec:
   type: ClusterIP
