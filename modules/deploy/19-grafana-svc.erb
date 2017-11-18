@@ -5,28 +5,37 @@ metadata:
   name: grafana
   labels:
     app: grafana
-  annotations:
-    dns.alpha.kubernetes.io/external: "grafana.<%= ENV["TF_VAR_cluster_name"] %>"
-  <% if ENV["TF_VAR_cluster_name"].start_with? "stg." %>
-    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
-    # Hardcoded reference to *.stg.gpii.net cert in ACM.
-    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:us-east-2:478785806711:certificate/6b326073-a2a2-4c92-b5b5-addd302ad79c"
-    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "http"
-  <% end %>
+###  annotations:
+###    dns.alpha.kubernetes.io/external: "grafana.<%= ENV["TF_VAR_cluster_name"] %>"
+###  <% if ENV["TF_VAR_cluster_name"].start_with? "stg." %>
+###    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
+###    # Hardcoded reference to *.stg.gpii.net cert in ACM.
+###    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:us-east-2:478785806711:certificate/6b326073-a2a2-4c92-b5b5-addd302ad79c"
+###    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "http"
+###  <% end %>
+###spec:
+###  selector:
+###    app: grafana
+###<% if ENV["TF_VAR_cluster_name"].start_with? "stg." or ENV["TF_VAR_cluster_name"].start_with? "prd." %>
+###  ports:
+###    - name: web
+###      protocol: TCP
+###      port: 443
+###      targetPort: 3000
+###<% else %>
+###  ports:
+###    - name: web
+###      protocol: TCP
+###      port: 80
+###      targetPort: 3000
+###<% end %>
+###  type: LoadBalancer # exposed externally
 spec:
   selector:
     app: grafana
-<% if ENV["TF_VAR_cluster_name"].start_with? "stg." or ENV["TF_VAR_cluster_name"].start_with? "prd." %>
+  type: ClusterIP
   ports:
-    - name: web
-      protocol: TCP
-      port: 443
-      targetPort: 3000
-<% else %>
-  ports:
-    - name: web
-      protocol: TCP
-      port: 80
-      targetPort: 3000
-<% end %>
-  type: LoadBalancer # exposed externally
+  - name: web
+    port: 3000
+    protocol: TCP
+    targetPort: web
