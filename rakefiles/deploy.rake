@@ -94,12 +94,27 @@ task :display_cluster_info do
   puts "AWS Dashboard Resource Group:"
   puts "  https://resources.console.aws.amazon.com/r/group#sharedgroup=%7B%22name%22%3A%22#{ ENV["TF_VAR_cluster_name"] }%22%2C%22regions%22%3A%22all%22%2C%22resourceTypes%22%3A%22all%22%2C%22tagFilters%22%3A%5B%7B%22key%22%3A%22KubernetesCluster%22%2C%22values%22%3A%5B%22#{ ENV["TF_VAR_cluster_name"] }%22%5D%7D%5D%7D"
   puts
+  puts "Prometheus:"
+  puts "  First! Run:"
+  puts "    kubectl --namespace monitoring port-forward prometheus-k8s-0 9090"
+  puts "  Or:"
+  puts "    kubectl --namespace monitoring port-forward prometheus-k8s-1 9091:9090"
+  puts "  Then:"
+  puts "    http://localhost:9090 or http://localhost:9091"
+  puts
+  puts "Grafana:"
+  puts "  First! Run:"
+  puts "    kubectl --namespace monitoring port-forward $(kubectl --namespace monitoring get pods -l 'app == grafana' -o name | sed -e 's,pods/,,g') 3000"
+  puts "  Then:"
+  puts "    http://localhost:3000"
+  puts "      user: admin"
+  puts "      pass: admin"
+  puts
   puts "Kubernetes Dashboard:"
   puts "  https://#{@api_hostname}/ui"
   puts "    user: admin"
   puts "    pass: `rake display_admin_password`"
   puts
-
 end
 
 task :find_gpii_components => :generate_modules do
