@@ -9,9 +9,10 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 1. Install [terraform](https://releases.hashicorp.com/terraform/) **< 0.10** (0.10 has significant architectural changes so I'm waiting on this (non backward-compatible) upgrade; also, kitchen-terraform doesn't support 0.10 yet).
 1. Install [terragrunt](https://github.com/gruntwork-io/terragrunt#install-terragrunt) **< 0.13** (0.13.0 doesn't work with terraform < 0.10 yet).
 1. Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
-1. Install [kops](https://github.com/kubernetes/kops#installing) **>= 1.7.1** (< 1.7.0 has a security vulnerability in dnsmasq).
+1. Install [kops](https://github.com/kubernetes/kops#installing) **>= 1.7.1** (<= 1.7.0 has a security vulnerability in dnsmasq).
 1. Install the [AWS CLI](http://docs.aws.amazon.com/cli/latest/userguide/installing.html).
-1. Install Ruby **>=2.4.0** and [Bundler](http://bundler.io/) (for [kitchen](https://github.com/test-kitchen/test-kitchen) and [kitchen-terraform](https://github.com/newcontext-oss/kitchen-terraform)).
+1. Install Ruby **==2.4.0** and [Bundler](http://bundler.io/) (for [kitchen](https://github.com/test-kitchen/test-kitchen) and [kitchen-terraform](https://github.com/newcontext-oss/kitchen-terraform)).
+   * There's nothing particularly special about this version. We could relax the constraint in Gemfile, but a single version for everyone is fine for now.
    * I like [rvm](https://rvm.io/) for ruby management.
    * If you're using a package manager, you may need to install "ruby-devel" as well.
 1. Install [rake](https://github.com/ruby/rake), probably via `gem install rake`.
@@ -27,15 +28,16 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 
 ### Configure SSH
 
-1. Get a copy of `id_rsa.gpii-ci` from `~deploy/.ssh` on `i40`. Put it at `~/.ssh/id_rsa.gpii-ci`.
-   * Alternately, if all you want is to test your own personal dev cluster, you can generate your own key and call it `~/.ssh/id_rsa.gpii-ci`. Remember that your "fake" key won't let you log into shared environments like `stg`, or allow other developers to ssh to your cluster's nodes.
+1. Get a copy of `id_rsa.gpii-ci` from `~deploy/.ssh` on `i40`. Put it at `~/.ssh/id_rsa.gpii-ci`, `chown` it to yourself, and `chmod 600` it.
    * The destination path is hardcoded into `.kitchen.yml` and the code responsible for provisioning instances.
+   * Alternately, if all you want is to test your own personal dev cluster, you can generate your own key and call it `~/.ssh/id_rsa.gpii-ci`. Remember that your "fake" key won't let you log into shared environments like `stg`, or allow other developers to ssh to your cluster's nodes.
    * The configuration process could create user accounts (there is already ansible code in the `ops` repo to do this) but for now we'll use this shared key.
 1. For ad-hoc debugging and ansible: `ssh-add ~/.ssh/id_rsa.gpii-ci`
 
 ### Provision an environment
 
-1. The first time this is run in a given AWS account, you will need to initialize an S3 bucket for remote state for kops:
+1. The first time this is run in a given AWS billing account, you will need to initialize an S3 bucket for remote state for kops:
+   * Billing account means "the Raising the Floor account", not "the TylerRoscoe 'account' (really an IAM User)". Skip this step if you are an RtF employee.
    * `aws s3api create-bucket --bucket gpii-kubernetes-state --region us-east-2 --create-bucket-configuration LocationConstraint=us-east-2`
    * `aws s3api put-bucket-versioning --bucket gpii-kubernetes-state --versioning-configuration Status=Enabled --region us-east-2`
 1. Clone this repo.
