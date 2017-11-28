@@ -79,6 +79,38 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 1. `rake destroy`
 1. `rake clobber`
 
+## What are all these environments?
+
+An "environment" describes a (more-or-less) self-contained cluster of machines running the GPII and its supporting infrastructure (e.g. monitoring, alerting, volume backups, etc.). There are a few types of environments, each with different purposes.
+
+### dev-$USER
+
+These are ephemeral environments, generally used by individual developers when working on the `gpii-infra` codebase or on cloud-based GPII components. An early phase of CI creates an ephemeral environment (`dev-gitlab-runner`) for integration testing.
+
+### stg
+
+This is a shared, long-lived environment for staging / pre-production. It aims to emulate `prd`, the production environment, as closely as possible.
+
+Deploying to `stg` verifies that the `gpii-infra` code that worked to create a `dev-$USER` environment from scratch also works to update a pre-existing environment. This is important since we generally don't want to destroy and re-create the production environment from scratch.
+
+Because `stg` emulates production, it will (in the future) allow us to run realistic end-to-end tests before deploying to `prd`.
+
+### prd
+
+This is the production environment which supports actual users of the GPII.
+
+Deploying to `prd` requires a [manual action](https://docs.gitlab.com/ce/ci/yaml/#manual-actions). This enables automated testing (CI) and a consistent deployment process (CD) while providing finer control over when changes are made to production (e.g. on a holiday weekend when no engineers are around).
+
+## SSL Certificates
+
+Long-lived environments (`stg`, `prd`) have wildcard SSL certificates (e.g. \*.stg.gpii.net) provided by [Amazon Certificate Manager](https://aws.amazon.com/certificate-manager/). Kubernetes manifests have hard-coded references to these certificates' ARNs.
+
+To create a new cert, [use ACM](http://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request.html).
+
+## Continuous Integration / Continuous Delivery
+
+See [CI-CD.md](CI-CD.md)
+
 ## Troubleshooting
 
 * Currently, this system builds everything in `us-east-2`. When inspecting cloud resources manually (e.g. via the AWS web dashboard), make sure this region is selected.
@@ -232,10 +264,6 @@ aws \
   > undelete.sh
 sh undelete.sh
 ```
-
-## Continuous Integration / Continuous Delivery
-
-See [CI-CD.md](CI-CD.md)
 
 ## Running manually in non-dev environments (stg, prd)
 
