@@ -3,6 +3,8 @@ stages:
   - dev
   - promote-to-stg
   - stg
+  - promote-to-prd
+  - prd
 
 setup:
   stage: setup
@@ -34,7 +36,7 @@ promote-to-stg:
   stage: promote-to-stg
   script:
     - export DATESTAMP="$(date -u '+%Y%m%d%H%M%S')"  # e.g. 20170603220542. Uses UTC.
-    - echo "$DATESTAMP"  # So it's visible in the log
+    - echo "DATESTAMP is $DATESTAMP"  # So it's visible in the log
     - git tag "deploy-stg-$DATESTAMP"
     # gitlab is not clever enough to clean up an added remote and git complains
     # if we add a remote that already exists.
@@ -47,3 +49,23 @@ stg:
     - cd stg
     - rake clobber
     - rake
+
+promote-to-prd:
+  stage: promote-to-prd
+  script:
+    - export DATESTAMP="$(date -u '+%Y%m%d%H%M%S')"  # e.g. 20170603220542. Uses UTC.
+    - echo "DATESTAMP is $DATESTAMP"  # So it's visible in the log
+    - git tag "deploy-prd-$DATESTAMP"
+    # gitlab is not clever enough to clean up an added remote and git complains
+    # if we add a remote that already exists.
+    - git remote | grep -q "^origin-rw" || git remote add origin-rw git@github.com:gpii-ops/gpii-infra
+    - git push --tags origin-rw
+
+prd:
+  stage: prd
+  script:
+    - cd prd
+    - rake clobber
+    - rake
+  when: manual
+  allow_failure: false
