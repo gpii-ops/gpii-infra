@@ -1,23 +1,24 @@
-# NOTE! This file is generated!
-
 apiVersion: v1
 kind: Service
 metadata:
   name: preferences
-  labels:
-    app: preferences
   annotations:
     dns.alpha.kubernetes.io/external: "preferences.<%= ENV["TF_VAR_cluster_name"] %>"
-  <% if ENV["TF_VAR_cluster_name"].start_with? "stg." %>
+  <% if ENV["TF_VAR_cluster_name"].start_with?("stg.", "prd.") %>
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "http"
     service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
+    <% if ENV["TF_VAR_cluster_name"].start_with? "stg." %>
     # Hardcoded reference to *.stg.gpii.net cert in ACM.
     service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:us-east-2:478785806711:certificate/6b326073-a2a2-4c92-b5b5-addd302ad79c"
-    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "http"
+    <% elsif ENV["TF_VAR_cluster_name"].start_with? "prd." %>
+    # Hardcoded reference to *.prd.gpii.net cert in ACM.
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:us-east-2:478785806711:certificate/d13ef7a5-be10-4cdc-b1d3-eaef6c25242f"
+    <% end %>
   <% end %>
 spec:
   selector:
     app: preferences
-<% if ENV["TF_VAR_cluster_name"].start_with? "stg." or ENV["TF_VAR_cluster_name"].start_with? "prd." %>
+<% if ENV["TF_VAR_cluster_name"].start_with?("stg.", "prd.") %>
   ports:
     - name: https
       protocol: TCP
