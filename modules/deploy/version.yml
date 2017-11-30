@@ -3,5 +3,5 @@
 
 flowmanager: "gpii/universal@sha256:6cfb83767a4d51d3582c33d10f2f4173e015d0c663590eeb2bebd30e370d7e63"
 infra-fake-component: "gpii/infra-fake-component@sha256:9582213a069ccf93f07d7c12a0478acbcc05f339b52207f24bd7197fb2c8ca91"
-preferences-dataloader: "gpii/preferences-dataloader@sha256:e9bbe06db48244b6169f11804cf653a59a096d322c98becb3f47452cdad5f714"
+preferences-dataloader: "gpii/preferences-dataloader@sha256:fa6928883c3d90e330e41cb30168e8aaf549a1f7c9cec61aa5f4aede69a4e6c3"
 preferences: "gpii/universal@sha256:6cfb83767a4d51d3582c33d10f2f4173e015d0c663590eeb2bebd30e370d7e63"
