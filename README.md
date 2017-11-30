@@ -36,10 +36,8 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 
 ### Provision an environment
 
-1. The first time this is run in a given AWS billing account, you will need to initialize an S3 bucket for remote state for kops:
-   * Billing account means "the Raising the Floor account", not "the TylerRoscoe 'account' (really an IAM User)". Skip this step if you are an RtF employee.
-   * `aws s3api create-bucket --bucket gpii-kubernetes-state --region us-east-2 --create-bucket-configuration LocationConstraint=us-east-2`
-   * `aws s3api put-bucket-versioning --bucket gpii-kubernetes-state --versioning-configuration Status=Enabled --region us-east-2`
+#### Usual workflow
+
 1. Clone this repo.
 1. `cd` into the `gpii-infra/dev/` directory.
 1. `bundle install --path vendor/bundle`
@@ -48,6 +46,26 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 1. When you are done with this environment: `rake destroy` and then `rake clobber`
 1. To see a list of other commands you can try: `rake -T`
 1. If something didn't work, see [Troubleshooting](#troubleshooting).
+
+#### One-time setup per AWS billing account
+
+Billing account means "the Raising the Floor account", not "the TylerRoscoe 'account' (really an IAM User)". Skip these steps if you are an RtF employee.
+
+##### Remote state
+
+1. Initialize an S3 bucket for kops remote state:
+   * `aws s3api create-bucket --bucket gpii-kubernetes-state --region us-east-2 --create-bucket-configuration LocationConstraint=us-east-2`
+   * `aws s3api put-bucket-versioning --bucket gpii-kubernetes-state --versioning-configuration Status=Enabled --region us-east-2`
+
+##### SSL Certificates
+
+Long-lived environments (`stg`, `prd`) have wildcard SSL certificates (e.g. \*.stg.gpii.net) provided by [Amazon Certificate Manager](https://aws.amazon.com/certificate-manager/). Kubernetes manifests have hard-coded references to these certificates' ARNs.
+
+1. To create a new cert, [use ACM](http://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request.html).
+
+##### EBS Volume encryption key
+
+TODO
 
 ### Manual testing
 
@@ -100,12 +118,6 @@ Because `stg` emulates production, it will (in the future) allow us to run reali
 This is the production environment which supports actual users of the GPII.
 
 Deploying to `prd` requires a [manual action](https://docs.gitlab.com/ce/ci/yaml/#manual-actions). This enables automated testing (CI) and a consistent deployment process (CD) while providing finer control over when changes are made to production (e.g. on a holiday weekend when no engineers are around).
-
-## SSL Certificates
-
-Long-lived environments (`stg`, `prd`) have wildcard SSL certificates (e.g. \*.stg.gpii.net) provided by [Amazon Certificate Manager](https://aws.amazon.com/certificate-manager/). Kubernetes manifests have hard-coded references to these certificates' ARNs.
-
-To create a new cert, [use ACM](http://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request.html).
 
 ## Continuous Integration / Continuous Delivery
 
