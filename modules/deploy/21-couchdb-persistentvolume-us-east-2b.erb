@@ -5,11 +5,13 @@ kind: PersistentVolume
 metadata:
   name: couchdb-us-east-2b-pv
   annotations:
-<% if ENV["TF_VAR_cluster_name"].start_with? "stg." or ENV["TF_VAR_cluster_name"].start_with? "prd." %>
-    backup.kubernetes.io/deltas: "PT15M PT60M PT4H PT24H"
-<% else %>
+  <% if ENV["TF_VAR_cluster_name"].start_with? "stg." %>
+    backup.kubernetes.io/deltas: "PT15M PT60M PT4H PT24H PT7D"
+  <% elsif ENV["TF_VAR_cluster_name"].start_with? "prd." %>
+    backup.kubernetes.io/deltas: "PT5M PT60M PT24H PT7D PT52W"
+  <% else %>
     backup.kubernetes.io/deltas: "PT5M PT15M PT45M"
-<% end %> 
+  <% end %>
   labels:
     couchdb-pv: us-east
 spec:
