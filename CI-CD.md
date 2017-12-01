@@ -21,6 +21,7 @@ This repo is designed to fit into a CI/CD scheme: new commits are automatically 
    * Import the `gpii-infra` repo from Github into the `gpii-ops` Gitlab organization.
       * In that repo, disable all Shared Runners.
       * Note the Registration Token for this project. You'll need to give it to Ansible later.
+   * [Schedule](https://docs.gitlab.com/ce/user/project/pipelines/schedules.html) a Nightly build of the `gpii-infra` project. This ensures the system is exercised regularly, even when there are no changes to the code base.
    * Create a role account `gpii-bot` for use by `gitlab-runner`. Add it to the `gpii-ops` Organization with `Master` permissions.
    * Associate the public key above (from Github) with the `gpii-bot` Gitlab account.
 
