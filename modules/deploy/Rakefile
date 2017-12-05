@@ -40,28 +40,43 @@ task :setup_versions do
 end
 
 task :setup_secrets do
+
+  secrets_filename = "#{ENV["TF_VAR_cluster_name"]}-secrets.yml"
+  begin
+    secrets_yml = File.read("../../modules/deploy/secrets/#{secrets_filename}")
+    @secrets_file = YAML.load(secrets_yml)
+  rescue Exception
+    puts "Secret file #{secrets_filename} for this deployment not found"
+    @secrets_file = Hash.new
+  end
+
   @secrets = Hash.new
-  if ENV["COUCHDB_USER"].nil?
+
+  if [nil, ''].include?(ENV["COUCHDB_USER"])
+    @secrets[:couchdb_user] = ENV["COUCHDB_USER"]
+  elsif [nil, ''].include?(@secrets_file["COUCHDB_USER"])
+    @secrets[:couchdb_user] = @secrets_file["COUCHDB_USER"]
+  else
     puts "WARNING: setting 'couchdb_user' to default, don't use it at production"
     @secrets[:couchdb_user] = "gpii"
-  else
-    @secrets[:couchdb_user] = ENV["COUCHDB_USER"]
   end
-  if ENV["COUCHDB_PASSWORD"].nil?
-    puts "WARNING: COUCHDB_PASSWORD env variable is not set, setting it to a random string"
-    # Temporarily disable generated token because lack of idempotence here breaks couchdb clients.
-    # @secrets[:couchdb_password] = SecureRandom.hex
-    @secrets[:couchdb_password] = "61c40de52c38b661e6c1a84978dc0d11"
-  else
+
+  if [nil, ''].include?(ENV["COUCHDB_PASSWORD"])
     @secrets[:couchdb_password] = ENV["COUCHDB_PASSWORD"]
-  end
-  if ENV["ERLANG_COOKIE"].nil?
-    puts "WARNING: ERLANG_COOKIE env variable is not set, setting it to a random string"
-    # Temporarily disable generated token because lack of idempotence here breaks couchdb clients.
-    # @secrets[:erlang_cookie] = SecureRandom.hex
-    @secrets[:erlang_cookie] = "8b31059de4e2e723725c10d0d04ad598"
+  elsif [nil, ''].include?(@secrets_file["COUCHDB_PASSWORD"])
+    @secrets[:couchdb_password] = @secrets_file["COUCHDB_PASSWORD"]
   else
+    puts "WARNING: COUCHDB_PASSWORD env variable is not set, setting it to a random string"
+    @secrets[:couchdb_password] = SecureRandom.hex
+  end
+
+  if [nil, ''].include?(ENV["ERLANG_COOKIE"])
     @secrets[:erlang_cookie] = ENV["ERLANG_COOKIE"]
+  elsif [nil, ''].include?(@secrets_file["ERLANG_COOKIE"])
+    @secrets[:erlang_cookie] = @secrets_file["ERLANG_COOKIE"]
+  else
+    puts "WARNING: ERLANG_COOKIE env variable is not set, setting it to a random string"
+    @secrets[:erlang_cookie] = SecureRandom.hex
   end
   if ENV["ALERTMANAGER_EMAIL_AUTH_PASSWORD"].nil?
     puts "WARNING: ALERTMANAGER_EMAIL_AUTH_PASSWORD is not set. Email notifications will be disabled."
