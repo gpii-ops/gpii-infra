@@ -21,7 +21,8 @@ rule "#{KOPS_OUT_DIR}/kubernetes.tf" do
       sh "kops create cluster \
         --name=#{ENV["TF_VAR_cluster_name"]} \
         --channel=alpha \
-        --kubernetes-version=1.8.0 \
+        --cloud-labels='Env=#{ENV["TF_VAR_environment"]}' \
+        --kubernetes-version=1.8.4 \
         --image=kope.io/k8s-1.7-debian-jessie-amd64-hvm-ebs-2017-07-28 \
         --node-count=3 \
         --node-size=t2.medium \
@@ -32,6 +33,35 @@ rule "#{KOPS_OUT_DIR}/kubernetes.tf" do
         --target=terraform \
         --out=#{KOPS_OUT_DIR} \
         --ssh-public-key=~/.ssh/id_rsa.gpii-ci.pub \
+      "
+      # Export the configuration to a yaml file
+      sh "kops get \
+        --name #{ENV["TF_VAR_cluster_name"]} \
+        -o yaml > #{KOPS_OUT_DIR}/cluster.yml \
+       "
+      # Merge yaml file with custom config
+      require 'yaml'
+      require 'erb'
+
+      def recurse_merge(a,b)
+        a.merge(b) do |_,x,y|
+          (x.is_a?(Hash) && y.is_a?(Hash)) ? recurse_merge(x,y) : y
+        end
+      end
+
+      current_settings = YAML.load(File.read("#{KOPS_OUT_DIR}/cluster.yml"))
+	  custom_settings = YAML.load(ERB.new(File.read("custom_cluster_settings.yml.erb")).result(binding))
+	  settings = recurse_merge(current_settings, custom_settings)
+	  File.open("#{KOPS_OUT_DIR}/cluster.yml", "w") do |file|
+        file.write(settings.to_yaml)
+      end
+
+      # Update the definition
+	  sh "kops replace -f #{KOPS_OUT_DIR}/cluster.yml"
+	  sh "kops update cluster \
+        --name=#{ENV["TF_VAR_cluster_name"]} \
+        --target=terraform \
+        --out=#{KOPS_OUT_DIR} \
       "
     else
       puts "Cluster #{ENV["TF_VAR_cluster_name"]} already exists."

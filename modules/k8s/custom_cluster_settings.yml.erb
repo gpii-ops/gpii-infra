@@ -1,0 +1,26 @@
+spec:
+  additionalPolicies:
+    master: |
+      [
+        {
+          "Effect": "Allow",
+          "Action": ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+          "Resource": ["*"]
+        }
+      ]
+    node: |
+      [
+        {
+          "Effect": "Allow",
+          "Action": ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+          "Resource": ["*"]
+        }
+      ]
+  docker:
+    logDriver: awslogs
+    logLevel: warn
+    logOpt:
+    - awslogs-region=us-east-2
+    - awslogs-group=<%= ENV["TF_VAR_cluster_name"]%>
+  iam:
+    legacy: true
