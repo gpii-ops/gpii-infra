@@ -60,6 +60,8 @@ promote-to-prd:
     # if we add a remote that already exists.
     - git remote | grep -q "^origin-rw" || git remote add origin-rw git@github.com:gpii-ops/gpii-infra
     - git push --tags origin-rw
+  when: manual
+  allow_failure: false
 
 prd:
   stage: prd
@@ -67,5 +69,3 @@ prd:
     - cd prd
     - rake clobber
     - rake
-  when: manual
-  allow_failure: false
