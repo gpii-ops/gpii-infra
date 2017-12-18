@@ -28,9 +28,10 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 
 ### Configure SSH
 
-1. Get a copy of `id_rsa.gpii-ci` from `~deploy/.ssh` on `i40`. Put it at `~/.ssh/id_rsa.gpii-ci`, `chown` it to yourself, and `chmod 600` it.
-   * The destination path is hardcoded into `.kitchen.yml` and the code responsible for provisioning instances.
-   * Alternately, if all you want is to test your own personal dev cluster, you can generate your own key and call it `~/.ssh/id_rsa.gpii-ci`. Remember that your "fake" key won't let you log into shared environments like `stg`, or allow other developers to ssh to your cluster's nodes.
+1. Place an SSH key you'd like to use at `~/.ssh/id_rsa.gpii-ci`
+   * Make sure the file is owned by you with `600` permissions.
+   * Using your own key is fine if all you want is to test your own personal dev cluster. However, remember that your "fake" key won't let you log into shared environments like `stg`, or allow other developers to ssh to your cluster's nodes. For those purposes, you'll need a copy of the "official" `id_rsa.gpii-ci` from `~deploy/.ssh` on `i40`.
+   * This path is hardcoded into `.kitchen.yml` and the code responsible for provisioning instances.
    * The configuration process could create user accounts (there is already ansible code in the `ops` repo to do this) but for now we'll use this shared key.
 1. For ad-hoc debugging and ansible: `ssh-add ~/.ssh/id_rsa.gpii-ci`
 
@@ -65,7 +66,21 @@ Long-lived environments (`stg`, `prd`) have wildcard SSL certificates (e.g. \*.s
 
 ##### EBS Volume encryption key
 
-TODO
+See https://github.com/ussjoin/gpii-backup-scripts#ec2-ebs-snapshot-replication.
+
+##### Alerts and notifications
+
+We use [Prometheus Alertmanager](https://github.com/prometheus/alertmanager), managed by [Prometheus Operator](https://github.com/coreos/prometheus-operator/) and some pieces from [kube-prometheus](https://github.com/coreos/prometheus-operator/tree/master/contrib/kube-prometheus), to handle alerts and notifications.
+
+1. Create a dedicated Gmail account (ours is `alertmanager@RtF`) for sending alerts.
+   * Log in to the account.
+   * Create a filter that sends all incoming mail (`to: alertmanager`) to the Trash.
+   * Create an [App Password](https://support.google.com/accounts/answer/185833?hl=en). Note that you'll need to temporarily enable 2-Step Verification (and successfully authenticate using that second factor) before you can create an App Password. Once the password is created, you can disable 2-Step Verification again.
+   * Add the App Password to [Gitlab](CI-CD.md#configure-gitlab-secret-variables).
+1. Create a dedicate Google Group (ours is `alerts@RtF`) to receive alerts and re-distribute them to Operations staff.
+   * Remove public access.
+   * Allow posts from the address you created above.
+   * Subscribe on-call personnel to this list.
 
 ### Manual testing
 
@@ -260,7 +275,7 @@ kops stores state in S3, so if you delete your cluster's entry in `s3://gpii-kub
 Here is an example that needs customization. Some notes:
    * Inspired by [How to Undelete Files in Amazon S3](http://www.dmuth.org/node/1472/how-undelete-files-amazon-s3)
    * The `grep '\tTrue'` is to find the latest version (in this case, the most recently deleted version) of a file
-   * The `grep` for datestamp limits the undelete to the last set of files that were deleted. This avoids undeleting really old files with slightly different auto-generated names (e.g. 6474602931679620185804047508.crt).
+   * The `grep` for datestamp limits the undelete to the last set of files that were deleted. This avoids undeleting really old files with slightly different auto-generated names (e.g. `6474602931679620185804047508.crt`).
 
 ```
 aws \

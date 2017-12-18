@@ -25,6 +25,12 @@ This repo is designed to fit into a CI/CD scheme: new commits are automatically 
    * Create a role account `gpii-bot` for use by `gitlab-runner`. Add it to the `gpii-ops` Organization with `Master` permissions.
    * Associate the public key above (from Github) with the `gpii-bot` Gitlab account.
 
+### Configure Gitlab Secret Variables
+
+Until we have better credential management (i.e. Vault integration), we fall back to that oldest of techniques: injection via environment variables stored in a safe place -- [Gitlab Secret Variables](https://gitlab.com/gpii-ops/gpii-infra/settings/ci_cd).
+
+Examples of things that get credentials this way include: CouchDB, Alertmanager. For an exhaustive list, see [`:setup_secrets`](https://github.com/gpii-ops/gpii-infra/blob/master/modules/deploy/Rakefile).
+
 ## Configure Docker Hub
 
    * Create a [Docker Hub](https://hub.docker.com) account `gpiibot` for use by `gitlab-runner`. Add it to the `Owners` group of the `gpii` Organization.
@@ -47,10 +53,15 @@ This repo is designed to fit into a CI/CD scheme: new commits are automatically 
 
 ## Running manually in non-dev environments (stg, prd)
 
+**Note: this is an advanced workflow.** User discretion is advised.
+
+**Note2: ESPECIALLY IF PRD IS INVOLVED!** Experts only! Work with a buddy!
+
 `dev-*` environments are built with code from `master`, but other environments (e.g. `stg`, `prd`) are controlled with version tags. The CD process handles versioning automatically, but in case manual intervention is required:
    * Make sure any local changes are committed or stashed (`git status`).
    * `git checkout $(git tag | grep ^deploy-stg- | sort | tail -1)`
    * `cd stg`
+   * If you will `rake deploy` (or just `rake`, as `rake deploy` is the default operation) or otherwise make changes to anything that uses credentials, you will need to manually configure your local environment. See [Configure Gitlab Secret Variables](#configure-gitlab-secret-variables).
    * `rake ...`
    * `git checkout master`
 

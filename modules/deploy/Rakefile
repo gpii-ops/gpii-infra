@@ -1,3 +1,4 @@
+require "base64"
 require "erb"
 require "rake/clean"
 require "securerandom"
@@ -62,6 +63,32 @@ task :setup_secrets do
   else
     @secrets[:erlang_cookie] = ENV["ERLANG_COOKIE"]
   end
+  if ENV["ALERTMANAGER_EMAIL_AUTH_PASSWORD"].nil?
+    puts "WARNING: ALERTMANAGER_EMAIL_AUTH_PASSWORD is not set. Email notifications will be disabled."
+    puts "For details on enabling these notifications, see:"
+    puts "  https://github.com/gpii-ops/gpii-infra/blob/master/CI-CD.md#configure-gitlab-secret-variables"
+  else
+    @secrets[:alertmanager_email_auth_password] = ENV["ALERTMANAGER_EMAIL_AUTH_PASSWORD"]
+  end
+  if ENV["ALERTMANAGER_SLACK_API_URL"].nil?
+    puts "WARNING: ALERTMANAGER_SLACK_API_URL is not set. Slack notifications will be disabled."
+    puts "For details on enabling these notifications, see:"
+    puts "  https://github.com/gpii-ops/gpii-infra/blob/master/CI-CD.md#configure-gitlab-secret-variables"
+  else
+    @secrets[:alertmanager_slack_api_url] = ENV["ALERTMANAGER_SLACK_API_URL"]
+  end
+end
+
+# Kubernetes Secrets are base64-encoded. Since the files we're encoding are
+# themselves ERBs (and I got weird results trying to interpolate an ERB
+# template from within an ERB template), we do this extra hop.
+task :setup_secrets_from_files => :setup_secrets do
+  @secrets_from_files = Hash.new
+  secrets_files = FileList.new("secrets/*.erb")
+  secrets_files.each do |f|
+    rendered = ERB.new(File.read(f)).result(binding)
+    @secrets_from_files[f] = Base64.strict_encode64(rendered)
+  end
 end
 
 SOURCE_FILES = FileList.new("*.erb")
@@ -69,7 +96,10 @@ DEST_FILES = SOURCE_FILES.ext(".yml")
 DEST_FILES_WITH_PATH = SOURCE_FILES.ext(".yml").map { |f| File.join(DEPLOY_OUT_DIR, f) }
 
 desc "Generate GPII component configs for cluster"
-task :generate => [DEPLOY_OUT_DIR, "Rakefile", :setup_versions, :setup_secrets, :setup_prereqs_output] + DEST_FILES do
+task :generate => \
+  [DEPLOY_OUT_DIR, "Rakefile", :setup_prereqs_output, :setup_versions, :setup_secrets, :setup_secrets_from_files] + \
+  DEST_FILES \
+do
   cp FileList.new("./*.yml"), "#{DEPLOY_OUT_DIR}/"
 end
 

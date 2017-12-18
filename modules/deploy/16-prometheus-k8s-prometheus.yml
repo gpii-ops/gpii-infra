@@ -8,15 +8,19 @@ metadata:
 spec:
   replicas: 2
   version: v2.0.0
-  retention: 14d
+  # Relies on user doing `kubectl port-forward`. Forces
+  # all links to what is typically the first instance in
+  # the StatefulSet.
+  externalUrl: http://localhost:9090
+  retention: 60d
   serviceAccountName: prometheus-k8s
   serviceMonitorSelector:
     matchExpressions:
     - {key: k8s-app, operator: Exists}
-###  ruleSelector:
-###    matchLabels:
-###      role: prometheus-rulefiles
-###      prometheus: k8s
+  ruleSelector:
+    matchLabels:
+      role: prometheus-rulefiles
+      prometheus: k8s
   storage:
     volumeClaimTemplate:
       metadata:
@@ -38,8 +42,8 @@ spec:
       # production use. This value is mainly meant for demonstration/testing
       # purposes.
       memory: 1Gi
-###  alerting:
-###    alertmanagers:
-###    - namespace: monitoring
-###      name: alertmanager-main
-###      port: web
+  alerting:
+    alertmanagers:
+    - namespace: monitoring
+      name: alertmanager-main
+      port: web

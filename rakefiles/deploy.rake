@@ -96,11 +96,15 @@ task :display_cluster_info do
   puts
   puts "Prometheus:"
   puts "  First! Run:"
-  puts "    kubectl --namespace monitoring port-forward prometheus-k8s-0 9090"
-  puts "  Or:"
-  puts "    kubectl --namespace monitoring port-forward prometheus-k8s-1 9091:9090"
+  puts "    kubectl --namespace monitoring port-forward prometheus-k8s-0 9090 (or k8s-1 and 9091:9090)"
   puts "  Then:"
   puts "    http://localhost:9090 or http://localhost:9091"
+  puts
+  puts "Alertmanager:"
+  puts "  First! Run:"
+  puts "    kubectl --namespace monitoring port-forward alertmanager-main-0 9093 (or main-1 and 9094:9093, or main-2 and 9095:9093)"
+  puts "  Then:"
+  puts "    http://localhost:9093 or http://localhost:9094 or http://localhost:9095"
   puts
   puts "Grafana:"
   puts "  First! Run:"
