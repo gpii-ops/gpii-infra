@@ -1,5 +1,7 @@
 require "rake/clean"
+require 'erb'
 require_relative "../../rakefiles/vars.rb"
+require_relative "../../rakefiles/helper_utils.rb"
 import "../../rakefiles/kops.rake"
 
 if ENV["RAKE_ENV_SHORT"].nil?
@@ -34,35 +36,29 @@ rule "#{KOPS_OUT_DIR}/kubernetes.tf" do
         --out=#{KOPS_OUT_DIR} \
         --ssh-public-key=~/.ssh/id_rsa.gpii-ci.pub \
       "
+
       # Export the configuration to a yaml file
       sh "kops get \
         --name #{ENV["TF_VAR_cluster_name"]} \
-        -o yaml > #{KOPS_OUT_DIR}/cluster.yml \
+        -o yaml > #{KOPS_OUT_DIR}/cluster-orig.yml \
        "
+ 
       # Merge yaml file with custom config
-      require 'yaml'
-      require 'erb'
-
-      def recurse_merge(a,b)
-        a.merge(b) do |_,x,y|
-          (x.is_a?(Hash) && y.is_a?(Hash)) ? recurse_merge(x,y) : y
-        end
-      end
-
-      current_settings = YAML.load(File.read("#{KOPS_OUT_DIR}/cluster.yml"))
-	  custom_settings = YAML.load(ERB.new(File.read("custom_cluster_settings.yml.erb")).result(binding))
-	  settings = recurse_merge(current_settings, custom_settings)
-	  File.open("#{KOPS_OUT_DIR}/cluster.yml", "w") do |file|
-        file.write(settings.to_yaml)
+      current_settings = File.read("#{KOPS_OUT_DIR}/cluster-orig.yml")
+      custom_settings = ERB.new(File.read("custom_cluster_settings.yml.erb")).result(binding)
+      settings = InfraUtils.merge_yaml(current_settings, custom_settings)
+      File.open("#{KOPS_OUT_DIR}/cluster.yml", "w") do |file|
+        file.write(settings)
       end
 
       # Update the definition
-	  sh "kops replace -f #{KOPS_OUT_DIR}/cluster.yml"
-	  sh "kops update cluster \
+      sh "kops replace -f #{KOPS_OUT_DIR}/cluster.yml"
+      sh "kops update cluster \
         --name=#{ENV["TF_VAR_cluster_name"]} \
         --target=terraform \
         --out=#{KOPS_OUT_DIR} \
       "
+
     else
       puts "Cluster #{ENV["TF_VAR_cluster_name"]} already exists."
       puts "If you want to change its configuration, you'll need to:"
