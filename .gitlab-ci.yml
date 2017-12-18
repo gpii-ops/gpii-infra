@@ -1,10 +1,17 @@
 stages:
+  - unit-tests
   - setup
   - dev
   - promote-to-stg
   - stg
   - promote-to-prd
   - prd
+
+unit-tests:
+  stage: unit-tests
+  script:
+    - cd rakefiles
+    - rake
 
 setup:
   stage: setup
