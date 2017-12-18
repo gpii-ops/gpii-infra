@@ -51,33 +51,31 @@ task :setup_secrets do
   end
 
   @secrets = Hash.new
+  @secrets[:couchdb_user] = "gpii"
+  @secrets[:couchdb_password] = SecureRandom.hex
+  @secrets[:erlang_cookie] = SecureRandom.hex
 
-  if [nil, ''].include?(ENV["COUCHDB_USER"])
-    @secrets[:couchdb_user] = ENV["COUCHDB_USER"]
-  elsif [nil, ''].include?(@secrets_file["COUCHDB_USER"])
+  unless [nil, ''].include?(@secrets_file["COUCHDB_USER"])
     @secrets[:couchdb_user] = @secrets_file["COUCHDB_USER"]
-  else
-    puts "WARNING: setting 'couchdb_user' to default, don't use it at production"
-    @secrets[:couchdb_user] = "gpii"
+  end
+  unless [nil, ''].include?(ENV["COUCHDB_USER"])
+    @secrets[:couchdb_user] = ENV["COUCHDB_USER"]
   end
 
-  if [nil, ''].include?(ENV["COUCHDB_PASSWORD"])
-    @secrets[:couchdb_password] = ENV["COUCHDB_PASSWORD"]
-  elsif [nil, ''].include?(@secrets_file["COUCHDB_PASSWORD"])
+  unless [nil, ''].include?(@secrets_file["COUCHDB_PASSWORD"])
     @secrets[:couchdb_password] = @secrets_file["COUCHDB_PASSWORD"]
-  else
-    puts "WARNING: COUCHDB_PASSWORD env variable is not set, setting it to a random string"
-    @secrets[:couchdb_password] = SecureRandom.hex
+  end
+  unless [nil, ''].include?(ENV["COUCHDB_PASSWORD"])
+    @secrets[:couchdb_password] = ENV["COUCHDB_PASSWORD"]
   end
 
-  if [nil, ''].include?(ENV["ERLANG_COOKIE"])
-    @secrets[:erlang_cookie] = ENV["ERLANG_COOKIE"]
-  elsif [nil, ''].include?(@secrets_file["ERLANG_COOKIE"])
+  unless[nil, ''].include?(@secrets_file["ERLANG_COOKIE"])
     @secrets[:erlang_cookie] = @secrets_file["ERLANG_COOKIE"]
-  else
-    puts "WARNING: ERLANG_COOKIE env variable is not set, setting it to a random string"
-    @secrets[:erlang_cookie] = SecureRandom.hex
   end
+  unless [nil, ''].include?(ENV["ERLANG_COOKIE"])
+    @secrets[:erlang_cookie] = ENV["ERLANG_COOKIE"]
+  end
+
   if ENV["ALERTMANAGER_EMAIL_AUTH_PASSWORD"].nil?
     puts "WARNING: ALERTMANAGER_EMAIL_AUTH_PASSWORD is not set. Email notifications will be disabled."
     puts "For details on enabling these notifications, see:"
