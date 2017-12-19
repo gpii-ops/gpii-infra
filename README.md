@@ -266,6 +266,20 @@ Examples of when you might want to do this:
    * Or, to add an additional dev cluster: `USER=mrtyler-experiment1 TF_VAR_environment=dev-mrtyler-experiment1`
    * `TF_VAR_environment` must contain `USER` as above. Otherwise, behavior is undefined.
 
+### I want to change Grafana dashboards or Alertmanager alerts [experimental]
+
+The manifests that control Grafana dashboards and Alertmanager alerts are copied from [kube-prometheus](https://github.com/coreos/prometheus-operator/tree/master/contrib/kube-prometheus) and then modified locally (e.g. a few more things in the `monitoring` namespace, different Service types).
+
+#### I want to update from the latest kube-prometheus
+
+Unfortunately, there's not a good automatic migration path. So I do this:
+
+1. From a clone of the prometheus-operator repo, `git log -p 6beaec7a.. -- contrib/kube-prometheus/manifests` to see what has changed.
+1. For any changed files, copy the manifest from kube-prometheus to the appropriate manifest in `modules/deploy` (the filenames are similar but slightly different).
+1. Review `git diff` to make sure no local changes will be clobbered.
+1. Update the revision above to reflect where the next updater should start looking.
+
+
 ### I accidentally deleted my kops state from S3 [experimental]
 
 **Note: this is an advanced workflow and it is incomplete.** User discretion is advised.
