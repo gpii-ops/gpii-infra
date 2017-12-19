@@ -21,7 +21,7 @@ spec:
     logLevel: warn
     logOpt:
     - awslogs-region=us-east-2
-    - awslogs-group=<%= ENV["TF_VAR_cluster_name"]%>
+    - awslogs-group=<%= ENV["TF_VAR_cluster_name"] %>
     - "tag='{{.Name}}'"
   iam:
     legacy: true
