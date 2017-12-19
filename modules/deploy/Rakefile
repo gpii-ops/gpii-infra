@@ -41,13 +41,12 @@ end
 
 task :setup_secrets do
 
-  secrets_filename = "#{ENV["TF_VAR_cluster_name"]}-secrets.yml"
+  saved_secrets_file_path = "../../modules/deploy/secrets/#{ENV["TF_VAR_cluster_name"]}-secrets.yml"
   begin
-    secrets_yml = File.read("../../modules/deploy/secrets/#{secrets_filename}")
-    @secrets_file = YAML.load(secrets_yml)
-  rescue Exception
-    puts "Secret file #{secrets_filename} for this deployment not found"
-    @secrets_file = Hash.new
+    @saved_secrets = YAML.load(File.read(saved_secrets_file_path))
+  rescue FileNotFound
+    puts "Secret file #{saved_secrets_file_path} for this deployment not found"
+    @saved_secrets = Hash.new
   end
 
   @secrets = Hash.new
@@ -55,22 +54,22 @@ task :setup_secrets do
   @secrets[:couchdb_password] = SecureRandom.hex
   @secrets[:erlang_cookie] = SecureRandom.hex
 
-  unless [nil, ''].include?(@secrets_file["COUCHDB_USER"])
-    @secrets[:couchdb_user] = @secrets_file["COUCHDB_USER"]
+  unless [nil, ''].include?(@saved_secrets["COUCHDB_USER"])
+    @secrets[:couchdb_user] = @saved_secrets["COUCHDB_USER"]
   end
   unless [nil, ''].include?(ENV["COUCHDB_USER"])
     @secrets[:couchdb_user] = ENV["COUCHDB_USER"]
   end
 
-  unless [nil, ''].include?(@secrets_file["COUCHDB_PASSWORD"])
-    @secrets[:couchdb_password] = @secrets_file["COUCHDB_PASSWORD"]
+  unless [nil, ''].include?(@saved_secrets["COUCHDB_PASSWORD"])
+    @secrets[:couchdb_password] = @saved_secrets["COUCHDB_PASSWORD"]
   end
   unless [nil, ''].include?(ENV["COUCHDB_PASSWORD"])
     @secrets[:couchdb_password] = ENV["COUCHDB_PASSWORD"]
   end
 
-  unless[nil, ''].include?(@secrets_file["ERLANG_COOKIE"])
-    @secrets[:erlang_cookie] = @secrets_file["ERLANG_COOKIE"]
+  unless[nil, ''].include?(@saved_secrets["ERLANG_COOKIE"])
+    @secrets[:erlang_cookie] = @saved_secrets["ERLANG_COOKIE"]
   end
   unless [nil, ''].include?(ENV["ERLANG_COOKIE"])
     @secrets[:erlang_cookie] = ENV["ERLANG_COOKIE"]
