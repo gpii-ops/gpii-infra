@@ -1,5 +1,5 @@
 resource "aws_cloudwatch_log_group" "main" {
-  name = "${var.environment}.gpii.net"
+  name = "${var.cluster_name}.gpii.net"
 
 # The logs shouldn't be removed between deployments, but we have to set the
 # scope in terraform to avoid issues at the 'detroy' step.
@@ -8,7 +8,7 @@ resource "aws_cloudwatch_log_group" "main" {
 #  }
 
   tags {
-    Environment = "${var.environment}"
+    Environment = "${var.cluster_name}"
     Terraform = true
   }
 }
