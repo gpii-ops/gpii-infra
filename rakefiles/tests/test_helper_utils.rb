@@ -1,12 +1,12 @@
 
-require_relative "helper_utils"
+require_relative "../helper_utils"
 require "test/unit"
 
 
 class TestHelperUtils < Test::Unit::TestCase
 
 
-  def test_yaml1
+  def test_yaml_subsittution
     str_a = <<~END_A
 ---
 one:
@@ -27,7 +27,7 @@ END_F
     assert_equal(str_final, InfraUtils.merge_yaml(str_a, str_b))
   end
 
-  def test_yaml2
+  def test_yaml_addition
     str_a = <<~END_A
 ---
 one:
@@ -48,7 +48,7 @@ END_F
     assert_equal(str_final, InfraUtils.merge_yaml(str_a, str_b))
   end
 
-  def test_yaml3
+  def test_yaml_kops_timestamp
     str_a = <<~END_A
 ---
 one:
@@ -70,7 +70,7 @@ END_F
     assert_equal(str_final, InfraUtils.merge_yaml(str_a, str_b))
   end
 
-  def test_yaml4
+  def test_yaml_use_first_block
     str_a = <<~END_A
 one:
   two: false
