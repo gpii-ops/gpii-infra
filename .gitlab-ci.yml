@@ -24,7 +24,7 @@ setup:
 unit-tests:
   stage: unit-tests
   script:
-    - cd rakefiles
+    - cd rakefiles/tests
     - rake
 
 dev:
