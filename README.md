@@ -279,7 +279,6 @@ Unfortunately, there's not a good automatic migration path. So I do this:
 1. Review `git diff` to make sure no local changes will be clobbered.
 1. Update the revision above to reflect where the next updater should start looking.
 
-
 ### I accidentally deleted my kops state from S3 [experimental]
 
 **Note: this is an advanced workflow and it is incomplete.** User discretion is advised.
