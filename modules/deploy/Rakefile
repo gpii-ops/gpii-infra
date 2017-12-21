@@ -50,9 +50,6 @@ task :setup_secrets do
   end
 
   @secrets = Hash.new
-  @secrets[:couchdb_user] = "gpii"
-  @secrets[:couchdb_password] = SecureRandom.hex
-  @secrets[:erlang_cookie] = SecureRandom.hex
 
   unless [nil, ''].include?(@saved_secrets["COUCHDB_USER"])
     @secrets[:couchdb_user] = @saved_secrets["COUCHDB_USER"]
@@ -74,6 +71,10 @@ task :setup_secrets do
   unless [nil, ''].include?(ENV["ERLANG_COOKIE"])
     @secrets[:erlang_cookie] = ENV["ERLANG_COOKIE"]
   end
+
+  @secrets[:couchdb_user] = "gpii" if [nil, ''].include?(@secrets[:couchdb_user])
+  @secrets[:couchdb_password] = SecureRandom.hex if [nil, ''].include?(@secrets[:couchdb_password])
+  @secrets[:erlang_cookie] = SecureRandom.hex if [nil, ''].include?(@secrets[:erlang_cookie])
 
   if ENV["ALERTMANAGER_EMAIL_AUTH_PASSWORD"].nil?
     puts "WARNING: ALERTMANAGER_EMAIL_AUTH_PASSWORD is not set. Email notifications will be disabled."
