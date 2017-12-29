@@ -5,9 +5,9 @@ metadata:
   name: prometheus-us-east-2b-pv
   annotations:
   <% if ENV["TF_VAR_cluster_name"].start_with? "stg." %>
-    backup.kubernetes.io/deltas: "PT15M PT60M PT4H PT24H PT7D"
+    backup.kubernetes.io/deltas: "PT15M PT60M PT4H PT24H P7D"
   <% elsif ENV["TF_VAR_cluster_name"].start_with? "prd." %>
-    backup.kubernetes.io/deltas: "PT5M PT60M PT24H PT7D PT52W"
+    backup.kubernetes.io/deltas: "PT5M PT60M PT24H P7D P52W"
   <% else %>
     backup.kubernetes.io/deltas: "PT5M PT15M PT45M"
   <% end %>
