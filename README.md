@@ -183,9 +183,6 @@ To delete the lock:
    * Check for orphaned IAM Roles using the AWS dashboard and delete them.
    * Delete `$TMPDIR/rake-tmp` (`rake clobber` should take care of this but just in case).
    * Delete `~/.terraform.d` and any directories in your `gpii-infra` sandbox named `.bundle`, `.kitchen`, or `.terraform`.
-
-#### After everything is cleaned up
-
 1. Run `rake _destroy` again afterwards to make sure Terraform agrees that all the old resources are gone and to clean up DNS entries.
 1. `rake clobber` - cleans up generated files.
 
@@ -253,6 +250,24 @@ data='
 1. Before the restore: verify that the new record is present.
 1. After the restore: verify that the new record is no longer present.
 
+### Increasing the size of a volume
+
+Uh-oh, the Persistent Volumes that back the database are getting full (or need more provisioned IOPS, or some other change to the configuration of the underlying Volume)!
+
+1. [This Amazon article](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-modify-volume.html) outlines the basic strategy.
+1. Our Persistent Volumes are managed by Terraform. Change the size there and `rake apply` to test in your dev environment. Commit and push and let CI make the change to other environments.
+1. Next we need to convince the running Node that the size has changed.
+   * An easy way is rebooting the Node. Depending on spare capacity in the Kubernetes cluster, this action is somewhat to very disruptive.
+   * Slightly slower and more labor intensive is [draining the Node](https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/) and then rebooting it. If there is adequate capacity in the Kubernetes cluster, this action is mostly non-disruptive for users although Pods will be restarted. If there is not adequate capcity, this action is still very disruptive.
+   * A very non-invasive but somewhat manual approach is described below.
+1. `ssh` to each Node running a component affected by the Volume size change (e.g. CouchDB or Prometheus Pods). The Dashboard, or `kubectl describe pod` and `kubectl describe node`, are helpful to discover where things are running.
+1. `lsblk` to verify that the block device itself reflects the updated size.
+1. Use the mounted path from `lsblk` above to verify the Pod is still seeing the old size: `sudo df -h /var/lib/kubelet/pods/fd14a296-e8c4-11e7-a320-02402b50a7f8/volumes/kubernetes.io~aws-ebs/prometheus-us-east-2c-pv`
+1. `growpart`, as recommended in the Amazon article above, does not work -- it insists on a partition number even though the provided block device (e.g. `/dev/xvdbw`) is itself a partition containing a filesystem (as you may verify with `file -s`).
+1. Force the mounted volume to re-calculate size: `sudo resize2fs /dev/xvdbg`
+1. Verify the Pod is now seeing the new size: `sudo df -h /var/lib/kubelet/pods/fd14a296-e8c4-11e7-a320-02402b50a7f8/volumes/kubernetes.io~aws-ebs/prometheus-us-east-2c-pv`
+1. It may be necessary to restart Pods to force them to notice the new size (Prometheus seems to need this once it has filled a disk). Use the Dashboard or `kubectl delete pod`.
+
 ### I want to work on a different dev cluster
 
 **Note: this is an advanced / non-standard workflow.** There aren't a lot of guard rails to prevent you from making a mistake. User discretion is advised.
@@ -277,7 +292,8 @@ Unfortunately, there's not a good automatic migration path. So I do this:
 1. From a clone of the prometheus-operator repo, `git log -p 6beaec7a.. -- contrib/kube-prometheus/manifests` to see what has changed.
 1. For any changed files, copy the manifest from kube-prometheus to the appropriate manifest in `modules/deploy` (the filenames are similar but slightly different).
 1. Review `git diff` to make sure no local changes will be clobbered.
-1. Update the revision above to reflect where the next updater should start looking.
+1. Update the `log -p` argument above to reflect where the next updater should start looking.
+1. `git commit`. In your log message, include the revision you pulled from upstream `kube-prometheus`.
 
 ### I accidentally deleted my kops state from S3 [experimental]
 
