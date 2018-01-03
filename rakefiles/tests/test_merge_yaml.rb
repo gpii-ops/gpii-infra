@@ -1,9 +1,9 @@
 
-require_relative "../helper_utils"
+require_relative "../merge_yaml"
 require "test/unit"
 
 
-class TestHelperUtils < Test::Unit::TestCase
+class TestMergeYaml < Test::Unit::TestCase
 
 
   def test_yaml_subsittution

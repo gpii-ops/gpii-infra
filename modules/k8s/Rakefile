@@ -1,7 +1,7 @@
 require "rake/clean"
 require 'erb'
 require_relative "../../rakefiles/vars.rb"
-require_relative "../../rakefiles/helper_utils.rb"
+require_relative "../../rakefiles/merge_yaml.rb"
 import "../../rakefiles/kops.rake"
 
 if ENV["RAKE_ENV_SHORT"].nil?
