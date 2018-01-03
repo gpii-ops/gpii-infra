@@ -44,8 +44,8 @@ task :setup_secrets do
   saved_secrets_file_path = "../../modules/deploy/secrets/#{ENV["TF_VAR_cluster_name"]}-secrets.yml"
   begin
     @saved_secrets = YAML.load(File.read(saved_secrets_file_path))
-  rescue FileNotFound
-    puts "Secret file #{saved_secrets_file_path} for this deployment not found"
+  rescue Errno::ENOENT => e
+    puts "Secret file #{saved_secrets_file_path} for this deployment not found: #{e}"
     @saved_secrets = Hash.new
   end
 
