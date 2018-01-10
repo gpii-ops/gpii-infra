@@ -1,5 +1,6 @@
 stages:
   - setup
+  - unit-tests
   - dev
   - promote-to-stg
   - stg
@@ -18,6 +19,12 @@ setup:
     - ruby --version
     - bundle version
     - rake --version
+
+unit-tests:
+  stage: unit-tests
+  script:
+    - cd rakefiles/tests
+    - rake
 
 dev:
   stage: dev

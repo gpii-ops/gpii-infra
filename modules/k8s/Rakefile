@@ -1,5 +1,7 @@
 require "rake/clean"
+require 'erb'
 require_relative "../../rakefiles/vars.rb"
+require_relative "../../rakefiles/merge_yaml.rb"
 import "../../rakefiles/kops.rake"
 
 if ENV["RAKE_ENV_SHORT"].nil?
@@ -21,6 +23,7 @@ rule "#{KOPS_OUT_DIR}/kubernetes.tf" do
       sh "kops create cluster \
         --name=#{ENV["TF_VAR_cluster_name"]} \
         --channel=alpha \
+        --cloud-labels='Env=#{ENV["TF_VAR_environment"]}' \
         --kubernetes-version=1.8.0 \
         --image=kope.io/k8s-1.7-debian-jessie-amd64-hvm-ebs-2017-07-28 \
         --node-count=3 \
@@ -33,6 +36,29 @@ rule "#{KOPS_OUT_DIR}/kubernetes.tf" do
         --out=#{KOPS_OUT_DIR} \
         --ssh-public-key=~/.ssh/id_rsa.gpii-ci.pub \
       "
+
+      # Export the configuration to a yaml file
+      sh "kops get \
+        --name #{ENV["TF_VAR_cluster_name"]} \
+        -o yaml > #{KOPS_OUT_DIR}/cluster-orig.yml \
+       "
+ 
+      # Merge yaml file with custom config
+      current_settings = File.read("#{KOPS_OUT_DIR}/cluster-orig.yml")
+      custom_settings = ERB.new(File.read("cluster-custom-settings.yml.erb")).result(binding)
+      settings = MergeYaml.merge_yaml(current_settings, custom_settings)
+      File.open("#{KOPS_OUT_DIR}/cluster.yml", "w") do |file|
+        file.write(settings)
+      end
+
+      # Update the definition
+      sh "kops replace -f #{KOPS_OUT_DIR}/cluster.yml"
+      sh "kops update cluster \
+        --name=#{ENV["TF_VAR_cluster_name"]} \
+        --target=terraform \
+        --out=#{KOPS_OUT_DIR} \
+      "
+
     else
       puts "Cluster #{ENV["TF_VAR_cluster_name"]} already exists."
       puts "If you want to change its configuration, you'll need to:"

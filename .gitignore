@@ -8,3 +8,4 @@ graph*.png
 tags
 test/inspec.lock
 vendor/
+modules/deploy/secrets/*-secrets.yml

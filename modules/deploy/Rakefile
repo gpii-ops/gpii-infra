@@ -40,29 +40,42 @@ task :setup_versions do
 end
 
 task :setup_secrets do
+
+  saved_secrets_file_path = "secrets/#{ENV["TF_VAR_cluster_name"]}-secrets.yml"
+  begin
+    @saved_secrets = YAML.load(File.read(saved_secrets_file_path))
+  rescue Errno::ENOENT => e
+    puts "Secret file #{saved_secrets_file_path} for this deployment not found: #{e}"
+    @saved_secrets = Hash.new
+  end
+
   @secrets = Hash.new
-  if ENV["COUCHDB_USER"].nil?
-    puts "WARNING: setting 'couchdb_user' to default, don't use it at production"
-    @secrets[:couchdb_user] = "gpii"
-  else
+
+  unless [nil, ''].include?(@saved_secrets["COUCHDB_USER"])
+    @secrets[:couchdb_user] = @saved_secrets["COUCHDB_USER"]
+  end
+  unless [nil, ''].include?(ENV["COUCHDB_USER"])
     @secrets[:couchdb_user] = ENV["COUCHDB_USER"]
   end
-  if ENV["COUCHDB_PASSWORD"].nil?
-    puts "WARNING: COUCHDB_PASSWORD env variable is not set, setting it to a random string"
-    # Temporarily disable generated token because lack of idempotence here breaks couchdb clients.
-    # @secrets[:couchdb_password] = SecureRandom.hex
-    @secrets[:couchdb_password] = "61c40de52c38b661e6c1a84978dc0d11"
-  else
+
+  unless [nil, ''].include?(@saved_secrets["COUCHDB_PASSWORD"])
+    @secrets[:couchdb_password] = @saved_secrets["COUCHDB_PASSWORD"]
+  end
+  unless [nil, ''].include?(ENV["COUCHDB_PASSWORD"])
     @secrets[:couchdb_password] = ENV["COUCHDB_PASSWORD"]
   end
-  if ENV["ERLANG_COOKIE"].nil?
-    puts "WARNING: ERLANG_COOKIE env variable is not set, setting it to a random string"
-    # Temporarily disable generated token because lack of idempotence here breaks couchdb clients.
-    # @secrets[:erlang_cookie] = SecureRandom.hex
-    @secrets[:erlang_cookie] = "8b31059de4e2e723725c10d0d04ad598"
-  else
+
+  unless[nil, ''].include?(@saved_secrets["ERLANG_COOKIE"])
+    @secrets[:erlang_cookie] = @saved_secrets["ERLANG_COOKIE"]
+  end
+  unless [nil, ''].include?(ENV["ERLANG_COOKIE"])
     @secrets[:erlang_cookie] = ENV["ERLANG_COOKIE"]
   end
+
+  @secrets[:couchdb_user] = "gpii" if [nil, ''].include?(@secrets[:couchdb_user])
+  @secrets[:couchdb_password] = SecureRandom.hex if [nil, ''].include?(@secrets[:couchdb_password])
+  @secrets[:erlang_cookie] = SecureRandom.hex if [nil, ''].include?(@secrets[:erlang_cookie])
+
   if ENV["ALERTMANAGER_EMAIL_AUTH_PASSWORD"].nil?
     puts "WARNING: ALERTMANAGER_EMAIL_AUTH_PASSWORD is not set. Email notifications will be disabled."
     puts "For details on enabling these notifications, see:"
@@ -99,7 +112,7 @@ desc "Generate GPII component configs for cluster"
 task :generate => \
   [DEPLOY_OUT_DIR, "Rakefile", :setup_prereqs_output, :setup_versions, :setup_secrets, :setup_secrets_from_files] + \
   DEST_FILES \
-do
+DO
   cp FileList.new("./*.yml"), "#{DEPLOY_OUT_DIR}/"
 end
 
