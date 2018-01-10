@@ -7,7 +7,6 @@ stages:
   - promote-to-prd
   - prd
 
-
 setup:
   stage: setup
   script:

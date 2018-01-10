@@ -1,4 +1,3 @@
-
 require_relative "../merge_yaml"
 require "test/unit"
 
@@ -6,7 +5,7 @@ require "test/unit"
 class TestMergeYaml < Test::Unit::TestCase
 
 
-  def test_yaml_subsittution
+  def test_yaml_substitution
     str_a = <<~END_A
 ---
 one:
@@ -24,7 +23,7 @@ one:
   two: false
   three: false
 END_F
-    assert_equal(str_final, InfraUtils.merge_yaml(str_a, str_b))
+    assert_equal(str_final, MergeYaml.merge_yaml(str_a, str_b))
   end
 
   def test_yaml_addition
@@ -45,7 +44,7 @@ one:
   two:
   - three: false
 END_F
-    assert_equal(str_final, InfraUtils.merge_yaml(str_a, str_b))
+    assert_equal(str_final, MergeYaml.merge_yaml(str_a, str_b))
   end
 
   def test_yaml_kops_timestamp
@@ -67,7 +66,7 @@ one:
   two:
   - three: false
 END_F
-    assert_equal(str_final, InfraUtils.merge_yaml(str_a, str_b))
+    assert_equal(str_final, MergeYaml.merge_yaml(str_a, str_b))
   end
 
   def test_yaml_use_first_block
@@ -89,6 +88,6 @@ one:
   two:
   - three: false
 END_F
-    assert_equal(str_final, InfraUtils.merge_yaml(str_a, str_b))
+    assert_equal(str_final, MergeYaml.merge_yaml(str_a, str_b))
   end 
 end

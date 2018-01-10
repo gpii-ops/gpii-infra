@@ -46,7 +46,7 @@ rule "#{KOPS_OUT_DIR}/kubernetes.tf" do
       # Merge yaml file with custom config
       current_settings = File.read("#{KOPS_OUT_DIR}/cluster-orig.yml")
       custom_settings = ERB.new(File.read("cluster-custom-settings.yml.erb")).result(binding)
-      settings = InfraUtils.merge_yaml(current_settings, custom_settings)
+      settings = MergeYaml.merge_yaml(current_settings, custom_settings)
       File.open("#{KOPS_OUT_DIR}/cluster.yml", "w") do |file|
         file.write(settings)
       end
