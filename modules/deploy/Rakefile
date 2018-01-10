@@ -112,7 +112,7 @@ desc "Generate GPII component configs for cluster"
 task :generate => \
   [DEPLOY_OUT_DIR, "Rakefile", :setup_prereqs_output, :setup_versions, :setup_secrets, :setup_secrets_from_files] + \
   DEST_FILES \
-DO
+do
   cp FileList.new("./*.yml"), "#{DEPLOY_OUT_DIR}/"
 end
 
