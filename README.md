@@ -260,7 +260,9 @@ data='
 Uh-oh, the Persistent Volumes that back the database are getting full (or need more provisioned IOPS, or some other change to the configuration of the underlying Volume)!
 
 1. [This Amazon article](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-modify-volume.html) outlines the basic strategy.
-1. Our Persistent Volumes are managed by Terraform. Change the size there and `rake apply` to test in your dev environment. Commit and push and let CI make the change to other environments.
+1. Our Persistent Volumes are managed by Terraform. Change the size there.
+1. Our Persistent Volume Claims are managed in `modules/deploy/`. Make changes there to match the changes in the Terraform code.
+1. `rake apply` to test in your dev environment. Commit and push and let CI make the change to other environments.
 1. Next we need to convince the running Node that the size has changed.
    * An easy way is rebooting the Node. Depending on spare capacity in the Kubernetes cluster, this action is somewhat to very disruptive.
    * Slightly slower and more labor intensive is [draining the Node](https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/) and then rebooting it. If there is adequate capacity in the Kubernetes cluster, this action is mostly non-disruptive for users although Pods will be restarted. If there is not adequate capcity, this action is still very disruptive.
