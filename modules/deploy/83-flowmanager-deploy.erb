@@ -1,6 +1,7 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
+  namespace: gpii
   name: flowmanager
 spec:
   replicas: <%= ENV["TF_VAR_cluster_name"].start_with?("stg.","prd.") ? '6' : '2' %>
@@ -18,6 +19,6 @@ spec:
         - name: NODE_ENV
           value: gpii.config.cloudBased.flowManager.production
         - name: GPII_FLOWMANAGER_PREFERENCES_URL
-          value: http://preferences.default.svc.cluster.local/preferences/%userToken
+          value: http://preferences.gpii.svc.cluster.local/preferences/%userToken
         - name: GPII_FLOWMANAGER_LISTEN_PORT
           value: '8081'

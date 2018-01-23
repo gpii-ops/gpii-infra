@@ -1,19 +1,20 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: couchdb-dataloader
+  namespace: gpii
+  name: preferences-dataloader
 spec:
   template:
     metadata:
       labels:
-        app: couchdb-dataloader
+        app: preferences-dataloader
     spec:
       containers:
-      - name: couchdb-dataloader
+      - name: preferences-dataloader
         image: <%= @versions["preferences-dataloader"] %>
         env:
         - name: COUCHDB_URL
-          value: http://<%= @secrets[:couchdb_user] %>:<%= @secrets[:couchdb_password] %>@couchdb-lb.default.svc.cluster.local:5984/preferences
+          value: http://<%= @secrets[:couchdb_user] %>:<%= @secrets[:couchdb_password] %>@couchdb-lb.gpii.svc.cluster.local:5984/preferences
         - name: CLEAR_INDEX
           value: 'true'
       restartPolicy: OnFailure

@@ -1,6 +1,7 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
+  namespace: gpii
   name: preferences
 spec:
   replicas: <%= ENV["TF_VAR_cluster_name"].start_with?("stg.","prd.") ? '6' : '2' %>
@@ -18,6 +19,6 @@ spec:
         - name: NODE_ENV
           value: gpii.config.preferencesServer.standalone.production
         - name: GPII_PREFERENCES_DATASOURCE_URL
-          value: http://<%= @secrets[:couchdb_user] %>:<%= @secrets[:couchdb_password] %>@couchdb-lb.default.svc.cluster.local:5984/preferences/%userToken
+          value: http://<%= @secrets[:couchdb_user] %>:<%= @secrets[:couchdb_password] %>@couchdb-lb.gpii.svc.cluster.local:5984/preferences/%userToken
         - name: GPII_PREFERENCES_LISTEN_PORT
           value: '8081'

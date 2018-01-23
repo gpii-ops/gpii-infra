@@ -1,6 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: gpii
   name: preferences
   annotations:
     dns.alpha.kubernetes.io/external: "preferences.<%= ENV["TF_VAR_cluster_name"] %>"

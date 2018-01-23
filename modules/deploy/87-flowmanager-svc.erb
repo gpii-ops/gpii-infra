@@ -1,6 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: gpii
   name: flowmanager
   annotations:
     dns.alpha.kubernetes.io/external: "flowmanager.<%= ENV["TF_VAR_cluster_name"] %>"
