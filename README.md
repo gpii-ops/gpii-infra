@@ -87,9 +87,14 @@ We use [Prometheus Alertmanager](https://github.com/prometheus/alertmanager), ma
 #### The Kubernetes dashboard
 
 1. Go to `https://api.<your cluster name>.gpii.net/ui`
-   * Login is `admin`.
-   * Get the password from `rake display_admin_password`.
+   * First you will authenticate to the API server.
+      * Login is `admin`.
+      * Get the password from `rake display_admin_password`.
+   * Then you will authenticate to the Dashboard itself.
+      * Select `Token`.
+      * Token is the password from `rake display_admin_password`.
 1. Click "Workloads" for a good overview of what's happening in the cluster.
+1. Select "All namespaces" under "Namespace" for best results.
 
 #### On the local machine
 

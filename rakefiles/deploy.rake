@@ -133,7 +133,7 @@ end
 desc "Deploy GPII components to existing cluster without creating/updating infrastructure"
 task :deploy_only => [:configure_kubectl, :find_gpii_components] do
   extra_components = [
-    "https://raw.githubusercontent.com/kubernetes/kops/master/addons/kubernetes-dashboard/v1.7.1.yaml",
+    "https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml",
   ]
   components = extra_components + @gpii_components
   components.each do |component|
