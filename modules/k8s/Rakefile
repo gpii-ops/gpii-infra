@@ -24,8 +24,7 @@ rule "#{KOPS_OUT_DIR}/kubernetes.tf" do
         --name=#{ENV["TF_VAR_cluster_name"]} \
         --channel=alpha \
         --cloud-labels='Env=#{ENV["TF_VAR_environment"]}' \
-        --kubernetes-version=1.8.0 \
-        --image=kope.io/k8s-1.7-debian-jessie-amd64-hvm-ebs-2017-07-28 \
+        --kubernetes-version=1.8.7 \
         --node-count=3 \
         --node-size=t2.medium \
         --master-size=t2.small \
