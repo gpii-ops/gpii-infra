@@ -6,12 +6,12 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 
 ### Install packages
 
-1. Install [terraform](https://releases.hashicorp.com/terraform/) **< 0.10** (0.10 has significant architectural changes so I'm waiting on this (non backward-compatible) upgrade; also, kitchen-terraform doesn't support 0.10 yet).
+1. Install [terraform](https://releases.hashicorp.com/terraform/) **< 0.10** (0.10+ has significant architectural changes so I'm waiting on this (non backward-compatible) upgrade; also, kitchen-terraform doesn't support 0.10 yet).
 1. Install [terragrunt](https://github.com/gruntwork-io/terragrunt#install-terragrunt) **< 0.13** (0.13.0 doesn't work with terraform < 0.10 yet).
 1. Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
-1. Install [kops](https://github.com/kubernetes/kops#installing) **== 1.7.1** (<= 1.7.0 has a security vulnerability in dnsmasq; >= 1.8.0 introduces some IAM changes we're not ready for).
+1. Install [kops](https://github.com/kubernetes/kops#installing) **==1.8.0**.
 1. Install the [AWS CLI](http://docs.aws.amazon.com/cli/latest/userguide/installing.html).
-1. Install Ruby **==2.4.0** and [Bundler](http://bundler.io/) (for [kitchen](https://github.com/test-kitchen/test-kitchen) and [kitchen-terraform](https://github.com/newcontext-oss/kitchen-terraform)).
+1. Install Ruby **==2.4.3** and [Bundler](http://bundler.io/) (for [kitchen](https://github.com/test-kitchen/test-kitchen) and [kitchen-terraform](https://github.com/newcontext-oss/kitchen-terraform)).
    * There's nothing particularly special about this version. We could relax the constraint in Gemfile, but a single version for everyone is fine for now.
    * I like [rvm](https://rvm.io/) for ruby management.
    * If you're using a package manager, you may need to install "ruby-devel" as well.
