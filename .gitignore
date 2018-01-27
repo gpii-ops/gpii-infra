@@ -1,11 +1,9 @@
 .*.sw?
 .bundle/
-.kitchen/
 .terraform/
 dev/terraform.tfstate*
 prereqs/dev/terraform.tfstate*
 graph*.png
 tags
-test/inspec.lock
 vendor/
 modules/deploy/secrets/*-secrets.yml
