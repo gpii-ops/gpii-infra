@@ -6,12 +6,12 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 
 ### Install packages
 
-1. Install [terraform](https://releases.hashicorp.com/terraform/) **< 0.10** (0.10+ has significant architectural changes so I'm waiting on this (non backward-compatible) upgrade; also, kitchen-terraform doesn't support 0.10 yet).
-1. Install [terragrunt](https://github.com/gruntwork-io/terragrunt#install-terragrunt) **< 0.13** (0.13.0 doesn't work with terraform < 0.10 yet).
+1. Install [terraform](https://releases.hashicorp.com/terraform/) ~> 0.11.
+1. Install [terragrunt](https://github.com/gruntwork-io/terragrunt#install-terragrunt) ~> 0.13.
 1. Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
 1. Install [kops](https://github.com/kubernetes/kops#installing) **==1.8.0**.
 1. Install the [AWS CLI](http://docs.aws.amazon.com/cli/latest/userguide/installing.html).
-1. Install Ruby **==2.4.3** and [Bundler](http://bundler.io/) (for [kitchen](https://github.com/test-kitchen/test-kitchen) and [kitchen-terraform](https://github.com/newcontext-oss/kitchen-terraform)).
+1. Install Ruby **==2.4.3** and [Bundler](http://bundler.io/)
    * There's nothing particularly special about this version. We could relax the constraint in Gemfile, but a single version for everyone is fine for now.
    * I like [rvm](https://rvm.io/) for ruby management.
    * If you're using a package manager, you may need to install "ruby-devel" as well.
@@ -31,7 +31,7 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 1. Place an SSH key you'd like to use at `~/.ssh/id_rsa.gpii-ci`
    * Make sure the file is owned by you with `600` permissions.
    * Using your own key is fine if all you want is to test your own personal dev cluster. However, remember that your "fake" key won't let you log into shared environments like `stg`, or allow other developers to ssh to your cluster's nodes. For those purposes, you'll need a copy of the "official" `id_rsa.gpii-ci` from `~deploy/.ssh` on `i40`.
-   * This path is hardcoded into `.kitchen.yml` and the code responsible for provisioning instances.
+   * This path is hardcoded into the code responsible for provisioning instances.
    * The configuration process could create user accounts (there is already ansible code in the `ops` repo to do this) but for now we'll use this shared key.
 1. For ad-hoc debugging and ansible: `ssh-add ~/.ssh/id_rsa.gpii-ci`
 
@@ -187,7 +187,7 @@ To delete the lock:
 1. Other stuff - a few more things to clean if you're still having problems.
    * Check for orphaned IAM Roles using the AWS dashboard and delete them.
    * Delete `$TMPDIR/rake-tmp` (`rake clobber` should take care of this but just in case).
-   * Delete `~/.terraform.d` and any directories in your `gpii-infra` sandbox named `.bundle`, `.kitchen`, or `.terraform`.
+   * Delete `~/.terraform.d` and any directories in your `gpii-infra` sandbox named `.bundle` or `.terraform`.
 1. Run `rake _destroy` again afterwards to make sure Terraform agrees that all the old resources are gone and to clean up DNS entries.
 1. `rake clobber` - cleans up generated files.
 
