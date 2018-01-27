@@ -22,7 +22,7 @@ end
 CLEAN << "#{ENV['HOME']}/.terragrunt"
 
 task :test_master do
-  sh "ssh -i ~/.ssh/id_rsa.gpii-ci -o StrictHostKeyChecking=no admin@api.#{ENV["TF_VAR_cluster_name"]} -- ping -c 1 8.8.8.8"
+  sh "ssh -i #{ENV["HOME"]}/.ssh/id_rsa.gpii-ci -o StrictHostKeyChecking=no admin@api.#{ENV["TF_VAR_cluster_name"]} -- ping -c 1 8.8.8.8"
 end
 
 desc "Destroy cluster"
