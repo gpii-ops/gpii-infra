@@ -2,7 +2,7 @@
 # separate terraform run.
 
 task :_apply_prereqs, [:dir, :tmpdir] do |taskname, args|
-  sh "cd #{args[:dir]} && TMPDIR=#{args[:tmpdir]} terragrunt apply-all --terragrunt-non-interactive"
+  sh "cd #{args[:dir]} && TMPDIR=#{args[:tmpdir]} terragrunt apply-all --terragrunt-non-interactive -auto-approve"
 end
 CLEAN << "#{@tmpdir_prereqs}/terragrunt"
 

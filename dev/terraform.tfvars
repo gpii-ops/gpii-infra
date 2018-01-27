@@ -18,7 +18,7 @@ terragrunt = {
 
       # Tell Terraform to do locking using DynamoDB. Terragrunt will
       # automatically create this table for you if it doesn't already exist.
-      lock_table = "gpii-terraform-lock-table"
+      dynamodb_table = "gpii-terraform-lock-table"
     }
   }
 }

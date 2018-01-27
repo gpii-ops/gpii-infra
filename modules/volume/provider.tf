@@ -5,5 +5,6 @@
 # it's empty when I try to call it. Maybe because I need a provider to run the
 # data stanza that would fill in these values?
 provider "aws" {
-  region     = "us-east-2"
+  version = "~> 1.7"
+  region = "us-east-2"
 }

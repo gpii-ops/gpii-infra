@@ -12,7 +12,7 @@ task :default => :deploy
 
 desc "Create or update cluster"
 task :apply => [@tmpdir, :generate_modules] do
-  sh "terragrunt apply-all --terragrunt-non-interactive"
+  sh "terragrunt apply-all --terragrunt-non-interactive -auto-approve"
   Rake::Task["wait_for_api_dns"].invoke
   puts "Waiting 60s to give local DNS a chance to catch up..."
   sleep 60
