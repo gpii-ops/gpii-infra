@@ -67,10 +67,6 @@ task :wait_for_dns, [:hostname] => :find_zone_id do |taskname, args|
   ")
 end
 
-# Technically it would be more correct to get the name of the API record
-# directly from the Terraform run that created the cluster (there is a
-# dedicated output for this, consumed by kitchen-terraform). This is
-# simpler, though.
 @api_hostname = "api.#{ENV['TF_VAR_cluster_name']}"
 
 desc "Wait until cluster has converged enough to create DNS records for API servers"

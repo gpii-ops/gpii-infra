@@ -12,15 +12,18 @@ task :default => :deploy
 
 desc "Create or update cluster"
 task :apply => [@tmpdir, :generate_modules] do
-  sh "bundle exec kitchen create -l debug"
-  sh "bundle exec kitchen converge -l debug"
+  sh "terragrunt apply-all --terragrunt-non-interactive"
   Rake::Task["wait_for_api_dns"].invoke
   puts "Waiting 60s to give local DNS a chance to catch up..."
   sleep 60
   Rake::Task["wait_for_api_dns_local"].invoke
-  sh "bundle exec kitchen verify -l debug"
+  Rake::Task["test_master"].invoke
 end
-CLEAN << "#{@tmpdir}/terragrunt"
+CLEAN << "#{ENV['HOME']}/.terragrunt"
+
+task :test_master do
+  sh "ssh -i ~/.ssh/id_rsa.gpii-ci -o StrictHostKeyChecking=no admin@api.#{ENV["TF_VAR_cluster_name"]} -- ping -c 1 8.8.8.8"
+end
 
 desc "Destroy cluster"
 task :destroy => [@tmpdir, :generate_modules, :undeploy] do
@@ -29,7 +32,7 @@ end
 
 desc "[ADVANCED] Helper for :destroy that ignores dependencies; useful for cleaning up malformed clusters."
 task :_destroy => @tmpdir do
-  sh "bundle exec kitchen destroy -l debug"
+  sh "terragrunt destroy-all --terragrunt-non-interactive"
   Rake::Task["kops_delete_cluster"].invoke
   Rake::Task["destroy_prereqs"].invoke
   Rake::Task["clean_modules"].invoke
