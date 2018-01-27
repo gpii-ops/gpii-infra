@@ -12,14 +12,14 @@ task :default => :deploy
 
 desc "Create or update cluster"
 task :apply => [@tmpdir, :generate_modules] do
-  sh "terragrunt apply-all --terragrunt-non-interactive -auto-approve"
+  sh "terragrunt apply-all --terragrunt-non-interactive"
   Rake::Task["wait_for_api_dns"].invoke
   puts "Waiting 60s to give local DNS a chance to catch up..."
   sleep 60
   Rake::Task["wait_for_api_dns_local"].invoke
   Rake::Task["test_master"].invoke
 end
-CLEAN << "#{@tmpdir}/terragrunt"
+CLEAN << "#{ENV['HOME']}/.terragrunt"
 
 task :test_master do
   sh "ssh -i ~/.ssh/id_rsa.gpii-ci -o StrictHostKeyChecking=no admin@api.#{ENV["TF_VAR_cluster_name"]} -- ping -c 1 8.8.8.8"

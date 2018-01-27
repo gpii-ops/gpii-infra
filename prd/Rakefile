@@ -12,13 +12,13 @@ task :default => :deploy
 
 desc "Create or update cluster"
 task :apply => [@tmpdir, :generate_modules] do
-  sh "terragrunt apply-all --terragrunt-non-interactive -auto-approve"
+  sh "terragrunt apply-all --terragrunt-non-interactive"
   Rake::Task["wait_for_api_dns"].invoke
   puts "Waiting 60s to give local DNS a chance to catch up..."
   sleep 60
   Rake::Task["wait_for_api_dns_local"].invoke
 end
-CLEAN << "#{@tmpdir}/terragrunt"
+CLEAN << "#{ENV['HOME']}/.terragrunt"
 
 desc "Destroy cluster"
 task :destroy => [@tmpdir, :generate_modules, :undeploy] do
