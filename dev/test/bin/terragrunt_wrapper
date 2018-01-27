@@ -46,6 +46,13 @@ if echo "$args" | grep -Eq -- "--dry-run\b" ; then
 fi
 SKIP_NEXT_APPLY_FILE="terragrunt_wrapper.skip_next_apply"
 
+# With '--version', terragrunt gets confused and fails to parse
+# --terragrunt-non-interactive (added below) as an argument to terraform, which
+# doesn't work. 'version' doesn't trigger this problem.
+if echo "$args" | grep -Eq -- "--version\b" ; then
+    args=$(echo "$args" | ruby -pe '$_.gsub! /--version(\b)/, "version\\2"')
+fi
+
 if echo "$args" | grep -Eq "\W-state(-out)*=" ; then
     state_dir=$(echo "$args" | ruby -pe '$_.gsub! /.*\W-state(-out)*=(\S+).*/, "\\2"')
     state_dir=$(dirname "$state_dir")
@@ -71,7 +78,7 @@ if echo "$args" | grep -Eq "\bapply\b" && [ -n "$state_dir" ] && [ -f "$state_di
     exit 0
 fi
 
-if echo "$args" | grep -Eq "\b(validate|plan|get|show)\b" ; then
+if echo "$args" | grep -Eq "\b(validate|plan|get|show|workspace)\b" ; then
     echo "terragrunt_wrapper: Skipping subcommand: $args"
     exit 0
 fi
@@ -83,7 +90,7 @@ args=$(echo "$args" \
     | ruby -pe '$_.gsub! /-state=\S*/, ""' \
 )
 
-cmd="terragrunt $args --terragrunt-non-interactive --terragrunt-source-update"
+cmd="terragrunt $args --terragrunt-tfpath /usr/local/bin/terraform --terragrunt-non-interactive --terragrunt-source-update"
 
 if echo "$cmd" | grep -Eq "\boutput-all\b" ; then
     cmd="$cmd --terragrunt-ignore-dependency-errors"

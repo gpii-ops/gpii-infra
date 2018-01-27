@@ -13,6 +13,12 @@ fail () {
     exit 1
 }
 
+echo -n "--version -> version..."
+out=$($base_cmd --version)
+echo "$out" | grep -Eq -- "\bversion" && success || fail "$out"
+echo -n "..."
+! echo "$out" | grep -q -- "--version" && success || fail "$out"
+
 echo -n "-state + -destroy -> create skip_next_apply..."
 tmp_state_dir="terragrunt_wrapper_test.tmp"
 skip_next_apply_file="terragrunt_wrapper.skip_next_apply"
@@ -53,6 +59,10 @@ echo -n "show -> skipped..."
 out=$($base_cmd show)
 echo $out | grep -q "Skipping subcommand:" && success || fail "$out"
 
+echo -n "workspace -> skipped..."
+out=$($base_cmd workspace)
+echo $out | grep -q "Skipping subcommand:" && success || fail "$out"
+
 echo -n "common args..."
 out=$($base_cmd whatever)
 echo $out | grep -q " --terragrunt-non-interactive" && success || fail "$out"
@@ -78,6 +88,7 @@ out=$($base_cmd whatever -state=/path/to/some/state)
 echo -n "output -> ignore-dependency-errors..."
 out=$($base_cmd output)
 echo $out | grep -q -- "--terragrunt-ignore-dependency-errors" && success || fail "$out"
+
 echo -n "-json -> jq..."
 out=$($base_cmd whatever -json)
 echo $out | grep -q "jq" && success || fail "$out"

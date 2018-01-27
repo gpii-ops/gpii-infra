@@ -1,7 +1,6 @@
 ---
 driver:
   name: terraform
-  cli: ./test/bin/terragrunt_wrapper
 
 provisioner:
   name: terraform
