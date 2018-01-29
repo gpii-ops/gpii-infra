@@ -14,7 +14,10 @@ spec:
         image: <%= @versions["preferences-dataloader"] %>
         env:
         - name: COUCHDB_URL
-          value: http://<%= @secrets["couchdb_user"] %>:<%= @secrets["couchdb_password"] %>@couchdb-lb.gpii.svc.cluster.local:5984/preferences
+          valueFrom:
+            secretKeyRef:
+              name: couchdb-secrets
+              key: url-preferences
         - name: CLEAR_INDEX
           value: 'true'
       restartPolicy: OnFailure
