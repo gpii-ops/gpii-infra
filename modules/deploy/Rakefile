@@ -48,11 +48,6 @@ task :setup_secrets do
     @secrets = Hash.new
   end
 
-  puts("\n#########################\n")
-  require 'pp'
-  pp @secrets
-  puts("\n#########################\n")
-
   ['couchdb_user','couchdb_password','erlang_cookie'].each do |secret|
     unless ENV[secret.upcase].to_s.empty?
       @secrets[secret] = ENV[secret.upcase]
