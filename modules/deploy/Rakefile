@@ -42,27 +42,30 @@ end
 task :setup_secrets do
   saved_secrets_file_path = "secrets/#{ENV["TF_VAR_cluster_name"]}-secrets.yml"
   begin
-    secrets_wo_syms = YAML.load(File.read(saved_secrets_file_path))
-    @secrets = secrets_wo_syms.collect{|k,v| [k.to_s.to_sym, v]}.to_h
+    @secrets = YAML.load(File.read(saved_secrets_file_path))
   rescue Errno::ENOENT
     generate_file = true
     @secrets = Hash.new
   end
 
+  puts("\n#########################\n")
+  require 'pp'
+  pp @secrets
+  puts("\n#########################\n")
+
   ['couchdb_user','couchdb_password','erlang_cookie'].each do |secret|
     unless ENV[secret.upcase].to_s.empty?
-      @secrets[secret.to_sym] = ENV[secret.upcase]
+      @secrets[secret] = ENV[secret.upcase]
       # we don't want to store Environment variables
       generate_file = false
     end
-    @secrets[secret.to_sym] = SecureRandom.hex if @secrets[secret.to_sym].to_s.empty?
+    @secrets[secret] = SecureRandom.hex if @secrets[secret].to_s.empty?
   end
 
   if generate_file
     puts "Secret file #{saved_secrets_file_path} for this deployment not found. I will create one."
     File.open(saved_secrets_file_path, 'w+') do |file|
-      secrets_wo_syms = @secrets.collect{|k,v| [k.to_s, v]}.to_h
-      file.write(secrets_wo_syms.to_yaml)
+      file.write(@secrets.to_yaml)
     end
   end
 
