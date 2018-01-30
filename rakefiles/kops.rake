@@ -35,12 +35,12 @@ task :kops_edit_cluster => [@tmpdir, :configure_kops] do
   puts
   puts "If that looks right, run:"
   puts
-  ###puts "  KOPS_STATE_STORE=#{ENV["KOPS_STATE_STORE"]} kops update cluster #{ENV["TF_VAR_cluster_name"]} --yes"
   puts "  # Clears existing generated files. NOTE: will clean up other generated files for other modules."
   puts "  rake clean"
-  puts
-  puts "  # Enact changes controlled by Terraform (e.g. instance types used by Masters and Nodes)"
-  puts "  rake apply"
+  Rake::Task[:display_rolling_update_cmd].invoke
+end
+
+task :display_rolling_update_cmd => [@tmpdir, :configure_kops] do
   puts
   puts "  # Enact changes controlled by kops (e.g. Kubernetes version) and changes that require instance restarts"
   puts "  # (e.g. instance types used by Masters and Nodes)"
