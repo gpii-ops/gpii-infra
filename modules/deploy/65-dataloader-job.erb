@@ -17,7 +17,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: couchdb-secrets
-              key: url-preferences
+              key: couchdb_preferences_url
         - name: CLEAR_INDEX
           value: 'true'
       restartPolicy: OnFailure
