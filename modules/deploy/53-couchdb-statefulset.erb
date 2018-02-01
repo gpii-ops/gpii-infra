@@ -19,11 +19,20 @@ spec:
         image: gpii/couchdb:latest
         env:
         - name: COUCHDB_USER
-          value: <%= @secrets[:couchdb_user] %>
+          valueFrom:
+            secretKeyRef:
+              name: couchdb-secrets
+              key: user
         - name: COUCHDB_PASSWORD
-          value: <%= @secrets[:couchdb_password] %>
+          valueFrom:
+            secretKeyRef:
+              name: couchdb-secrets
+              key: password
         - name: ERLANG_COOKIE
-          value: <%= @secrets[:erlang_cookie] %>
+          valueFrom:
+            secretKeyRef:
+              name: couchdb-secrets
+              key: erlang_cookie
         ports:
         - name: data
           containerPort: 5984
