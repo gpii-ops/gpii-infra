@@ -143,7 +143,7 @@ Deploying to `prd` requires a [manual action](https://docs.gitlab.com/ce/ci/yaml
 
 See [CI-CD.md](CI-CD.md)
 
-## Troubleshooting
+## Troubleshooting / FAQ
 
 * Currently, this system builds everything in `us-east-2`. When inspecting cloud resources manually (e.g. via the AWS web dashboard), make sure this region is selected.
 * This system uses a lot of rapidly-evolving software. If a tool reports strange errors that look like incompatibilities, try downgrading to an earlier version. [ansible-gpii-ci-worker](https://github.com/idi-ops/ansible-gpii-ci-worker/) should always contain a working combination of versions -- see [defaults/main.yml](https://github.com/idi-ops/ansible-gpii-ci-worker/blob/master/defaults/main.yml)
@@ -191,6 +191,10 @@ To delete the lock:
 1. Run `rake _destroy` again afterwards to make sure Terraform agrees that all the old resources are gone and to clean up DNS entries.
 1. `rake clobber` - cleans up generated files.
 
+### Running manually in non-dev environments (stg, prd)
+
+See [CI-CD.md#running-in-non-dev-environments](CI-CD.md#running-manually-in-non-dev-environments-stg-prd)
+
 ### Restoring a volume from a backup/snapshot
 
 1. We use [k8s-snapshots](https://github.com/miracle2k/k8s-snapshots) to periodically snapshot Kubernetes Persistent Volumes.
@@ -232,10 +236,10 @@ This is what I used to create a fake preference while verifying that volumes are
 1. From inside the container, install some tools: `apk update && apk add curl`
 1. Define a record:
 ```
-# copied and modified from vicky.json
+# Copied and modified from vicky.json.
 data='
 {
-  "_id": "tyler",
+  "_id": "mrtyler",
   "value": {
     "flat": {
       "contexts": {
@@ -292,7 +296,7 @@ Examples of when you might want to do this:
 
 The manifests that control Grafana dashboards and Alertmanager alerts are copied from [kube-prometheus](https://github.com/coreos/prometheus-operator/tree/master/contrib/kube-prometheus) and then modified locally (e.g. a few more things in the `monitoring` namespace, different Service types).
 
-#### I want to update from the latest kube-prometheus
+#### I want to update to the latest kube-prometheus
 
 Unfortunately, there's not a good automatic migration path. So I do this:
 
@@ -327,10 +331,6 @@ aws \
   > undelete.sh
 sh undelete.sh
 ```
-
-## Running manually in non-dev environments (stg, prd)
-
-See [CI-CD.md#running-in-non-dev-environments](CI-CD.md#running-manually-in-non-dev-environments-stg-prd)
 
 ## History
 
