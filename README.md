@@ -61,7 +61,7 @@ Billing account means "the Raising the Floor account", not "the TylerRoscoe 'acc
 ##### SSL Certificates
 
 Long-lived environments (`stg`, `prd`) have wildcard SSL certificates (e.g. \*.stg.gpii.net) provided by [Amazon Certificate Manager](https://aws.amazon.com/certificate-manager/). Kubernetes manifests have hard-coded references to these certificates' ARNs.
-
+.
 1. To create a new cert, [use ACM](http://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request.html).
 
 ##### EBS Volume encryption key
@@ -129,7 +129,7 @@ These are ephemeral environments, generally used by individual developers when w
 
 This is a shared, long-lived environment for staging / pre-production. It aims to emulate `prd`, the production environment, as closely as possible.
 
-Deploying to `stg` verifies that the `gpii-infra` code that worked to create a `dev-$USER` environment from scratch also works to update a pre-existing environment. This is important since we generally don't want to destroy and re-create the production environment from scratch.
+Deploying to `stg` verifies that the gpii-infra code that worked to create a `dev-$USER` environment from scratch also works to update a pre-existing environment. This is important since we generally don't want to destroy and re-create the production environment from scratch.
 
 Because `stg` emulates production, it will (in the future) allow us to run realistic end-to-end tests before deploying to `prd`.
 
@@ -194,6 +194,36 @@ To delete the lock:
 ### Running manually in non-dev environments (stg, prd)
 
 See [CI-CD.md#running-in-non-dev-environments](CI-CD.md#running-manually-in-non-dev-environments-stg-prd)
+
+### I want to test my local changes to GPII components in my cluster
+
+1. Build a local Docker image containing your changes.
+1. Push your image to Docker Hub under your user account.
+1. Clone https://github.com/gpii-ops/gpii-version-updater/.
+1. Edit `components.conf`. Find your component and edit the `image` field to point to your Docker Hub user account.
+   * E.g., `gpii/universal -> mrtyler/universal`
+1. Run `update-version`. It will generate a `version.yml` in the current directory.
+1. `cp version.yml ../gpii-infra/modules/deploy`
+1. `cd ../gpii-infra/dev && rake deploy`
+
+#### Can't I just edit `version.yml` by hand?
+
+gpii-infra uses explicit SHAs to refer to specific Docker images for GPII components. This has a number of advantages (repeatability, auditability) but the main thing you care about is that changing the SHA forces Kubernetes to re-deploy a component (but see below for a note about preferences-dataloader).
+
+If you don't want to deal with gpii-version-updater, you can instead:
+1. Edit `modules/deploy/version.yml`. Find your component and replace the entire image value (path and SHA) with your Docker Hub user account.
+   * E.g., `flowmanager: "gpii/universal@sha256:4b3...64f" -> flowmanager: "mrtyler/universal"`
+1. Manually delete the component via Kubernetes Dashboard or `kubectl delete`.
+1. `cd dev && rake deploy`
+
+#### A note about local changes and preferences-dataloader
+
+[preferences-dataloader](https://github.com/gpii-ops/docker-preferences-dataloader) initializes CouchDB with some canned data. It is designed to run once, as a Kubernetes Job. If you want to run it again, e.g. to test changes to the canned data:
+1. Note that the dataloader **deletes all data in CouchDB** when it runs.
+1. Because of how Kubernetes Jobs work, the dataloader will not re-run when a new Docker image becomes available (this is different from Deployments like `flowmanager`, which are updated when the Docker image changes).
+1. Thus, to make changes to the dataloader:
+   * Delete the Job: `kubectl -n gpii delete job preferences-dataloader`
+   * Re-deploy the Job: `cd dev && rake deploy`
 
 ### Restoring a volume from a backup/snapshot
 
