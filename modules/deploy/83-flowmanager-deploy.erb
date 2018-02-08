@@ -17,8 +17,6 @@ spec:
         - containerPort: 8081
         env:
         - name: NODE_ENV
-          value: gpii.config.cloudBased.flowManager.production
-        - name: GPII_FLOWMANAGER_PREFERENCES_URL
-          value: http://preferences.gpii.svc.cluster.local/preferences/%userToken
+          value: gpii.config.cloudBased.production
         - name: GPII_FLOWMANAGER_LISTEN_PORT
           value: '8081'
