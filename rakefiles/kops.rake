@@ -3,7 +3,7 @@ task :configure_kops do
   ENV["KOPS_STATE_STORE"] = "s3://#{ENV["S3_BUCKET"]}"
 end
 
-desc "Configure kubectl to know about cluster"
+desc "Configure kubectl to know about cluster #{ENV["TF_VAR_cluster_name"]}"
 task :configure_kubectl => [@tmpdir, :configure_kops] do
   sh "kops export kubecfg #{ENV["TF_VAR_cluster_name"]}"
 end
@@ -42,12 +42,8 @@ task :display_rolling_update_cmd => [@tmpdir, :configure_kops] do
   puts "  # Clears existing generated files. NOTE: will clean up other generated files for other modules."
   puts "  rake clean"
   puts
-  puts "  # Enact changes controlled by Terraform (e.g. instance types used by Masters and Nodes)"
+  puts "  # Enact changes."
   puts "  rake apply"
-  puts
-  puts "  # Enact changes controlled by kops (e.g. Kubernetes version) and changes that require instance restarts"
-  puts "  # (e.g. instance types used by Masters and Nodes)"
-  puts "  rake kops_rolling_update"
 end
 
 task :kops_rolling_update => [@tmpdir, :configure_kops] do

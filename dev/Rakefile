@@ -18,6 +18,7 @@ task :apply => [@tmpdir, :generate_modules] do
   sleep 60
   Rake::Task["wait_for_api_dns_local"].invoke
   Rake::Task["test_master"].invoke
+  Rake::Task["kops_rolling_update"].invoke
 end
 CLEAN << "#{ENV['HOME']}/.terragrunt"
 
