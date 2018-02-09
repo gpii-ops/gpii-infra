@@ -8,6 +8,55 @@ task :configure_kubectl => [@tmpdir, :configure_kops] do
   sh "kops export kubecfg #{ENV["TF_VAR_cluster_name"]}"
 end
 
+desc "Wait until cluster has converged and is ready to receive components"
+task :wait_for_cluster_up => :configure_kubectl do
+  puts "Waiting for Kubernetes cluster to be fully up..."
+  puts "(You can Ctrl-C out of this safely. You may need to run :destroy afterward.)"
+
+  wait_for("kops validate cluster --name #{ENV["TF_VAR_cluster_name"]}")
+end
+
+desc "Wait until cluster has undeployed components and is ready to shut down"
+task :wait_for_cluster_down => :configure_kubectl do
+  # External-facing Services create ELBs, which will prevent terraform from
+  # destroying resources later. Before we delete the Deployments associated
+  # with the Service, give the Service time to shut down.
+  #
+  # Here's the best way I could figure to do that:
+  # * Get a list of the names of all ELBs
+  # * For each ELB, get the value of the "KubernetesCluster" Tag
+  # * Make sure $TF_VAR_cluster_name doesn't appear in the list
+  puts "Waiting for load balancers to be fully down..."
+  puts "(You can Ctrl-C out of this safely. You may need to re-run :undeploy and/or :destroy afterward.)"
+  wait_for("\
+    elbs=$(aws elb describe-load-balancers \
+      --region us-east-2 \
+      --query LoadBalancerDescriptions[*].LoadBalancerName \
+      --output text \
+    ) && \
+    tags=$(for elb in $elbs ; do \
+      aws elb describe-tags \
+      --region us-east-2 \
+      --load-balancer-names $elb | jq -r \
+      '.TagDescriptions[].Tags[] | select(.Key==\"KubernetesCluster\") | .Value' \
+      ; done \
+    ) && \
+    [ \"$(echo $tags | grep \"#{ENV["TF_VAR_cluster_name"]}\")\" == \"\" ] \
+  ")
+  puts "Waiting for load balancer security groups to be fully down..."
+  puts "(You can Ctrl-C out of this safely. You may need to re-run :undeploy and/or :destroy afterward.)"
+  # We only want to wait for SGs dynamically created by Kubernetes. Permanent
+  # SGs (e.g. SGs for nodes and masters) are managed by kops/terraform.
+  wait_for("\
+    sgs=$(aws ec2 describe-security-groups \
+      --region us-east-2 \
+      | jq -r \
+      '.SecurityGroups[] | select(.Tags != null and .Tags[].Key==\"KubernetesCluster\" and .Tags[].Value == \"#{ENV["TF_VAR_cluster_name"]}\") | select(.Description | startswith(\"Security group for Kubernetes\")) | .GroupId' \
+    ) && \
+    [ \"$sgs\" == \"\" ] \
+  ")
+end
+
 desc "[EXPERIMENTAL] [ADVANCED] Edit cluster using kops"
 task :kops_edit_cluster => [@tmpdir, :configure_kops] do
   puts "Running a series of 'kops edit' commands."

@@ -1,5 +1,6 @@
 require "rake/clean"
 require_relative "./dns_lookup.rb"
+import "../rakefiles/kops.rake"
 import "../rakefiles/prereqs.rake"
 require_relative "./terraform_output.rb"
 require_relative "./wait_for.rb"
