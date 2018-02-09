@@ -140,7 +140,7 @@ task :deploy_only => [:configure_kubectl, :find_gpii_components] do
     begin
       wait_for(
         "kubectl --context #{ENV["TF_VAR_cluster_name"]} apply -f #{component}",
-        max_wait_secs: 60,
+        max_wait_secs: 120,
       )
     rescue
       puts "WARNING: Failed to deploy #{component}. Run 'rake deploy_only' to try again. Continuing."
