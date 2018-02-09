@@ -1,3 +1,7 @@
 spec:
   iam:
     legacy: true
+  kubeControllerManager:
+    terminatedPodGCThreshold: 100  # Wild, untested guess
+  kubelet:
+    anonymousAuth: false
