@@ -262,7 +262,7 @@ If you don't want to deal with gpii-version-updater, you can instead:
 
 This is what I used to create a fake preference while verifying that volumes are restored correctly.
 
-1. Run a container inside the cluster: `kubectl run -i -t alpine --image=alpine --restart=Never`
+1. Run a container inside the cluster: `cd dev && rake run_interactive`
 1. From inside the container, install some tools: `apk update && apk add curl`
 1. Define a record:
 ```

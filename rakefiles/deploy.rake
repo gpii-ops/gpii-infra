@@ -124,3 +124,18 @@ task :undeploy => [:configure_kubectl, :find_gpii_components] do
   end
   Rake::Task["wait_for_cluster_down"].invoke
 end
+
+desc "Run an interactive shell on a container inside the cluster"
+task :run_interactive => :configure_kubectl do
+  sh "kubectl run -i -t alpine --image=alpine --restart=Never"
+end
+
+desc "Re-attach to a shell started with :run_interactive"
+task :attach_interactive => :configure_kubectl do
+  sh "kubectl attach -i -t alpine"
+end
+
+desc "Delete the interactive shell running inside the cluster"
+task :delete_interactive => :configure_kubectl do
+  sh "kubectl delete pod alpine"
+end
