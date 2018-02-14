@@ -74,10 +74,13 @@ end
 
 task :find_gpii_components => :generate_modules do
   @gpii_components = FileList.new("#{@tmpdir}-modules/deploy/[0-9]*.yml").sort
+  Dir.chdir("#{@tmpdir}-modules/deploy/helms/") do
+    @gpii_helmcharts = Dir.glob("*").select {|d| File.directory? d }
+  end
 end
 
 desc "Deploy GPII components to cluster"
-task :deploy => [:apply, :configure_kubectl, :wait_for_cluster_up, :find_gpii_components] do
+task :deploy => [:apply, :configure_kubectl, :wait_for_cluster_up, :init_helm, :find_gpii_components] do
   Rake::Task["deploy_only"].invoke
 end
 
@@ -97,11 +100,34 @@ task :deploy_only => [:configure_kubectl, :find_gpii_components] do
       puts "WARNING: Failed to deploy #{component}. Run 'rake deploy_only' to try again. Continuing."
     end
   end
+  @gpii_helmcharts.each do |chart|
+    #TODO upgrade the chart if found
+    begin
+      wait_for(
+        "helm install --name #{chart} -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{@tmpdir}-modules/deploy/helms/#{chart}",
+        max_wait_secs: 120,
+      )
+    rescue
+      puts "WARNING: Failed to install helm chart #{chart}. Run 'rake deploy_only' to try again. Continuing."
+    end
+  end
   Rake::Task["wait_for_gpii_dns"].invoke
   puts "Waiting 60s to give local DNS a chance to catch up..."
   sleep 60
   Rake::Task["wait_for_gpii_ready"].invoke
   Rake::Task["display_cluster_info"].invoke
+end
+
+desc "Configure Helm to install Tiller in the cluster #{ENV["TF_VAR_cluster_name"]}"
+task :init_helm => [:configure_kubectl] do
+  begin
+    wait_for(
+      "helm init",
+      max_wait_secs: 120
+    )
+  rescue
+    puts "WARNING: Failed to initialize helm chart."
+  end
 end
 
 # Shut things down via kubernetes, otherwise terraform destroy will get stuck
@@ -120,6 +146,16 @@ task :undeploy => [:configure_kubectl, :find_gpii_components] do
     rescue
       puts "WARNING: Failed to undeploy #{component}. Run 'rake undeploy' to try again. Continuing."
       puts "WARNING: An incomplete undeploy may prevent 'rake destroy' from succeeding."
+    end
+  end
+  @gpii_helmcharts.each do |chart|
+    begin
+      wait_for(
+        "helm delete --name #{chart}",
+        max_wait_secs: 120,
+      )
+    rescue
+      puts "WARNING: Failed to delete helm chart #{chart}. Run 'rake undeploy' to try again. Continuing."
     end
   end
   Rake::Task["wait_for_cluster_down"].invoke

@@ -48,7 +48,10 @@ task :setup_secrets do
     @secrets = Hash.new
   end
 
-  ['couchdb_user','couchdb_password','erlang_cookie'].each do |secret|
+  ['couchdb_user','couchdb_password','erlang_cookie', \
+    'fluent_elasticsearch_host','fluent_elasticsearch_port', \
+    'fluent_elasticsearch_scheme', 'fluent_elasticsearch_user' \
+    'fluent_elasticsearch_password'].each do |secret|
     unless ENV[secret.upcase].to_s.empty?
       @secrets[secret] = ENV[secret.upcase]
       # we don't want to store Environment variables
@@ -92,6 +95,9 @@ task :setup_secrets_from_files => :setup_secrets do
   end
 end
 
+Dir.chdir('helms') do
+  HELMCHARTS_DIRS = Dir.glob('*').select {|d| File.directory? d}
+end
 SOURCE_FILES = FileList.new("*.erb")
 DEST_FILES = SOURCE_FILES.ext(".yml")
 DEST_FILES_WITH_PATH = SOURCE_FILES.ext(".yml").map { |f| File.join(DEPLOY_OUT_DIR, f) }
@@ -102,6 +108,21 @@ task :generate => \
   DEST_FILES \
 do
   cp FileList.new("./*.yml"), "#{DEPLOY_OUT_DIR}/"
+  begin
+    FileUtils.mkdir "#{DEPLOY_OUT_DIR}/helms"
+  rescue Errno::EEXIST
+    puts "#{DEPLOY_OUT_DIR}/helms already created"
+  end
+  HELMCHARTS_DIRS.each do |d|
+    FileUtils.cp_r "helms/#{d}", "#{DEPLOY_OUT_DIR}/helms/#{d}"
+  end
+
+  HELMCHARTS_DIRS.each do |d|
+    rendered = ERB.new(File.read("helms/#{d}-values.erb")).result(binding)
+    File.open("#{DEPLOY_OUT_DIR}/helms/#{d}/custom-values.yaml", "w") do |f|
+      f.puts rendered
+    end
+  end
 end
 
 rule ".yml" => ".erb" do |t|
@@ -110,6 +131,7 @@ rule ".yml" => ".erb" do |t|
     f.puts rendered
   end
 end
+
 CLEAN << DEPLOY_OUT_DIR
 
 
