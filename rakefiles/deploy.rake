@@ -106,8 +106,6 @@ task :deploy_only => [:configure_kubectl, :find_gpii_components] do
   installed_charts = installed_charts.split("\n")
 
   @gpii_helmcharts.each do |chart|
-    #TODO upgrade the chart if found
-
     if installed_charts.include?(chart)
       begin
         wait_for(
@@ -127,7 +125,6 @@ task :deploy_only => [:configure_kubectl, :find_gpii_components] do
         puts "WARNING: Failed to install helm chart #{chart}. Run 'rake deploy_only' to try again. Continuing."
       end
     end
-
   end
   Rake::Task["wait_for_gpii_dns"].invoke
   puts "Waiting 60s to give local DNS a chance to catch up..."
