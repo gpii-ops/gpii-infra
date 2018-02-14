@@ -1,3 +1,4 @@
+require "open3"
 require "rake/clean"
 require_relative "./wait_for.rb"
 import "../rakefiles/kops.rake"
@@ -100,16 +101,33 @@ task :deploy_only => [:configure_kubectl, :find_gpii_components] do
       puts "WARNING: Failed to deploy #{component}. Run 'rake deploy_only' to try again. Continuing."
     end
   end
+
+  installed_charts, helm_stdout = Open3.capture2("helm list -q -a")
+  installed_charts = installed_charts.split("\n")
+
   @gpii_helmcharts.each do |chart|
     #TODO upgrade the chart if found
-    begin
-      wait_for(
-        "helm install --name #{chart} -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{@tmpdir}-modules/deploy/helms/#{chart}",
-        max_wait_secs: 120,
-      )
-    rescue
-      puts "WARNING: Failed to install helm chart #{chart}. Run 'rake deploy_only' to try again. Continuing."
+
+    if installed_charts.include?(chart)
+      begin
+        wait_for(
+          "helm upgrade -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{chart} #{@tmpdir}-modules/deploy/helms/#{chart}",
+          max_wait_secs: 120,
+        )
+      rescue
+        puts "WARNING: Failed to install helm chart #{chart}. Run 'rake deploy_only' to try again. Continuing."
+      end
+    else
+      begin
+        wait_for(
+          "helm install --name #{chart} -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{@tmpdir}-modules/deploy/helms/#{chart}",
+          max_wait_secs: 120,
+        )
+      rescue
+        puts "WARNING: Failed to install helm chart #{chart}. Run 'rake deploy_only' to try again. Continuing."
+      end
     end
+
   end
   Rake::Task["wait_for_gpii_dns"].invoke
   puts "Waiting 60s to give local DNS a chance to catch up..."
