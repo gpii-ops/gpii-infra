@@ -20,3 +20,16 @@ spec:
           value: gpii.config.cloudBased.production
         - name: GPII_FLOWMANAGER_LISTEN_PORT
           value: '8081'
+        - name: FLOWMANAGER_DATASOURCE_HOSTNAME
+          valueFrom:
+            secretKeyRef:
+              name: couchdb-secrets
+              key: flowmanager_datasource_hostname
+        - name: FLOWMANAGER_DATASOURCE_PORT
+          value: '5984'
+        - name: FLOWMANAGER_MATCHMAKER_URL
+        <% if ENV["TF_VAR_cluster_name"].start_with?("stg.", "prd.") %>
+          value: "https://flowmanager.<%= ENV["TF_VAR_cluster_name"] %>"
+        <% else %>
+          value: "http://flowmanager.<%= ENV["TF_VAR_cluster_name"] %>"
+        <% end %>

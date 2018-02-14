@@ -53,12 +53,12 @@ end
 
 desc "Wait until cluster has converged enough to create DNS records for GPII components"
 task :wait_for_gpii_dns => :find_zone_id do
-  preferences_hostname = "preferences.#{ENV["TF_VAR_cluster_name"]}"
+  flowmanager_hostname = "flowmanager.#{ENV["TF_VAR_cluster_name"]}"
 
-  puts "Waiting for DNS records for #{preferences_hostname} to exist..."
+  puts "Waiting for DNS records for #{flowmanager_hostname} to exist..."
   puts "(You can Ctrl-C out of this safely. You may need to re-run :deploy_only afterward.)"
 
-  Rake::Task["wait_for_dns"].invoke(preferences_hostname)
+  Rake::Task["wait_for_dns"].invoke(flowmanager_hostname)
 end
 
 desc "Wait until GPII components have been deployed"
@@ -72,15 +72,15 @@ task :wait_for_gpii_ready => :configure_kubectl do
   #
   # The grep catches a 2xx status code.
   #
-  # We use /preferences/carla as a proxy for the overall health of the system.
+  # We use /carla/settings as a proxy for the overall health of the system.
   # It's not perfect but it's a good start.
   #
   # Currently we only deploy SSL to shared environemnts (stg, prd).
-  preferences_url = "http://preferences.#{ENV["TF_VAR_cluster_name"]}/preferences/carla"
+  flowmanager_url = "http://flowmanager.#{ENV["TF_VAR_cluster_name"]}/carla/settings/%7B%22OS%22:%7B%22id%22:%22linux%22%7D,%22solutions%22:[%7B%22id%22:%22org.gnome.desktop.a11y.magnifier%22%7D]%7D"
   if ENV["TF_VAR_cluster_name"].start_with?("stg.", "prd.")
-    preferences_url.gsub! "http://", "https://"
+    flowmanager_url.gsub! "http://", "https://"
   end
-  wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' '#{preferences_url}' | grep -q ^2")
+  wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' '#{flowmanager_url}' | grep -q ^2")
 end
 
 desc "Display some handy info about the cluster"
