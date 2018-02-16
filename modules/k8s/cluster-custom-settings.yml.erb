@@ -5,3 +5,5 @@ spec:
     terminatedPodGCThreshold: 100  # Wild, untested guess
   kubelet:
     anonymousAuth: false
+    featureGates:
+      MountPropagation: "true"
