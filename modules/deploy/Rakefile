@@ -117,7 +117,6 @@ do
   begin
     FileUtils.mkdir "#{DEPLOY_OUT_DIR}/helms"
   rescue Errno::EEXIST
-    puts "#{DEPLOY_OUT_DIR}/helms already created"
   end
   HELMCHARTS_DIRS.each do |d|
     FileUtils.cp_r "helms/#{d}", "#{DEPLOY_OUT_DIR}/helms/#{d}"
