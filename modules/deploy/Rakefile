@@ -48,10 +48,16 @@ task :setup_secrets do
     @secrets = Hash.new
   end
 
-  ['couchdb_user','couchdb_password','erlang_cookie', \
-    'fluent_elasticsearch_host','fluent_elasticsearch_port', \
-    'fluent_elasticsearch_scheme', 'fluent_elasticsearch_user' \
-    'fluent_elasticsearch_password'].each do |secret|
+  [ \
+    'couchdb_user', \
+    'couchdb_password', \
+    'erlang_cookie', \
+    'fluent_elasticsearch_host', \
+    'fluent_elasticsearch_port', \
+    'fluent_elasticsearch_scheme', \
+    'fluent_elasticsearch_user' \
+    'fluent_elasticsearch_password' \
+  ].each do |secret|
     unless ENV[secret.upcase].to_s.empty?
       @secrets[secret] = ENV[secret.upcase]
       # we don't want to store Environment variables
