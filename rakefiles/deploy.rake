@@ -1,4 +1,3 @@
-require "open3"
 require "rake/clean"
 require_relative "./wait_for.rb"
 import "../rakefiles/kops.rake"
@@ -102,9 +101,8 @@ task :deploy_only => [:configure_kubectl, :find_gpii_components] do
     end
   end
 
-  installed_charts, helm_stdout = Open3.capture2("helm list -q -a")
+  installed_charts = `helm list -q -ai`
   installed_charts = installed_charts.split("\n")
-
   @gpii_helmcharts.each do |chart|
     if installed_charts.include?(chart)
       begin
