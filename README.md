@@ -251,7 +251,7 @@ data='
 }
 '
 ```
-1. Add the record: `curl -f -H 'Content-Type: application/json' -X POST http://couchdb.default.svc.cluster.local:5984/preferences -d "$data"`
+1. Add the record: `curl -f -H 'Content-Type: application/json' -X POST http://couchdb.default.svc.cluster.local:5984/gpii -d "$data"`
 1. Before the restore: verify that the new record is present.
 1. After the restore: verify that the new record is no longer present.
 

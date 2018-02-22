@@ -76,11 +76,11 @@ task :wait_for_gpii_ready => :configure_kubectl do
   # It's not perfect but it's a good start.
   #
   # Currently we only deploy SSL to shared environemnts (stg, prd).
-  # flowmanager_url = "http://flowmanager.#{ENV["TF_VAR_cluster_name"]}/carla/settings/%7B%22OS%22:%7B%22id%22:%22linux%22%7D,%22solutions%22:\[%7B%22id%22:%22org.gnome.desktop.a11y.magnifier%22%7D\]%7D"
-  # if ENV["TF_VAR_cluster_name"].start_with?("stg.", "prd.")
-  #   flowmanager_url.gsub! "http://", "https://"
-  # end
-  # wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' '#{flowmanager_url}' | grep -q ^2")
+  flowmanager_url = "http://flowmanager.#{ENV["TF_VAR_cluster_name"]}/carla/settings/%7B%22OS%22:%7B%22id%22:%22linux%22%7D,%22solutions%22:\\[%7B%22id%22:%22org.gnome.desktop.a11y.magnifier%22%7D\\]%7D"
+  if ENV["TF_VAR_cluster_name"].start_with?("stg.", "prd.")
+    flowmanager_url.gsub! "http://", "https://"
+  end
+  wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' '#{flowmanager_url}' | grep -q ^2")
 end
 
 desc "Display some handy info about the cluster"

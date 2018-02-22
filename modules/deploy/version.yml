@@ -2,4 +2,3 @@
 ---
 flowmanager: "cindyqili/vagrant-universal@sha256:f419a41c082dd2e78ac280365341dbcbd5683dac78781f7220de96aa37878c6f"
 gpii-dataloader: "cindyqili/gpii-dataloader@sha256:8fe1789084aee1e308e5e89cee3bc0074b446e80dc9ee1c0f1bbbd765123f314"
-preferences: "gpii/universal@sha256:6158cb742574ae2940f5daeaf2f8ae10f37a903be0b6871081aada3c0d0436b3"
