@@ -164,7 +164,7 @@ task :undeploy => [:configure_kubectl, :find_gpii_components] do
   @gpii_helmcharts.each do |chart|
     begin
       wait_for(
-        "helm delete --name #{chart}",
+        "helm delete #{chart}",
         max_wait_secs: 120,
       )
     rescue
