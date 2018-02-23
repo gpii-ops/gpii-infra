@@ -16,8 +16,9 @@ directory KOPS_OUT_DIR
 CLOBBER << KOPS_OUT_DIR
 
 desc "Generate config for cluster, including terraform files and kops cluster definition in S3"
-task :generate => [@tmpdir, :configure_kops, "Rakefile", "#{KOPS_OUT_DIR}/kubernetes.tf"]
+task :generate => [@tmpdir, :configure_kops, "Rakefile", KOPS_OUT_DIR, "#{KOPS_OUT_DIR}/kubernetes.tf"]
 rule "#{KOPS_OUT_DIR}/kubernetes.tf" do
+  # Create cluster iff it doesn't already exist.
   sh "kops get cluster #{ENV["TF_VAR_cluster_name"]}" do |ok, res|
     unless ok
       sh "kops create cluster \
@@ -35,47 +36,31 @@ rule "#{KOPS_OUT_DIR}/kubernetes.tf" do
         --out=#{KOPS_OUT_DIR} \
         --ssh-public-key=~/.ssh/id_rsa.gpii-ci.pub \
       "
-
-      # Export the configuration to a yaml file
-      sh "kops get \
-        --name #{ENV["TF_VAR_cluster_name"]} \
-        -o yaml > #{KOPS_OUT_DIR}/cluster-orig.yml \
-       "
- 
-      # Merge yaml file with custom config
-      current_settings = File.read("#{KOPS_OUT_DIR}/cluster-orig.yml")
-      custom_settings = ERB.new(File.read("cluster-custom-settings.yml.erb")).result(binding)
-      settings = MergeYaml.merge_yaml(current_settings, custom_settings)
-      File.open("#{KOPS_OUT_DIR}/cluster.yml", "w") do |file|
-        file.write(settings)
-      end
-
-      # Update the definition
-      sh "kops replace -f #{KOPS_OUT_DIR}/cluster.yml"
-      sh "kops update cluster \
-        --name=#{ENV["TF_VAR_cluster_name"]} \
-        --target=terraform \
-        --out=#{KOPS_OUT_DIR} \
-      "
-
-    else
-      puts "Cluster #{ENV["TF_VAR_cluster_name"]} already exists."
-      puts "If you want to change its configuration, you'll need to:"
-      puts "* rake destroy"
-      puts "* rake clobber"
-      puts "(Note that this DESTROYS THE CLUSTER.)"
-      puts "--OR--"
-      puts "* Upgrade manually. See https://github.com/kubernetes/kops/blob/master/docs/upgrade.md."
-      puts "(This is not recommended except for testing.)"
-      puts
-      puts "Updating an existing cluster is a planned feature."
-      sh "kops update cluster \
-        --name=#{ENV["TF_VAR_cluster_name"]} \
-        --target=terraform \
-        --out=#{KOPS_OUT_DIR} \
-      "
     end
   end
+
+  # Export cluster configuration to a file.
+  sh "kops get \
+    --name #{ENV["TF_VAR_cluster_name"]} \
+    -o yaml > #{KOPS_OUT_DIR}/cluster-orig.yml \
+  "
+
+  # Merge file with custom config.
+  current_settings = File.read("#{KOPS_OUT_DIR}/cluster-orig.yml")
+  custom_settings = ERB.new(File.read("cluster-custom-settings.yml.erb")).result(binding)
+  settings = MergeYaml.merge_yaml(current_settings, custom_settings)
+  File.open("#{KOPS_OUT_DIR}/cluster.yml", "w") do |file|
+    file.write(settings)
+  end
+
+  # Update the definition
+  sh "kops replace -f #{KOPS_OUT_DIR}/cluster.yml"
+  sh "kops update cluster \
+    --name=#{ENV["TF_VAR_cluster_name"]} \
+    --target=terraform \
+    --out=#{KOPS_OUT_DIR} \
+  "
+
   cp FileList.new("./*.tf"), "#{KOPS_OUT_DIR}/"
 end
 CLEAN << KOPS_OUT_DIR

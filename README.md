@@ -61,7 +61,7 @@ Billing account means "the Raising the Floor account", not "the TylerRoscoe 'acc
 ##### SSL Certificates
 
 Long-lived environments (`stg`, `prd`) have wildcard SSL certificates (e.g. \*.stg.gpii.net) provided by [Amazon Certificate Manager](https://aws.amazon.com/certificate-manager/). Kubernetes manifests have hard-coded references to these certificates' ARNs.
-
+.
 1. To create a new cert, [use ACM](http://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request.html).
 
 ##### EBS Volume encryption key
@@ -129,7 +129,7 @@ These are ephemeral environments, generally used by individual developers when w
 
 This is a shared, long-lived environment for staging / pre-production. It aims to emulate `prd`, the production environment, as closely as possible.
 
-Deploying to `stg` verifies that the `gpii-infra` code that worked to create a `dev-$USER` environment from scratch also works to update a pre-existing environment. This is important since we generally don't want to destroy and re-create the production environment from scratch.
+Deploying to `stg` verifies that the gpii-infra code that worked to create a `dev-$USER` environment from scratch also works to update a pre-existing environment. This is important since we generally don't want to destroy and re-create the production environment from scratch.
 
 Because `stg` emulates production, it will (in the future) allow us to run realistic end-to-end tests before deploying to `prd`.
 
@@ -143,7 +143,7 @@ Deploying to `prd` requires a [manual action](https://docs.gitlab.com/ce/ci/yaml
 
 See [CI-CD.md](CI-CD.md)
 
-## Troubleshooting
+## Troubleshooting / FAQ
 
 * Currently, this system builds everything in `us-east-2`. When inspecting cloud resources manually (e.g. via the AWS web dashboard), make sure this region is selected.
 * This system uses a lot of rapidly-evolving software. If a tool reports strange errors that look like incompatibilities, try downgrading to an earlier version. [ansible-gpii-ci-worker](https://github.com/idi-ops/ansible-gpii-ci-worker/) should always contain a working combination of versions -- see [defaults/main.yml](https://github.com/idi-ops/ansible-gpii-ci-worker/blob/master/defaults/main.yml)
@@ -191,6 +191,40 @@ To delete the lock:
 1. Run `rake _destroy` again afterwards to make sure Terraform agrees that all the old resources are gone and to clean up DNS entries.
 1. `rake clobber` - cleans up generated files.
 
+### Running manually in non-dev environments (stg, prd)
+
+See [CI-CD.md#running-in-non-dev-environments](CI-CD.md#running-manually-in-non-dev-environments-stg-prd)
+
+### I want to test my local changes to GPII components in my cluster
+
+1. Build a local Docker image containing your changes.
+1. Push your image to Docker Hub under your user account.
+1. Clone https://github.com/gpii-ops/gpii-version-updater/.
+1. Edit `components.conf`. Find your component and edit the `image` field to point to your Docker Hub user account.
+   * E.g., `gpii/universal -> mrtyler/universal`
+1. Run `update-version`. It will generate a `version.yml` in the current directory.
+1. `cp version.yml ../gpii-infra/modules/deploy`
+1. `cd ../gpii-infra/dev && rake deploy`
+
+#### Can't I just edit `version.yml` by hand?
+
+gpii-infra uses explicit SHAs to refer to specific Docker images for GPII components. This has a number of advantages (repeatability, auditability) but the main thing you care about is that changing the SHA forces Kubernetes to re-deploy a component (but see below for a note about preferences-dataloader).
+
+If you don't want to deal with gpii-version-updater, you can instead:
+1. Edit `modules/deploy/version.yml`. Find your component and replace the entire image value (path and SHA) with your Docker Hub user account.
+   * E.g., `flowmanager: "gpii/universal@sha256:4b3...64f" -> flowmanager: "mrtyler/universal"`
+1. Manually delete the component via Kubernetes Dashboard or `kubectl delete`.
+1. `cd dev && rake deploy`
+
+#### A note about local changes and preferences-dataloader
+
+[preferences-dataloader](https://github.com/gpii-ops/docker-preferences-dataloader) initializes CouchDB with some canned data. It is designed to run once, as a Kubernetes Job. If you want to run it again, e.g. to test changes to the canned data:
+1. Note that the dataloader **deletes all data in CouchDB** when it runs.
+1. Because of how Kubernetes Jobs work, the dataloader will not re-run when a new Docker image becomes available (this is different from Deployments like `flowmanager`, which are updated when the Docker image changes).
+1. Thus, to make changes to the dataloader:
+   * Delete the Job: `kubectl -n gpii delete job preferences-dataloader`
+   * Re-deploy the Job: `cd dev && rake deploy`
+
 ### Restoring a volume from a backup/snapshot
 
 1. We use [k8s-snapshots](https://github.com/miracle2k/k8s-snapshots) to periodically snapshot Kubernetes Persistent Volumes.
@@ -228,14 +262,14 @@ To delete the lock:
 
 This is what I used to create a fake preference while verifying that volumes are restored correctly.
 
-1. Run a container inside the cluster: `kubectl run -i -t alpine --image=alpine --restart=Never`
+1. Run a container inside the cluster: `cd dev && rake run_interactive`
 1. From inside the container, install some tools: `apk update && apk add curl`
 1. Define a record:
 ```
-# copied and modified from vicky.json
+# Copied and modified from vicky.json.
 data='
 {
-  "_id": "tyler",
+  "_id": "mrtyler",
   "value": {
     "flat": {
       "contexts": {
@@ -292,7 +326,7 @@ Examples of when you might want to do this:
 
 The manifests that control Grafana dashboards and Alertmanager alerts are copied from [kube-prometheus](https://github.com/coreos/prometheus-operator/tree/master/contrib/kube-prometheus) and then modified locally (e.g. a few more things in the `monitoring` namespace, different Service types).
 
-#### I want to update from the latest kube-prometheus
+#### I want to update to the latest kube-prometheus
 
 Unfortunately, there's not a good automatic migration path. So I do this:
 
@@ -327,10 +361,6 @@ aws \
   > undelete.sh
 sh undelete.sh
 ```
-
-## Running manually in non-dev environments (stg, prd)
-
-See [CI-CD.md#running-in-non-dev-environments](CI-CD.md#running-manually-in-non-dev-environments-stg-prd)
 
 ## History
 

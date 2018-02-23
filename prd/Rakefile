@@ -17,6 +17,8 @@ task :apply => [@tmpdir, :generate_modules] do
   puts "Waiting 60s to give local DNS a chance to catch up..."
   sleep 60
   Rake::Task["wait_for_api_dns_local"].invoke
+  Rake::Task["wait_for_cluster_up"].invoke
+  Rake::Task["kops_rolling_update"].invoke
 end
 CLEAN << "#{ENV['HOME']}/.terragrunt"
 
