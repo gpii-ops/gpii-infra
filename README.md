@@ -10,6 +10,7 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 1. Install [terragrunt](https://github.com/gruntwork-io/terragrunt#install-terragrunt) ~> 0.14.
 1. Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) ~> 1.9.
 1. Install [kops](https://github.com/kubernetes/kops#installing) ~> 1.8.
+1. Install [Kubernetes Helm](https://github.com/kubernetes/helm#install) ~> 2.8.
 1. Install the [AWS CLI](http://docs.aws.amazon.com/cli/latest/userguide/installing.html).
 1. Install Ruby **==2.4.3** and [Bundler](http://bundler.io/)
    * There's nothing particularly special about this version. We could relax the constraint in Gemfile, but a single version for everyone is fine for now.
