@@ -73,11 +73,8 @@ See https://github.com/ussjoin/gpii-backup-scripts#ec2-ebs-snapshot-replication.
 
 We use [Prometheus Alertmanager](https://github.com/prometheus/alertmanager), managed by [Prometheus Operator](https://github.com/coreos/prometheus-operator/) and some pieces from [kube-prometheus](https://github.com/coreos/prometheus-operator/tree/master/contrib/kube-prometheus), to handle alerts and notifications.
 
-1. Create a dedicated Gmail account (ours is `alertmanager@RtF`) for sending alerts.
-   * Log in to the account.
-   * Create a filter that sends all incoming mail (`to: alertmanager`) to the Trash.
-   * Create an [App Password](https://support.google.com/accounts/answer/185833?hl=en). Note that you'll need to temporarily enable 2-Step Verification (and successfully authenticate using that second factor) before you can create an App Password. Once the password is created, you can disable 2-Step Verification again.
-   * Add the App Password to [Gitlab](CI-CD.md#configure-gitlab-secret-variables).
+1. Create [Amazon SES credentials](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/smtp-credentials.html).
+   * Add the usernamd and password to [Gitlab](CI-CD.md#configure-gitlab-secret-variables).
 1. Create a dedicate Google Group (ours is `alerts@RtF`) to receive alerts and re-distribute them to Operations staff.
    * Remove public access.
    * Allow posts from the address you created above.
