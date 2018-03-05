@@ -73,6 +73,13 @@ task :setup_secrets do
     end
   end
 
+  if ENV["ALERTMANAGER_EMAIL_AUTH_USERNAME"].nil?
+    puts "WARNING: ALERTMANAGER_EMAIL_AUTH_USERNAME is not set. Email notifications will be disabled."
+    puts "For details on enabling these notifications, see:"
+    puts "  https://github.com/gpii-ops/gpii-infra/blob/master/CI-CD.md#configure-gitlab-secret-variables"
+  else
+    @secrets[:alertmanager_email_auth_username] = ENV["ALERTMANAGER_EMAIL_AUTH_USERNAME"]
+  end
   if ENV["ALERTMANAGER_EMAIL_AUTH_PASSWORD"].nil?
     puts "WARNING: ALERTMANAGER_EMAIL_AUTH_PASSWORD is not set. Email notifications will be disabled."
     puts "For details on enabling these notifications, see:"
