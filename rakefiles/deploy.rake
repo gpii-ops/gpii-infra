@@ -1,6 +1,8 @@
 require "rake/clean"
+require "yaml"
 require_relative "./wait_for.rb"
 import "../rakefiles/kops.rake"
+import "../rakefiles/setup_versions.rake"
 
 desc "Wait until cluster has converged enough to create DNS records for GPII components"
 task :wait_for_gpii_dns => :find_zone_id do
@@ -32,6 +34,19 @@ task :wait_for_gpii_ready => :configure_kubectl do
     flowmanager_url.gsub! "http://", "https://"
   end
   wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' '#{flowmanager_url}' | grep -q ^2")
+end
+
+desc "Wait until production config tests have been completed"
+task :wait_for_productionConfigTests_complete => [:configure_kubectl, :setup_versions] do
+  puts "Waiting for production config tests to complete..."
+  puts "(You can Ctrl-C out of this safely. You may need to re-run :deploy_only afterward.)"
+
+  flowmanager_url = "http://flowmanager.#{ENV["TF_VAR_cluster_name"]}/carla/settings/%7B%22OS%22:%7B%22id%22:%22linux%22%7D,%22solutions%22:\\[%7B%22id%22:%22org.gnome.desktop.a11y.magnifier%22%7D\\]%7D"
+  if ENV["TF_VAR_cluster_name"].start_with?("stg.", "prd.")
+    flowmanager_url.gsub! "http://", "https://"
+  end
+  sh "docker rm -f productionConfigTests || true"
+  wait_for("FLOWMANAGER_URL='#{flowmanager_url}' docker run --name productionConfigTests '#{@versions["flowmanager"]}' node tests/ProductionConfigTests.js")
 end
 
 desc "Display some handy info about the cluster"
@@ -101,6 +116,7 @@ task :deploy_only => [:configure_kubectl, :find_gpii_components] do
   puts "Waiting 60s to give local DNS a chance to catch up..."
   sleep 60
   Rake::Task["wait_for_gpii_ready"].invoke
+  Rake::Task["wait_for_productionConfigTests_complete"].invoke
   Rake::Task["display_cluster_info"].invoke
 end
 
