@@ -101,7 +101,7 @@ task :deploy_only => [:configure_kubectl, :find_gpii_components] do
     end
   end
 
-  installed_charts = `helm list -q -ai`
+  installed_charts = `helm list -q -a`
   installed_charts = installed_charts.split("\n")
   @gpii_helmcharts.each do |chart|
     if installed_charts.include?(chart)
