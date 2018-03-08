@@ -1,6 +1,7 @@
 require "yaml"
 
-task :setup_versions do
-  version_yml = File.read("../modules/deploy/version.yml")
+task :setup_versions, [:path_to_version_yml] do |taskname, args|
+  args.with_defaults(path_to_version_yml: "./version.yml")
+  version_yml = File.read(args[:path_to_version_yml])
   @versions = YAML.load(version_yml)
 end

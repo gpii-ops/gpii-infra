@@ -37,7 +37,8 @@ task :wait_for_gpii_ready => :configure_kubectl do
 end
 
 desc "Wait until production config tests have been completed"
-task :wait_for_productionConfigTests_complete => [:configure_kubectl, :setup_versions] do
+task :wait_for_productionConfigTests_complete => :configure_kubectl do
+  Rake::Task["setup_versions"].invoke("../modules/deploy/version.yml")
   puts "Waiting for production config tests to complete..."
   puts "(You can Ctrl-C out of this safely. You may need to re-run :deploy_only afterward.)"
 
