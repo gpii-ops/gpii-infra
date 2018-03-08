@@ -2,5 +2,5 @@
 ---
 
 flowmanager: "gpii/universal@sha256:7d2bb3e7621ec800969d019ba994f0a6e0d228587a1d112c33e847459d4e7f3a"
-preferences-dataloader: "gpii/preferences-dataloader@sha256:2b475ac4f5eec607ee4f3ba00496877b93980cf8154da9a48841d8f87c92f1fe"
+preferences-dataloader: "gpii/preferences-dataloader@sha256:64f7daef3677b1c9238c52c1f032cfe8036b8a02b9aa4b0e0a4bcf575e0308b5"
 preferences: "gpii/universal@sha256:7d2bb3e7621ec800969d019ba994f0a6e0d228587a1d112c33e847459d4e7f3a"
