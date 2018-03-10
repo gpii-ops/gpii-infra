@@ -107,7 +107,7 @@ task :deploy_only => [:configure_kubectl, :find_gpii_components] do
     if installed_charts.include?(chart)
       begin
         wait_for(
-          "helm upgrade -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{chart} #{@tmpdir}-modules/deploy/helms/#{chart}",
+          "helm upgrade --recreate-pods -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{chart} #{@tmpdir}-modules/deploy/helms/#{chart}",
           max_wait_secs: 120,
         )
       rescue
