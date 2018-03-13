@@ -79,6 +79,11 @@ We use [Prometheus Alertmanager](https://github.com/prometheus/alertmanager), ma
    * Remove public access.
    * Allow posts from the address you created above.
    * Subscribe on-call personnel to this list.
+1. Create a Slack channel `#alerts` to receive alerts.
+   * Create an Incoming WebHook.
+   * Give it a name, description, and icon (I like the ambulance emoji :)).
+   * Add the WebHook URL to [Gitlab](CI-CD.md#configure-gitlab-secret-variables).
+   * See also: https://www.robustperception.io/using-slack-with-the-alertmanager/
 
 ### Manual testing
 
