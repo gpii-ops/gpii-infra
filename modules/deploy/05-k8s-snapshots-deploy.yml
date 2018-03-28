@@ -12,7 +12,9 @@ spec:
     spec:
       containers:
       - name: k8s-snapshots
-        image: elsdoerfer/k8s-snapshots:dev  # v2.0 has a breaking bug in AWS support
+        # Temporarily using mrtyler version of this image due to
+        # https://github.com/miracle2k/k8s-snapshots/issues/53
+        image: mrtyler/k8s-snapshots:dev  # Use :dev because :v2.0 has a breaking bug in AWS support
         env:
         - name: USE_CLAIM_NAME
           value: "true"
