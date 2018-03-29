@@ -26,7 +26,7 @@ CLEAN << "#{ENV['HOME']}/.terragrunt"
 task :test_master do
   wait_for(
     "ssh -i #{ENV["HOME"]}/.ssh/id_rsa.gpii-ci -o StrictHostKeyChecking=no admin@api.#{ENV["TF_VAR_cluster_name"]} -- ping -c 1 8.8.8.8",
-    max_wait_secs: 60,
+    max_wait_secs: 300,
   )
 end
 
