@@ -94,7 +94,8 @@ task :deploy_only => [:configure_kubectl, :find_gpii_components] do
     begin
       wait_for(
         "kubectl --context #{ENV["TF_VAR_cluster_name"]} apply -f #{component}",
-        max_wait_secs: 120,
+        sleep_secs: 5,
+        max_wait_secs: 20,
       )
     rescue
       puts "WARNING: Failed to deploy #{component}. Run 'rake deploy_only' to try again. Continuing."
@@ -108,7 +109,8 @@ task :deploy_only => [:configure_kubectl, :find_gpii_components] do
       begin
         wait_for(
           "helm upgrade --recreate-pods -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{chart} #{@tmpdir}-modules/deploy/helms/#{chart}",
-          max_wait_secs: 120,
+          sleep_secs: 5,
+          max_wait_secs: 20,
         )
       rescue
         puts "WARNING: Failed to install helm chart #{chart}. Run 'rake deploy_only' to try again. Continuing."
@@ -117,7 +119,8 @@ task :deploy_only => [:configure_kubectl, :find_gpii_components] do
       begin
         wait_for(
           "helm install --name #{chart} -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{@tmpdir}-modules/deploy/helms/#{chart}",
-          max_wait_secs: 120,
+          sleep_secs: 5,
+          max_wait_secs: 20,
         )
       rescue
         puts "WARNING: Failed to install helm chart #{chart}. Run 'rake deploy_only' to try again. Continuing."
@@ -136,7 +139,8 @@ task :init_helm => [:configure_kubectl] do
   begin
     wait_for(
       "helm init",
-      max_wait_secs: 120
+      sleep_secs: 5,
+      max_wait_secs: 20,
     )
   rescue
     puts "WARNING: Failed to initialize helm chart."
@@ -154,7 +158,8 @@ task :undeploy => [:configure_kubectl, :find_gpii_components] do
     begin
       wait_for(
         "kubectl --context #{ENV["TF_VAR_cluster_name"]} delete --ignore-not-found -f #{component}",
-        max_wait_secs: 120,
+        sleep_secs: 5,
+        max_wait_secs: 20,
       )
     rescue
       puts "WARNING: Failed to undeploy #{component}. Run 'rake undeploy' to try again. Continuing."
@@ -165,7 +170,8 @@ task :undeploy => [:configure_kubectl, :find_gpii_components] do
     begin
       wait_for(
         "helm delete #{chart}",
-        max_wait_secs: 120,
+        sleep_secs: 5,
+        max_wait_secs: 20,
       )
     rescue
       puts "WARNING: Failed to delete helm chart #{chart}. Run 'rake undeploy' to try again. Continuing."
