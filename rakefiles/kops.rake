@@ -37,7 +37,8 @@ task :wait_for_cluster_down => :configure_kubectl do
     tags=$(for elb in $elbs ; do \
       aws elb describe-tags \
       --region us-east-2 \
-      --load-balancer-names $elb | jq -r \
+      --load-balancer-names $elb \
+      --output json | jq -r \
       '.TagDescriptions[].Tags[] | select(.Key==\"KubernetesCluster\") | .Value' \
       ; done \
     ) && \
@@ -50,7 +51,7 @@ task :wait_for_cluster_down => :configure_kubectl do
   wait_for("\
     sgs=$(aws ec2 describe-security-groups \
       --region us-east-2 \
-      | jq -r \
+      --output json | jq -r \
       '.SecurityGroups[] | select(.Tags != null and .Tags[].Key==\"KubernetesCluster\" and .Tags[].Value == \"#{ENV["TF_VAR_cluster_name"]}\") | select(.Description | startswith(\"Security group for Kubernetes\")) | .GroupId' \
     ) && \
     [ \"$sgs\" == \"\" ] \
