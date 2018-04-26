@@ -1,21 +1,35 @@
-# First we create the two managed zones at AWS and Google DNS
+
+variable "recordname" {}
+
+variable "gcp_project" {}
+
+
+provider "aws" {
+  version = "~> 1.8"
+  region = "us-east-2"
+}
+
+provider "google" {
+  credentials = "${file("key.json")}"
+  project     = "${var.gcp_project}"
+  region      = "us-central1"
+}
 
 
 resource "aws_route53_zone" "main" {
-  name = "${var.environment}.gpii.net"
+  name = "${var.recordname}.gpii.net"
   force_destroy = true
 
   tags {
-    Environment = "${var.environment}"
     Terraform = true
   }
 }
 
 
 resource "google_dns_managed_zone" "main" {
-  name        = "${var.environment}-gpii-net"
-  dns_name    = "${var.environment}.gpii.net."
-  description = "${var.environment} DNS zone"
+  name        = "${var.recordname}-gpii-net"
+  dns_name    = "${var.recordname}.gpii.net."
+  description = "${var.recordname} DNS zone"
 }
 
 
@@ -31,5 +45,10 @@ resource "aws_route53_record" "main_ns" {
     "${google_dns_managed_zone.main.name_servers.2}",
     "${google_dns_managed_zone.main.name_servers.3}",
   ]
+}
+
+
+output "cluster_dns_zone_id" {
+  value = "${aws_route53_zone.main.zone_id}"
 }
 
