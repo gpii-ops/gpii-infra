@@ -16,14 +16,14 @@ services:
       # TF_VAR_project_id is used to create a GCP project for our environment
       #   via the gcp-project-init script
       # It's then used by modules as a space to create resources in
-      TF_VAR_project_id: ${ENV}-demo-apps-296e23
+      TF_VAR_project_id:
 
       # TF_VAR_serviceaccount_key will be used by the gcp-project-init script
       #    to put the service account key upon the creation of the GCP project
       # It can then be used by modules to authenticate to GCP
       TF_VAR_serviceaccount_key: /project/live/${ENV}/secrets/kube-system/owner.json
 
-      # TF_VAR is the default directory for Terraform / Terragrunt
+      # TF_VAR_default_dir is the default directory for Terraform / Terragrunt
       # Used when we run `xk up` or `xk down` without an argument
       TF_VAR_default_dir: /project/live/${ENV}/k8s
 
@@ -45,6 +45,6 @@ services:
       - ./.config/${ENV}/kube:/root/.kube
 
       # EXEKUBE DEVELOPMENT
-      - ../exekube/modules:/exekube-modules
+      - ../../exekube/modules:/exekube-modules
       # ---
     command: kubectl proxy --address="0.0.0.0" --accept-hosts ".*"
