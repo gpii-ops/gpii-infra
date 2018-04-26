@@ -21,6 +21,12 @@ variable "dns_records" {
   default = {}
 }
 
+variable "cluster_subnets" {
+  default = {}
+}
+
+variable "static_ip_region" {}
+
 # ------------------------------------------------------------------------------
 # Modules and resources
 # ------------------------------------------------------------------------------
@@ -30,8 +36,10 @@ module "gke_network" {
   project_id         = "${var.project_id}"
   serviceaccount_key = "${var.serviceaccount_key}"
 
-  dns_zones   = "${var.dns_zones}"
-  dns_records = "${var.dns_records}"
+  dns_zones        = "${var.dns_zones}"
+  dns_records      = "${var.dns_records}"
+  cluster_subnets  = "${var.cluster_subnets}"
+  static_ip_region = "${var.static_ip_region}"
 }
 
 # ------------------------------------------------------------------------------

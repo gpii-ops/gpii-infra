@@ -12,3 +12,4 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
+main_compute_zone = "us-central1-a"
