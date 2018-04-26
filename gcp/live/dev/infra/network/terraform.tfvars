@@ -15,9 +15,9 @@ terragrunt = {
 # create_static_ip_address = false
 
 dns_zones = {
-  istio-exekube-us = "istio.exekube.us."
+  gcp-gpii-net = "gcp.gpii.net."
 }
 
 dns_records = {
-  istio-exekube-us = "*.istio.exekube.us."
+  gcp-gpii-net = "*.gcp.gpii.net."
 }
