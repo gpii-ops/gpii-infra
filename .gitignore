@@ -1,9 +1,12 @@
 .*.sw?
 .bundle/
+.config
 .terraform/
 dev/terraform.tfstate*
-prereqs/dev/terraform.tfstate*
 graph*.png
+gcp/live/*/**/owner.json
+gcp/live/*/*secrets/**
+modules/deploy/secrets/*-secrets.yml
+prereqs/dev/terraform.tfstate*
 tags
 vendor/
-modules/deploy/secrets/*-secrets.yml
