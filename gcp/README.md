@@ -4,10 +4,10 @@ This directory manages GPII infrastructure in [Google Cloud Project (GCP)](https
 
 Initial instructions based on [exekube's Getting Started](https://exekube.github.io/exekube/in-practice/getting-started/) (version 0.3.0).
 
-# Setup
+## Setup
 
 1. Clone this repo.
-1. Clone [exekube](https://github.com/exekube/exekube).
+1. Clone [my fork of exekube](https://github.com/mrtyler/exekube).
    * The `gpii-infra` clone and the `exekube` clone must be siblings in the same directory (there are some references to `../exekube`).
 1. `cd exekube && docker-compose build google`
 1. `cd ../gpii-infra/gcp`
@@ -25,7 +25,8 @@ Initial instructions based on [exekube's Getting Started](https://exekube.github
 1. `xk up live/dev/infra`
 1. `xk up`
 
-# Teardown
+## Teardown
+
 1. `xk down`
    * This is the important one since it shuts down the expensive bits (VMs in the Kubernetes cluster, mostly)
 1. `xk down live/dev/infra`
