@@ -1,0 +1,50 @@
+version: "3"
+
+services:
+  xk:
+    image: exekube/exekube:0.3.0-google
+    working_dir: /project
+    environment:
+      USER: root
+      ENV: ${ENV:?err}
+      ORGANIZATION_ID:
+      BILLING_ID:
+
+      TF_INPUT: "0"
+      TF_LOG:
+
+      # TF_VAR_project_id is used to create a GCP project for our environment
+      #   via the gcp-project-init script
+      # It's then used by modules as a space to create resources in
+      TF_VAR_project_id:
+
+      # TF_VAR_serviceaccount_key will be used by the gcp-project-init script
+      #    to put the service account key upon the creation of the GCP project
+      # It can then be used by modules to authenticate to GCP
+      TF_VAR_serviceaccount_key: /project/live/${ENV}/secrets/kube-system/owner.json
+
+      # TF_VAR_default_dir is the default directory for Terraform / Terragrunt
+      # Used when we run `xk up` or `xk down` without an argument
+      TF_VAR_default_dir: /project/live/${ENV}/k8s
+
+      # TF_VAR_secrets_dir is used by multiple modules to source secrets from
+      TF_VAR_secrets_dir: /project/live/${ENV}/secrets
+
+      # Keyring is used by the gcp-secret-mgmt module
+      # Also by secrets-fetch and secrets-push scripts
+      # The GCP KMS keyring name to use
+      TF_VAR_keyring_name: keyring
+
+    ports:
+      - 8001:8001
+    volumes:
+      - .:/project
+      - ./.config/${ENV}/helm:/root/.helm
+      - ./.config/${ENV}/terragrunt:/root/.terragrunt
+      - ./.config/${ENV}/gcloud:/root/.config/gcloud
+      - ./.config/${ENV}/kube:/root/.kube
+
+      # EXEKUBE DEVELOPMENT
+      - ../../exekube/modules:/exekube-modules
+      # ---
+    command: kubectl proxy --address="0.0.0.0" --accept-hosts ".*"

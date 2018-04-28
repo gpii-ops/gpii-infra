@@ -23,19 +23,19 @@ setup:
 unit-tests:
   stage: unit-tests
   script:
-    - cd rakefiles/tests
+    - cd aws/rakefiles/tests
     - rake
 
 dev:
   stage: dev
   script:
-    - cd dev
+    - cd aws/dev
     - bundle install --path "vendor/bundle"
     - rake clobber
     - rake
   after_script:
     # Clean up even if something failed.
-    - cd dev
+    - cd aws/dev
     - rake destroy
     - rake clobber
 
@@ -53,7 +53,7 @@ promote-to-stg:
 stg:
   stage: stg
   script:
-    - cd stg
+    - cd aws/stg
     - rake clobber
     - rake
   environment:
@@ -75,7 +75,7 @@ promote-to-prd:
 prd:
   stage: prd
   script:
-    - cd prd
+    - cd aws/prd
     - rake clobber
     - rake
   environment:
