@@ -7,7 +7,7 @@ terragrunt = {
   dependencies {
     paths = [
       "../../cluster",
-      "../namespace",
+      "../../kube-system/administration-tasks",
     ]
   }
 
