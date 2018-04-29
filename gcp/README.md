@@ -7,7 +7,7 @@ Initial instructions based on [exekube's Getting Started](https://exekube.github
 ## Setup
 
 1. Clone this repo.
-1. Clone [my fork of exekube](https://github.com/mrtyler/exekube).
+1. Clone [exekube](https://github.com/exekube/exekube).
    * The `gpii-infra` clone and the `exekube` clone must be siblings in the same directory (there are some references to `../exekube`).
 1. `cd exekube && docker-compose build google`
 1. `cd ../gpii-infra/gcp`

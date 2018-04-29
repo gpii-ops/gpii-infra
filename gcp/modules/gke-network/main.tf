@@ -38,8 +38,10 @@ module "gke_network" {
 
   dns_zones        = "${var.dns_zones}"
   dns_records      = "${var.dns_records}"
-  cluster_subnets  = "${var.cluster_subnets}"
-  static_ip_region = "${var.static_ip_region}"
+  cluster_subnets  = {
+    "0" = "us-central1,10.16.0.0/20,10.17.0.0/16,10.18.0.0/16"
+  }
+  static_ip_region = "us-central1"
 }
 
 # ------------------------------------------------------------------------------
