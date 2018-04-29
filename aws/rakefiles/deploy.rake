@@ -80,7 +80,7 @@ task :find_gpii_components => :generate_modules do
 end
 
 desc "Deploy GPII components to cluster"
-task :deploy => [:apply, :configure_kubectl, :wait_for_cluster_up, :init_helm, :find_gpii_components] do
+task :deploy => [:apply, :configure_kubectl, :wait_for_cluster_up, :setup_rbac, :init_helm, :find_gpii_components] do
   Rake::Task["deploy_only"].invoke
 end
 
@@ -134,11 +134,24 @@ task :deploy_only => [:configure_kubectl, :find_gpii_components] do
   Rake::Task["display_cluster_info"].invoke
 end
 
+desc "Configure default RBAC roles and Tiller account in the cluster #{ENV["TF_VAR_cluster_name"]}"
+task :setup_rbac => [:configure_kubectl] do
+  begin
+    wait_for(
+      "kubectl --context #{ENV["TF_VAR_cluster_name"]} apply -f ../modules/deploy/rbac/",
+      sleep_secs: 5,
+      max_wait_secs: 20,
+    )
+  rescue
+    puts "WARNING: Failed to initialize RBAC."
+  end
+end
+
 desc "Configure Helm to install Tiller in the cluster #{ENV["TF_VAR_cluster_name"]}"
 task :init_helm => [:configure_kubectl] do
   begin
     wait_for(
-      "helm init",
+      "helm init --service-account tiller",
       sleep_secs: 5,
       max_wait_secs: 20,
     )

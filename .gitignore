@@ -2,6 +2,7 @@
 .bundle/
 .config
 .terraform/
+.DS_Store
 aws/dev/terraform.tfstate*
 graph*.png
 gcp/live/*/**/owner.json
