@@ -1,7 +1,7 @@
 # ↓ Module metadata
 terragrunt = {
   terraform {
-    source = "/project/modules//helm-initializer"
+    source = "/project/modules//couchdb"
   }
 
   dependencies {
@@ -17,4 +17,3 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
-tiller_namespace = "gpii"
