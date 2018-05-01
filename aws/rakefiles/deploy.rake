@@ -1,3 +1,4 @@
+require 'yaml'
 require "rake/clean"
 require_relative "./wait_for.rb"
 import "../rakefiles/kops.rake"
@@ -25,9 +26,7 @@ task :wait_for_gpii_ready => :configure_kubectl do
   #
   # We use /preferences/carla as a proxy for the overall health of the system.
   # It's not perfect but it's a good start.
-  #
-  # Currently we only deploy SSL to shared environemnts (stg, prd).
-  preferences_url = "http://preferences.#{ENV["TF_VAR_cluster_name"]}/preferences/carla"
+  preferences_url = "https://preferences.#{ENV["TF_VAR_cluster_name"]}/preferences/carla"
   if ENV["TF_VAR_cluster_name"].start_with?("stg.", "prd.")
     preferences_url.gsub! "http://", "https://"
   end
@@ -107,7 +106,7 @@ task :deploy_only => [:configure_kubectl, :install_charts, :find_gpii_components
 end
 
 desc "Install Helm charts in the cluster #{ENV["TF_VAR_cluster_name"]}"
-task :install_charts => [:configure_kubectl, :setup_system_components, :init_helm] do
+task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_components, :init_helm] do
   Dir.chdir("#{@tmpdir}-modules/deploy/helms/") do
     @gpii_helmcharts = Dir.glob("*").select {|d| File.directory? d }
   end
@@ -115,10 +114,11 @@ task :install_charts => [:configure_kubectl, :setup_system_components, :init_hel
   installed_charts = `helm list -q -a`
   installed_charts = installed_charts.split("\n")
   @gpii_helmcharts.each do |chart|
+    chart_config = YAML.load_file("#{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml")
     if installed_charts.include?(chart)
       begin
         wait_for(
-          "helm upgrade --recreate-pods -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{chart} #{@tmpdir}-modules/deploy/helms/#{chart}",
+          "helm upgrade --recreate-pods -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{chart_config['helm-override'] && chart_config['helm-override']['name'] ? chart_config['helm-override']['name'] : chart} #{@tmpdir}-modules/deploy/helms/#{chart}",
           sleep_secs: 5,
           max_wait_secs: 20,
         )
@@ -128,7 +128,7 @@ task :install_charts => [:configure_kubectl, :setup_system_components, :init_hel
     else
       begin
         wait_for(
-          "helm install --name #{chart} -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{@tmpdir}-modules/deploy/helms/#{chart}",
+          "helm install --name #{chart_config['helm-override'] && chart_config['helm-override']['name'] ? chart_config['helm-override']['name'] : chart} #{chart_config['helm-override'] && chart_config['helm-override']['namespace'] ? "--namespace " + chart_config['helm-override']['namespace'] : ""} -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{@tmpdir}-modules/deploy/helms/#{chart}",
           sleep_secs: 5,
           max_wait_secs: 20,
         )
@@ -184,6 +184,10 @@ task :undeploy => [:configure_kubectl, :find_gpii_components] do
       puts "WARNING: An incomplete undeploy may prevent 'rake destroy' from succeeding."
     end
   end
+
+  Dir.chdir("#{@tmpdir}-modules/deploy/helms/") do
+    @gpii_helmcharts = Dir.glob("*").select {|d| File.directory? d }
+  end
   @gpii_helmcharts.each do |chart|
     begin
       wait_for(
@@ -194,6 +198,15 @@ task :undeploy => [:configure_kubectl, :find_gpii_components] do
     rescue
       puts "WARNING: Failed to delete helm chart #{chart}. Run 'rake undeploy' to try again. Continuing."
     end
+  end
+  begin
+    wait_for(
+      "kubectl --context #{ENV["TF_VAR_cluster_name"]} delete --ignore-not-found -f ../modules/deploy/system/",
+      sleep_secs: 5,
+      max_wait_secs: 20,
+    )
+  rescue
+    puts "WARNING: Failed to configure system components."
   end
   Rake::Task["wait_for_cluster_down"].invoke
 end

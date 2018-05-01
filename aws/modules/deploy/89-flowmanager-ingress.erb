@@ -1,0 +1,18 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: flowmanager-ingress
+  namespace: gpii
+spec:
+  tls:
+    - hosts:
+      - flowmanager.<%= ENV["TF_VAR_environment"] %>.gpii.net
+      secretName: flowmanager-tls
+  rules:
+    - host: flowmanager.<%= ENV["TF_VAR_environment"] %>.gpii.net
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: flowmanager
+            servicePort: 80

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    dns.alpha.kubernetes.io/external: preferences.<%= ENV["TF_VAR_environment"] %>.gpii.net,flowmanager.<%= ENV["TF_VAR_environment"] %>.gpii.net
+  name: nginx-ingress-controller
+  namespace: gpii
