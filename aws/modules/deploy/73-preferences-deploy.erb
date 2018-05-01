@@ -18,10 +18,12 @@ spec:
         env:
         - name: NODE_ENV
           value: gpii.config.preferencesServer.standalone.production
-        - name: GPII_PREFERENCES_DATASOURCE_URL
+        - name: PREFERENCESSERVER_LISTEN_PORT
+          value: '8081'
+        - name: DATASOURCE_HOSTNAME
           valueFrom:
             secretKeyRef:
               name: couchdb-secrets
-              key: preferences_datasource_url
-        - name: GPII_PREFERENCES_LISTEN_PORT
-          value: '8081'
+              key: datasource_hostname
+        - name: DATASOURCE_PORT
+          value: '5984'

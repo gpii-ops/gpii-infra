@@ -18,7 +18,20 @@ spec:
         env:
         - name: NODE_ENV
           value: gpii.config.cloudBased.flowManager.production
-        - name: GPII_FLOWMANAGER_PREFERENCES_URL
-          value: http://preferences.gpii.svc.cluster.local/preferences/%userToken
-        - name: GPII_FLOWMANAGER_LISTEN_PORT
+        - name: FLOWMANAGER_LISTEN_PORT
           value: '8081'
+        - name: DATASOURCE_HOSTNAME
+          valueFrom:
+            secretKeyRef:
+              name: couchdb-secrets
+              key: datasource_hostname
+        - name: DATASOURCE_PORT
+          value: '5984'
+        - name: FLOWMANAGER_TO_PREFERENCESSERVER_URL
+          value: http://preferences.gpii.svc.cluster.local/preferences/%gpiiKey?merge=%merge
+        - name: FLOWMANAGER_MATCHMAKER_URL
+        <% if ENV["TF_VAR_cluster_name"].start_with?("stg.", "prd.") %>
+          value: "https://flowmanager.<%= ENV["TF_VAR_cluster_name"] %>"
+        <% else %>
+          value: "http://flowmanager.<%= ENV["TF_VAR_cluster_name"] %>"
+        <% end %>

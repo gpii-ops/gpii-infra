@@ -273,7 +273,13 @@ This is what I used to create a fake preference while verifying that volumes are
 data='
 {
   "_id": "mrtyler",
-  "value": {
+  "type": "prefsSafe",
+  "schemaVersion": "0.1",
+  "prefsSafeType": "user",
+  "name": "mrtyler",
+  "password": null,
+  "email": null,
+  "preferences": {
     "flat": {
       "contexts": {
         "gpii-default": {
@@ -284,11 +290,13 @@ data='
         }
       }
     }
-  }
+  },
+  "timestampCreated": "2018-04-27T20:41:01.850Z",
+  "timestampUpdated": null
 }
 '
 ```
-1. Add the record: `curl -f -H 'Content-Type: application/json' -X POST http://couchdb.default.svc.cluster.local:5984/preferences -d "$data"`
+1. Add the record: `curl -f -H 'Content-Type: application/json' -X POST http://couchdb.default.svc.cluster.local:5984/gpii -d "$data"`
 1. Before the restore: verify that the new record is present.
 1. After the restore: verify that the new record is no longer present.
 

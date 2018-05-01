@@ -3,6 +3,7 @@ require "erb"
 require "rake/clean"
 require "securerandom"
 require "yaml"
+import "../../rakefiles/setup_versions.rake"
 import "../../rakefiles/prereqs.rake"
 require_relative "../../rakefiles/terraform_output.rb"
 require_relative "../../rakefiles/vars.rb"
@@ -33,11 +34,6 @@ end
 DEPLOY_OUT_DIR = "#{@tmpdir}-modules/deploy"
 directory DEPLOY_OUT_DIR
 CLOBBER << DEPLOY_OUT_DIR
-
-task :setup_versions do
-  version_yml = File.read("./version.yml")
-  @versions = YAML.load(version_yml)
-end
 
 task :setup_secrets do
   saved_secrets_file_path = "secrets/#{ENV["TF_VAR_cluster_name"]}-secrets.yml"

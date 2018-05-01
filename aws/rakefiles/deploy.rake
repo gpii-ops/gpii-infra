@@ -1,6 +1,18 @@
 require "rake/clean"
+require "yaml"
 require_relative "./wait_for.rb"
 import "../rakefiles/kops.rake"
+import "../rakefiles/setup_versions.rake"
+
+@flowmanager_hostname = "flowmanager.#{ENV["TF_VAR_cluster_name"]}"
+# We use /carla/settings as a proxy for the overall health of the system.
+# It's not perfect but it's a good start.
+#
+# Currently we only deploy SSL to shared environemnts (stg, prd).
+@flowmanager_test_url = "http://#{@flowmanager_hostname}/carla/settings/%7B%22OS%22:%7B%22id%22:%22linux%22%7D,%22solutions%22:\\[%7B%22id%22:%22org.gnome.desktop.a11y.magnifier%22%7D\\]%7D"
+if ENV["TF_VAR_cluster_name"].start_with?("stg.", "prd.")
+  @flowmanager_test_url.gsub! "http://", "https://"
+end
 
 desc "Wait until cluster has converged enough to create DNS records for GPII components"
 task :wait_for_gpii_dns => :find_zone_id do
@@ -31,7 +43,21 @@ task :wait_for_gpii_ready => :configure_kubectl do
   if ENV["TF_VAR_cluster_name"].start_with?("stg.", "prd.")
     preferences_url.gsub! "http://", "https://"
   end
+
+  # Test Preferences Server
   wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' '#{preferences_url}' | grep -q ^2")
+  # Test Cloud Based Flow Manager
+  wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' '#{@flowmanager_test_url}' | grep -q ^2")
+end
+
+desc "Wait until production config tests have been completed"
+task :wait_for_productionConfigTests_complete => :configure_kubectl do
+  Rake::Task["setup_versions"].invoke("../modules/deploy/version.yml")
+  puts "Waiting for production config tests to complete..."
+  puts "(You can Ctrl-C out of this safely. You may need to re-run :deploy_only afterward.)"
+
+  sh "docker rm -f productionConfigTests || true"
+  wait_for("FLOWMANAGER_URL='#{@flowmanager_test_url}' docker run --name productionConfigTests '#{@versions["flowmanager"]}' node tests/ProductionConfigTests.js")
 end
 
 desc "Display some handy info about the cluster"
