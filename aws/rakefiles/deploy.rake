@@ -74,18 +74,15 @@ end
 
 task :find_gpii_components => :generate_modules do
   @gpii_components = FileList.new("#{@tmpdir}-modules/deploy/[0-9]*.yml").sort
-  Dir.chdir("#{@tmpdir}-modules/deploy/helms/") do
-    @gpii_helmcharts = Dir.glob("*").select {|d| File.directory? d }
-  end
 end
 
 desc "Deploy GPII components to cluster"
-task :deploy => [:apply, :configure_kubectl, :wait_for_cluster_up, :init_helm, :find_gpii_components] do
+task :deploy => [:apply, :configure_kubectl, :wait_for_cluster_up, :setup_system_components, :init_helm, :install_charts, :find_gpii_components] do
   Rake::Task["deploy_only"].invoke
 end
 
 desc "Deploy GPII components to existing cluster without creating/updating infrastructure"
-task :deploy_only => [:configure_kubectl, :find_gpii_components] do
+task :deploy_only => [:configure_kubectl, :install_charts, :find_gpii_components] do
   extra_components = [
     "https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml",
   ]
@@ -100,6 +97,19 @@ task :deploy_only => [:configure_kubectl, :find_gpii_components] do
     rescue
       puts "WARNING: Failed to deploy #{component}. Run 'rake deploy_only' to try again. Continuing."
     end
+  end
+
+  Rake::Task["wait_for_gpii_dns"].invoke
+  puts "Waiting 60s to give local DNS a chance to catch up..."
+  sleep 60
+  Rake::Task["wait_for_gpii_ready"].invoke
+  Rake::Task["display_cluster_info"].invoke
+end
+
+desc "Install Helm charts in the cluster #{ENV["TF_VAR_cluster_name"]}"
+task :install_charts => [:configure_kubectl, :setup_system_components, :init_helm] do
+  Dir.chdir("#{@tmpdir}-modules/deploy/helms/") do
+    @gpii_helmcharts = Dir.glob("*").select {|d| File.directory? d }
   end
 
   installed_charts = `helm list -q -a`
@@ -127,23 +137,31 @@ task :deploy_only => [:configure_kubectl, :find_gpii_components] do
       end
     end
   end
-  Rake::Task["wait_for_gpii_dns"].invoke
-  puts "Waiting 60s to give local DNS a chance to catch up..."
-  sleep 60
-  Rake::Task["wait_for_gpii_ready"].invoke
-  Rake::Task["display_cluster_info"].invoke
 end
 
-desc "Configure Helm to install Tiller in the cluster #{ENV["TF_VAR_cluster_name"]}"
-task :init_helm => [:configure_kubectl] do
+desc "Configure default RBAC roles, namespaces, Tiller account, and other system components in the cluster #{ENV["TF_VAR_cluster_name"]}"
+task :setup_system_components => [:configure_kubectl] do
   begin
     wait_for(
-      "helm init",
+      "kubectl --context #{ENV["TF_VAR_cluster_name"]} apply -f ../modules/deploy/system/",
       sleep_secs: 5,
       max_wait_secs: 20,
     )
   rescue
-    puts "WARNING: Failed to initialize helm chart."
+    puts "WARNING: Failed to configure system components."
+  end
+end
+
+desc "Configure Helm to install Tiller in the cluster #{ENV["TF_VAR_cluster_name"]}"
+task :init_helm => [:configure_kubectl, :setup_system_components] do
+  begin
+    wait_for(
+      "helm init --service-account tiller",
+      sleep_secs: 5,
+      max_wait_secs: 20,
+    )
+  rescue
+    puts "WARNING: Failed to initialize Helm."
   end
 end
 
