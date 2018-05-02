@@ -1,4 +1,4 @@
-helm-override:
+chart-metadata:
   name: nginx-ingress
   namespace: gpii
 

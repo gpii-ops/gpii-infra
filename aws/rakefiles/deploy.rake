@@ -1,4 +1,4 @@
-require 'yaml'
+require "yaml"
 require "rake/clean"
 require_relative "./wait_for.rb"
 import "../rakefiles/kops.rake"
@@ -17,20 +17,14 @@ desc "Wait until GPII components have been deployed"
 task :wait_for_gpii_ready => :configure_kubectl do
   puts "Waiting for GPII components to be fully deployed..."
   puts "(You can Ctrl-C out of this safely. You may need to re-run :deploy_only afterward.)"
-
-  # This is the simplest one-liner I could find to GET a url and return just
-  # the status code.
-  # http://superuser.com/questions/590099/can-i-make-curl-fail-with-an-exitcode-different-than-0-if-the-http-status-code-i
-  #
-  # The grep catches a 2xx status code.
-  #
-  # We use /preferences/carla as a proxy for the overall health of the system.
-  # It's not perfect but it's a good start.
   preferences_url = "https://preferences.#{ENV["TF_VAR_cluster_name"]}/preferences/carla"
-  if ENV["TF_VAR_cluster_name"].start_with?("stg.", "prd.")
-    preferences_url.gsub! "http://", "https://"
+  if ENV["TF_VAR_cluster_name"].start_with?("prd.")
+    wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' '#{preferences_url}' | grep -q ^2")
+  else
+    wait_for("curl -k --silent --output /dev/stderr --write-out '%{http_code}' '#{preferences_url}' | grep -q ^2")
+    # For staging and dev environments we also need to make sure that certificate is issues by Letsencrypt
+    wait_for("curl -k -vI https://preferences.dev-natarajaya.gpii.net/preferences/carla 2>&1 | grep 'CN=Fake LE Intermediate X1'")
   end
-  wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' '#{preferences_url}' | grep -q ^2")
 end
 
 desc "Display some handy info about the cluster"
@@ -115,10 +109,21 @@ task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_co
   installed_charts = installed_charts.split("\n")
   @gpii_helmcharts.each do |chart|
     chart_config = YAML.load_file("#{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml")
+    # Extracting chart name and namespace from chart-metadata
+    if chart_config['chart-metadata'] && chart_config['chart-metadata']['name']
+      chart_name = chart_config['chart-metadata']['name']
+    else
+      chart_name = chart
+    end
+    if chart_config['chart-metadata'] && chart_config['chart-metadata']['namespace']
+      chart_namespace = chart_config['chart-metadata']['namespace']
+    else
+      chart_namespace = 'default'
+    end
     if installed_charts.include?(chart)
       begin
         wait_for(
-          "helm upgrade --recreate-pods -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{chart_config['helm-override'] && chart_config['helm-override']['name'] ? chart_config['helm-override']['name'] : chart} #{@tmpdir}-modules/deploy/helms/#{chart}",
+          "helm upgrade --recreate-pods -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{chart_name} #{@tmpdir}-modules/deploy/helms/#{chart}",
           sleep_secs: 5,
           max_wait_secs: 20,
         )
@@ -128,7 +133,7 @@ task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_co
     else
       begin
         wait_for(
-          "helm install --name #{chart_config['helm-override'] && chart_config['helm-override']['name'] ? chart_config['helm-override']['name'] : chart} #{chart_config['helm-override'] && chart_config['helm-override']['namespace'] ? "--namespace " + chart_config['helm-override']['namespace'] : ""} -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{@tmpdir}-modules/deploy/helms/#{chart}",
+          "helm install --name #{chart_name} --namespace #{chart_namespace} -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{@tmpdir}-modules/deploy/helms/#{chart}",
           sleep_secs: 5,
           max_wait_secs: 20,
         )

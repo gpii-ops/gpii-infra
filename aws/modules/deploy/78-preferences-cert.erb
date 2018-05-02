@@ -6,7 +6,11 @@ metadata:
 spec:
   secretName: preferences-tls
   issuerRef:
-    name: letsencrypt
+    <% if ENV["TF_VAR_cluster_name"].start_with?("prd.") %>
+    name: letsencrypt-production
+    <% else %>
+    name: letsencrypt-staging
+    <% end %>
   dnsNames:
   - preferences.<%= ENV["TF_VAR_environment"] %>.gpii.net
   acme:

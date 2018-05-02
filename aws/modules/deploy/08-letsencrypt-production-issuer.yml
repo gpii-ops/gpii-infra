@@ -1,13 +1,13 @@
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Issuer
 metadata:
-  name: letsencrypt
+  name: letsencrypt-production
   namespace: gpii
 spec:
   acme:
     server: https://acme-v01.api.letsencrypt.org/directory
-    email: ops@raisingthefloor.org
+    email: webmaster@raisingthefloor.org
     privateKeySecretRef:
-      name: letsencrypt
+      name: letsencrypt-production
       namespace: gpii
     http01: {}
