@@ -19,11 +19,23 @@ task :wait_for_gpii_ready => :configure_kubectl do
   puts "(You can Ctrl-C out of this safely. You may need to re-run :deploy_only afterward.)"
   preferences_url = "https://preferences.#{ENV["TF_VAR_cluster_name"]}/preferences/carla"
   if ENV["TF_VAR_cluster_name"].start_with?("prd.")
+    # This is the simplest one-liner I could find to GET a url and return just
+    # the status code.
+    # http://superuser.com/questions/590099/can-i-make-curl-fail-with-an-exitcode-different-than-0-if-the-http-status-code-i
+    #
+    # The grep catches a 2xx status code.
+    #
+    # We use /preferences/carla as a proxy for the overall health of the system.
+    # It's not perfect but it's a good start.
     wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' '#{preferences_url}' | grep -q ^2")
   else
     wait_for("curl -k --silent --output /dev/stderr --write-out '%{http_code}' '#{preferences_url}' | grep -q ^2")
-    # For staging and dev environments we also need to make sure that certificate is issues by Letsencrypt
-    wait_for("curl -k -vI #{preferences_url} 2>&1 | grep 'CN=Fake LE Intermediate X1'")
+    # For staging and dev environments we also need to make sure that certificate is issued by Letsencrypt
+    wait_for(
+      "curl -k -vI #{preferences_url} 2>&1 | grep 'CN=Fake LE Intermediate X1'",
+      sleep_secs: 5,
+      max_wait_secs: 20,
+    )
   end
 end
 
@@ -123,7 +135,7 @@ task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_co
     if installed_charts.include?(chart)
       begin
         wait_for(
-          "helm upgrade --recreate-pods -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{chart_name} #{@tmpdir}-modules/deploy/helms/#{chart}",
+          "helm upgrade --namespace #{chart_namespace} --recreate-pods -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{chart_name} #{@tmpdir}-modules/deploy/helms/#{chart}",
           sleep_secs: 5,
           max_wait_secs: 20,
         )

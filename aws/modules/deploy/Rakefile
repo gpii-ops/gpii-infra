@@ -130,7 +130,7 @@ do
   end
 
   HELMCHARTS_DIRS.each do |d|
-    rendered = ERB.new(File.read("helms/#{d}-values.#{File.file?("helms/#{d}-values.erb") ? 'erb' : 'yml'}")).result(binding)
+    rendered = ERB.new(File.read("helms/#{d}-values.erb")).result(binding)
     File.open("#{DEPLOY_OUT_DIR}/helms/#{d}/custom-values.yaml", "w") do |f|
       f.puts rendered
     end
