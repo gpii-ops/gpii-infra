@@ -6,7 +6,7 @@ metadata:
 spec:
   secretName: preferences-tls
   issuerRef:
-    <% if ENV["TF_VAR_cluster_name"].start_with?("prd.") %>
+    <% if ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.") %>
     name: letsencrypt-production
     <% else %>
     name: letsencrypt-staging

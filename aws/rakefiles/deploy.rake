@@ -18,7 +18,7 @@ task :wait_for_gpii_ready => :configure_kubectl do
   puts "Waiting for GPII components to be fully deployed..."
   puts "(You can Ctrl-C out of this safely. You may need to re-run :deploy_only afterward.)"
   preferences_url = "https://preferences.#{ENV["TF_VAR_cluster_name"]}/preferences/carla"
-  if ENV["TF_VAR_cluster_name"].start_with?("prd.")
+  if ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.")
     # This is the simplest one-liner I could find to GET a url and return just
     # the status code.
     # http://superuser.com/questions/590099/can-i-make-curl-fail-with-an-exitcode-different-than-0-if-the-http-status-code-i
@@ -30,7 +30,7 @@ task :wait_for_gpii_ready => :configure_kubectl do
     wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' '#{preferences_url}' | grep -q ^2")
   else
     wait_for("curl -k --silent --output /dev/stderr --write-out '%{http_code}' '#{preferences_url}' | grep -q ^2")
-    # For staging and dev environments we also need to make sure that certificate is issued by Letsencrypt
+    # For dev environment we also need to make sure that certificate is issued by Letsencrypt
     wait_for(
       "curl -k -vI #{preferences_url} 2>&1 | grep 'CN=Fake LE Intermediate X1'",
       sleep_secs: 5,
