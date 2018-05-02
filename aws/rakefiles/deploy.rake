@@ -23,7 +23,7 @@ task :wait_for_gpii_ready => :configure_kubectl do
   else
     wait_for("curl -k --silent --output /dev/stderr --write-out '%{http_code}' '#{preferences_url}' | grep -q ^2")
     # For staging and dev environments we also need to make sure that certificate is issues by Letsencrypt
-    wait_for("curl -k -vI https://preferences.dev-natarajaya.gpii.net/preferences/carla 2>&1 | grep 'CN=Fake LE Intermediate X1'")
+    wait_for("curl -k -vI #{preferences_url} 2>&1 | grep 'CN=Fake LE Intermediate X1'")
   end
 end
 
