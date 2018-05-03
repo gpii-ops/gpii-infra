@@ -137,7 +137,7 @@ task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_co
         wait_for(
           "helm upgrade --namespace #{chart_namespace} --recreate-pods -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{chart_name} #{@tmpdir}-modules/deploy/helms/#{chart}",
           sleep_secs: 5,
-          max_wait_secs: 20,
+          max_wait_secs: 60,
         )
       rescue
         puts "WARNING: Failed to install helm chart #{chart}. Run 'rake deploy_only' to try again. Continuing."
@@ -147,7 +147,7 @@ task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_co
         wait_for(
           "helm install --name #{chart_name} --namespace #{chart_namespace} -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{@tmpdir}-modules/deploy/helms/#{chart}",
           sleep_secs: 5,
-          max_wait_secs: 20,
+          max_wait_secs: 60,
         )
       rescue
         puts "WARNING: Failed to install helm chart #{chart}. Run 'rake deploy_only' to try again. Continuing."
