@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   namespace: gpii
-  name: gpii-dataloader-load-static-data
+  name: gpii-dataloader
 spec:
   template:
     metadata:
@@ -20,6 +20,4 @@ spec:
               key: dataloader_couchdb_url
         - name: CLEAR_INDEX
           value: 'true'
-        - name: DBDATA_DIR
-          value: /home/node/universal/testData/dbData
       restartPolicy: OnFailure
