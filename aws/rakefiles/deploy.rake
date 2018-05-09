@@ -5,16 +5,6 @@ require_relative "./wait_for.rb"
 import "../rakefiles/kops.rake"
 import "../rakefiles/setup_versions.rake"
 
-@flowmanager_hostname = "flowmanager.#{ENV["TF_VAR_cluster_name"]}"
-# We use /carla/settings as a proxy for the overall health of the system.
-# It's not perfect but it's a good start.
-#
-# Currently we only deploy SSL to shared environemnts (stg, prd).
-@flowmanager_test_url = "http://#{@flowmanager_hostname}/carla/settings/%7B%22OS%22:%7B%22id%22:%22linux%22%7D,%22solutions%22:\\[%7B%22id%22:%22org.gnome.desktop.a11y.magnifier%22%7D\\]%7D"
-if ENV["TF_VAR_cluster_name"].start_with?("stg.", "prd.")
-  @flowmanager_test_url.gsub! "http://", "https://"
-end
-
 desc "Wait until cluster has converged enough to create DNS records for GPII components"
 task :wait_for_gpii_dns => :find_zone_id do
   preferences_hostname = "preferences.#{ENV["TF_VAR_cluster_name"]}"
@@ -29,6 +19,8 @@ desc "Wait until GPII components have been deployed"
 task :wait_for_gpii_ready => :configure_kubectl do
   puts "Waiting for GPII components to be fully deployed..."
   puts "(You can Ctrl-C out of this safely. You may need to re-run :deploy_only afterward.)"
+
+  # Test preferences server
   preferences_url = "https://preferences.#{ENV["TF_VAR_cluster_name"]}/preferences/carla"
   if ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.")
     # This is the simplest one-liner I could find to GET a url and return just
@@ -50,10 +42,19 @@ task :wait_for_gpii_ready => :configure_kubectl do
     )
   end
 
-  # Test Preferences Server
-  wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' '#{preferences_url}' | grep -q ^2")
   # Test Cloud Based Flow Manager
-  wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' '#{@flowmanager_test_url}' | grep -q ^2")
+  flowmanager_url = "https://flowmanager.#{ENV["TF_VAR_cluster_name"]}/carla/settings/%7B%22OS%22:%7B%22id%22:%22linux%22%7D,%22solutions%22:\\[%7B%22id%22:%22org.gnome.desktop.a11y.magnifier%22%7D\\]%7D"
+  if ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.")
+    wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' '#{flowmanager_url}' | grep -q ^2")
+  else
+    wait_for("curl -k --silent --output /dev/stderr --write-out '%{http_code}' '#{flowmanager_url}' | grep -q ^2")
+    # For dev environment we also need to make sure that certificate is issued by Letsencrypt
+    wait_for(
+      "curl -k -vI #{flowmanager_url} 2>&1 | grep 'CN=Fake LE Intermediate X1'",
+      sleep_secs: 5,
+      max_wait_secs: 20,
+    )
+  end
 end
 
 desc "Wait until production config tests have been completed"
