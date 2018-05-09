@@ -22,38 +22,28 @@ task :wait_for_gpii_ready => :configure_kubectl do
 
   # Test preferences server
   preferences_url = "https://preferences.#{ENV["TF_VAR_cluster_name"]}/preferences/carla"
-  if ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.")
-    # This is the simplest one-liner I could find to GET a url and return just
-    # the status code.
-    # http://superuser.com/questions/590099/can-i-make-curl-fail-with-an-exitcode-different-than-0-if-the-http-status-code-i
-    #
-    # The grep catches a 2xx status code.
-    #
-    # We use /preferences/carla as a proxy for the overall health of the system.
-    # It's not perfect but it's a good start.
-    wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' '#{preferences_url}' | grep -q ^2")
-  else
-    wait_for("curl -k --silent --output /dev/stderr --write-out '%{http_code}' '#{preferences_url}' | grep -q ^2")
-    # For dev environment we also need to make sure that certificate is issued by Letsencrypt
-    wait_for(
-      "curl -k -vI #{preferences_url} 2>&1 | grep 'CN=Fake LE Intermediate X1'",
-      sleep_secs: 5,
-      max_wait_secs: 20,
-    )
-  end
-
-  # Test Cloud Based Flow Manager
   flowmanager_url = "https://flowmanager.#{ENV["TF_VAR_cluster_name"]}/carla/settings/%7B%22OS%22:%7B%22id%22:%22linux%22%7D,%22solutions%22:\\[%7B%22id%22:%22org.gnome.desktop.a11y.magnifier%22%7D\\]%7D"
-  if ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.")
-    wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' '#{flowmanager_url}' | grep -q ^2")
-  else
-    wait_for("curl -k --silent --output /dev/stderr --write-out '%{http_code}' '#{flowmanager_url}' | grep -q ^2")
-    # For dev environment we also need to make sure that certificate is issued by Letsencrypt
-    wait_for(
-      "curl -k -vI #{flowmanager_url} 2>&1 | grep 'CN=Fake LE Intermediate X1'",
-      sleep_secs: 5,
-      max_wait_secs: 20,
-    )
+
+  [preferences_url, flowmanager_url].each do |url|
+      if ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.")
+        # This is the simplest one-liner I could find to GET a url and return just
+        # the status code.
+        # http://superuser.com/questions/590099/can-i-make-curl-fail-with-an-exitcode-different-than-0-if-the-http-status-code-i
+        #
+        # The grep catches a 2xx status code.
+        #
+        # We use /preferences/carla as a proxy for the overall health of the system.
+        # It's not perfect but it's a good start.
+        wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' '#{url}' | grep -q ^2")
+      else
+        wait_for("curl -k --silent --output /dev/stderr --write-out '%{http_code}' '#{url}' | grep -q ^2")
+        # For dev environment we also need to make sure that certificate is issued by Letsencrypt
+        wait_for(
+          "curl -k -vI #{url} 2>&1 | grep 'CN=Fake LE Intermediate X1'",
+          sleep_secs: 5,
+          max_wait_secs: 20,
+        )
+      end
   end
 end
 
@@ -64,7 +54,8 @@ task :wait_for_productionConfigTests_complete => :configure_kubectl do
   puts "(You can Ctrl-C out of this safely. You may need to re-run :deploy_only afterward.)"
 
   sh "docker rm -f productionConfigTests || true"
-  wait_for("FLOWMANAGER_URL='#{@flowmanager_test_url}' docker run --name productionConfigTests '#{@versions["flowmanager"]}' node tests/ProductionConfigTests.js")
+  flowmanager_hostname = "https://flowmanager.#{ENV["TF_VAR_cluster_name"]}"
+  wait_for("FLOWMANAGER_URL='#{@flowmanager_hostname}' docker run --name productionConfigTests '#{@versions["flowmanager"]}' node tests/ProductionConfigTests.js")
 end
 
 desc "Display some handy info about the cluster"
