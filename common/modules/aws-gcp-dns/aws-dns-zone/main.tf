@@ -1,6 +1,6 @@
-variable "recordname" {}
+variable "record_name" {}
 
-variable "nsrecords" {
+variable "ns_records" {
   type        = "list"
   default     = []
 }
@@ -23,7 +23,7 @@ provider "aws" {
  
 
 resource "aws_route53_zone" "main" {
-  name = "${var.recordname}.gpii.net"
+  name = "${var.record_name}.gpii.net"
   lifecycle   {
      prevent_destroy = "true"
   } 
@@ -39,7 +39,7 @@ resource "aws_route53_record" "main_ns" {
   type    = "NS"
   ttl     = "60"
   # Tricky list assignement, more info: https://github.com/hashicorp/terraform/issues/13733
-  records = ["${split(",", length(var.nsrecords) == 0 ? join(",",aws_route53_zone.main.name_servers) : join(",",var.nsrecords))}"]
+  records = ["${split(",", length(var.ns_records) == 0 ? join(",",aws_route53_zone.main.name_servers) : join(",",var.ns_records))}"]
   lifecycle   {
      prevent_destroy = "true"
   }

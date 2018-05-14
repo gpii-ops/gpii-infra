@@ -1,4 +1,4 @@
-variable "recordname" {}
+variable "record_name" {}
 
 variable "project_id" {}
 
@@ -18,9 +18,9 @@ provider "google" {
  
 
 resource "google_dns_managed_zone" "main" {
-  name        = "${var.recordname}-gpii-net"
-  dns_name    = "${var.recordname}.gpii.net."
-  description = "${var.recordname} DNS zone"
+  name        = "${var.record_name}-gpii-net"
+  dns_name    = "${var.record_name}.gpii.net."
+  description = "${var.record_name} DNS zone"
   lifecycle   {
      prevent_destroy = "true"
   }
