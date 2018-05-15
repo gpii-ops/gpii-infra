@@ -1,0 +1,17 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  namespace: {{ .Release.Namespace | quote }}
+  name: {{ template "preferences.fullname" . }}-cert
+spec:
+  secretName: {{ template "preferences.fullname" . }}-tls
+  issuerRef:
+    name: {{ .Values.issuerRef.name }}
+  dnsNames:
+  {{ toYaml .Values.dnsNames | indent 2 }}
+  acme:
+    config:
+    - http01:
+        ingressClass: nginx
+      domains:
+      {{ toYaml .Values.dnsNames | indent 6 }}

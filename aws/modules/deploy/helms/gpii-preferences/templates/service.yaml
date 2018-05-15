@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ .Release.Namespace | quote }}
+  name: {{ template "preferences.fullname" . }}
+spec:
+  selector:
+    app: preferences
+  ports:
+  - name: http
+    protocol: TCP
+    port: {{ .Values.svc_listen_port }}
+    targetPort: {{ .Values.preferences_listen_port }}
+  type: ClusterIP

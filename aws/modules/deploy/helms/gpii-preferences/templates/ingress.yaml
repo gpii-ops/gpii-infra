@@ -1,0 +1,18 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: {{ .Release.Namespace | quote }}
+  name: {{ template "preferences.fullname" . }}-ingress
+spec:
+  tls:
+    - hosts:
+      {{ toYaml .Values.dnsNames | indent 6 }}
+      secretName: {{ template "preferences.fullname" . }}-tls
+  rules:
+    - host: {{ .Values.dnsNames | first }}
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: {{ template "preferences.fullname" . }}
+            servicePort: {{ .Values.svc_listen_port }}

@@ -1,0 +1,19 @@
+chart-metadata:
+  name: preferences
+  namespace: gpii
+
+replicaCount: <%= ENV["TF_VAR_cluster_name"].start_with?("stg.","prd.") ? '6' : '2' %>
+
+image:
+  repository: <%= @versions["preferences"].split('@')[0] %>
+  checksum: <%= @versions["preferences"].split('@')[1] %>
+
+issuerRef:
+  <% if ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.") %>
+  name: letsencrypt-production
+  <% else %>
+  name: letsencrypt-staging
+  <% end %>
+
+dnsNames:
+- preferences.<%= ENV["TF_VAR_environment"] %>.gpii.net
