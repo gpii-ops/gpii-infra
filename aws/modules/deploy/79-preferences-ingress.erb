@@ -3,6 +3,10 @@ kind: Ingress
 metadata:
   name: preferences-ingress
   namespace: gpii
+  <% if ENV["TF_VAR_cluster_name"].start_with?("dev") %>
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  <% end %>
 spec:
   tls:
     - hosts:

@@ -17,7 +17,7 @@ desc "Wait until GPII components have been deployed"
 task :wait_for_gpii_ready => :configure_kubectl do
   puts "Waiting for GPII components to be fully deployed..."
   puts "(You can Ctrl-C out of this safely. You may need to re-run :deploy_only afterward.)"
-  preferences_url = "https://preferences.#{ENV["TF_VAR_cluster_name"]}/preferences/carla"
+  preferences_url = "preferences.#{ENV["TF_VAR_cluster_name"]}/preferences/carla"
   if ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.")
     # This is the simplest one-liner I could find to GET a url and return just
     # the status code.
@@ -27,12 +27,15 @@ task :wait_for_gpii_ready => :configure_kubectl do
     #
     # We use /preferences/carla as a proxy for the overall health of the system.
     # It's not perfect but it's a good start.
-    wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' '#{preferences_url}' | grep -q ^2")
+    wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' 'https://#{preferences_url}' | grep -q ^2")
   else
-    wait_for("curl -k --silent --output /dev/stderr --write-out '%{http_code}' '#{preferences_url}' | grep -q ^2")
-    # For dev environment we also need to make sure that certificate is issued by Letsencrypt
+    # For dev environments we need to make sure that plain http is working correctly too
+    ['http', 'https'].each do |protocol|
+      wait_for("curl -k --silent --output /dev/stderr --write-out '%{http_code}' '#{protocol}://#{preferences_url}' | grep -q ^2")
+    end
+    # We also need to make sure that certificate is issued by Letsencrypt
     wait_for(
-      "curl -k -vI #{preferences_url} 2>&1 | grep 'CN=Fake LE Intermediate X1'",
+      "curl -k -vI https://#{preferences_url} 2>&1 | grep 'CN=Fake LE Intermediate X1'",
       sleep_secs: 5,
       max_wait_secs: 20,
     )
