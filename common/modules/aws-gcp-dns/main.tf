@@ -30,22 +30,16 @@ provider "aws" {
 module "aws_zone" {
   source = "./aws-dns-zone"
   record_name = "aws"
-  serviceaccount_key = "${var.serviceaccount_key}"
-  project_id = "${var.project_id}"
 }
 
 module "gcp_zone" {
   source = "./gcp-dns-zone"
   record_name = "gcp"
-  serviceaccount_key = "${var.serviceaccount_key}"
-  project_id = "${var.project_id}" 
 }
  
 module "gcp_zone_in_aws" {
   source = "./aws-dns-zone"
   record_name = "gcp"
   ns_records = "${module.gcp_zone.gcp_name_servers}"
-  serviceaccount_key = "${var.serviceaccount_key}"
-  project_id = "${var.project_id}"  
 }
 

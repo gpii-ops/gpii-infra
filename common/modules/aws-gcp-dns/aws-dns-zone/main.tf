@@ -5,22 +5,6 @@ variable "ns_records" {
   default     = []
 }
 
-variable "project_id" {}
-
-variable "serviceaccount_key" {}
-
-
-provider "google" {
-  credentials = "${var.serviceaccount_key}"
-  project     = "${var.project_id}"
-  region      = "us-central1"
-}
- 
-provider "aws" {
-  version = "~> 1.8"
-  region = "us-east-2"
-}
- 
 
 resource "aws_route53_zone" "main" {
   name = "${var.record_name}.gpii.net"

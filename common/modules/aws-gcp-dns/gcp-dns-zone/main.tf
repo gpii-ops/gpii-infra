@@ -1,21 +1,5 @@
 variable "record_name" {}
 
-variable "project_id" {}
-
-variable "serviceaccount_key" {}
-
-
-provider "aws" {
-  version = "~> 1.8"
-  region = "us-east-2"
-}
-
-provider "google" {
-  credentials = "${var.serviceaccount_key}"
-  project     = "${var.project_id}"
-  region      = "us-central1"
-}
- 
 
 resource "google_dns_managed_zone" "main" {
   name        = "${var.record_name}-gpii-net"
