@@ -12,7 +12,7 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
-# create_static_ip_address = false
+create_static_ip_address = false
 
 dns_zones = {
   gcp-gpii-net = "dev.gcp.gpii.net."
