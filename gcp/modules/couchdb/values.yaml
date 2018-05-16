@@ -1,0 +1,2 @@
+# clusterSize is the initial size of the CouchDB cluster.
+clusterSize: 2

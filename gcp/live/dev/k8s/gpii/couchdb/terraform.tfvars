@@ -1,13 +1,12 @@
 # ↓ Module metadata
-
 terragrunt = {
   terraform {
-    source = "/project/modules//k8s-namespace"
+    source = "/project/modules//couchdb"
   }
 
   dependencies {
     paths = [
-      "../../cluster",
+      "../../kube-system/administration-tasks",
     ]
   }
 
@@ -18,4 +17,3 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
-namespace_name = "gpii"

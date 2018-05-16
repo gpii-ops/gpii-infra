@@ -5,8 +5,6 @@ terraform {
 variable "project_id" {}
 variable "serviceaccount_key" {}
 
-variable "main_compute_zone" {}
-
 module "gke_cluster" {
   source             = "/exekube-modules/gke-cluster"
   project_id         = "${var.project_id}"
@@ -16,7 +14,7 @@ module "gke_cluster" {
   node_type          = "n1-standard-2"
   kubernetes_version = "1.9.6-gke.1"
 
-  main_compute_zone = "${var.main_compute_zone}"
+  main_compute_zone = "us-central1-a"
   additional_zones  = []
 
   oauth_scopes = [
