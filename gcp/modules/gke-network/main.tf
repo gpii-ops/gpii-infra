@@ -22,10 +22,14 @@ variable "dns_records" {
 }
 
 variable "cluster_subnets" {
-  default = {}
+  default = {
+    "0" = "us-central1,10.16.0.0/20,10.17.0.0/16,10.18.0.0/16"
+  }
 }
 
-variable "static_ip_region" {}
+variable "static_ip_region" {
+  default = "us-central1"
+}
 
 # ------------------------------------------------------------------------------
 # Modules and resources
@@ -33,8 +37,6 @@ variable "static_ip_region" {}
 
 module "gke_network" {
   source             = "/exekube-modules/gke-network"
-  project_id         = "${var.project_id}"
-  serviceaccount_key = "${var.serviceaccount_key}"
 
   dns_zones        = "${var.dns_zones}"
   dns_records      = "${var.dns_records}"

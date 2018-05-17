@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Chart for simplifying common cluster administration charts
+name: administration-tasks
+version: 0.3.1

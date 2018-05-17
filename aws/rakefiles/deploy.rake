@@ -21,8 +21,8 @@ task :wait_for_gpii_ready => :configure_kubectl do
   puts "(You can Ctrl-C out of this safely. You may need to re-run :deploy_only afterward.)"
 
   # Test preferences server
-  preferences_url = "https://preferences.#{ENV["TF_VAR_cluster_name"]}/preferences/carla"
-  flowmanager_url = "https://flowmanager.#{ENV["TF_VAR_cluster_name"]}/carla/settings/%7B%22OS%22:%7B%22id%22:%22linux%22%7D,%22solutions%22:\\[%7B%22id%22:%22org.gnome.desktop.a11y.magnifier%22%7D\\]%7D"
+  preferences_url = "preferences.#{ENV["TF_VAR_cluster_name"]}/preferences/carla"
+  flowmanager_url = "flowmanager.#{ENV["TF_VAR_cluster_name"]}/carla/settings/%7B%22OS%22:%7B%22id%22:%22linux%22%7D,%22solutions%22:\\[%7B%22id%22:%22org.gnome.desktop.a11y.magnifier%22%7D\\]%7D"
 
   [preferences_url, flowmanager_url].each do |url|
       if ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.")
@@ -34,12 +34,15 @@ task :wait_for_gpii_ready => :configure_kubectl do
         #
         # We use /preferences/carla as a proxy for the overall health of the system.
         # It's not perfect but it's a good start.
-        wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' '#{url}' | grep -q ^2")
+        wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' 'https://#{url}' | grep -q ^2")
       else
-        wait_for("curl -k --silent --output /dev/stderr --write-out '%{http_code}' '#{url}' | grep -q ^2")
-        # For dev environment we also need to make sure that certificate is issued by Letsencrypt
+        # For dev environments we need to make sure that plain http is working correctly too
+        ['http', 'https'].each do |protocol|
+          wait_for("curl -k --silent --output /dev/stderr --write-out '%{http_code}' '#{protocol}://#{url}' | grep -q ^2")
+        end
+        # We also need to make sure that certificate is issued by Letsencrypt
         wait_for(
-          "curl -k -vI #{url} 2>&1 | grep 'CN=Fake LE Intermediate X1'",
+          "curl -k -vI https://#{url} 2>&1 | grep 'CN=Fake LE Intermediate X1'",
           sleep_secs: 5,
           max_wait_secs: 20,
         )
