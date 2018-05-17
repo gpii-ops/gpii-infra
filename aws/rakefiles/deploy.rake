@@ -57,8 +57,14 @@ task :wait_for_productionConfigTests_complete => :configure_kubectl do
   puts "(You can Ctrl-C out of this safely. You may need to re-run :deploy_only afterward.)"
 
   sh "docker rm -f productionConfigTests || true"
-  flowmanager_hostname = "https://flowmanager.#{ENV["TF_VAR_cluster_name"]}"
-  wait_for("FLOWMANAGER_URL='#{@flowmanager_hostname}' docker run --name productionConfigTests '#{@versions["flowmanager"]}' node tests/ProductionConfigTests.js")
+  flowmanager_hostname = "flowmanager.#{ENV["TF_VAR_cluster_name"]}"
+
+  if ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.")
+    flowmanager_hostname = 'https://#{flowmanager_hostname}'
+  else
+    flowmanager_hostname = 'http://#{flowmanager_hostname}'
+  end
+  wait_for("GPII_CLOUD_URL='#{@flowmanager_hostname}' docker run --name productionConfigTests '#{@versions["flowmanager"]}' node tests/ProductionConfigTests.js")
 end
 
 desc "Display some handy info about the cluster"
