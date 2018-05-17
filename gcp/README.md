@@ -7,19 +7,17 @@ Initial instructions based on [exekube's Getting Started](https://exekube.github
 ## Setup
 
 1. Clone this repo.
-1. Clone [the gpii-ops fork of exekube](https://github.com/gpii-ops/exekube).
-   * The `gpii-infra` clone and the `exekube` clone must be siblings in the same directory (there are some references to `../exekube`).
-1. `cd exekube && docker-compose build google`
-1. `cd ../gpii-infra/gcp`
+1. (Optional) Clone [the gpii-ops fork of exekube](https://github.com/gpii-ops/exekube).
+   * The `gpii-infra` clone and the `exekube` clone should be siblings in the same directory (there are some references to `../exekube`).
+1. `cd gpii-infra/gcp`
 1. `alias xk='docker-compose run --rm --service-ports xk'`
 1. `export ENV=dev`
 1. `export ORGANIZATION_ID=247149361674`
-   * Use the RtF Organization ID (above)
-   * *OR* Create a GCP Free Trial account. Get the Organization ID from there.
+   * *OR* Create a GCP Free Trial account. Use the Organization ID from there.
 1. `export BILLING_ID=01A0E1-B0B31F-349F4F`
-   * Use the RtF Billing ID (above)
-   * *OR* Create a GCP Free Trial account. Get the Billing ID from there.
+   * *OR* Create a GCP Free Trial account. Use the Billing ID from there.
 1. `export TF_VAR_project_id=xk-mrtyler`
+   * The project ID must be unique across all of Google Cloud Platform, like an AWS S3 Bucket.
    * When changing to a new project\_id, I had to `rm .config/terragrunt`. This is something that `rake clean` should handle.
 1. `xk gcloud auth login`
    * Follow the instructions to authenticate.
@@ -43,7 +41,8 @@ Initial instructions based on [exekube's Getting Started](https://exekube.github
       * @mrtyler believes he did this when he created his Free Trial account using his RtF email address.
    * "If you're the Super Admin of your G Suite domain account, you can add yourself and others as the Organization Admin of the corresponding Organization. For instructions on adding Organization Admins, see Adding an organization admin."
 * https://cloud.google.com/resource-manager/docs/creating-managing-organization#adding_an_organization_admin
-   * Manually create IAMs for Ops Team. Assign role "Organization Policy Administrator".
+   * Manually create IAMs for Ops Team. Assign role "Organization Policy Administrator" and "Billing Account User".
+      * Actually this isn't working either -- even with admin privileges, Alfredo can't attach his Project to the Official Billing Account. Alfredo is investigating.
 * https://cloud.google.com/resource-manager/docs/quickstart-organizations#create_a_billing_account
    * Manually create IAM for Eugene. Assign role "Billing Account Administrator".
    * Eugene creates Billing Account, "Official". Fills in contact info, payment info.
