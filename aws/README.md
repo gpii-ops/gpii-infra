@@ -211,7 +211,7 @@ See [CI-CD.md#running-in-non-dev-environments](CI-CD.md#running-manually-in-non-
 
 #### Can't I just edit `version.yml` by hand?
 
-gpii-infra uses explicit SHAs to refer to specific Docker images for GPII components. This has a number of advantages (repeatability, auditability) but the main thing you care about is that changing the SHA forces Kubernetes to re-deploy a component (but see below for a note about preferences-dataloader).
+gpii-infra uses explicit SHAs to refer to specific Docker images for GPII components. This has a number of advantages (repeatability, auditability) but the main thing you care about is that changing the SHA forces Kubernetes to re-deploy a component (but see below for a note about gpii-dataloader).
 
 If you don't want to deal with gpii-version-updater, you can instead:
 1. Edit `modules/deploy/version.yml`. Find your component and replace the entire image value (path and SHA) with your Docker Hub user account.
@@ -219,13 +219,13 @@ If you don't want to deal with gpii-version-updater, you can instead:
 1. Manually delete the component via Kubernetes Dashboard or `kubectl delete`.
 1. `cd dev && rake deploy`
 
-#### A note about local changes and preferences-dataloader
+#### A note about local changes and gpii-dataloader
 
-[preferences-dataloader](https://github.com/gpii-ops/docker-preferences-dataloader) initializes CouchDB with some canned data. It is designed to run once, as a Kubernetes Job. If you want to run it again, e.g. to test changes to the canned data:
+[gpii-dataloader](https://github.com/gpii-ops/docker-preferences-dataloader) initializes CouchDB with some canned data. It is designed to run once, as a Kubernetes Job. If you want to run it again, e.g. to test changes to the canned data:
 1. Note that the dataloader **deletes all data in CouchDB** when it runs.
 1. Because of how Kubernetes Jobs work, the dataloader will not re-run when a new Docker image becomes available (this is different from Deployments like `flowmanager`, which are updated when the Docker image changes).
 1. Thus, to make changes to the dataloader:
-   * Delete the Job: `kubectl -n gpii delete job preferences-dataloader`
+   * Delete the Job: `kubectl -n gpii delete job gpii-dataloader`
    * Re-deploy the Job: `cd dev && rake deploy`
 
 ### Restoring a volume from a backup/snapshot
@@ -273,7 +273,13 @@ This is what I used to create a fake preference while verifying that volumes are
 data='
 {
   "_id": "mrtyler",
-  "value": {
+  "type": "prefsSafe",
+  "schemaVersion": "0.1",
+  "prefsSafeType": "user",
+  "name": "mrtyler",
+  "password": null,
+  "email": null,
+  "preferences": {
     "flat": {
       "contexts": {
         "gpii-default": {
@@ -284,11 +290,13 @@ data='
         }
       }
     }
-  }
+  },
+  "timestampCreated": "2018-04-27T20:41:01.850Z",
+  "timestampUpdated": null
 }
 '
 ```
-1. Add the record: `curl -f -H 'Content-Type: application/json' -X POST http://couchdb.default.svc.cluster.local:5984/preferences -d "$data"`
+1. Add the record: `curl -f -H 'Content-Type: application/json' -X POST http://couchdb.default.svc.cluster.local:5984/gpii -d "$data"`
 1. Before the restore: verify that the new record is present.
 1. After the restore: verify that the new record is no longer present.
 
