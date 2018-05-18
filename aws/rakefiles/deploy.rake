@@ -1,7 +1,9 @@
 require "yaml"
 require "rake/clean"
+require "yaml"
 require_relative "./wait_for.rb"
 import "../rakefiles/kops.rake"
+import "../rakefiles/setup_versions.rake"
 
 desc "Wait until cluster has converged enough to create DNS records for GPII components"
 task :wait_for_gpii_dns => :find_zone_id do
@@ -17,26 +19,53 @@ desc "Wait until GPII components have been deployed"
 task :wait_for_gpii_ready => :configure_kubectl do
   puts "Waiting for GPII components to be fully deployed..."
   puts "(You can Ctrl-C out of this safely. You may need to re-run :deploy_only afterward.)"
-  preferences_url = "https://preferences.#{ENV["TF_VAR_cluster_name"]}/preferences/carla"
-  if ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.")
-    # This is the simplest one-liner I could find to GET a url and return just
-    # the status code.
-    # http://superuser.com/questions/590099/can-i-make-curl-fail-with-an-exitcode-different-than-0-if-the-http-status-code-i
-    #
-    # The grep catches a 2xx status code.
-    #
-    # We use /preferences/carla as a proxy for the overall health of the system.
-    # It's not perfect but it's a good start.
-    wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' '#{preferences_url}' | grep -q ^2")
-  else
-    wait_for("curl -k --silent --output /dev/stderr --write-out '%{http_code}' '#{preferences_url}' | grep -q ^2")
-    # For dev environment we also need to make sure that certificate is issued by Letsencrypt
-    wait_for(
-      "curl -k -vI #{preferences_url} 2>&1 | grep 'CN=Fake LE Intermediate X1'",
-      sleep_secs: 5,
-      max_wait_secs: 20,
-    )
+
+  # Test preferences server
+  preferences_url = "preferences.#{ENV["TF_VAR_cluster_name"]}/preferences/carla"
+  flowmanager_url = "flowmanager.#{ENV["TF_VAR_cluster_name"]}/carla/settings/%7B%22OS%22:%7B%22id%22:%22linux%22%7D,%22solutions%22:\\[%7B%22id%22:%22org.gnome.desktop.a11y.magnifier%22%7D\\]%7D"
+
+  [preferences_url, flowmanager_url].each do |url|
+      if ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.")
+        # This is the simplest one-liner I could find to GET a url and return just
+        # the status code.
+        # http://superuser.com/questions/590099/can-i-make-curl-fail-with-an-exitcode-different-than-0-if-the-http-status-code-i
+        #
+        # The grep catches a 2xx status code.
+        #
+        # We use /preferences/carla as a proxy for the overall health of the system.
+        # It's not perfect but it's a good start.
+        wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' 'https://#{url}' | grep -q ^2")
+      else
+        # For dev environments we need to make sure that plain http is working correctly too
+        ['http', 'https'].each do |protocol|
+          wait_for("curl -k --silent --output /dev/stderr --write-out '%{http_code}' '#{protocol}://#{url}' | grep -q ^2")
+        end
+        # We also need to make sure that certificate is issued by Letsencrypt
+        wait_for(
+          "curl -k -vI 'https://#{url}' 2>&1 | grep 'CN=Fake LE Intermediate X1'",
+          sleep_secs: 5,
+          max_wait_secs: 20,
+        )
+      end
   end
+end
+
+desc "Wait until production config tests have been completed"
+task :wait_for_productionConfigTests_complete => :configure_kubectl do
+  Rake::Task["setup_versions"].invoke("../modules/deploy/version.yml")
+  puts "Waiting for production config tests to complete..."
+  puts "(You can Ctrl-C out of this safely. You may need to re-run :deploy_only afterward.)"
+
+  sh "docker rm -f productionConfigTests || true"
+  flowmanager_hostname = "flowmanager.#{ENV["TF_VAR_cluster_name"]}"
+
+  if ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.")
+    flowmanager_hostname = "https://#{flowmanager_hostname}"
+  else
+    flowmanager_hostname = "http://#{flowmanager_hostname}"
+  end
+
+  wait_for("docker run --name productionConfigTests -e GPII_CLOUD_URL='#{flowmanager_hostname}' '#{@versions["flowmanager"]}' node tests/ProductionConfigTests.js")
 end
 
 desc "Display some handy info about the cluster"

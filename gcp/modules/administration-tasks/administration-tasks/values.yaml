@@ -1,0 +1,28 @@
+# List namespaces to create
+# Use 'secure: true' to add deny-all networkpolicy + allow-dns networkpolicy
+namespaces: []
+# - name: team1
+#   secure: false
+#   labels:
+#     name: team1
+#     app: team1-app
+# - name: team2
+#   secure: true
+#   labels:
+#     name: team2
+#     app: team2-app
+
+# Assign cluster-admin role to users
+clusterAdmins:
+  create: false
+  users: []
+    # - user@example.com
+
+# List roles to limit things you can view / modify with the dashboard
+# By default, you only get the "view" role
+dashboardPermissions:
+  create: true
+  clusterRoles:
+    - view
+    # - secret-lister
+    # - cluster-object-viewer
