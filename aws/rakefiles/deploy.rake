@@ -42,7 +42,7 @@ task :wait_for_gpii_ready => :configure_kubectl do
         end
         # We also need to make sure that certificate is issued by Letsencrypt
         wait_for(
-          "curl -k -vI https://#{url} 2>&1 | grep 'CN=Fake LE Intermediate X1'",
+          "curl -k -vI 'https://#{url}' 2>&1 | grep 'CN=Fake LE Intermediate X1'",
           sleep_secs: 5,
           max_wait_secs: 20,
         )
@@ -60,11 +60,12 @@ task :wait_for_productionConfigTests_complete => :configure_kubectl do
   flowmanager_hostname = "flowmanager.#{ENV["TF_VAR_cluster_name"]}"
 
   if ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.")
-    flowmanager_hostname = 'https://#{flowmanager_hostname}'
+    flowmanager_hostname = "https://#{flowmanager_hostname}"
   else
-    flowmanager_hostname = 'http://#{flowmanager_hostname}'
+    flowmanager_hostname = "http://#{flowmanager_hostname}"
   end
-  wait_for("GPII_CLOUD_URL='#{@flowmanager_hostname}' docker run --name productionConfigTests '#{@versions["flowmanager"]}' node tests/ProductionConfigTests.js")
+
+  wait_for("docker run --name productionConfigTests -e GPII_CLOUD_URL='#{flowmanager_hostname}' '#{@versions["flowmanager"]}' node tests/ProductionConfigTests.js")
 end
 
 desc "Display some handy info about the cluster"
