@@ -125,14 +125,15 @@ task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_co
     if chart_config['chart-metadata'] && chart_config['chart-metadata']['name']
       chart_name = chart_config['chart-metadata']['name']
     else
-      chart_name = chart
+      chart_name = chart.match(/^\d+\-(.*)/)[1]
     end
     if chart_config['chart-metadata'] && chart_config['chart-metadata']['namespace']
       chart_namespace = chart_config['chart-metadata']['namespace']
     else
       chart_namespace = 'default'
     end
-    if installed_charts.include?(chart)
+
+    if installed_charts.include?(chart_name)
       begin
         wait_for(
           "helm upgrade --namespace #{chart_namespace} --recreate-pods -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{chart_name} #{@tmpdir}-modules/deploy/helms/#{chart}",
