@@ -12,7 +12,7 @@ node_env: gpii.config.preferencesServer.standalone.production
 
 image:
   repository: gpii/universal
-  checksum: sha256:57d0a17da505c8bc28c221c88b8de54447c78dc873c355d0bfd435d28f8b09ee
+  checksum: sha256:b9da957b2511ec2c25d1e6054359b0a345c4c14dc7853355054e70bd01fda323
   pullPolicy: IfNotPresent
 
 issuerRef:
