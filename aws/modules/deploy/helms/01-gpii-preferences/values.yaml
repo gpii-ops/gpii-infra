@@ -6,6 +6,8 @@ replicaCount: 1
 
 svc_listen_port: 80
 preferences_listen_port: 8081
+datasource_listen_port: 5984
+
 node_env: gpii.config.preferencesServer.standalone.production
 
 image:
@@ -21,4 +23,9 @@ dnsNames:
 
 secretKeyRef:
   name: couchdb-secrets
-  key: preferences_datasource_url
+  key: datasource_hostname
+
+ingress:
+  disable_ssl_redirect: false
+
+nameOverride: preferences

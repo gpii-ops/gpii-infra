@@ -49,10 +49,11 @@ Parameter | Description | Default
 `replicaCount` | desired number of controller pods | `1`
 `svc_listen_port` | ClusterIP service port | `80`
 `preferences_listen_port` | port for preferences service to listen on | `8081`
+`datasource_listen_port` | data source port for preferences service | `5984`
 `node_env` | preferences node env | `gpii.config.preferencesServer.standalone.production`
 `issuerRef.name` | name of the cert-manager issuer | `letsencrypt-production`
-`dnsNames` | list of DNS names for nginx-ingress controller | `preferences.test.local`
+`dnsNames` | list of host names for nginx-ingress controller | `preferences.test.local`
 `secretKeyRef.name` | name of the secret with CouchDB connection details | `couchdb-secrets`
-`secretKeyRef.key` | key of the secret with CouchDB connection details | `preferences_datasource_url`
+`secretKeyRef.key` | key of the secret with CouchDB connection details | `datasource_hostname`
 `image.repository` | container image repository | `gpii/universal`
 `image.pullPolicy` | container image pullPolicy | `IfNotPresent`

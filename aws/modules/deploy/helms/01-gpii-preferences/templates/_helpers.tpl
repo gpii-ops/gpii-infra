@@ -7,15 +7,6 @@ Expand the name of the chart.
 {{- end -}}
 
 {{/*
-Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-*/}}
-{{- define "preferences.fullname" -}}
-{{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- default $name .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "preferences.chart" -}}

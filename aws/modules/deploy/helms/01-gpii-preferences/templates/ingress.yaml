@@ -2,17 +2,21 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   namespace: {{ .Release.Namespace | quote }}
-  name: {{ template "preferences.fullname" . }}-ingress
+  name: {{ template "preferences.name" . }}-ingress
+  {{- if .Values.ingress.disable_ssl_redirect }}
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  {{- end }}
 spec:
   tls:
     - hosts:
       {{ toYaml .Values.dnsNames | indent 6 }}
-      secretName: {{ template "preferences.fullname" . }}-tls
+      secretName: {{ template "preferences.name" . }}-tls
   rules:
     - host: {{ .Values.dnsNames | first }}
       http:
         paths:
         - path: /
           backend:
-            serviceName: {{ template "preferences.fullname" . }}
+            serviceName: {{ template "preferences.name" . }}
             servicePort: {{ .Values.svc_listen_port }}
