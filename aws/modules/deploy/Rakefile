@@ -126,7 +126,8 @@ do
   end
 
   HELMCHARTS_DIRS.each do |d|
-    rendered = ERB.new(File.read("helms/#{d}-custom-values.erb")).result(binding)
+    chart_name = d.match(/^\d+\-(.*)/)[1]
+    rendered = ERB.new(File.read("helms/#{chart_name}-custom-values.erb")).result(binding)
     File.open("#{DEPLOY_OUT_DIR}/helms/#{d}/custom-values.yaml", "w") do |f|
       f.puts rendered
     end
