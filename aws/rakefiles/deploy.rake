@@ -235,10 +235,17 @@ task :undeploy => [:configure_kubectl, :find_gpii_components] do
   Dir.chdir("#{@tmpdir}-modules/deploy/helms/") do
     @gpii_helmcharts = Dir.glob("*").select {|d| File.directory? d }
   end
-  @gpii_helmcharts.each do |chart|
+  @gpii_helmcharts.reverse.each do |chart|
+    chart_config = YAML.load_file("#{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml")
+    # Extracting chart name from chart-metadata
+    if chart_config['chart-metadata'] && chart_config['chart-metadata']['name']
+      chart_name = chart_config['chart-metadata']['name']
+    else
+      chart_name = chart.match(/^\d+\-(.*)/)[1]
+    end
     begin
       wait_for(
-        "helm delete #{chart}",
+        "helm delete --purge #{chart_name}",
         sleep_secs: 5,
         max_wait_secs: 20,
       )
