@@ -10,10 +10,10 @@ metadata:
 spec:
   tls:
     - hosts:
-      - flowmanager.<%= ENV["TF_VAR_environment"] %>.gpii.net
+      - flowmanager.<%= ENV["TF_VAR_cluster_name"] %>
       secretName: flowmanager-tls
   rules:
-    - host: flowmanager.<%= ENV["TF_VAR_environment"] %>.gpii.net
+    - host: flowmanager.<%= ENV["TF_VAR_cluster_name"] %>
       http:
         paths:
         - path: /

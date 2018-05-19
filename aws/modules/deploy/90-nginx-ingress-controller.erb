@@ -5,7 +5,7 @@ metadata:
     # Slashes and double quotes required to collapse multi-line
     # annotation to the format that DNS plugin understands
     dns.alpha.kubernetes.io/external: "\
-      preferences.<%= ENV["TF_VAR_environment"] %>.gpii.net,\
-      flowmanager.<%= ENV["TF_VAR_environment"] %>.gpii.net"
+      preferences.<%= ENV["TF_VAR_cluster_name"] %>,\
+      flowmanager.<%= ENV["TF_VAR_cluster_name"] %>"
   name: nginx-ingress-controller
   namespace: gpii

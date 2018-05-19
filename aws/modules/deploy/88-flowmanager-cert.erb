@@ -12,10 +12,10 @@ spec:
     name: letsencrypt-staging
     <% end %>
   dnsNames:
-  - flowmanager.<%= ENV["TF_VAR_environment"] %>.gpii.net
+  - flowmanager.<%= ENV["TF_VAR_cluster_name"] %>
   acme:
     config:
     - http01:
         ingressClass: nginx
       domains:
-      - flowmanager.<%= ENV["TF_VAR_environment"] %>.gpii.net
+      - flowmanager.<%= ENV["TF_VAR_cluster_name"] %>

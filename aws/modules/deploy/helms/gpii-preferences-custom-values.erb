@@ -16,7 +16,7 @@ issuerRef:
   <% end %>
 
 dnsNames:
-- preferences.<%= ENV["TF_VAR_environment"] %>.gpii.net
+- preferences.<%= ENV["TF_VAR_cluster_name"] %>
 
 <% if !ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.") %>
 ingress:
