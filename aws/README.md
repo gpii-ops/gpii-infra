@@ -207,7 +207,7 @@ See [CI-CD.md#running-in-non-dev-environments](CI-CD.md#running-manually-in-non-
    * E.g., `gpii/universal -> mrtyler/universal`
 1. Run `update-version`. It will generate a `version.yml` in the current directory.
 1. `cp version.yml ../gpii-infra/modules/deploy`
-1. `cd ../gpii-infra/dev && rake deploy`
+1. `cd ../gpii-infra/aws/dev && rake deploy`
 
 #### Can't I just edit `version.yml` by hand?
 
@@ -217,7 +217,7 @@ If you don't want to deal with gpii-version-updater, you can instead:
 1. Edit `modules/deploy/version.yml`. Find your component and replace the entire image value (path and SHA) with your Docker Hub user account.
    * E.g., `flowmanager: "gpii/universal@sha256:4b3...64f" -> flowmanager: "mrtyler/universal"`
 1. Manually delete the component via Kubernetes Dashboard or `kubectl delete`.
-1. `cd dev && rake deploy`
+1. `cd aws/dev && rake deploy`
 
 #### A note about local changes and gpii-dataloader
 
@@ -226,7 +226,7 @@ If you don't want to deal with gpii-version-updater, you can instead:
 1. Because of how Kubernetes Jobs work, the dataloader will not re-run when a new Docker image becomes available (this is different from Deployments like `flowmanager`, which are updated when the Docker image changes).
 1. Thus, to make changes to the dataloader:
    * Delete the Job: `kubectl -n gpii delete job gpii-dataloader`
-   * Re-deploy the Job: `cd dev && rake deploy`
+   * Re-deploy the Job: `cd aws/dev && rake deploy`
 
 ### Restoring a volume from a backup/snapshot
 
@@ -265,7 +265,7 @@ If you don't want to deal with gpii-version-updater, you can instead:
 
 This is what I used to create a fake preference while verifying that volumes are restored correctly.
 
-1. Run a container inside the cluster: `cd dev && rake run_interactive`
+1. Run a container inside the cluster: `cd aws/dev && rake run_interactive`
 1. From inside the container, install some tools: `apk update && apk add curl`
 1. Define a record:
 ```
