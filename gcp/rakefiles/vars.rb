@@ -9,8 +9,12 @@ class Vars
     if ENV["ENV"].nil?
       ENV["ENV"] = "dev"
     end
-    ENV["ORGANIZATION_ID"] = "247149361674"  # RtF Organization
-    ENV["BILLING_ID"] = "01A0E1-B0B31F-349F4F"  # RtF Billing Account
+    if ENV["ORGANIZATION_ID"].nil?
+      ENV["ORGANIZATION_ID"] = "247149361674"  # RtF Organization
+    end
+    if ENV["BILLING_ID"].nil?
+      ENV["BILLING_ID"] = "01A0E1-B0B31F-349F4F"  # RtF Billing Account
+    end
   end
 end
 
