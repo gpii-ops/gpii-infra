@@ -1,9 +1,9 @@
 class Vars
   def self.set_vars
     if ENV["TF_VAR_project_id"].nil?
-      puts "ERROR: TF_VAR_project_id must be set!"
-      puts "Do this: export TF_VAR_project_id=<your name>-<env>"
-      puts "and try again."
+      puts "  ERROR: TF_VAR_project_id must be set!"
+      puts "  Do this: export TF_VAR_project_id=<your name>-<env>"
+      puts "  and try again."
       raise ArgumentError, "TF_VAR_project_id must be set"
     end
     if ENV["ENV"].nil?
