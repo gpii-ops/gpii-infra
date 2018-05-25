@@ -6,9 +6,7 @@ class Vars
       puts "  and try again."
       raise ArgumentError, "TF_VAR_project_id must be set"
     end
-    if ENV["ENV"].nil?
-      ENV["ENV"] = "dev"
-    end
+    ENV["ENV"] = env
     if ENV["ORGANIZATION_ID"].nil?
       ENV["ORGANIZATION_ID"] = "247149361674"  # RtF Organization
     end
