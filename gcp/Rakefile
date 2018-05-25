@@ -1,0 +1,31 @@
+require "rake/clean"
+require_relative "rakefiles/vars.rb"
+
+@exekube_cmd = "docker-compose run --rm --service-ports xk"
+
+namespace :dev do |namespace|
+  task :default => :deploy
+
+  @env = namespace.scope.path
+
+  task :set_vars do
+    Vars.set_vars(@env)
+  end
+
+  @gcp_creds_path = ".config/#{@env}/gcloud"
+  @gcp_creds_file = "#{@gcp_creds_path}/credentials.db"
+  desc "Authenticate and generate GCP credentials (gcloud auth login)"
+  task :auth => [:set_vars, @gcp_creds_file]
+  rule @gcp_creds_file do
+    sh "#{@exekube_cmd} gcloud auth login"
+  end
+  CLOBBER << @gcp_creds_path
+
+  desc "Deploy GPII components to cluster"
+  task :deploy => :set_vars do
+    puts "_ID #{ENV["BILLING_ID"]} #{ENV["ORGANIZATION_ID"]}"
+  end
+end
+
+
+# vim: et ts=2 sw=2:
