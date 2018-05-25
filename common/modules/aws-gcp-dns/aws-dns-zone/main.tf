@@ -29,3 +29,7 @@ resource "aws_route53_record" "main_ns" {
   }
 }
 
+output "aws_name" {
+  value = "${aws_route53_zone.main.name}"
+}
+
