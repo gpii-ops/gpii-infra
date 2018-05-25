@@ -1,5 +1,5 @@
 class Vars
-  def self.set_vars
+  def self.set_vars(env)
     if ENV["TF_VAR_project_id"].nil?
       puts "  ERROR: TF_VAR_project_id must be set!"
       puts "  Do this: export TF_VAR_project_id=<your name>-<env>"
@@ -18,4 +18,4 @@ class Vars
   end
 end
 
-# vim: set et ts=2 sw=2:
+# vim: et ts=2 sw=2:
