@@ -2,6 +2,8 @@ require "rake/clean"
 require_relative "rakefiles/vars.rb"
 
 @exekube_cmd = "docker-compose run --rm --service-ports xk"
+desc "Create dev cluster and deploy GPII components to it"
+task :dev => "dev:default"
 
 namespace :dev do |namespace|
   task :default => :deploy
@@ -21,9 +23,24 @@ namespace :dev do |namespace|
   end
   CLOBBER << @gcp_creds_path
 
-  desc "Deploy GPII components to cluster"
-  task :deploy => :set_vars do
-    puts "_ID #{ENV["BILLING_ID"]} #{ENV["ORGANIZATION_ID"]}"
+  desc "[NOT IDEMPOTENT] Initialize GCP Project where this environment's resources will live"
+  task :project_init => [:set_vars, @gcp_creds_file] do
+    sh "#{@exekube_cmd} gcp-project-init"
+  end
+
+  desc "[ADVANCED] Create or update low-level infrastructure"
+  task :apply_infra => [:set_vars, @gcp_creds_file] do
+    sh "#{@exekube_cmd} up live/#{@env}/infra"
+  end
+
+  desc "Create cluster and deploy GPII components to it"
+  task :deploy => [:set_vars, @gcp_creds_file, :apply_infra] do
+    sh "#{@exekube_cmd} up"
+  end
+
+  desc "[ADVANCED] Interactive exekube shell"
+  task :xk_sh => :set_vars do
+    sh "#{@exekube_cmd} sh"
   end
 end
 
