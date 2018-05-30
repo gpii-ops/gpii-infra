@@ -41,8 +41,7 @@ Initial instructions based on [exekube's Getting Started](https://exekube.github
       * @mrtyler believes he did this when he created his Free Trial account using his RtF email address.
    * "If you're the Super Admin of your G Suite domain account, you can add yourself and others as the Organization Admin of the corresponding Organization. For instructions on adding Organization Admins, see Adding an organization admin."
 * https://cloud.google.com/resource-manager/docs/creating-managing-organization#adding_an_organization_admin
-   * Manually create IAMs for Ops Team. Assign role "Organization Policy Administrator" and "Billing Account User".
-      * Actually this isn't working either -- even with admin privileges, Alfredo can't attach his Project to the Official Billing Account. Alfredo is investigating.
+   * Manually create IAMs for Ops Team. Assign role "Project -> Owner" and "Billing Account User".
 * https://cloud.google.com/resource-manager/docs/quickstart-organizations#create_a_billing_account
    * Manually create IAM for Eugene. Assign role "Billing Account Administrator".
    * Eugene creates Billing Account, "Official". Fills in contact info, payment info.
@@ -51,3 +50,6 @@ Initial instructions based on [exekube's Getting Started](https://exekube.github
       * In spite of all those privileges, I can't Manage Payment Users for any Billing Accounts other than the one from my Free Trial Account.
    * Send billing emails to accounts-payable@rtf-us.org -- https://cloud.google.com/billing/docs/how-to/modify-contacts
       * Billing -> Official -> Payment Settings -> Payments Users -> Manage Payments Users -> Add a New User. Leave all Permissions unchecked. Leave Primary Contact unchecked (there can be only one, and it's Eugene). Confirm invitation email.
+* https://support.google.com/code/contact/billing_quota_increase
+   * @mrtyler requested a quota bump to 100 Projects.
+      * He only authorized his own email for now, to see what it did. But it's possible other Ops team members will need to go through this step.
