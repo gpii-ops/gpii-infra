@@ -6,9 +6,9 @@ desc "Create dev cluster and deploy GPII components to it"
 task :dev => "dev:default"
 
 namespace :dev do |namespace|
-  task :default => :deploy
-
   @env = namespace.scope.path
+
+  task :default => :deploy
 
   task :set_vars do
     Vars.set_vars(@env)
@@ -23,9 +23,16 @@ namespace :dev do |namespace|
   end
   CLOBBER << @gcp_creds_path
 
-  desc "[NOT IDEMPOTENT] Initialize GCP Project where this environment's resources will live"
+  desc "[NOT IDEMPOTENT, RUN ONCE] Initialize GCP Project where this environment's resources will live"
   task :project_init => [:set_vars, @gcp_creds_file] do
     sh "#{@exekube_cmd} gcp-project-init"
+    # TODO: Move this to exekube gcp-project-init instead?
+    sh "#{@exekube_cmd} gcloud services enable serviceusage.googleapis.com"
+  end
+
+  desc "[ADVANCED] Tell gcloud to use TF_VAR_project_id as the default Project; can be useful after 'rake clobber'"
+  task :set_current_project => [:set_vars, @gcp_creds_file] do
+    sh "#{@exekube_cmd} gcloud config set project #{ENV["TF_VAR_project_id"]}"
   end
 
   desc "[ADVANCED] Create or update low-level infrastructure"
