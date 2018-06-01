@@ -24,7 +24,7 @@ namespace :dev do |namespace|
   end
   CLOBBER << @gcp_creds_path
 
-  desc "[NOT IDEMPOTENT, RUN ONCE] Initialize GCP Project where this environment's resources will live"
+  desc "[NOT IDEMPOTENT, RUN ONCE PER ENVIRONMENT] Initialize GCP Project where this environment's resources will live"
   task :project_init => [:set_vars, @gcp_creds_file] do
     sh "#{@exekube_cmd} gcp-project-init"
     # TODO: Move this to exekube gcp-project-init instead?
