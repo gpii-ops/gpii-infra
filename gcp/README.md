@@ -4,7 +4,7 @@ This directory manages GPII infrastructure in [Google Cloud Project (GCP)](https
 
 Initial instructions based on [exekube's Getting Started](https://exekube.github.io/exekube/in-practice/getting-started/) (version 0.3.0).
 
-## Setup
+## Creating an environment
 
 1. Clone this repo.
 1. (Optional) Clone [the gpii-ops fork of exekube](https://github.com/gpii-ops/exekube).
@@ -13,14 +13,14 @@ Initial instructions based on [exekube's Getting Started](https://exekube.github
    * You can use a different Organization or Billing Account, e.g. from a GCP Free Trial Account, with `export ORGANIZATION_ID=111111111111` and/or `export BILLING_ID=222222-222222-222222`.
 1. `export TF_VAR_project_id=xk-mrtyler`
    * The project ID must be unique across all of Google Cloud Platform, like an AWS S3 Bucket.
-   * When changing to a new project\_id, I had to `rm .config/terragrunt`. This is something that `rake clean` should handle.
+   * When changing to a new project\_id, I had to `rm .config/terragrunt`. This is something that `rake clean` will handle.
 1. `cd gpii-infra/gcp`
 1. `rake dev:project_init`
    * Follow the instructions to authenticate.
    * This step is not idempotent. It will fail if you've already initialized the project named in `$TF_VAR_project_id`.
 1. `rake dev`
 
-## Teardown
+## Tearing down an environment
 
 1. `rake dev:destroy_cluster`
    * This is the important one since it shuts down the expensive bits (VMs in the Kubernetes cluster, mostly)
