@@ -11,19 +11,8 @@ describe Vars do
   # It works today, but if the testing situation becomes more complex and weird
   # stuff is happening, this method might be why!
   def scrub_env
-    allowed_keys = {
-      # Variables in use here
-      "BILLING_ID" => 1,
-      "ENV" => 1,
-      "ORGANIZATION_ID" => 1,
-      "TF_VAR_project_id" => 1,
-      # Other variables we need
-      # "USER" => 1,
-    }
     ENV.each_key do |key|
-      unless allowed_keys.has_key?(key)
-        ENV.delete(key)
-      end
+      ENV.delete(key)
     end
   end
 
