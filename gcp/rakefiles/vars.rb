@@ -1,10 +1,14 @@
 class Vars
   def self.set_vars(env)
     if ENV["TF_VAR_project_id"].nil?
-      puts "  ERROR: TF_VAR_project_id must be set!"
-      puts "  Do this: export TF_VAR_project_id=<your name>-<env>"
-      puts "  and try again."
-      raise ArgumentError, "TF_VAR_project_id must be set"
+      if ["stg", "prd"].include?(env)
+        ENV["TF_VAR_project_id"] = "gpii-#{env}"
+      else
+        puts "  ERROR: TF_VAR_project_id must be set!"
+        puts "  Do this: export TF_VAR_project_id=<your name>-<env>"
+        puts "  and try again."
+        raise ArgumentError, "TF_VAR_project_id must be set"
+      end
     end
     ENV["ENV"] = env
     if ENV["ORGANIZATION_ID"].nil?

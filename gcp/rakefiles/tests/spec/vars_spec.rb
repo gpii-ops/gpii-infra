@@ -20,7 +20,15 @@ describe Vars do
     scrub_env
   end
 
-  it "set_vars requires ENV['TF_VAR_project_id']" do
+  it "set_vars calculates ENV['TF_VAR_project_id'] when env=stg" do
+    allow(ENV).to receive(:[]=)
+    allow(ENV).to receive(:[])
+    env = "stg"
+    Vars.set_vars(env)
+    expect(ENV).to have_received(:[]=).with("TF_VAR_project_id", "gpii-#{env}")
+  end
+
+  it "set_vars requires ENV['TF_VAR_project_id'] for unknown values of env" do
     allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return(nil)
     env = "fake-env"
@@ -38,13 +46,14 @@ describe Vars do
     expect(ENV).to have_received(:[]=).with("BILLING_ID", "01A0E1-B0B31F-349F4F")
   end
 
-  it "set_vars doesn't clobber vars that are already set" do
+  it "set_vars doesn't clobber vars that are already set (even when env=stg)" do
     allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
     allow(ENV).to receive(:[]).with("ORGANIZATION_ID").and_return("fake-organization-id")
     allow(ENV).to receive(:[]).with("BILLING_ID").and_return("fake-billing-id")
-    env = "fake-env"
+    env = "stg"
     Vars.set_vars(env)
+    expect(ENV).not_to have_received(:[]=).with("TF_VAR_project_id")
     expect(ENV).not_to have_received(:[]=).with("ORGANIZATION_ID")
     expect(ENV).not_to have_received(:[]=).with("BILLING_ID")
   end
