@@ -11,13 +11,11 @@ Initial instructions based on [exekube's Getting Started](https://exekube.github
    * The `gpii-infra` clone and the `exekube` clone should be siblings in the same directory (there are some references to `../exekube`).
 1. By default you'll use the RtF Organization and Billing Account.
    * You can use a different Organization or Billing Account, e.g. from a GCP Free Trial Account, with `export ORGANIZATION_ID=111111111111` and/or `export BILLING_ID=222222-222222-222222`.
-1. `export TF_VAR_project_id=xk-mrtyler`
-   * The project ID must be unique across all of Google Cloud Platform, like an AWS S3 Bucket.
-   * When changing to a new project\_id, I had to `rm .config/terragrunt`. This is something that `rake clean` will handle.
 1. `cd gpii-infra/gcp/live/dev`
 1. `rake project_init`
+   * This will create a project called `gpii-dev-$USER` where `$USER` comes from your shell.
    * Follow the instructions to authenticate.
-   * This step is not idempotent. It will fail if you've already initialized the project named in `$TF_VAR_project_id`.
+   * This step is not idempotent. It will fail if you've already initialized the project named in `$TF_VAR_project_id` (e.g. `gpii-dev-$USER` or `gpii-prd`).
 1. `rake`
 
 ## Tearing down an environment
