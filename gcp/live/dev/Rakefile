@@ -1,5 +1,5 @@
 require "rake/clean"
-require_relative "rakefiles/vars.rb"
+require_relative "../../rakefiles/vars.rb"
 
 @exekube_cmd = "docker-compose run --rm --service-ports xk"
 
@@ -15,7 +15,7 @@ namespace :dev do |namespace|
     Vars.set_vars(@env)
   end
 
-  @gcp_creds_path = ".config/#{@env}/gcloud"
+  @gcp_creds_path = "../../.config/#{@env}/gcloud"
   @gcp_creds_file = "#{@gcp_creds_path}/credentials.db"
   desc "Authenticate and generate GCP credentials (gcloud auth login)"
   task :auth => [:set_vars, @gcp_creds_file]
