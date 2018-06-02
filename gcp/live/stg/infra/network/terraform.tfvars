@@ -15,9 +15,9 @@ terragrunt = {
 create_static_ip_address = false
 
 dns_zones = {
-  gcp-gpii-net = "dev.gcp.gpii.net."
+  gcp-gpii-net = "stg.gcp.gpii.net."
 }
 
 dns_records = {
-  gcp-gpii-net = "*.dev.gcp.gpii.net."
+  gcp-gpii-net = "*.stg.gcp.gpii.net."
 }
