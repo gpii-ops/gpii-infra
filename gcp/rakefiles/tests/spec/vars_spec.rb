@@ -20,6 +20,22 @@ describe Vars do
     scrub_env
   end
 
+  it "set_vars requires ENV['USER'] when env=dev" do
+    allow(ENV).to receive(:[]=)
+    allow(ENV).to receive(:[])
+    env = "dev"
+    expect { Vars.set_vars(env) }.to raise_error(ArgumentError, "USER must be set")
+  end
+
+  it "set_vars calculates ENV['TF_VAR_project_id'] when env=dev" do
+    allow(ENV).to receive(:[]=)
+    allow(ENV).to receive(:[])
+    allow(ENV).to receive(:[]).with("USER").and_return("fake-user")
+    env = "dev"
+    Vars.set_vars(env)
+    expect(ENV).to have_received(:[]=).with("TF_VAR_project_id", "gpii-#{env}-fake-user")
+  end
+
   it "set_vars calculates ENV['TF_VAR_project_id'] when env=stg" do
     allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[])

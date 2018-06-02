@@ -1,12 +1,24 @@
 class Vars
   def self.set_vars(env)
     if ENV["TF_VAR_project_id"].nil?
-      if ["stg", "prd"].include?(env)
+      if ["dev"].include?(env)
+        if ENV["USER"].nil?
+          puts "  ERROR: USER must be set!"
+          puts "  Do this: export USER=<your name>"
+          puts "  and try again."
+          raise ArgumentError, "USER must be set"
+        end
+        ENV["TF_VAR_project_id"] = "gpii-#{env}-#{ENV["USER"]}"
+      elsif ["stg", "prd"].include?(env)
         ENV["TF_VAR_project_id"] = "gpii-#{env}"
       else
         puts "  ERROR: TF_VAR_project_id must be set!"
-        puts "  Do this: export TF_VAR_project_id=<your name>-<env>"
-        puts "  and try again."
+        puts "  Usually, this value will be calculated for you, but you are"
+        puts "  using an env I don't recognize: #{env}."
+        puts "  Either pick a different env or, if you know what you're doing,"
+        puts "  you may override TF_VAR_project_id directly:"
+        puts "    export TF_VAR_project_id=<env>-<your name>"
+        puts "  Do one of those and try again."
         raise ArgumentError, "TF_VAR_project_id must be set"
       end
     end
