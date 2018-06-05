@@ -69,9 +69,9 @@ describe Vars do
     allow(ENV).to receive(:[]).with("BILLING_ID").and_return("fake-billing-id")
     env = "stg"
     Vars.set_vars(env)
-    expect(ENV).not_to have_received(:[]=).with("TF_VAR_project_id")
-    expect(ENV).not_to have_received(:[]=).with("ORGANIZATION_ID")
-    expect(ENV).not_to have_received(:[]=).with("BILLING_ID")
+    expect(ENV).not_to have_received(:[]=).with("TF_VAR_project_id", any_args)
+    expect(ENV).not_to have_received(:[]=).with("ORGANIZATION_ID", any_args)
+    expect(ENV).not_to have_received(:[]=).with("BILLING_ID", any_args)
   end
 end
 
