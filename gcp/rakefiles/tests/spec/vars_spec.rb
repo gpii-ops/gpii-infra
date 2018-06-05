@@ -51,6 +51,28 @@ describe Vars do
     expect { Vars.set_vars(env) }.to raise_error(ArgumentError, "TF_VAR_project_id must be set")
   end
 
+  it "set_vars calculates ENV['dns_(zones|records)'] when env=dev" do
+    allow(ENV).to receive(:[]=)
+    allow(ENV).to receive(:[])
+    allow(ENV).to receive(:[]).with("USER").and_return("fake-user")
+    env = "dev"
+    Vars.set_vars(env)
+    expect(ENV).to have_received(:[]=).with("TF_VAR_dns_zones", %Q|{ dev-gcp-gpii-net = "fake-user.dev.gcp.gpii.net." }|)
+    expect(ENV).to have_received(:[]=).with("TF_VAR_dns_records", %Q|{ dev-gcp-gpii-net = "*.fake-user.dev.gcp.gpii.net." }|)
+  end
+
+  it "set_vars doesn't clobber ENV['dns_(zones|records)'] when already set and env=dev" do
+    allow(ENV).to receive(:[]=)
+    allow(ENV).to receive(:[])
+    allow(ENV).to receive(:[]).with("USER").and_return("fake-user")
+    allow(ENV).to receive(:[]).with("TF_VAR_dns_zones").and_return("fake-custom-dns-zone.")
+    allow(ENV).to receive(:[]).with("TF_VAR_dns_records").and_return("fake-custom-dns-record.")
+    env = "dev"
+    Vars.set_vars(env)
+    expect(ENV).not_to have_received(:[]=).with("TF_VAR_dns_zones", any_args)
+    expect(ENV).not_to have_received(:[]=).with("TF_VAR_dns_records", any_args)
+  end
+
   it "set_vars sets default vars" do
     allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[])
