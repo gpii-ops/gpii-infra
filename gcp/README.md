@@ -45,3 +45,36 @@ Initial instructions based on [exekube's Getting Started](https://exekube.github
 * https://support.google.com/code/contact/billing_quota_increase
    * @mrtyler requested a quota bump to 100 Projects.
       * He only authorized his own email for now, to see what it did. But it's possible other Ops team members will need to go through this step.
+
+## FAQ / Troubleshooting
+
+### Errors trying to enable/disable Google Cloud APIs
+
+When destroying an environment completely (`rake destroy`), or creating an environment for the first time or after complete destruction (`rake deploy`), we disable/enable some Google Cloud APIs. This action is asynchronous and can take a few minutes to propagate.
+
+1. If you encounter an error like this during a `rake` run:
+
+```
+* google_project_service.services.1:
+Error enabling service:
+Error enabling service ["container.googleapis.com"]
+for project "gpii-dev-mrtyler": googleapi:
+Error 400: Precondition check failed., failedPrecondition
+```
+
+then try again.
+
+See https://github.com/exekube/exekube/pull/91 for further discussion.
+
+2. There is a slightly different error related to enabling/disabling GCP APIs:
+
+```
+Error 403: The caller does not have permission, forbidden
+```
+
+This happens when trying to enable an API that is already enabled. This shouldn't happen in normal operation, but a quick fix is to run something like this for each affected API:
+
+```
+$ rake xk_sh
+[inside exekube container]$ gcloud services disable container.googleapis.com
+```
