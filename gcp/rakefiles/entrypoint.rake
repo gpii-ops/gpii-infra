@@ -17,14 +17,26 @@ task :set_vars do
   Vars.set_vars(@env)
 end
 
-@gcp_creds_path = "../../.config/#{@env}/gcloud"
-@gcp_creds_file = "#{@gcp_creds_path}/credentials.db"
+@dot_config_path = "../../.config/#{@env}"
+CLOBBER << @dot_config_path
+
+@gcp_creds_file = "#{@dot_config_path}/gcloud/credentials.db"
 desc "[ADVANCED] Authenticate and generate GCP credentials (gcloud auth login)"
 task :auth => [:set_vars, @gcp_creds_file]
 rule @gcp_creds_file do
   sh "#{@exekube_cmd} gcloud auth login"
 end
-CLOBBER << @gcp_creds_path
+
+@kubectl_creds_file = "#{@dot_config_path}/kube/config"
+desc "[ADVANCED] Fetch kubectl credentials (gcloud auth login)"
+task :configure_kubectl => [:set_vars, @gcp_creds_file, @kubectl_creds_file]
+rule @kubectl_creds_file do
+  # This duplicates information in terraform code, 'k8s-cluster'
+  cluster_name = 'k8s-cluster'
+  # This duplicates information in terraform code, 'zone'. Could be a variable with some plumbing.
+  zone = 'us-central1-a'
+  sh "#{@exekube_cmd} gcloud container clusters get-credentials #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}"
+end
 
 desc "[NOT IDEMPOTENT, RUN ONCE PER ENVIRONMENT] Initialize GCP Project where this environment's resources will live"
 task :project_init => [:set_vars, @gcp_creds_file] do
@@ -58,22 +70,22 @@ task :set_current_project => [:set_vars, @gcp_creds_file, @serviceaccount_key_fi
 end
 
 desc "[ADVANCED] Create or update low-level infrastructure"
-task :apply_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
+task :apply_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file] do
   sh "#{@exekube_cmd} up live/#{@env}/infra"
 end
 
 desc "Create cluster and deploy GPII components to it"
-task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, :apply_infra] do
+task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :apply_infra] do
   sh "#{@exekube_cmd} up"
 end
 
 desc "Destroy cluster and low-level infrastructure"
-task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, :destroy_cluster] do
+task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :destroy_cluster] do
   sh "#{@exekube_cmd} down live/#{@env}/infra"
 end
 
 desc "Destroy cluster"
-task :destroy_cluster => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
+task :destroy_cluster => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file] do
   sh "#{@exekube_cmd} down"
 end
 
