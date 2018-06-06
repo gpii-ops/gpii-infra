@@ -1,5 +1,5 @@
 class Vars
-  def self.set_vars(env)
+  def self.set_vars(env, project_type)
     if ["dev"].include?(env)
       if ENV["USER"].nil?
         puts "  ERROR: USER must be set!"
