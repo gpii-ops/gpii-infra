@@ -75,6 +75,5 @@ Error 403: The caller does not have permission, forbidden
 This happens when trying to enable an API that is already enabled. This shouldn't happen in normal operation, but a quick fix is to run something like this for each affected API:
 
 ```
-$ rake xk_sh
-[inside exekube container]$ gcloud services disable container.googleapis.com
+rake xk"[gcloud services disable container.googleapis.com]"
 ```

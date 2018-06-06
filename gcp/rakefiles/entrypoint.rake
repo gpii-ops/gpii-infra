@@ -77,9 +77,12 @@ task :destroy_cluster => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] 
   sh "#{@exekube_cmd} down"
 end
 
-desc "[ADVANCED] Interactive exekube shell"
-task :xk_sh => :set_vars do
-  sh "#{@exekube_cmd} sh"
+desc '[ADVANCED] Run arbitrary exekube command -- rake xk"[kubectl get pods]"'
+task :xk, [:cmd] => :set_vars do |taskname, args|
+  unless args[:cmd]
+    raise "Argument :cmd -- the command to run inside the exekube container -- is required."
+  end
+  sh "#{@exekube_cmd} #{args[:cmd]}"
 end
 
 
