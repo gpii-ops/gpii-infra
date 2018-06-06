@@ -70,7 +70,7 @@ task :set_current_project => [:set_vars, @gcp_creds_file, @serviceaccount_key_fi
 end
 
 desc "[ADVANCED] Create or update low-level infrastructure"
-task :apply_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file] do
+task :apply_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
   sh "#{@exekube_cmd} up live/#{@env}/infra"
 end
 
@@ -80,7 +80,7 @@ task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_
 end
 
 desc "Destroy cluster and low-level infrastructure"
-task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :destroy_cluster] do
+task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, :destroy_cluster] do
   sh "#{@exekube_cmd} down live/#{@env}/infra"
 end
 
