@@ -11,9 +11,9 @@ class Vars
 
     if ENV["TF_VAR_project_id"].nil?
       if ["dev"].include?(env)
-        ENV["TF_VAR_project_id"] = "gpii-#{env}-#{ENV["USER"]}"
+        ENV["TF_VAR_project_id"] = "gpii-#{project_type}-#{env}-#{ENV["USER"]}"
       elsif ["stg", "prd"].include?(env)
-        ENV["TF_VAR_project_id"] = "gpii-#{env}"
+        ENV["TF_VAR_project_id"] = "gpii-#{project_type}-#{env}"
       else
         puts "  ERROR: TF_VAR_project_id must be set!"
         puts "  Usually, this value will be calculated for you, but you are"

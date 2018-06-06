@@ -35,7 +35,7 @@ describe Vars do
     env = "dev"
     project_type = "fake-project-type"
     Vars.set_vars(env, project_type)
-    expect(ENV).to have_received(:[]=).with("TF_VAR_project_id", "gpii-#{env}-fake-user")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_project_id", "gpii-#{project_type}-#{env}-fake-user")
   end
 
   it "set_vars calculates ENV['TF_VAR_project_id'] when env=stg" do
@@ -44,7 +44,7 @@ describe Vars do
     env = "stg"
     project_type = "fake-project-type"
     Vars.set_vars(env, project_type)
-    expect(ENV).to have_received(:[]=).with("TF_VAR_project_id", "gpii-#{env}")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_project_id", "gpii-#{project_type}-#{env}")
   end
 
   it "set_vars requires ENV['TF_VAR_project_id'] for unknown values of env" do
