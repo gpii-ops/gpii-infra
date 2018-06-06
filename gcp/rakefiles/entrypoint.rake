@@ -7,6 +7,12 @@ if @env.nil?
   puts "  Set @env before importing this rakefile."
   raise ArgumentError, "@env must be set"
 end
+if @project_type.nil?
+  puts "  ERROR: @project_type must be set!"
+  puts "  This is a problem in rake code."
+  puts "  Set @project_type before importing this rakefile."
+  raise ArgumentError, "@project_type must be set"
+end
 
 @exekube_cmd = "docker-compose run --rm --service-ports xk"
 
@@ -14,7 +20,7 @@ desc "Create cluster and deploy GPII components to it"
 task :default => :deploy
 
 task :set_vars do
-  Vars.set_vars(@env)
+  Vars.set_vars(@env, @project_type)
 end
 
 @dot_config_path = "../../.config/#{@env}"
