@@ -1,0 +1,12 @@
+# Default values for gpii-dataloader.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+couchdb_url: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local:5984/gpii"
+
+image:
+  repository: gpii/universal
+  checksum: sha256:b9da957b2511ec2c25d1e6054359b0a345c4c14dc7853355054e70bd01fda323
+  pullPolicy: IfNotPresent
+
+nameOverride: dataloader

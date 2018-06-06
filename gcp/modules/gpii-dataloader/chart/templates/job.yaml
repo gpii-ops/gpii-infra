@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: {{ .Release.Namespace | quote }}
+  name: {{ template "dataloader.name" . }}
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ template "dataloader.name" . }}
+    spec:
+      containers:
+      - name: gpii-dataloader
+        image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
+        env:
+        - name: COUCHDB_URL
+          value: '{{ .Values.couchdb_url }}'
+        - name: CLEAR_INDEX
+          value: 'true'
+      restartPolicy: OnFailure

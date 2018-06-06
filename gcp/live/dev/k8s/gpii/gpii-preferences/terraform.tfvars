@@ -1,13 +1,14 @@
 # ↓ Module metadata
 terragrunt = {
   terraform {
-    source = "/project/modules//couchdb"
+    source = "/project/modules//gpii-preferences"
   }
 
   dependencies {
     paths = [
-      "../../templater",
-      "../../kube-system/administration-tasks",
+      "../../kube-system/nginx-ingress",
+      "../../kube-system/cert-manager",
+      "../couchdb",
     ]
   }
 
@@ -17,3 +18,4 @@ terragrunt = {
 }
 
 # ↓ Module configuration (empty means all default)
+
