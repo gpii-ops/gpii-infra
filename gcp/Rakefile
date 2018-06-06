@@ -13,6 +13,7 @@ namespace :dev do |namespace|
 
   task :set_vars do
     Vars.set_vars(@env)
+    Vars.set_secrets()
   end
 
   @gcp_creds_path = ".config/#{@env}/gcloud"
@@ -45,6 +46,30 @@ namespace :dev do |namespace|
   desc "Create cluster and deploy GPII components to it"
   task :deploy => [:set_vars, @gcp_creds_file, :apply_infra] do
     sh "#{@exekube_cmd} up"
+  end
+
+  desc "[ADVANCED] Deploy provided ENV['RES'] into the cluster"
+  task :deploy_res => [:set_vars, @gcp_creds_file, :apply_infra] do
+    if ENV["RES"].nil?
+      puts "  ERROR: RES must be set and point to Terragrunt directory!"
+      raise ArgumentError, "RES must be set"
+    elsif !File.directory?(ENV["RES"])
+      puts "  ERROR: RES must point to Terragrunt directory!"
+      raise IOError, "RES must point to existing Terragrunt directory"
+    end
+    sh "#{@exekube_cmd} up #{ENV['RES']}"
+  end
+
+  desc "[ADVANCED] Destroy provided ENV['RES'] in the cluster"
+  task :destroy_res => [:set_vars, @gcp_creds_file] do
+    if ENV["RES"].nil?
+      puts "  ERROR: RES must be set and point to Terragrunt directory!"
+      raise ArgumentError, "RES must be set"
+    elsif !File.directory?(ENV["RES"])
+      puts "  ERROR: RES must point to Terragrunt directory!"
+      raise IOError, "RES must point to existing Terragrunt directory"
+    end
+    sh "#{@exekube_cmd} down #{ENV['RES']}"
   end
 
   desc "Destroy cluster and low-level infrastructure"
