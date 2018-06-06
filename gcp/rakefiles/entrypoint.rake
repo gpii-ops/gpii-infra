@@ -80,12 +80,12 @@ task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_
 end
 
 desc "Destroy cluster and low-level infrastructure"
-task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, :destroy_cluster] do
+task :destroy_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, :destroy_cluster] do
   sh "#{@exekube_cmd} down live/#{@env}/infra"
 end
 
-desc "Destroy cluster"
-task :destroy_cluster => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file] do
+desc "Undeploy GPII compoments and destroy cluster"
+task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file] do
   sh "#{@exekube_cmd} down"
 end
 
