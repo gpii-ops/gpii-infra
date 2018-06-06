@@ -1,0 +1,18 @@
+replicaCount: ${env == "dev" ? 2 : 6}
+
+image:
+  repository: ${flowmanager_repository}
+  checksum: ${flowmanager_checksum}
+
+issuerRef:
+  name: ${env == "dev" ? "letsencrypt-staging" : "letsencrypt-production"}
+
+dnsNames:
+- flowmanager.${project_id}.${env}.gcp.gpii.net
+
+ingress:
+  disable_ssl_redirect: ${env == "dev" ? "true" : "false"}
+
+matchmaker_url: "${env == "dev" ? "http" : "https"}://flowmanager.${project_id}.${env}.gcp.gpii.net"
+
+datasource_hostname: "http://${couchdb_admin_username}:${couchdb_admin_password}@couchdb-svc-couchdb.gpii.svc.cluster.local"
