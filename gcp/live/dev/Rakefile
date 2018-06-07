@@ -1,0 +1,7 @@
+import "../../rakefiles/entrypoint.rake"
+
+@env = File.basename(File.dirname(__FILE__))
+@project_type = File.basename(File.expand_path("../../../", __FILE__))
+
+
+# vim: et ts=2 sw=2:

@@ -14,8 +14,10 @@ terragrunt = {
 
 create_static_ip_address = false
 
-# DNS zone names are dynamic (e.g. mrtyler.dev.gcp.gpii.net) so they will be
-# injected from outside. (If they're not, defaulting to no DNS records is
-# reasonable.)
-dns_zones = {}
-dns_records = {}
+dns_zones = {
+  gcp-gpii-net = "stg.gcp.gpii.net."
+}
+
+dns_records = {
+  gcp-gpii-net = "*.stg.gcp.gpii.net."
+}
