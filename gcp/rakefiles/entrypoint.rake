@@ -87,7 +87,7 @@ task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_
 end
 
 desc "Destroy cluster and low-level infrastructure"
-task :destroy_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, :destroy_cluster] do
+task :destroy_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, :destroy] do
   sh "#{@exekube_cmd} down live/#{@env}/infra"
 end
 
