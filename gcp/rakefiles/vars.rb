@@ -50,7 +50,7 @@ class Vars
     end
 
     # Hack to avoid changes in gpii-version-updater
-    version_file = '../aws/modules/deploy/version.yml'
+    version_file = '../../../aws/modules/deploy/version.yml'
     versions = YAML.load(File.read(version_file))
     if versions['flowmanager']
       ENV['TF_VAR_flowmanager_repository'] = versions['flowmanager'].split('@')[0]
@@ -67,7 +67,7 @@ class Vars
   end
 
   def self.set_secrets()
-    saved_secrets_file_path = "live/#{ENV['ENV']}/secrets/#{ENV["TF_VAR_project_id"]}-secrets.yml"
+    saved_secrets_file_path = "../#{ENV['ENV']}/secrets/#{ENV["TF_VAR_project_id"]}-secrets.yml"
 
     begin
       @secrets = YAML.load(File.read(saved_secrets_file_path))
