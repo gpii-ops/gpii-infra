@@ -17,15 +17,15 @@ data "template_file" "couchdb_values" {
   template = "${file("values/couchdb.yaml")}"
 
   vars {
-    couchdb_admin_username  = "${var.couchdb_admin_username}"
-    couchdb_admin_password  = "${var.couchdb_admin_password}"
-    couchdb_secret  = "${var.couchdb_secret}"
+    couchdb_admin_username = "${var.couchdb_admin_username}"
+    couchdb_admin_password = "${var.couchdb_admin_password}"
+    couchdb_secret         = "${var.couchdb_secret}"
   }
 }
 
 resource "local_file" "couchdb_values_rendered" {
-    content     = "${data.template_file.couchdb_values.rendered}"
-    filename    = "${var.values_dir}/couchdb.yaml"
+  content  = "${data.template_file.couchdb_values.rendered}"
+  filename = "${var.values_dir}/couchdb.yaml"
 }
 
 # END COUCHDB
@@ -39,18 +39,18 @@ data "template_file" "preferences_values" {
   template = "${file("values/gpii-preferences.yaml")}"
 
   vars {
-    env  = "${var.env}"
-    project_id  = "${var.project_id}"
-    preferences_repository  = "${var.preferences_repository}"
-    preferences_checksum  = "${var.preferences_checksum}"
-    couchdb_admin_username  = "${var.couchdb_admin_username}"
-    couchdb_admin_password  = "${var.couchdb_admin_password}"
+    env                    = "${var.env}"
+    project_id             = "${var.project_id}"
+    preferences_repository = "${var.preferences_repository}"
+    preferences_checksum   = "${var.preferences_checksum}"
+    couchdb_admin_username = "${var.couchdb_admin_username}"
+    couchdb_admin_password = "${var.couchdb_admin_password}"
   }
 }
 
 resource "local_file" "preferences_values_rendered" {
-    content     = "${data.template_file.preferences_values.rendered}"
-    filename    = "${var.values_dir}/gpii-preferences.yaml"
+  content  = "${data.template_file.preferences_values.rendered}"
+  filename = "${var.values_dir}/gpii-preferences.yaml"
 }
 
 # END GPII PREFERENCES
@@ -64,18 +64,18 @@ data "template_file" "flowmanager_values" {
   template = "${file("values/gpii-flowmanager.yaml")}"
 
   vars {
-    env  = "${var.env}"
-    project_id  = "${var.project_id}"
-    flowmanager_repository  = "${var.flowmanager_repository}"
-    flowmanager_checksum  = "${var.flowmanager_checksum}"
-    couchdb_admin_username  = "${var.couchdb_admin_username}"
-    couchdb_admin_password  = "${var.couchdb_admin_password}"
+    env                    = "${var.env}"
+    project_id             = "${var.project_id}"
+    flowmanager_repository = "${var.flowmanager_repository}"
+    flowmanager_checksum   = "${var.flowmanager_checksum}"
+    couchdb_admin_username = "${var.couchdb_admin_username}"
+    couchdb_admin_password = "${var.couchdb_admin_password}"
   }
 }
 
 resource "local_file" "flowmanager_values_rendered" {
-    content     = "${data.template_file.flowmanager_values.rendered}"
-    filename    = "${var.values_dir}/gpii-flowmanager.yaml"
+  content  = "${data.template_file.flowmanager_values.rendered}"
+  filename = "${var.values_dir}/gpii-flowmanager.yaml"
 }
 
 # END GPII FLOWMANAGER
@@ -90,15 +90,16 @@ data "template_file" "dataloader_values" {
 
   vars {
     dataloader_repository  = "${var.dataloader_repository}"
-    dataloader_checksum  = "${var.dataloader_checksum}"
-    couchdb_admin_username  = "${var.couchdb_admin_username}"
-    couchdb_admin_password  = "${var.couchdb_admin_password}"
+    dataloader_checksum    = "${var.dataloader_checksum}"
+    couchdb_admin_username = "${var.couchdb_admin_username}"
+    couchdb_admin_password = "${var.couchdb_admin_password}"
   }
 }
 
 resource "local_file" "dataloader_values_rendered" {
-    content     = "${data.template_file.dataloader_values.rendered}"
-    filename    = "${var.values_dir}/gpii-dataloader.yaml"
+  content  = "${data.template_file.dataloader_values.rendered}"
+  filename = "${var.values_dir}/gpii-dataloader.yaml"
 }
 
 # END GPII DATALOADER
+

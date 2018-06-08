@@ -10,5 +10,5 @@ module "administration_tasks" {
   release_name      = "administration-tasks"
   release_namespace = "gpii"
 
-  chart_name    = "administration-tasks/"
+  chart_name = "administration-tasks/"
 }

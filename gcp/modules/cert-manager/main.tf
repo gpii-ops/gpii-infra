@@ -29,4 +29,3 @@ resource "null_resource" "cert_manager_resources" {
     command = "kubectl delete --ignore-not-found -f ${path.module}/resources/"
   }
 }
-
