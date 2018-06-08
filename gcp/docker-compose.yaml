@@ -38,6 +38,11 @@ services:
       # The GCP KMS keyring name to use
       TF_VAR_keyring_name: keyring
 
+      # Used by gke-network. Environments like "gpii-dev-mrtyler" need to
+      # dynamically DNS names (e.g. "flowmanager.mrtyler.dev.gcp.gpii.net").
+      TF_VAR_dns_zones:
+      TF_VAR_dns_records:
+
       # We also need to have ENV as Terraform var
       TF_VAR_env: ${ENV:?err}
 
