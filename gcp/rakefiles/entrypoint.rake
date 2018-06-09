@@ -83,30 +83,6 @@ task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_
   sh "#{@exekube_cmd} up"
 end
 
-desc "[ADVANCED] Deploy provided ENV['RES'] module into the cluster"
-task :deploy_module => [:set_vars, @gcp_creds_file, :apply_infra] do
-  if ENV["RES"].nil?
-    puts "  ERROR: RES must be set and point to Terragrunt directory!"
-    raise ArgumentError, "RES must be set"
-  elsif !File.directory?(ENV["RES"])
-    puts "  ERROR: RES must point to Terragrunt directory!"
-    raise IOError, "RES must point to existing Terragrunt directory"
-  end
-  sh "#{@exekube_cmd} up #{ENV['RES']}"
-end
-
-desc "[ADVANCED] Destroy provided ENV['RES'] module in the cluster"
-task :destroy_module => [:set_vars, @gcp_creds_file] do
-  if ENV["RES"].nil?
-    puts "  ERROR: RES must be set and point to Terragrunt directory!"
-    raise ArgumentError, "RES must be set"
-  elsif !File.directory?(ENV["RES"])
-    puts "  ERROR: RES must point to Terragrunt directory!"
-    raise IOError, "RES must point to existing Terragrunt directory"
-  end
-  sh "#{@exekube_cmd} down #{ENV['RES']}"
-end
-
 desc "Destroy cluster and low-level infrastructure"
 task :destroy_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, :destroy] do
   sh "#{@exekube_cmd} down live/#{@env}/infra"
@@ -125,5 +101,28 @@ task :xk, [:cmd] => :set_vars do |taskname, args|
   sh "#{@exekube_cmd} #{args[:cmd]}"
 end
 
+desc '[ADVANCED] Deploy provided module into the cluster -- rake deploy_module"[k8s/kube-system/cert-manager]"'
+task :deploy_module, [:module] => [:set_vars, @gcp_creds_file, :apply_infra] do |taskname, args|
+  if args[:module].nil?
+    puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
+    raise ArgumentError, "args[:module] must be set"
+  elsif !File.directory?(args[:module])
+    puts "  ERROR: args[:module] must point to Terragrunt directory!"
+    raise IOError, "args[:module] must point to existing Terragrunt directory"
+  end
+  sh "#{@exekube_cmd} up live/#{@env}/#{args[:module]}"
+end
+
+desc '[ADVANCED] Destroy provided module in the cluster -- rake destroy_module"[k8s/kube-system/cert-manager]"'
+task :destroy_module, [:module] => [:set_vars, @gcp_creds_file] do |taskname, args|
+  if args[:module].nil?
+    puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
+    raise ArgumentError, "args[:module] must be set"
+  elsif !File.directory?(args[:module])
+    puts "  ERROR: args[:module] must point to Terragrunt directory!"
+    raise IOError, "args[:module] must point to existing Terragrunt directory"
+  end
+  sh "#{@exekube_cmd} down live/#{@env}/#{args[:module]}"
+end
 
 # vim: et ts=2 sw=2:
