@@ -105,7 +105,7 @@ task :setup_secrets_from_files => :setup_secrets do
 end
 
 Dir.chdir('helms') do
-  HELMCHARTS_DIRS = Dir.glob('*').select {|d| File.directory? d}
+  HELMCHARTS_DIRS = Dir.glob('*').select {|d| File.directory? d}.sort
 end
 SOURCE_FILES = FileList.new("*.erb")
 DEST_FILES = SOURCE_FILES.ext(".yml")

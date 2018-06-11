@@ -143,7 +143,7 @@ end
 desc "Install Helm charts in the cluster #{ENV["TF_VAR_cluster_name"]}"
 task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_components, :init_helm] do
   Dir.chdir("#{@tmpdir}-modules/deploy/helms/") do
-    @gpii_helmcharts = Dir.glob("*").select {|d| File.directory? d }
+    @gpii_helmcharts = Dir.glob("*").select {|d| File.directory? d }.sort
   end
 
   installed_charts = `helm list -q -a`
@@ -233,7 +233,7 @@ task :undeploy => [:configure_kubectl, :find_gpii_components] do
   end
 
   Dir.chdir("#{@tmpdir}-modules/deploy/helms/") do
-    @gpii_helmcharts = Dir.glob("*").select {|d| File.directory? d }
+    @gpii_helmcharts = Dir.glob("*").select {|d| File.directory? d }.sort
   end
   @gpii_helmcharts.reverse.each do |chart|
     chart_config = YAML.load_file("#{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml")
