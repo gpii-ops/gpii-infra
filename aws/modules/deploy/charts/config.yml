@@ -1,0 +1,25 @@
+# This is the config file for GPII Helm Charts.
+#
+# It contain a list of chart names with respect to install/uninstall order.
+# All charts are being installed from /common/charts directory, which
+# is shared between AWS and GCP parts of the project.
+#
+# Child directory named "values" may contain ERB template with custom values
+# for the chart, that is being rendered in `rake generate` task.
+#
+# Values file may also contain the following structure to set name and
+# namespace values that will be passed to Helm:
+#
+# chart-metadata:
+#  name: install_name
+#  namespace: install_namespace
+#
+
+# TODO: switch couchdb deployment to Helm chart
+# - couchdb
+- nginx-ingress
+- cert-manager
+- gpii-dataloader
+- gpii-preferences
+- gpii-flowmanager
+# - fluentd

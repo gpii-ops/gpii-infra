@@ -142,21 +142,18 @@ end
 
 desc "Install Helm charts in the cluster #{ENV["TF_VAR_cluster_name"]}"
 task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_components, :init_helm] do
-  Dir.chdir("#{@tmpdir}-modules/deploy/helms/") do
-    @gpii_helmcharts = Dir.glob("*").select {|d| File.directory? d }
-  end
-
+  @gpii_helmcharts = YAML.load_file("#{@tmpdir}-modules/deploy/charts/config.yml")
   installed_charts = `helm list -q -a`
   installed_charts = installed_charts.split("\n")
   @gpii_helmcharts.each do |chart|
-    chart_config = YAML.load_file("#{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml")
+    chart_config = YAML.load_file("#{@tmpdir}-modules/deploy/charts/values/#{chart}.yaml")
     # Extracting chart name and namespace from chart-metadata
-    if chart_config['chart-metadata'] && chart_config['chart-metadata']['name']
+    if chart_config && chart_config['chart-metadata'] && chart_config['chart-metadata']['name']
       chart_name = chart_config['chart-metadata']['name']
     else
       chart_name = chart.match(/^\d+\-(.*)/)[1]
     end
-    if chart_config['chart-metadata'] && chart_config['chart-metadata']['namespace']
+    if chart_config && chart_config['chart-metadata'] && chart_config['chart-metadata']['namespace']
       chart_namespace = chart_config['chart-metadata']['namespace']
     else
       chart_namespace = 'default'
@@ -165,7 +162,7 @@ task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_co
     if installed_charts.include?(chart_name)
       begin
         wait_for(
-          "helm upgrade --namespace #{chart_namespace} --recreate-pods -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{chart_name} #{@tmpdir}-modules/deploy/helms/#{chart}",
+          "helm upgrade --namespace #{chart_namespace} --recreate-pods -f #{@tmpdir}-modules/deploy/charts/values/#{chart}.yaml #{chart_name} #{@chartdir}/#{chart}",
           sleep_secs: 5,
           max_wait_secs: 60,
         )
@@ -175,7 +172,7 @@ task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_co
     else
       begin
         wait_for(
-          "helm install --name #{chart_name} --namespace #{chart_namespace} -f #{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml #{@tmpdir}-modules/deploy/helms/#{chart}",
+          "helm install --name #{chart_name} --namespace #{chart_namespace} -f #{@tmpdir}-modules/deploy/charts/values/#{chart}.yaml #{@chartdir}/#{chart}",
           sleep_secs: 5,
           max_wait_secs: 60,
         )
@@ -232,13 +229,11 @@ task :undeploy => [:configure_kubectl, :find_gpii_components] do
     end
   end
 
-  Dir.chdir("#{@tmpdir}-modules/deploy/helms/") do
-    @gpii_helmcharts = Dir.glob("*").select {|d| File.directory? d }
-  end
+  @gpii_helmcharts = YAML.load_file("#{@tmpdir}-modules/deploy/charts/config.yml")
   @gpii_helmcharts.reverse.each do |chart|
-    chart_config = YAML.load_file("#{@tmpdir}-modules/deploy/helms/#{chart}/custom-values.yaml")
+    chart_config = YAML.load_file("#{@tmpdir}-modules/deploy/charts/values/#{chart}.yaml")
     # Extracting chart name from chart-metadata
-    if chart_config['chart-metadata'] && chart_config['chart-metadata']['name']
+    if chart_config && chart_config['chart-metadata'] && chart_config['chart-metadata']['name']
       chart_name = chart_config['chart-metadata']['name']
     else
       chart_name = chart.match(/^\d+\-(.*)/)[1]

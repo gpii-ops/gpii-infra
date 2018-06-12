@@ -22,3 +22,5 @@ dnsNames:
 ingress:
   disable_ssl_redirect: true
 <% end %>
+
+datasource_hostname: "http://<%= @secrets["couchdb_user"] %>:<%= @secrets["couchdb_password"] %>@couchdb-lb.gpii.svc.cluster.local"
