@@ -1,7 +1,3 @@
-chart-metadata:
-  name: preferences
-  namespace: gpii
-
 replicaCount: <%= ENV["TF_VAR_cluster_name"].start_with?("stg.","prd.") ? '6' : '2' %>
 
 image:

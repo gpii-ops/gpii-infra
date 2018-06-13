@@ -124,7 +124,7 @@ do
   rescue Errno::EEXIST
   end
   charts = YAML.load_file("charts/config.yml")
-  charts.each do |chart|
+  charts.each do |chart, attrs|
     rendered = ERB.new(File.read("charts/values/#{chart}.erb")).result(binding)
     File.open("#{DEPLOY_OUT_DIR}/charts/values/#{chart}.yaml", "w") do |f|
       f.puts rendered

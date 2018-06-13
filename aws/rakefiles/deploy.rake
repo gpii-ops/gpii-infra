@@ -145,16 +145,15 @@ task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_co
   @gpii_helmcharts = YAML.load_file("#{@tmpdir}-modules/deploy/charts/config.yml")
   installed_charts = `helm list -q -a`
   installed_charts = installed_charts.split("\n")
-  @gpii_helmcharts.each do |chart|
-    chart_config = YAML.load_file("#{@tmpdir}-modules/deploy/charts/values/#{chart}.yaml")
-    # Extracting chart name and namespace from chart-metadata
-    if chart_config && chart_config['chart-metadata'] && chart_config['chart-metadata']['name']
-      chart_name = chart_config['chart-metadata']['name']
+  @gpii_helmcharts.each do |chart, attrs|
+    # Extracting release name and namespace
+    if attrs && attrs['release_name']
+      chart_name = attrs['release_name']
     else
       chart_name = chart.match(/^\d+\-(.*)/)[1]
     end
-    if chart_config && chart_config['chart-metadata'] && chart_config['chart-metadata']['namespace']
-      chart_namespace = chart_config['chart-metadata']['namespace']
+    if attrs && attrs['release_namespace']
+      chart_namespace = attrs['release_namespace']
     else
       chart_namespace = 'default'
     end
@@ -230,11 +229,10 @@ task :undeploy => [:configure_kubectl, :find_gpii_components] do
   end
 
   @gpii_helmcharts = YAML.load_file("#{@tmpdir}-modules/deploy/charts/config.yml")
-  @gpii_helmcharts.reverse.each do |chart|
-    chart_config = YAML.load_file("#{@tmpdir}-modules/deploy/charts/values/#{chart}.yaml")
-    # Extracting chart name from chart-metadata
-    if chart_config && chart_config['chart-metadata'] && chart_config['chart-metadata']['name']
-      chart_name = chart_config['chart-metadata']['name']
+  @gpii_helmcharts.to_a.reverse.each do |chart, attrs|
+    # Extracting release name
+    if attrs && attrs['release_name']
+      chart_name = attrs['release_name']
     else
       chart_name = chart.match(/^\d+\-(.*)/)[1]
     end

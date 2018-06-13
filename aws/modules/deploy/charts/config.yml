@@ -7,19 +7,32 @@
 # Child directory named "values" may contain ERB template with custom values
 # for the chart, that is being rendered in `rake generate` task.
 #
-# Values file may also contain the following structure to set name and
-# namespace values that will be passed to Helm:
+# Every chart should have the following attributes:
 #
-# chart-metadata:
-#  name: install_name
-#  namespace: install_namespace
+# beautiful-chart:
+#  release_name: release-name-to-pass-to-helm
+#  release_namespace: release-namespace-to-pass-to-helm
 #
 
 # TODO: switch couchdb deployment to Helm chart
-# - couchdb
-- nginx-ingress
-- cert-manager
-- gpii-dataloader
-- gpii-preferences
-- gpii-flowmanager
-# - fluentd
+# couchdb:
+#   release_name: couchdb
+#   release_namespace: gpii
+nginx-ingress:
+  release_name: nginx-ingress
+  release_namespace: gpii
+cert-manager:
+  release_name: cert-manager
+  release_namespace: kube-system
+gpii-dataloader:
+  release_name: dataloader
+  release_namespace: gpii
+gpii-preferences:
+  release_name: preferences
+  release_namespace: gpii
+gpii-flowmanager:
+  release_name: flowmanager
+  release_namespace: gpii
+# fluentd:
+#   release_name: preferences
+#   release_namespace: gpii
