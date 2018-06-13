@@ -64,6 +64,7 @@ services:
       - 8001:8001
     volumes:
       - .:/project
+      - ../common/charts:/charts
       - ./.config/${ENV}/helm:/root/.helm
       - ./.config/${ENV}/terragrunt:/root/.terragrunt
       - ./.config/${ENV}/gcloud:/root/.config/gcloud

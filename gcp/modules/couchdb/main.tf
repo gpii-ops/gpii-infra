@@ -11,5 +11,5 @@ module "couchdb" {
   release_namespace = "gpii"
   release_values    = "${var.values_dir}/couchdb.yaml"
 
-  chart_name = "chart/"
+  chart_name = "../../../../../charts/couchdb"
 }
