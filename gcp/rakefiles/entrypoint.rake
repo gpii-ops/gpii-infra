@@ -102,7 +102,7 @@ task :xk, [:cmd] => :set_vars do |taskname, args|
 end
 
 desc '[ADVANCED] Deploy provided module into the cluster -- rake deploy_module"[k8s/kube-system/cert-manager]"'
-task :deploy_module, [:module] => [:set_vars, @gcp_creds_file, :apply_infra] do |taskname, args|
+task :deploy_module, [:module] => [:set_vars, @gcp_creds_file] do |taskname, args|
   if args[:module].nil?
     puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
     raise ArgumentError, "args[:module] must be set"
