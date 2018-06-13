@@ -13,6 +13,7 @@ metadata:
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
   name: {{ template "nginx-ingress.defaultBackend.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
 spec:
   clusterIP: "{{ .Values.defaultBackend.service.clusterIP }}"
 {{- if .Values.defaultBackend.service.externalIPs }}

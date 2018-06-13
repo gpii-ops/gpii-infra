@@ -9,6 +9,7 @@ metadata:
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
   name: {{ template "nginx-ingress.controller.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
 spec:
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   updateStrategy:
