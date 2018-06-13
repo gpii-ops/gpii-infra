@@ -5,8 +5,8 @@
 couchdb_url: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local:5984/gpii"
 
 image:
-  repository: gpii/universal
-  checksum: sha256:b9da957b2511ec2c25d1e6054359b0a345c4c14dc7853355054e70bd01fda323
+  repository: gpii/gpii-dataloader
+  checksum: sha256:f279c6ab7fa1c19e5f358a6a3d87a970eaf8d615c8b6181851fa086b6229b3a1
   pullPolicy: IfNotPresent
 
 nameOverride: dataloader

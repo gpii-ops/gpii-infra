@@ -15,7 +15,7 @@ matchmaker_url: https://flowmanager.test.local
 
 image:
   repository: gpii/universal
-  checksum: sha256:b9da957b2511ec2c25d1e6054359b0a345c4c14dc7853355054e70bd01fda323
+  checksum: sha256:8547f22ae8e86d7b4b09e10d9ec87b1605b47dc37904171c84555a55462f161e
   pullPolicy: IfNotPresent
 
 issuerRef:

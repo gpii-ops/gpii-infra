@@ -46,4 +46,5 @@ Parameter | Description | Default
 --- | --- | ---
 `couchdb_url` | couchdb url for dataloader | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local:5984/gpii`
 `image.repository` | container image repository | `gpii/universal`
+`image.checksum` | image checksum | `sha256:8547f22ae8e86d7b4b09e10d9ec87b1605b47dc37904171c84555a55462f161e`
 `image.pullPolicy` | container image pullPolicy | `IfNotPresent`

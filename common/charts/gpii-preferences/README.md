@@ -57,4 +57,5 @@ Parameter | Description | Default
 `secretKeyRef.name` | name of the secret with CouchDB connection details | `couchdb-secrets`
 `secretKeyRef.key` | key of the secret with CouchDB connection details | `datasource_hostname`
 `image.repository` | container image repository | `gpii/universal`
+`image.checksum` | image checksum | `sha256:f279c6ab7fa1c19e5f358a6a3d87a970eaf8d615c8b6181851fa086b6229b3a1`
 `image.pullPolicy` | container image pullPolicy | `IfNotPresent`
