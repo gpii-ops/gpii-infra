@@ -6,6 +6,7 @@ image:
 
 issuerRef:
   name: ${env == "dev" ? "letsencrypt-staging" : "letsencrypt-production"}
+  kind: ClusterIssuer
 
 dnsNames:
 - flowmanager.${project_id}.${env}.gcp.gpii.net

@@ -1,8 +1,8 @@
 apiVersion: certmanager.k8s.io/v1alpha1
-kind: Issuer
+kind: ClusterIssuer
 metadata:
   name: letsencrypt-staging
-  namespace: gpii
+  namespace: kube-system
 spec:
   acme:
     server: https://acme-staging.api.letsencrypt.org/directory
@@ -12,10 +12,10 @@ spec:
     http01: {}
 ---
 apiVersion: certmanager.k8s.io/v1alpha1
-kind: Issuer
+kind: ClusterIssuer
 metadata:
   name: letsencrypt-production
-  namespace: gpii
+  namespace: kube-system
 spec:
   acme:
     server: https://acme-v01.api.letsencrypt.org/directory
