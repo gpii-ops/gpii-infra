@@ -18,6 +18,7 @@ image:
 
 issuerRef:
   name: letsencrypt-production
+  kind: Issuer
 
 dnsNames:
 - preferences.test.local

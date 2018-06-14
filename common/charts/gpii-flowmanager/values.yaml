@@ -20,6 +20,7 @@ image:
 
 issuerRef:
   name: letsencrypt-production
+  kind: Issuer
 
 dnsNames:
 - flowmanager.test.local

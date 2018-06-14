@@ -53,6 +53,7 @@ Parameter | Description | Default
 `datasource_hostname` | data source hostname for preferences service | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`
 `node_env` | preferences node env | `gpii.config.preferencesServer.standalone.production`
 `issuerRef.name` | name of the cert-manager issuer | `letsencrypt-production`
+`issuerRef.kind` | kind of the cert-manager issuer | `Issuer`
 `dnsNames` | list of host names for nginx-ingress controller | `preferences.test.local`
 `secretKeyRef.name` | name of the secret with CouchDB connection details | `couchdb-secrets`
 `secretKeyRef.key` | key of the secret with CouchDB connection details | `datasource_hostname`

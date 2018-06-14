@@ -55,6 +55,7 @@ Parameter | Description | Default
 `preferences_url` | preferences service url | `http://preferences.gpii.svc.cluster.local/preferences/%gpiiKey?merge=%merge`
 `matchmaker_url` | matchmaker url | `https://flowmanager.test.local`
 `issuerRef.name` | name of the cert-manager issuer | `letsencrypt-production`
+`issuerRef.kind` | kind of the cert-manager issuer | `Issuer`
 `dnsNames` | list of host names for nginx-ingress controller | `flowmanager.test.local`
 `secretKeyRef.name` | name of the secret with CouchDB connection details | `couchdb-secrets`
 `secretKeyRef.key` | key of the secret with CouchDB connection details | `datasource_hostname`
