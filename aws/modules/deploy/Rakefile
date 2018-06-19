@@ -114,12 +114,9 @@ task :generate => \
   DEST_FILES \
 do
   cp FileList.new("./*.yml"), "#{DEPLOY_OUT_DIR}/"
-  begin
-    FileUtils.mkdir "#{DEPLOY_OUT_DIR}/charts"
-  rescue Errno::EEXIST
-  end
   cp "charts/config.yml", "#{DEPLOY_OUT_DIR}/charts/"
   begin
+    FileUtils.mkdir "#{DEPLOY_OUT_DIR}/charts"
     FileUtils.mkdir "#{DEPLOY_OUT_DIR}/charts/values"
   rescue Errno::EEXIST
   end
