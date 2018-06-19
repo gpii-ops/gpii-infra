@@ -2,7 +2,18 @@ terraform {
   backend "gcs" {}
 }
 
-variable "load_balancer_ip" {}
+variable "env" {}
+variable "serviceaccount_key" {}
+variable "project_id" {}
+
+data "terraform_remote_state" "network" {
+  backend = "gcs"
+  config {
+    credentials = "${var.serviceaccount_key}"
+    bucket      = "${var.project_id}-tfstate"
+    prefix      = "${var.env}/infra/network"
+  }
+}
 
 module "nginx-ingress" {
   source = "/exekube-modules/helm-template-release"
@@ -12,5 +23,5 @@ module "nginx-ingress" {
 
   chart_name = "../../../../../charts/nginx-ingress"
 
-  load_balancer_ip = "${var.load_balancer_ip}"
+  load_balancer_ip = "${data.terraform_remote_state.network.static_ip_address}"
 }

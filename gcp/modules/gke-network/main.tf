@@ -12,6 +12,7 @@ terraform {
 
 variable "project_id" {}
 variable "serviceaccount_key" {}
+variable "create_static_ip_address" {}
 
 variable "dns_zones" {
   default = {}
@@ -42,17 +43,16 @@ module "gke_network" {
   dns_records      = "${var.dns_records}"
   cluster_subnets  = "${var.cluster_subnets}"
   static_ip_region = "${var.static_ip_region}"
+  create_static_ip_address = "${var.create_static_ip_address}"
 }
 
 # ------------------------------------------------------------------------------
 # Outuputs
 # ------------------------------------------------------------------------------
 
-/*
 output "static_ip_address" {
   value = "${module.gke_network.static_ip_address}"
 }
-*/
 
 output "dns_zones" {
   value = "${module.gke_network.dns_zones}"
