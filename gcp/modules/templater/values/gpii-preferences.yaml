@@ -9,7 +9,7 @@ issuerRef:
   kind: ClusterIssuer
 
 dnsNames:
-- preferences.${project_id}.${env}.gcp.gpii.net
+- ${substr(dns_name, 0, length(dns_name) - 1)}
 
 ingress:
   disable_ssl_redirect: ${env == "dev" ? "true" : "false"}

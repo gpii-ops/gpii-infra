@@ -9,11 +9,11 @@ issuerRef:
   kind: ClusterIssuer
 
 dnsNames:
-- flowmanager.${project_id}.${env}.gcp.gpii.net
+- ${substr(dns_name, 0, length(dns_name) - 1)}
 
 ingress:
   disable_ssl_redirect: ${env == "dev" ? "true" : "false"}
 
-matchmaker_url: "${env == "dev" ? "http" : "https"}://flowmanager.${project_id}.${env}.gcp.gpii.net"
+matchmaker_url: "${env == "dev" ? "http" : "https"}://${substr(dns_name, 0, length(dns_name) - 1)}"
 
 datasource_hostname: "http://${couchdb_admin_username}:${couchdb_admin_password}@couchdb-svc-couchdb.gpii.svc.cluster.local"

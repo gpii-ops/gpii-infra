@@ -5,7 +5,10 @@ terraform {
 variable "values_dir" {}
 
 variable "env" {}
-variable "project_id" {}
+
+variable "dns_zones" {
+  type = "map"
+}
 
 # COUCHDB
 
@@ -40,7 +43,7 @@ data "template_file" "preferences_values" {
 
   vars {
     env                    = "${var.env}"
-    project_id             = "${var.project_id}"
+    dns_name               = "${var.dns_zones["${var.env}-gcp-gpii-net"]}"
     preferences_repository = "${var.preferences_repository}"
     preferences_checksum   = "${var.preferences_checksum}"
     couchdb_admin_username = "${var.couchdb_admin_username}"
@@ -65,7 +68,7 @@ data "template_file" "flowmanager_values" {
 
   vars {
     env                    = "${var.env}"
-    project_id             = "${var.project_id}"
+    dns_name               = "${var.dns_zones["${var.env}-gcp-gpii-net"]}"
     flowmanager_repository = "${var.flowmanager_repository}"
     flowmanager_checksum   = "${var.flowmanager_checksum}"
     couchdb_admin_username = "${var.couchdb_admin_username}"
