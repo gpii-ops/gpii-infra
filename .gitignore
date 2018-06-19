@@ -8,6 +8,7 @@ graph*.png
 gcp/live/*/**/owner.json
 gcp/live/*/*secrets/**
 gcp/live/*/*values/**
+common/live/*/*secrets/**
 aws/modules/deploy/secrets/*-secrets.yml
 aws/prereqs/dev/terraform.tfstate*
 tags
