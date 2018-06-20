@@ -14,7 +14,7 @@ setup:
     - terragrunt -version
     - kubectl version --client
     - kops version
-    - helm version
+    - helm version --client
     - aws --version
     - jq --version
     - ruby --version
