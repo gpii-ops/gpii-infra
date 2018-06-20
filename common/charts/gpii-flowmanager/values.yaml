@@ -1,0 +1,35 @@
+# Default values for gpii-flowmanager.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+svc_listen_port: 80
+flowmanager_listen_port: 8081
+datasource_listen_port: 5984
+datasource_hostname: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local"
+
+node_env: gpii.config.cloudBased.flowManager.production
+preferences_url: http://preferences.gpii.svc.cluster.local/preferences/%gpiiKey?merge=%merge
+matchmaker_url: https://flowmanager.test.local
+
+image:
+  repository: gpii/universal
+  checksum: sha256:8547f22ae8e86d7b4b09e10d9ec87b1605b47dc37904171c84555a55462f161e
+  pullPolicy: IfNotPresent
+
+issuerRef:
+  name: letsencrypt-production
+  kind: Issuer
+
+dnsNames:
+- flowmanager.test.local
+
+secretKeyRef:
+  name: couchdb-secrets
+  key: datasource_hostname
+
+ingress:
+  disable_ssl_redirect: false
+
+nameOverride: flowmanager

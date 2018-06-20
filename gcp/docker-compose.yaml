@@ -30,6 +30,9 @@ services:
       # TF_VAR_secrets_dir is used by multiple modules to source secrets from
       TF_VAR_secrets_dir: /project/live/${ENV}/secrets
 
+       # TF_VAR_values_dir is used by templater to put rendered files into
+      TF_VAR_values_dir: /project/live/${ENV}/values
+
       # Keyring is used by the gcp-secret-mgmt module
       # Also by secrets-fetch and secrets-push scripts
       # The GCP KMS keyring name to use
@@ -40,10 +43,28 @@ services:
       TF_VAR_dns_zones:
       TF_VAR_dns_records:
 
+      # We also need to have ENV as Terraform var
+      TF_VAR_env: ${ENV:?err}
+
+      # We need to pass module variables for templater
+      TF_VAR_couchdb_admin_username:
+      TF_VAR_couchdb_admin_password:
+      TF_VAR_couchdb_secret:
+
+      TF_VAR_flowmanager_repository:
+      TF_VAR_flowmanager_checksum:
+
+      TF_VAR_preferences_repository:
+      TF_VAR_preferences_checksum:
+
+      TF_VAR_dataloader_repository:
+      TF_VAR_dataloader_checksum:
+
     ports:
       - 8001:8001
     volumes:
       - .:/project
+      - ../common/charts:/charts
       - ./.config/${ENV}/helm:/root/.helm
       - ./.config/${ENV}/terragrunt:/root/.terragrunt
       - ./.config/${ENV}/gcloud:/root/.config/gcloud

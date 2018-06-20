@@ -6,6 +6,7 @@ terragrunt = {
 
   dependencies {
     paths = [
+      "../../templater",
       "../../kube-system/administration-tasks",
     ]
   }
@@ -16,4 +17,3 @@ terragrunt = {
 }
 
 # ↓ Module configuration (empty means all default)
-

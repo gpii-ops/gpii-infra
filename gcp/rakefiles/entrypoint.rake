@@ -21,6 +21,7 @@ task :default => :deploy
 
 task :set_vars do
   Vars.set_vars(@env, @project_type)
+  Vars.set_secrets()
 end
 
 @dot_config_path = "../../.config/#{@env}"
@@ -39,7 +40,8 @@ task :configure_kubectl => [:set_vars, @gcp_creds_file, @kubectl_creds_file]
 rule @kubectl_creds_file do
   # This duplicates information in terraform code, 'k8s-cluster'
   cluster_name = 'k8s-cluster'
-  # This duplicates information in terraform code, 'zone'. Could be a variable with some plumbing.
+  # This duplicates information in terraform code, 'zone'. Could be a variable
+  # with some plumbing.
   zone = 'us-central1-a'
   sh "#{@exekube_cmd} gcloud container clusters get-credentials #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}"
 end
@@ -100,5 +102,28 @@ task :xk, [:cmd] => :set_vars do |taskname, args|
   sh "#{@exekube_cmd} #{args[:cmd]}"
 end
 
+desc '[ADVANCED] Deploy provided module into the cluster -- rake deploy_module"[k8s/kube-system/cert-manager]"'
+task :deploy_module, [:module] => [:set_vars, @gcp_creds_file] do |taskname, args|
+  if args[:module].nil?
+    puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
+    raise ArgumentError, "args[:module] must be set"
+  elsif !File.directory?(args[:module])
+    puts "  ERROR: args[:module] must point to Terragrunt directory!"
+    raise IOError, "args[:module] must point to existing Terragrunt directory"
+  end
+  sh "#{@exekube_cmd} up live/#{@env}/#{args[:module]}"
+end
+
+desc '[ADVANCED] Destroy provided module in the cluster -- rake destroy_module"[k8s/kube-system/cert-manager]"'
+task :destroy_module, [:module] => [:set_vars, @gcp_creds_file] do |taskname, args|
+  if args[:module].nil?
+    puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
+    raise ArgumentError, "args[:module] must be set"
+  elsif !File.directory?(args[:module])
+    puts "  ERROR: args[:module] must point to Terragrunt directory!"
+    raise IOError, "args[:module] must point to existing Terragrunt directory"
+  end
+  sh "#{@exekube_cmd} down live/#{@env}/#{args[:module]}"
+end
 
 # vim: et ts=2 sw=2:

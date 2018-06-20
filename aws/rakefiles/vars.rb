@@ -33,4 +33,7 @@ def setup_vars(env_short)
   CLOBBER << @tmpdir_prereqs
 
   ENV["RAKE_TMPDIR_ALREADY_SET"] = "true"
+
+  # Directory where Helm charts live
+  @chartdir = '../../common/charts'
 end
