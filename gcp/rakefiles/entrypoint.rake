@@ -98,6 +98,14 @@ task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl
   sh "#{@exekube_cmd} down"
 end
 
+desc "[ADVANCED] Remove stale Terraform locks from GS -- for non-dev environments coordinate with the team first"
+task :unlock => [:set_vars, @gcp_creds_file] do
+  sh "#{@exekube_cmd} sh -c ' \
+    for lock in $(gsutil ls -R gs://#{ENV["TF_VAR_project_id"]}-tfstate/#{@env}/ | grep .tflock); do \
+      gsutil rm $lock; \
+    done'"
+end
+
 desc '[ADVANCED] Run arbitrary exekube command -- rake xk"[kubectl get pods]"'
 task :xk, [:cmd] => :set_vars do |taskname, args|
   unless args[:cmd]
