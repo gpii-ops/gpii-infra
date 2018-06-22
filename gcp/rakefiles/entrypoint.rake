@@ -85,7 +85,7 @@ end
 
 desc "Create cluster and deploy GPII components to it"
 task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :apply_infra] do
-  sh "#{@exekube_cmd} up"
+  sh "#{@exekube_cmd} up | sed -f secrets/#{ENV["TF_VAR_project_id"]}-sed.cfg"
 end
 
 desc "Destroy cluster and low-level infrastructure"

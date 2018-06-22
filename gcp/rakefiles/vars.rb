@@ -2,6 +2,9 @@ require "securerandom"
 require "yaml"
 
 class Vars
+
+  SENSITIVE = "<sensitive>"
+
   def self.set_vars(env, project_type)
     if ["dev"].include?(env)
       if ENV["USER"].nil?
@@ -68,6 +71,8 @@ class Vars
 
   def self.set_secrets()
     saved_secrets_file_path = "../#{ENV['ENV']}/secrets/#{ENV["TF_VAR_project_id"]}-secrets.yml"
+    sed_cfg_file_path = "../#{ENV['ENV']}/secrets/#{ENV["TF_VAR_project_id"]}-sed.cfg"
+    sed_cfg = ""
 
     begin
       @secrets = YAML.load(File.read(saved_secrets_file_path))
@@ -88,12 +93,16 @@ class Vars
       end
       @secrets[secret] = SecureRandom.hex if @secrets[secret].to_s.empty?
       ENV["TF_VAR_#{secret}"] = @secrets[secret]
+      sed_cfg << "s/#{@secrets[secret]}/#{Vars::SENSITIVE}/g\n"
     end
 
     if generate_file
       puts "Secret file #{saved_secrets_file_path} for this deployment not found. I will create one."
       File.open(saved_secrets_file_path, 'w+') do |file|
         file.write(@secrets.to_yaml)
+      end
+      File.open(sed_cfg_file_path, 'w+') do |file|
+        file.write(sed_cfg)
       end
     end
   end
