@@ -25,6 +25,16 @@ resource "null_resource" "couchdb_finish_cluster" {
 
   provisioner "local-exec" {
     command = <<EOF
+      while [ "$PODS_READY" != "true" ]; do
+        PODS_READY=true
+        echo Waiting for all CouchDB pods to become Running...
+        for status in $(kubectl get pods --namespace ${var.release_namespace} -l app=couchdb -o jsonpath='{.items[*].status.phase}'); do
+          if [ "$status" != "Running" ]; then
+            PODS_READY=false
+          fi
+        done
+        sleep 5;
+      done
       while [ "$STATUS" != "\"Cluster is already finished\"" ]; do
         RESULT=$(
           kubectl exec --namespace ${var.release_namespace} couchdb-couchdb-0 -c couchdb -- \
