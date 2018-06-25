@@ -1,5 +1,3 @@
-require "yaml"
-
 # Obfuscate sensitive data in the output of a command, relying on @secrets
 def sh_filter(*cmd)
   if @secrets
