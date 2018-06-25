@@ -1,5 +1,8 @@
 require "rake/clean"
+
 require_relative "./vars.rb"
+require_relative "./secrets.rb"
+require_relative "./utils.rb"
 
 if @env.nil?
   puts "  ERROR: @env must be set!"
@@ -21,7 +24,7 @@ task :default => :deploy
 
 task :set_vars do
   Vars.set_vars(@env, @project_type)
-  Vars.set_secrets()
+  @secrets = Secrets.set_secrets()
 end
 
 @dot_config_path = "../../.config/#{@env}"
@@ -85,7 +88,7 @@ end
 
 desc "Create cluster and deploy GPII components to it"
 task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :apply_infra] do
-  sh "#{@exekube_cmd} up | sed -f secrets/#{ENV["TF_VAR_project_id"]}-sed.cfg"
+  sh_filter "#{@exekube_cmd} up"
 end
 
 desc "Destroy cluster and low-level infrastructure"
@@ -123,7 +126,7 @@ task :deploy_module, [:module] => [:set_vars, @gcp_creds_file] do |taskname, arg
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
     raise IOError, "args[:module] must point to existing Terragrunt directory"
   end
-  sh "#{@exekube_cmd} up live/#{@env}/#{args[:module]}"
+  sh_filter "#{@exekube_cmd} up live/#{@env}/#{args[:module]}"
 end
 
 desc '[ADVANCED] Destroy provided module in the cluster -- rake destroy_module"[k8s/kube-system/cert-manager]"'
