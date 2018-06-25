@@ -79,6 +79,16 @@ task :apply_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
   sh "#{@exekube_cmd} up live/#{@env}/infra"
 end
 
+desc "[ADVANCED] Plan low-level infrastructure"
+task :plan_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
+  sh "#{@exekube_cmd} plan live/#{@env}/infra"
+end
+
+desc "Plan cluster and deploy GPII components to it"
+task :plan => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, :plan_infra] do
+  sh "#{@exekube_cmd} plan"
+end
+
 desc "Create cluster and deploy GPII components to it"
 task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :apply_infra] do
   sh "#{@exekube_cmd} up"
