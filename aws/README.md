@@ -1,4 +1,4 @@
-# gpii-infra
+# gpii-infra AWS
 
 Following the pattern laid out in "[How to create reusable infrastructure with Terraform modules](https://blog.gruntwork.io/how-to-create-reusable-infrastructure-with-terraform-modules-25526d65f73d)" and "[Terragrunt: Remote Terraform configurations](https://github.com/gruntwork-io/terragrunt#keep-your-remote-state-configuration-dry)", this repo describes both the state of deployed infrastructure ("houses") and the modules ("blueprints") that comprise the [GPII](http://gpii.net/).
 
@@ -6,18 +6,24 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 
 ### Install packages
 
-1. Install [terraform](https://releases.hashicorp.com/terraform/) ~> 0.11.
-1. Install [terragrunt](https://github.com/gruntwork-io/terragrunt#install-terragrunt) ~> 0.14.
-1. Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) ~> 1.9.
-1. Install [kops](https://github.com/kubernetes/kops#installing) ~> 1.8.
-1. Install [Kubernetes Helm](https://github.com/kubernetes/helm#install) ~> 2.8.
-1. Install the [AWS CLI](http://docs.aws.amazon.com/cli/latest/userguide/installing.html).
-1. Install Ruby **==2.4.3** and [Bundler](http://bundler.io/)
+**NOTE: Use exact versions for best results.** We have observed non-obvious problems from using even slightly different versions (especially terraform and kops).
+
+Most MacOS users are looking for packages with names that contain `darwin_amd64` or `osx-amd64`. Most Linux users are looking for packages with names that contain `linux_amd64`.
+
+1. Install [terraform](https://releases.hashicorp.com/terraform/) **==0.11.7**.
+1. Install [terragrunt](https://github.com/gruntwork-io/terragrunt#install-terragrunt) **==0.14.0**.
+1. Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) **==1.9.8**.
+1. Install [kops](https://github.com/kubernetes/kops#installing) **==1.8.1**.
+1. Install [Kubernetes Helm](https://github.com/kubernetes/helm#install) **==2.8.2**.
+1. Install the [AWS CLI](http://docs.aws.amazon.com/cli/latest/userguide/installing.html) **==1.15.45**, possibly via `pip install awscli==1.15.45`.
+   * The CI machine happens to use the listed version today. In practice, I haven't seen any trouble with versions including 1.11.129, 1.14.16, and 1.15.45.
+1. Install Ruby **==2.4.3**.
    * There's nothing particularly special about this version. We could relax the constraint in Gemfile, but a single version for everyone is fine for now.
    * I like [rvm](https://rvm.io/) for ruby management.
    * If you're using a package manager, you may need to install "ruby-devel" as well.
-1. Install [rake](https://github.com/ruby/rake), probably via `gem install rake`.
-1. Install [jq](https://stedolan.github.io/jq/).
+1. Install [Bundler](http://bundler.io/) **==1.16.1**, probably via `gem install bundler -v 1.16.1`.
+1. Install [rake](https://github.com/ruby/rake) **==12.3.0**, probably via `gem install rake -v 12.3.0`.
+1. Install [jq](https://stedolan.github.io/jq/) **==1.5**.
 
 ### Configure cloud provider credentials
 
@@ -41,7 +47,7 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 #### Usual workflow
 
 1. Clone this repo.
-1. `cd` into the `gpii-infra/dev/` directory.
+1. `cd` into the `gpii-infra/aws/dev/` directory.
 1. `bundle install --path vendor/bundle`
 1. `rake`
    * This will create an independent dev environment called `dev-$USER` and run tests.
@@ -59,30 +65,24 @@ Billing account means "the Raising the Floor account", not "the TylerRoscoe 'acc
    * `aws s3api create-bucket --bucket gpii-kubernetes-state --region us-east-2 --create-bucket-configuration LocationConstraint=us-east-2`
    * `aws s3api put-bucket-versioning --bucket gpii-kubernetes-state --versioning-configuration Status=Enabled --region us-east-2`
 
-##### SSL Certificates
-
-Long-lived environments (`stg`, `prd`) have wildcard SSL certificates (e.g. \*.stg.gpii.net) provided by [Amazon Certificate Manager](https://aws.amazon.com/certificate-manager/). Kubernetes manifests have hard-coded references to these certificates' ARNs.
-.
-1. To create a new cert, [use ACM](http://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request.html).
-
 ##### EBS Volume encryption key
 
-See https://github.com/ussjoin/gpii-backup-scripts#ec2-ebs-snapshot-replication.
+See https://github.com/ussjoin/gpii-backup-scripts#ec2-ebs-snapshot-replication, but this project never reached production.
 
 ##### Alerts and notifications
 
 We use [Prometheus Alertmanager](https://github.com/prometheus/alertmanager), managed by [Prometheus Operator](https://github.com/coreos/prometheus-operator/) and some pieces from [kube-prometheus](https://github.com/coreos/prometheus-operator/tree/master/contrib/kube-prometheus), to handle alerts and notifications.
 
 1. Create [Amazon SES credentials](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/smtp-credentials.html).
-   * Add the usernamd and password to [Gitlab](CI-CD.md#configure-gitlab-secret-variables).
+   * Add the usernamd and password to [Gitlab](../CI-CD.md#configure-gitlab-secret-variables).
 1. Create a dedicate Google Group (ours is `alerts@RtF`) to receive alerts and re-distribute them to Operations staff.
    * Remove public access.
-   * Allow posts from the address you created above.
+   * Allow posts from the SES address you created above.
    * Subscribe on-call personnel to this list.
 1. Create a Slack channel `#alerts` to receive alerts.
    * Create an Incoming WebHook.
    * Give it a name, description, and icon (I like the ambulance emoji :)).
-   * Add the WebHook URL to [Gitlab](CI-CD.md#configure-gitlab-secret-variables).
+   * Add the WebHook URL to [Gitlab](../CI-CD.md#configure-gitlab-secret-variables).
    * See also: https://www.robustperception.io/using-slack-with-the-alertmanager/
 
 ### Manual testing
@@ -96,8 +96,8 @@ We use [Prometheus Alertmanager](https://github.com/prometheus/alertmanager), ma
    * Then you will authenticate to the Dashboard itself.
       * Select `Token`.
       * Token is the password from `rake display_admin_password`.
+1. Select a namespace in the in the "Namespace" dropdown in the left column (*not* the "Cluster `->` Namespaces" link). GPII developers likely want the `gpii` Namespace; infrastructure developers will likely want `All namespaces`.
 1. Click "Workloads" for a good overview of what's happening in the cluster.
-1. Select "All namespaces" under "Namespace" for best results.
 
 #### On the local machine
 
@@ -116,13 +116,13 @@ We use [Prometheus Alertmanager](https://github.com/prometheus/alertmanager), ma
 
 ### Cleaning up
 
-1. `cd` into the `gpii-infra/dev/` directory.
+1. `cd` into the `gpii-infra/aws/dev/` directory.
 1. `rake destroy`
 1. `rake clobber`
 
 ## What are all these environments?
 
-An "environment" describes a (more-or-less) self-contained cluster of machines running the GPII and its supporting infrastructure (e.g. monitoring, alerting, volume backups, etc.). There are a few types of environments, each with different purposes.
+An "environment" describes a (more-or-less) self-contained cluster of machines running the GPII and its supporting infrastructure (e.g. monitoring, alerting, backups, etc.). There are a few types of environments, each with different purposes.
 
 ### dev-$USER
 
@@ -144,7 +144,7 @@ Deploying to `prd` requires a [manual action](https://docs.gitlab.com/ce/ci/yaml
 
 ## Continuous Integration / Continuous Delivery
 
-See [CI-CD.md](CI-CD.md)
+See [CI-CD.md](../CI-CD.md)
 
 ## Troubleshooting / FAQ
 
@@ -154,7 +154,7 @@ See [CI-CD.md](CI-CD.md)
 
 ### Error acquiring the state lock
 
-Terraform uses [DynamoDB](https://aws.amazon.com/dynamodb/) for locking. An easy way to orphan a lock is to Ctrl-C out of Terraform in the middle of an operation. The error looks like this:
+Terraform uses [DynamoDB](https://aws.amazon.com/dynamodb/) for locking. An easy way to orphan a lock is to `Ctrl+c` out of Terraform in the middle of an operation. The error looks like this:
 
 ```
 Error locking state: Error acquiring the state lock: ConditionalCheckFailedException: The conditional request failed
@@ -173,30 +173,52 @@ To delete the lock:
 1. **Make sure the lock is really orphaned!** This is especially important in shared environments like `stg` where CI or other developers could be making changes. The `Who` value in the error message gives you a clue about this.
 1. Find the ID and Path from the error message (see above)
 1. `rake "force_unlock[c785778e-0b67-0bcf-88fd-8c03045a045b, gpii-terraform-state/dev-mrtyler/k8s/terraform.tfstate]"`
-1. You can also use the AWS web dashboard. Go to `DynamoDB -> Tables -> gpii-infra-lock-table -> Items`. Select the lock(s) for your environment `-> Actions -> Delete`.
+1. You can also use the AWS web dashboard -- do this if you're recovering from a [messed up cluster](#my-cluster-is-messed-up-and-i-just-want-to-get-rid-of-it-so-i-can-start-over). Go to `DynamoDB -> Tables -> gpii-terraform-lock-table -> Items`. Select the lock(s) for your environment `-> Actions -> Delete`.
 
 ### My cluster is messed up and I just want to get rid of it so I can start over
 
-1. `rake destroy` - the cleanest way to terminate a cluster. However, it may fail if the cluster never converged.
+1. `rake destroy` - the cleanest way to terminate a cluster. However, it may fail if the cluster never converged. If `rake` is spending a lot of time trying to undeploy components from a cluster that doesn't exist, `Ctrl+c` and continue to the next step.
 1. `rake _destroy` - destroys cloud resources but does not undeploy GPII components. This can cause `_destroy` to get stuck: Rake and Terraform don't know about resources created by Kubernetes, such as load balancers. These Kubernetes-managed resources will block Terraform from deleting, e.g. the network in which the load balancer resides.
+   * If `rake _destroy` gets stuck, it's best to let it finish/time out (to avoid [orphaning a DynamoDB lock](#error-acquiring-the-state-lock)) and continue to the next step. We'll run `rake _destroy` again later.
 1. The AWS dashboard - I'm sorry that you're here, but the last step is manually deleting orphaned resources.
-   * One helpful trick is to make a Resource Group (top bar `->` Resource Groups `->` Create a Resource Group) and find resources Tagged with `KubernetesCluster: dev-mrtyler.gpii.net`. [Here is one I made for my dev environment](https://resources.console.aws.amazon.com/r/group#sharedgroup=%7B%22name%22%3A%22dev-mrtyler%22%2C%22regions%22%3A%22all%22%2C%22resourceTypes%22%3A%22all%22%2C%22tagFilters%22%3A%5B%7B%22key%22%3A%22KubernetesCluster%22%2C%22values%22%3A%5B%22dev-mrtyler.gpii.net%22%5D%7D%5D%7D).
-   * Not all cloud resources care Taggable so you may need to explore a little, but the Resource Group report should give you an idea of what kinds of resources are getting stuck.
-   * Eventually, I plan to add a `rake exterminate` to automate the destruction of wayward resources.
+   * One helpful trick is to make a Classic Resource Group (top bar `->` Resource Groups `->` Create a Resource Group) and find resources Tagged with `KubernetesCluster: dev-mrtyler.gpii.net`. [Here is one I made for my dev environment](https://resources.console.aws.amazon.com/r/group#sharedgroup=%7B%22name%22%3A%22dev-mrtyler%22%2C%22regions%22%3A%22all%22%2C%22resourceTypes%22%3A%22all%22%2C%22tagFilters%22%3A%5B%7B%22key%22%3A%22KubernetesCluster%22%2C%22values%22%3A%5B%22dev-mrtyler.gpii.net%22%5D%7D%5D%7D).
+   * Not all cloud resources are Taggable so you may need to explore a little, but the Resource Group report should give you an idea of what kinds of resources are getting stuck.
+   * You can also use the new (non-Classic) Resource Group interface, though I find it more confusing than Classic Resource Groups:
+      * Top bar `->` Resource Groups `->` Create a Resource Group.
+      * Leave "Select resource types" dropdown alone.
+      * "Tag key" is `KubernetesCluster`.
+      * "Optional tag value" is `dev-mrtyler.gpii.net`.
+      * Click "View group resources" above the filter fields.
 1. The AWS dashboard, part 2 - various tools in the system store state in S3 and DynamoDB. If you encounter weird mismatch errors, you may need to perform more manual cleanup.
-   * Check S3 Bucket `gpii-infra-state` for Keys named after your environment (`dev-mrtyler.gpii.net`) and delete only those keys. Remember to check non-environment subdirectories like `prereqs`.
+   * Check S3 Bucket `gpii-terraform-state` for Keys named after your environment (`dev-mrtyler.gpii.net`) and delete only those keys.
+   * Repeat in subdirectory `prereqs`.
    * Check S3 Bucket `gpii-kubernetes-state` for Keys named after your environment (`dev-mrtyler.gpii.net`) and delete only those keys.
-   * Check DynamoDB for orphaned locks. See section in [Troubleshooting](#troubleshooting).
+   * Check DynamoDB for orphaned locks. See [Error acquiring the state lock](#error-acquiring-the-state-lock).
+1. The AWS dashboard, part 3 - Route 53 DNS (Services `->` search for Route 53)
+   * Go to "Hosted zones".
+   * Delete the zone for your cluster (e.g. `dev-mrtyler.gpii.net.`).
+   * Go to the hosted zone `gpii.net`.
+   * Delete the `NS` record for your cluster (e.g. `dev-mrtyler.gpii.net.`).
 1. Other stuff - a few more things to clean if you're still having problems.
-   * Check for orphaned IAM Roles using the AWS dashboard and delete them.
+   * Check for orphaned IAM Roles using the AWS dashboard (Services `->` search for IAM `->` Roles) and delete them.
    * Delete `$TMPDIR/rake-tmp` (`rake clobber` should take care of this but just in case).
-   * Delete `~/.terraform.d` and any directories in your `gpii-infra` sandbox named `.bundle` or `.terraform`.
-1. Run `rake _destroy` again afterwards to make sure Terraform agrees that all the old resources are gone and to clean up DNS entries.
+   * Delete `~/.terraform.d` from your home directory.
+   * Delete any directories in your `gpii-infra/aws` directory named `.bundle` or `.terraform` (`find aws/ -name '*.bundle' -o -name '*.terraform'`).
+1. Run `rake _destroy` again to make sure Terraform agrees that all the old resources are gone and to clean up DNS entries.
 1. `rake clobber` - cleans up generated files.
+
+### The Job "gpii-dataloader" is invalid
+
+When re-deploying `gpii-dataloader` (e.g. running `rake` against an already existing cluster), the following error is expected and harmless:
+```
+The Job "gpii-dataloader" is invalid: spec.template: Invalid value: api.PodTemplateSpec{... lots of stuff ...}: field is immutable
+```
+
+See also [A note about local changes and gpii-dataloader](#a-note-about-local-changes-and-gpii-dataloader)
 
 ### Running manually in non-dev environments (stg, prd)
 
-See [CI-CD.md#running-in-non-dev-environments](CI-CD.md#running-manually-in-non-dev-environments-stg-prd)
+See [CI-CD.md#running-in-non-dev-environments](../CI-CD.md#running-manually-in-non-dev-environments-stg-prd)
 
 ### I want to test my local changes to GPII components in my cluster
 
@@ -221,12 +243,14 @@ If you don't want to deal with gpii-version-updater, you can instead:
 
 #### A note about local changes and gpii-dataloader
 
-[gpii-dataloader](https://github.com/gpii-ops/docker-preferences-dataloader) initializes CouchDB with some canned data. It is designed to run once, as a Kubernetes Job. If you want to run it again, e.g. to test changes to the canned data:
+[gpii-dataloader](https://github.com/gpii-ops/gpii-dataloader) initializes CouchDB with some canned data. It is designed to run once, as a Kubernetes Job. If you want to run it again, e.g. to test changes to the canned data:
 1. Note that the dataloader **deletes all data in CouchDB** when it runs.
 1. Because of how Kubernetes Jobs work, the dataloader will not re-run when a new Docker image becomes available (this is different from Deployments like `flowmanager`, which are updated when the Docker image changes).
 1. Thus, to make changes to the dataloader:
    * Delete the Job: `kubectl -n gpii delete job gpii-dataloader`
    * Re-deploy the Job: `cd aws/dev && rake deploy`
+1. We abuse the fact that Kubernetes doesn't allow a Job's Docker image to be changed to prevent the dataloader Job from running (and deleting all data from CouchDB) every time. See [The Job "gpii-dataloder" is invalid](#the-job-gpii-dataloader-is-invalid) and [this architecture@ thread](https://lists.gpii.net/pipermail/infrastructure/2017-September/000070.html).
+
 
 ### Restoring a volume from a backup/snapshot
 
@@ -312,7 +336,7 @@ Uh-oh, the Persistent Volumes that back the database are getting full (or need m
    * An easy way is rebooting the Node. Depending on spare capacity in the Kubernetes cluster, this action is somewhat to very disruptive.
    * Slightly slower and more labor intensive is [draining the Node](https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/) and then rebooting it. If there is adequate capacity in the Kubernetes cluster, this action is mostly non-disruptive for users although Pods will be restarted. If there is not adequate capcity, this action is still very disruptive.
    * A very non-invasive but somewhat manual approach is described below.
-1. `ssh` to each Node running a component affected by the Volume size change (e.g. CouchDB or Prometheus Pods). The Dashboard, or `kubectl describe pod` and `kubectl describe node`, are helpful to discover where things are running.
+1. `ssh` to each Node running a component affected by the Volume size change (e.g. CouchDB Pods or Prometheus Pods). The Kubernetes Dashboard, or `kubectl describe pod` and `kubectl describe node`, are helpful to discover where things are running.
 1. `lsblk` to verify that the block device itself reflects the updated size.
 1. Use the mounted path from `lsblk` above to verify the Pod is still seeing the old size: `sudo df -h /var/lib/kubelet/pods/fd14a296-e8c4-11e7-a320-02402b50a7f8/volumes/kubernetes.io~aws-ebs/prometheus-us-east-2c-pv`
 1. `growpart`, as recommended in the Amazon article above, does not work -- it insists on a partition number even though the provided block device (e.g. `/dev/xvdbw`) is itself a partition containing a filesystem (as you may verify with `file -s`).
@@ -344,14 +368,14 @@ Unfortunately, there's not a good automatic migration path. So I do this:
 1. From a clone of the prometheus-operator repo, `git log -p 6beaec7a.. -- contrib/kube-prometheus/manifests` to see what has changed.
 1. For any changed files, copy the manifest from kube-prometheus to the appropriate manifest in `modules/deploy` (the filenames are similar but slightly different).
 1. Review `git diff` to make sure no local changes will be clobbered.
-1. Update the `log -p` argument above to reflect where the next updater should start looking.
+1. Update the `git log -p` argument above to reflect where the next updater should start looking.
 1. `git commit`. In your log message, include the revision you pulled from upstream `kube-prometheus`.
 
 ### I accidentally deleted my kops state from S3 [experimental]
 
 **Note: this is an advanced workflow and it is incomplete.** User discretion is advised.
 
-kops stores state in S3, so if you delete your cluster's entry in `s3://gpii-kubernetes-state`, you will be unable to use Kubernetes commands (`kops`, `kubectl`) to interact with your cluster. Thanks to S3 Bucket Versioning, you can recover from this by undeleting your cluster's folder (`s3://gpii-kubernetes-state/dev-mrtyler.gpii.net`).
+`kops` stores state in S3, so if you delete your cluster's entry in `s3://gpii-kubernetes-state`, you will be unable to use Kubernetes commands (`kops`, `kubectl`) to interact with your cluster. Thanks to S3 Bucket Versioning, you can recover from this by undeleting your cluster's folder (`s3://gpii-kubernetes-state/dev-mrtyler.gpii.net`).
 
 Here is an example that needs customization. Some notes:
    * Inspired by [How to Undelete Files in Amazon S3](http://www.dmuth.org/node/1472/how-undelete-files-amazon-s3)
