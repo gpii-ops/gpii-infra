@@ -1,8 +1,6 @@
 require "rake/clean"
 
-require_relative "./vars.rb"
-require_relative "./secrets.rb"
-require_relative "./utils.rb"
+Dir[File.dirname(__FILE__) + '/*.rb'].each {|file| require file }
 
 if @env.nil?
   puts "  ERROR: @env must be set!"

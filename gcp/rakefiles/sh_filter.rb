@@ -3,7 +3,7 @@ def sh_filter(*cmd)
   if @secrets
     IO.popen(*cmd).each do |out|
       @secrets.each do |key, val|
-        out = out.gsub("#{val}", "<SENSITIVE>")
+        out.gsub!("#{Regexp.escape(val)}", "<SENSITIVE>")
       end
       puts out
     end
