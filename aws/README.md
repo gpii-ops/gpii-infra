@@ -183,6 +183,9 @@ To delete the lock:
 1. The AWS dashboard - I'm sorry that you're here, but the last step is manually deleting orphaned resources.
    * One helpful trick is to make a Classic Resource Group (top bar `->` Resource Groups `->` Create a Resource Group) and find resources Tagged with `KubernetesCluster: dev-mrtyler.gpii.net`. [Here is one I made for my dev environment](https://resources.console.aws.amazon.com/r/group#sharedgroup=%7B%22name%22%3A%22dev-mrtyler%22%2C%22regions%22%3A%22all%22%2C%22resourceTypes%22%3A%22all%22%2C%22tagFilters%22%3A%5B%7B%22key%22%3A%22KubernetesCluster%22%2C%22values%22%3A%5B%22dev-mrtyler.gpii.net%22%5D%7D%5D%7D).
    * Not all cloud resources are Taggable so you may need to explore a little, but the Resource Group report should give you an idea of what kinds of resources are getting stuck.
+   * Use this order when manually deleting resources: Autoscaling Groups `->` Instances `->` Volumes `->` VPCs `->` Security Groups
+      * Autoscaling Groups, Instances, and Volumes can be found on the "EC2 Dashboard".
+      * VPCs and Security Groups can be found on: Top left menu Services `->` VPC `->` left side menu Your VPCs `->` delete all VPC `dev-mrtyler.gpii.net` (deleting a VPC deletes that VPC's Security Groups).
    * You can also use the new (non-Classic) Resource Group interface, though I find it more confusing than Classic Resource Groups:
       * Top bar `->` Resource Groups `->` Create a Resource Group.
       * Leave "Select resource types" dropdown alone.
