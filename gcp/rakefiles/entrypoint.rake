@@ -117,6 +117,12 @@ task :xk, [:cmd] => :set_vars do |taskname, args|
   sh "#{@exekube_cmd} #{args[:cmd]}"
 end
 
+desc '[ADVANCED] Destroy provided module in the cluster, and then deploy it -- rake redeploy_module"[k8s/kube-system/cert-manager]"'
+task :redeploy_module, [:module] => [:set_vars, @gcp_creds_file] do |taskname, args|
+  Rake::Task[:destroy_module].invoke(args[:module])
+  Rake::Task[:deploy_module].invoke(args[:module])
+end
+
 desc '[ADVANCED] Deploy provided module into the cluster -- rake deploy_module"[k8s/kube-system/cert-manager]"'
 task :deploy_module, [:module] => [:set_vars, @gcp_creds_file] do |taskname, args|
   if args[:module].nil?
