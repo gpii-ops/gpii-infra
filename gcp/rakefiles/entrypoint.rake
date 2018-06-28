@@ -17,14 +17,17 @@ if @project_type.nil?
   raise ArgumentError, "@project_type must be set"
 end
 
-@exekube_cmd = "docker-compose run --rm --service-ports xk"
+$exekube_cmd = "docker-compose run --rm --service-ports xk"
 
 desc "Create cluster and deploy GPII components to it"
 task :default => :deploy
 
 task :set_vars do
   Vars.set_vars(@env, @project_type)
-  @secrets = Secrets.set_secrets()
+end
+
+task :get_secrets do
+  @secrets = Secrets.get_secrets()
 end
 
 @dot_config_path = "../../.config/#{@env}"
@@ -34,7 +37,7 @@ CLOBBER << @dot_config_path
 desc "[ADVANCED] Authenticate and generate GCP credentials (gcloud auth login)"
 task :auth => [:set_vars, @gcp_creds_file]
 rule @gcp_creds_file do
-  sh "#{@exekube_cmd} gcloud auth login"
+  sh "#{$exekube_cmd} gcloud auth login"
 end
 
 @kubectl_creds_file = "#{@dot_config_path}/kube/config"
@@ -47,15 +50,15 @@ rule @kubectl_creds_file do
   # with some plumbing.
   zone = 'us-central1-a'
   sh "
-    if [[ $(#{@exekube_cmd} gcloud container clusters list --filter #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}) ]] ; \
+    if [[ $(#{$exekube_cmd} gcloud container clusters list --filter #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}) ]] ; \
     then \
-      #{@exekube_cmd} gcloud container clusters get-credentials #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}
+      #{$exekube_cmd} gcloud container clusters get-credentials #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}
     fi"
 end
 
 desc "[NOT IDEMPOTENT, RUN ONCE PER ENVIRONMENT] Initialize GCP Project where this environment's resources will live"
 task :project_init => [:set_vars, @gcp_creds_file] do
-  sh "#{@exekube_cmd} gcp-project-init"
+  sh "#{$exekube_cmd} gcp-project-init"
 end
 
 # This duplicates information in docker-compose.yaml,
@@ -71,39 +74,39 @@ rule @serviceaccount_key_file do
   # step moves somewhere else in exekube, call this command from that place
   # instead.
   sh "
-    #{@exekube_cmd} sh -c 'gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
+    #{$exekube_cmd} sh -c 'gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
       --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com'"
 end
 CLOBBER << @serviceaccount_key_file
 
 desc "[ADVANCED] Tell gcloud to use TF_VAR_project_id as the default Project; can be useful after 'rake clobber'"
 task :set_current_project => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
-  sh "#{@exekube_cmd} gcloud config set project #{ENV["TF_VAR_project_id"]}"
+  sh "#{$exekube_cmd} gcloud config set project #{ENV["TF_VAR_project_id"]}"
 end
 
 desc "[ADVANCED] Create or update low-level infrastructure"
 task :apply_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
-  sh "#{@exekube_cmd} up live/#{@env}/infra"
+  sh "#{$exekube_cmd} up live/#{@env}/infra"
 end
 
 desc "Create cluster and deploy GPII components to it"
-task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :apply_infra] do
-  sh_filter "#{@exekube_cmd} up"
+task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :apply_infra, :get_secrets] do
+  sh_filter "#{$exekube_cmd} up"
 end
 
 desc "Destroy cluster and low-level infrastructure"
 task :destroy_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, :destroy] do
-  sh "#{@exekube_cmd} down live/#{@env}/infra"
+  sh "#{$exekube_cmd} down live/#{@env}/infra"
 end
 
 desc "Undeploy GPII compoments and destroy cluster"
-task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file] do
-  sh "#{@exekube_cmd} down"
+task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :get_secrets] do
+  sh "#{$exekube_cmd} down"
 end
 
 desc "[ADVANCED] Remove stale Terraform locks from GS -- for non-dev environments coordinate with the team first"
 task :unlock => [:set_vars, @gcp_creds_file] do
-  sh "#{@exekube_cmd} sh -c ' \
+  sh "#{$exekube_cmd} sh -c ' \
     for lock in $(gsutil ls -R gs://#{ENV["TF_VAR_project_id"]}-tfstate/#{@env}/ | grep .tflock); do \
       gsutil rm $lock; \
     done'"
@@ -114,17 +117,17 @@ task :xk, [:cmd] => :set_vars do |taskname, args|
   unless args[:cmd]
     raise "Argument :cmd -- the command to run inside the exekube container -- is required."
   end
-  sh "#{@exekube_cmd} #{args[:cmd]}"
+  sh "#{$exekube_cmd} #{args[:cmd]}"
 end
 
 desc '[ADVANCED] Destroy provided module in the cluster, and then deploy it -- rake redeploy_module"[k8s/kube-system/cert-manager]"'
-task :redeploy_module, [:module] => [:set_vars, @gcp_creds_file] do |taskname, args|
+task :redeploy_module, [:module] => [:set_vars, @gcp_creds_file, :get_secrets] do |taskname, args|
   Rake::Task[:destroy_module].invoke(args[:module])
   Rake::Task[:deploy_module].invoke(args[:module])
 end
 
 desc '[ADVANCED] Deploy provided module into the cluster -- rake deploy_module"[k8s/kube-system/cert-manager]"'
-task :deploy_module, [:module] => [:set_vars, @gcp_creds_file] do |taskname, args|
+task :deploy_module, [:module] => [:set_vars, @gcp_creds_file, :get_secrets] do |taskname, args|
   if args[:module].nil?
     puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
     raise ArgumentError, "args[:module] must be set"
@@ -132,11 +135,11 @@ task :deploy_module, [:module] => [:set_vars, @gcp_creds_file] do |taskname, arg
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
     raise IOError, "args[:module] must point to existing Terragrunt directory"
   end
-  sh_filter "#{@exekube_cmd} up live/#{@env}/#{args[:module]}"
+  sh_filter "#{$exekube_cmd} up live/#{@env}/#{args[:module]}"
 end
 
 desc '[ADVANCED] Destroy provided module in the cluster -- rake destroy_module"[k8s/kube-system/cert-manager]"'
-task :destroy_module, [:module] => [:set_vars, @gcp_creds_file] do |taskname, args|
+task :destroy_module, [:module] => [:set_vars, @gcp_creds_file, :get_secrets] do |taskname, args|
   if args[:module].nil?
     puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
     raise ArgumentError, "args[:module] must be set"
@@ -144,7 +147,7 @@ task :destroy_module, [:module] => [:set_vars, @gcp_creds_file] do |taskname, ar
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
     raise IOError, "args[:module] must point to existing Terragrunt directory"
   end
-  sh "#{@exekube_cmd} down live/#{@env}/#{args[:module]}"
+  sh "#{$exekube_cmd} down live/#{@env}/#{args[:module]}"
 end
 
 # vim: et ts=2 sw=2:
