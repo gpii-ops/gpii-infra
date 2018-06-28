@@ -25,7 +25,7 @@ resource "null_resource" "couchdb_finish_cluster" {
 
   provisioner "local-exec" {
     command = <<EOF
-      RETRIES=10
+      RETRIES=15
       RETRY_COUNT=1
       while [ "$PODS_READY" != "true" ]; do
         PODS_READY="true"
