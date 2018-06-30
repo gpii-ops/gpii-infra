@@ -36,7 +36,7 @@ class Secrets
     @gs_bucket = "#{ENV['TF_VAR_project_id']}-#{Secrets::KMS_KEY}-secrets"
     @gs_secrets_file = "#{@gs_bucket}/o/secrets.yml"
 
-    puts "Checking if secrets file is present in GS bucket..."
+    puts "[secrets] Checking if secrets file is present in GS bucket..."
     gs_secrets = %x{
       #{$exekube_cmd} sh -c 'curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
@@ -56,7 +56,7 @@ class Secrets
       secrets = set_secrets()
     # Encrypted secrets file is present, attempting to download and decrypt
     else
-      puts "Retrieving encrypted secrets from GS bucket..."
+      puts "[secrets] Retrieving encrypted secrets from GS bucket..."
       gs_secrets = %x{
         #{$exekube_cmd} sh -c 'curl -s \
         -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
@@ -69,7 +69,7 @@ class Secrets
         raise IOError, "Unable to extract ciphertext from YAML data"
       end
 
-      puts "Decrypting secrets with KMS cert..."
+      puts "[secrets] Decrypting secrets with KMS cert..."
       decrypted_secrets = %x{
         #{$exekube_cmd} sh -c 'curl -s \
         -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
@@ -87,7 +87,7 @@ class Secrets
         raise JSON::ParserError, "Unable to parse secrets data"
       end
 
-      puts "Populating secrets..."
+      puts "[secrets] Populating secrets..."
       decrypted_secrets.each do |key, val|
         ENV[key.upcase] = val
       end
@@ -103,7 +103,7 @@ class Secrets
     secrets = populate_secrets()
     encoded_secrets = Base64.encode64(secrets.to_json).delete!("\n")
 
-    puts "Encrypting generated secrets with KMS cert..."
+    puts "[secrets] Encrypting generated secrets with KMS cert..."
     encrypted_secrets = %x{
       #{$exekube_cmd} sh -c 'curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
@@ -123,7 +123,7 @@ class Secrets
       'ciphertext' => encrypted_secrets['ciphertext']
     }.to_yaml
 
-    puts "Uploading encrypted secrets into GS bucket..."
+    puts "[secrets] Uploading encrypted secrets into GS bucket..."
     gs_upload = %x{
       #{$exekube_cmd} sh -c 'curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
