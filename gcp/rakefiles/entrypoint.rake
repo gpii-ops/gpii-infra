@@ -95,12 +95,17 @@ task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_
 end
 
 desc "Destroy cluster and low-level infrastructure"
-task :destroy_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, :destroy] do
+task :destroy_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
+  # Terraform will fail if template files are missing
+  Rake::Task[:deploy_module].invoke('k8s/templater')
+  Rake::Task[:destroy].invoke
   sh "#{$exekube_cmd} down live/#{@env}/infra"
 end
 
 desc "Undeploy GPII compoments and destroy cluster"
 task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :get_secrets] do
+  # Terraform will fail if template files are missing
+  Rake::Task[:deploy_module].invoke('k8s/templater')
   sh "#{$exekube_cmd} down"
 end
 
