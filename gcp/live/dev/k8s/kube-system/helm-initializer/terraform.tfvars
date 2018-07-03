@@ -1,13 +1,12 @@
 # ↓ Module metadata
 terragrunt = {
   terraform {
-    source = "/project/modules//nginx-ingress"
+    source = "/project/modules//helm-initializer"
   }
 
   dependencies {
     paths = [
-      "../../kube-system/helm-initializer",
-      "../../kube-system/cert-manager",
+      "../../cluster",
     ]
   }
 
@@ -17,3 +16,4 @@ terragrunt = {
 }
 
 # ↓ Module configuration (empty means all default)
+

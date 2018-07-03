@@ -1,6 +1,6 @@
 {{- if eq .Values.controller.kind "Deployment" }}
 {{- if .Values.controller.autoscaling.enabled }}
-apiVersion: autoscaling/v1
+apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
   labels:
@@ -10,7 +10,6 @@ metadata:
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
   name: {{ template "nginx-ingress.controller.fullname" . }}
-  namespace: {{ .Release.Namespace | quote }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1beta1
@@ -18,6 +17,14 @@ spec:
     name: {{ template "nginx-ingress.controller.fullname" . }}
   minReplicas: {{ .Values.controller.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.controller.autoscaling.maxReplicas }}
-  targetCPUUtilizationPercentage: {{ .Values.controller.autoscaling.targetCPUUtilizationPercentage }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: {{ .Values.controller.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: {{ .Values.controller.autoscaling.targetMemoryUtilizationPercentage }}
 {{- end }}
 {{- end }}
