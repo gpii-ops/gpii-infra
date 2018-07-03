@@ -2,7 +2,6 @@ apiVersion: apps/v1beta2
 kind: StatefulSet
 metadata:
   name: {{ template "couchdb.fullname" . }}
-  namespace: {{ .Release.Namespace | quote }}
   labels:
     app: {{ template "couchdb.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
@@ -23,14 +22,14 @@ spec:
         release: {{ .Release.Name }}
     spec:
       initContainers:
-        - name: couchdb-config
+        - name: init-copy
           image: busybox
-          command: [ "/bin/sh", "-c", "cp -RvpL /config/* /opt/couchdb/etc/default.d"]
+          command: ['sh','-c','cp /tmp/chart.ini /default.d; ls -lrt /default.d;']
           volumeMounts:
-          - name: init-config
-            mountPath: /config
           - name: config
-            mountPath: /opt/couchdb/etc/default.d
+            mountPath: /tmp/
+          - name: config-storage
+            mountPath: /default.d
       containers:
         - name: couchdb
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -62,7 +61,6 @@ spec:
             - name: ERL_FLAGS
               value: "{{ range $k, $v := .Values.erlangFlags }} -{{ $k }} {{ $v }} {{ end }}"
           livenessProbe:
-            initialDelaySeconds: 60
             httpGet:
               path: /
               port: 5984
@@ -73,10 +71,10 @@ spec:
           resources:
 {{ toYaml .Values.resources | indent 12 }}
           volumeMounts:
+          - name: config-storage
+            mountPath: /opt/couchdb/etc/default.d
           - name: database-storage
             mountPath: /opt/couchdb/data
-          - name: config
-            mountPath: /opt/couchdb/etc/default.d
         - name: couchdb-statefulset-assembler
           image: "{{ .Values.helperImage.repository }}:{{ .Values.helperImage.tag }}"
           imagePullPolicy: {{ .Values.helperImage.pullPolicy }}
@@ -98,14 +96,14 @@ spec:
 {{ toYaml .Values.nodeSelector | indent 8 }}
 {{- end }}
       volumes:
-        - name: init-config
+        - name: config-storage
+          emptyDir: {}
+        - name: config
           configMap:
             name: {{ template "couchdb.fullname" . }}
             items:
               - key: inifile
                 path: chart.ini
-        - name: config
-          emptyDir: {}
 {{- if not .Values.persistentVolume.enabled }}
         - name: database-storage
           emptyDir: {}

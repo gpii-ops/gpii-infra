@@ -5,7 +5,6 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ template "couchdb.fullname" . }}
-  namespace: {{ .Release.Namespace | quote }}
   labels:
     app: {{ template "couchdb.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
