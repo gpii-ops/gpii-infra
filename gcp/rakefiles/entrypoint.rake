@@ -43,8 +43,7 @@ task :configure_kubectl => [:set_vars, @gcp_creds_file, @kubectl_creds_file]
 rule @kubectl_creds_file do
   # This duplicates information in terraform code, 'k8s-cluster'
   cluster_name = 'k8s-cluster'
-  # This duplicates information in terraform code, 'zone'. Could be a variable
-  # with some plumbing.
+  # This duplicates information in terraform code, 'zone'. Could be a variable with some plumbing.
   zone = 'us-central1-a'
   sh "
     if [[ $(#{@exekube_cmd} gcloud container clusters list --filter #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}) ]] ; \
