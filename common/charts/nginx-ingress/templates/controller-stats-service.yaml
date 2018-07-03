@@ -13,7 +13,6 @@ metadata:
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
   name: {{ template "nginx-ingress.controller.fullname" . }}-stats
-  namespace: {{ .Release.Namespace | quote }}
 spec:
   clusterIP: "{{ .Values.controller.stats.service.clusterIP }}"
 {{- if .Values.controller.stats.service.externalIPs }}
@@ -30,7 +29,7 @@ spec:
   ports:
     - name: stats
       port: {{ .Values.controller.stats.service.servicePort }}
-      targetPort: 18080
+      targetPort: stats
   selector:
     app: {{ template "nginx-ingress.name" . }}
     component: "{{ .Values.controller.name }}"

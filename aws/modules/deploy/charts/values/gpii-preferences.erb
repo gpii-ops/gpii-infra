@@ -10,6 +10,7 @@ issuerRef:
   <% else %>
   name: letsencrypt-staging
   <% end %>
+  kind: ClusterIssuer
 
 dnsNames:
 - preferences.<%= ENV["TF_VAR_cluster_name"] %>
