@@ -15,7 +15,7 @@ module "couchdb" {
 
   release_name      = "couchdb"
   release_namespace = "${var.release_namespace}"
-  release_values    = "../../../../../${var.values_dir}/couchdb.yaml"
+  release_values    = "${var.values_dir}/couchdb.yaml"
 
   chart_name = "../../../../../charts/couchdb"
 }
