@@ -1,8 +1,8 @@
 require "rake/clean"
 
-require_relative "./vars.rb"
+require_relative "../../common/rakefiles/sh_filter.rb"
 require_relative "./secrets.rb"
-require_relative "./sh_filter.rb"
+require_relative "./vars.rb"
 
 if @env.nil?
   puts "  ERROR: @env must be set!"
