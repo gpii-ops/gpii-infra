@@ -1,6 +1,6 @@
-require "yaml"
 require "rake/clean"
 require "yaml"
+require_relative "../../common/rakefiles/sh_filter.rb"
 require_relative "./wait_for.rb"
 import "../rakefiles/kops.rake"
 import "../rakefiles/setup_versions.rake"
@@ -141,7 +141,8 @@ task :deploy_only => [:configure_kubectl, :install_charts, :find_gpii_components
 end
 
 desc "Install Helm charts in the cluster #{ENV["TF_VAR_cluster_name"]}"
-task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_components, :init_helm] do
+###task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_components, :init_helm] do
+task :install_charts => [:setup_system_components] do
   @gpii_helmcharts = YAML.load_file("#{@tmpdir}-modules/deploy/charts/config.yml")
   installed_charts = `helm list -q -a`
   installed_charts = installed_charts.split("\n")
@@ -162,6 +163,7 @@ task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_co
       begin
         wait_for(
           "helm --debug upgrade --namespace #{chart_namespace} --recreate-pods -f #{@tmpdir}-modules/deploy/charts/values/#{chart}.yaml #{chart_name} #{@chartdir}/#{chart}",
+          run_with: method(:sh_filter),
           sleep_secs: 5,
           max_wait_secs: 60,
         )
@@ -172,6 +174,7 @@ task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_co
       begin
         wait_for(
           "helm --debug install --name #{chart_name} --namespace #{chart_namespace} -f #{@tmpdir}-modules/deploy/charts/values/#{chart}.yaml #{@chartdir}/#{chart}",
+          run_with: method(:sh_filter),
           sleep_secs: 5,
           max_wait_secs: 60,
         )
