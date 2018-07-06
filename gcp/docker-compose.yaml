@@ -33,32 +33,9 @@ services:
        # TF_VAR_values_dir is used by templater to put rendered files into
       TF_VAR_values_dir: /project/live/${ENV}/values
 
-      # Keyring is used by the gcp-secret-mgmt module
-      # Also by secrets-fetch and secrets-push scripts
-      # The GCP KMS keyring name to use
-      TF_VAR_keyring_name: keyring
-
-      # Used by gke-network. Environments like "gpii-dev-mrtyler" need to
-      # dynamically DNS names (e.g. "flowmanager.mrtyler.dev.gcp.gpii.net").
-      TF_VAR_dns_zones:
-      TF_VAR_dns_records:
-
-      # We also need to have ENV as Terraform var
-      TF_VAR_env: ${ENV:?err}
-
-      # We need to pass module variables for templater
-      TF_VAR_couchdb_admin_username:
-      TF_VAR_couchdb_admin_password:
-      TF_VAR_couchdb_secret:
-
-      TF_VAR_flowmanager_repository:
-      TF_VAR_flowmanager_checksum:
-
-      TF_VAR_preferences_repository:
-      TF_VAR_preferences_checksum:
-
-      TF_VAR_dataloader_repository:
-      TF_VAR_dataloader_checksum:
+    # File with environment variables will be populated by rake
+    env_file:
+      - ./.config/${ENV}/compose.env
 
     ports:
       - 8001:8001
