@@ -1,4 +1,5 @@
 require "yaml"
+require "securerandom"
 
 class Vars
 
@@ -36,13 +37,16 @@ class Vars
       zone = "#{ENV["USER"]}.#{env}.gcp.gpii.net."
       if ENV["TF_VAR_dns_zones"].nil?
         ENV["TF_VAR_dns_zones"] = %Q|{ #{env}-gcp-gpii-net = "#{zone}" }|
+        $compose_env << "TF_VAR_dns_zones"
       end
       if ENV["TF_VAR_dns_records"].nil?
         ENV["TF_VAR_dns_records"] = %Q|{ #{env}-gcp-gpii-net = "*.#{zone}" }|
+        $compose_env << "TF_VAR_dns_records"
       end
     end
 
-    ENV["ENV"] = env
+    ENV["ENV"] = ENV["TF_VAR_env"] = env
+    $compose_env << "TF_VAR_env"
 
     if ENV["ORGANIZATION_ID"].nil?
       ENV["ORGANIZATION_ID"] = "247149361674"  # RtF Organization
@@ -52,7 +56,10 @@ class Vars
       ENV["BILLING_ID"] = "01A0E1-B0B31F-349F4F"  # RtF Billing Account
     end
 
-    # Hack to avoid changes in gpii-version-updater
+    set_versions
+  end
+
+  def self.set_versions()
     versions = YAML.load(File.read(Vars::VERSION_FILE))
     if versions['flowmanager']
       ENV['TF_VAR_flowmanager_repository'] = versions['flowmanager'].split('@')[0]
@@ -66,8 +73,12 @@ class Vars
       ENV['TF_VAR_dataloader_repository'] = versions['gpii-dataloader'].split('@')[0]
       ENV['TF_VAR_dataloader_checksum'] = versions['gpii-dataloader'].split('@')[1]
     end
+
+    ['flowmanager', 'preferences', 'dataloader'].each do |val|
+      $compose_env << "TF_VAR_#{val}_repository"
+      $compose_env << "TF_VAR_#{val}_checksum"
+    end
   end
 end
-
 
 # vim: et ts=2 sw=2:

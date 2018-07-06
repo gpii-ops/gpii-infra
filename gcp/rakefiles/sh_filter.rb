@@ -6,7 +6,9 @@ def sh_filter(*cmd)
     out.gsub!(/-----BEGIN EC PRIVATE KEY-----.*?-----END EC PRIVATE KEY-----\\n/m, "<SENSITIVE>")
     if @secrets
       @secrets.each do |key, val|
-        out.gsub!("#{Regexp.escape(val)}", "<SENSITIVE>")
+        val.each do |secret|
+          out.gsub!(Regexp.escape(ENV["TF_VAR_#{secret}"]), "<SENSITIVE>")
+        end
       end
     end
     puts out

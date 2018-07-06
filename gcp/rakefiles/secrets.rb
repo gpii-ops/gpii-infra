@@ -1,143 +1,70 @@
 require "securerandom"
 require "yaml"
-require "json"
-require 'base64'
 
 class Secrets
 
   KMS_KEYRING = "keyring"
-  KMS_KEY = "default"
+  KMS_DEFAULT_KEY = "default"
 
-  SECRETS = [
-    'couchdb_admin_username',
-    'couchdb_admin_password',
-    'couchdb_secret'
-  ]
+  SECRETS_FILE = "secrets.yaml"
 
-  GCLOUD_API = "https://www.googleapis.com"
-  KMS_API = "https://cloudkms.googleapis.com"
+  def self.collect_secrets()
+    ENV['TF_VAR_keyring_name'] = Secrets::KMS_KEYRING
+    $compose_env << "TF_VAR_keyring_name"
 
-  def self.populate_secrets()
+    encryption_keys = []
     secrets = {}
-    Secrets::SECRETS.each do |secret|
-      unless ENV[secret.upcase].to_s.empty?
-        secrets[secret] = ENV[secret.upcase]
+    %x{find ../../modules -maxdepth 2 | grep #{Secrets::SECRETS_FILE}}.split.each do |mod|
+      mod_default_key = File.dirname(mod).split('/').last
+      mod_secrets_cfg = YAML.load(File.read(mod))
+
+      kms_key = mod_secrets_cfg['kms_key'] ? mod_secrets_cfg['kms_key'] : mod_default_key
+      encryption_keys << "\"#{kms_key}\"" unless encryption_keys.include? kms_key
+
+      if secrets[kms_key]
+        secrets[kms_key].concat(mod_secrets_cfg['secrets'])
+      else
+        secrets[kms_key] = mod_secrets_cfg['secrets']
       end
-      if secrets[secret].to_s.empty?
-        secrets[secret] = SecureRandom.hex
+      mod_secrets_cfg['secrets'].each do |secret|
+        $compose_env << "TF_VAR_#{secret}"
       end
-      ENV["TF_VAR_#{secret}"] = secrets[secret]
     end
+
+    ENV["TF_VAR_encryption_keys"] = %Q|[ #{encryption_keys.join(", ")} ]|
+    $compose_env << "TF_VAR_encryption_keys"
 
     return secrets
   end
 
-  def self.get_secrets()
-    @gs_bucket = "#{ENV['TF_VAR_project_id']}-#{Secrets::KMS_KEY}-secrets"
-    @gs_secrets_file = "#{@gs_bucket}/o/secrets.yml"
+  def self.set_secrets(secrets)
+    if secrets
+      secrets.each do |key, secrets|
+        sh_filter "#{$exekube_cmd} secrets-fetch #{key}"
 
-    puts "[secrets] Checking if secrets file is present in GS bucket..."
-    gs_secrets = %x{
-      #{$exekube_cmd} sh -c 'curl -s \
-      -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
-      -X GET \"#{Secrets::GCLOUD_API}/storage/v1/b/#{@gs_secrets_file}\"'
-    }
+        secrets_file = "./secrets/#{key}/#{Secrets::SECRETS_FILE}"
+        if File.file?(secrets_file)
+          secrets = YAML.load(File.read(secrets_file))
+          secrets.each do |key, val|
+            ENV["TF_VAR_#{key}"] = val
+          end
+          File.delete(secrets_file)
+        else
+          populated_secrets = {}
+          secrets.each do |secret|
+            ENV["TF_VAR_#{secret}"] = populated_secrets[secret] = SecureRandom.hex
+          end
+          puts "Secret file '#{secrets_file}' not found. I will create one."
+          File.open(secrets_file, 'w+') do |file|
+            file.write(populated_secrets.to_yaml)
+          end
 
-    begin
-      gs_secrets = JSON.parse(gs_secrets)
-    rescue
-      puts "  ERROR: Unable to parse Google API response, terminating!"
-      raise JSON::ParserError, "Unable to parse GS secrets file data"
-    end
-
-    # Encrypted secrets file not present in GS bucket
-    # Populating secrets, encrypting them and uploading into GS
-    if gs_secrets['error'] && gs_secrets['error']['code'] == 404
-      secrets = set_secrets()
-    # Encrypted secrets file is present, attempting to download and decrypt
-    else
-      puts "[secrets] Retrieving encrypted secrets from GS bucket..."
-      gs_secrets = %x{
-        #{$exekube_cmd} sh -c 'curl -s \
-        -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
-        -X GET \"#{Secrets::GCLOUD_API}/storage/v1/b/#{@gs_secrets_file}?alt=media\"'
-      }
-
-      gs_secrets = YAML.load(gs_secrets)
-      if !gs_secrets['ciphertext']
-        puts "  ERROR: Unable to parse Google API response, terminating!"
-        raise IOError, "Unable to extract ciphertext from YAML data"
+          sh_filter "#{$exekube_cmd} secrets-push #{key}"
+          File.delete(secrets_file)
+        end
       end
-
-      puts "[secrets] Decrypting secrets with KMS cert..."
-      decrypted_secrets = %x{
-        #{$exekube_cmd} sh -c 'curl -s \
-        -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
-        -H \"Content-Type:application/json\" \
-        -X POST \"#{Secrets::KMS_API}/v1/projects/#{ENV['TF_VAR_project_id']}/locations/global/keyRings/#{Secrets::KMS_KEYRING}/cryptoKeys/#{Secrets::KMS_KEY}:decrypt\" \
-        -d \"{\\\"ciphertext\\\":\\\"#{gs_secrets['ciphertext']}\\\"}\"'
-      }
-
-      begin
-        decrypted_secrets = JSON.parse(decrypted_secrets)
-        decrypted_secrets = Base64.decode64(decrypted_secrets['plaintext'])
-        decrypted_secrets = JSON.parse(decrypted_secrets)
-      rescue
-        puts "  ERROR: Unable to parse Google API response, terminating!"
-        raise JSON::ParserError, "Unable to parse secrets data"
-      end
-
-      puts "[secrets] Populating secrets..."
-      decrypted_secrets.each do |key, val|
-        ENV[key.upcase] = val
-      end
-
-      secrets = populate_secrets()
     end
-
-    return secrets
-  end
-
-  def self.set_secrets()
-    puts "Populating secrets..."
-    secrets = populate_secrets()
-    encoded_secrets = Base64.encode64(secrets.to_json).delete!("\n")
-
-    puts "[secrets] Encrypting generated secrets with KMS cert..."
-    encrypted_secrets = %x{
-      #{$exekube_cmd} sh -c 'curl -s \
-      -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
-      -H \"Content-Type:application/json\" \
-      -X POST \"#{Secrets::KMS_API}/v1/projects/#{ENV['TF_VAR_project_id']}/locations/global/keyRings/#{Secrets::KMS_KEYRING}/cryptoKeys/#{Secrets::KMS_KEY}:encrypt\" \
-      -d \"{\\\"plaintext\\\":\\\"#{encoded_secrets}\\\"}\"'
-    }
-
-    begin
-      encrypted_secrets = JSON.parse(encrypted_secrets)
-    rescue
-      puts "  ERROR: Unable to parse Google API response, terminating!"
-      raise JSON::ParserError, "Unable to parse GS secrets file data"
-    end
-
-    encrypted_secrets = {
-      'ciphertext' => encrypted_secrets['ciphertext']
-    }.to_yaml
-
-    puts "[secrets] Uploading encrypted secrets into GS bucket..."
-    gs_upload = %x{
-      #{$exekube_cmd} sh -c 'curl -s \
-      -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
-      -X POST \"#{Secrets::GCLOUD_API}/upload/storage/v1/b/#{@gs_bucket}/o?uploadType=media&name=secrets.yml\" \
-      -d \"#{encrypted_secrets}\"'
-    }
-
-    begin
-      gs_upload = JSON.parse(gs_upload)
-    rescue
-      puts "  ERROR: Unable to parse Google API response, Terminating!"
-      raise JSON::ParserError, "Unable to upload secrets file into GS"
-    end
-
-    return secrets
   end
 end
+
+# vim: et ts=2 sw=2:

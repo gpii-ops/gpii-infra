@@ -18,16 +18,21 @@ if @project_type.nil?
 end
 
 $exekube_cmd = "docker-compose run --rm --service-ports xk"
+$compose_env = []
 
 desc "Create cluster and deploy GPII components to it"
 task :default => :deploy
 
 task :set_vars do
   Vars.set_vars(@env, @project_type)
+  @secrets = Secrets.collect_secrets()
+  File.open("#{@dot_config_path}/compose.env", 'w+') do |file|
+    file.write($compose_env.join("\n"))
+  end
 end
 
-task :get_secrets do
-  @secrets = Secrets.get_secrets()
+task :set_secrets do
+  Secrets.set_secrets(@secrets)
 end
 
 @dot_config_path = "../../.config/#{@env}"
@@ -89,14 +94,14 @@ task :apply_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
 end
 
 desc "Create cluster and deploy GPII components to it"
-task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :apply_infra, :get_secrets] do
+task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :apply_infra, :set_secrets] do
   sh_filter "#{$exekube_cmd} up"
   # Workaround for 'context deadline exceeded' issue:
   # https://github.com/exekube/exekube/issues/62
   # https://github.com/docker/for-mac/issues/2076
   # Remove this when docker for mac 18.05 becomes stable
   sh "docker run --rm --privileged alpine hwclock -s"
-  sh_filter "#{@exekube_cmd} up"
+#  sh_filter "#{@exekube_cmd} up"
 end
 
 desc "Destroy cluster and low-level infrastructure"
@@ -108,7 +113,7 @@ task :destroy_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
 end
 
 desc "Undeploy GPII compoments and destroy cluster"
-task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :get_secrets] do
+task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :set_secrets] do
   # Terraform will fail if template files are missing
   Rake::Task[:deploy_module].invoke('k8s/templater')
   sh "#{$exekube_cmd} down"
@@ -131,13 +136,13 @@ task :xk, [:cmd] => :set_vars do |taskname, args|
 end
 
 desc '[ADVANCED] Destroy provided module in the cluster, and then deploy it -- rake redeploy_module"[k8s/kube-system/cert-manager]"'
-task :redeploy_module, [:module] => [:set_vars, @gcp_creds_file, :get_secrets] do |taskname, args|
+task :redeploy_module, [:module] => [:set_vars, @gcp_creds_file] do |taskname, args|
   Rake::Task[:destroy_module].invoke(args[:module])
   Rake::Task[:deploy_module].invoke(args[:module])
 end
 
 desc '[ADVANCED] Deploy provided module into the cluster -- rake deploy_module"[k8s/kube-system/cert-manager]"'
-task :deploy_module, [:module] => [:set_vars, @gcp_creds_file, :get_secrets] do |taskname, args|
+task :deploy_module, [:module] => [:set_vars, @gcp_creds_file, :set_secrets] do |taskname, args|
   if args[:module].nil?
     puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
     raise ArgumentError, "args[:module] must be set"
@@ -149,7 +154,7 @@ task :deploy_module, [:module] => [:set_vars, @gcp_creds_file, :get_secrets] do 
 end
 
 desc '[ADVANCED] Destroy provided module in the cluster -- rake destroy_module"[k8s/kube-system/cert-manager]"'
-task :destroy_module, [:module] => [:set_vars, @gcp_creds_file, :get_secrets] do |taskname, args|
+task :destroy_module, [:module] => [:set_vars, @gcp_creds_file, :set_secrets] do |taskname, args|
   if args[:module].nil?
     puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
     raise ArgumentError, "args[:module] must be set"
