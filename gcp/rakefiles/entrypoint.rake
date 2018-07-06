@@ -100,7 +100,7 @@ task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_
   # https://github.com/docker/for-mac/issues/2076
   # Remove this when docker for mac 18.05 becomes stable
   sh "docker run --rm --privileged alpine hwclock -s"
-  sh_filter "#{@exekube_cmd} up"
+  sh_filter "#{$exekube_cmd} up"
 end
 
 desc "Destroy cluster and low-level infrastructure"
