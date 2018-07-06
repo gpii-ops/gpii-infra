@@ -48,7 +48,62 @@ end
 
 desc "[NOT IDEMPOTENT, RUN ONCE PER ENVIRONMENT] Initialize GCP Project where this environment's resources will live"
 task :project_init => [:set_vars, @gcp_creds_file] do
-  sh "#{@exekube_cmd} gcp-project-init"
+  # Steps to initialize GCP with a minimum set of resources to allow Terraform
+  # create the rest of the infrastructure.
+  # These steps are the same found in this tutorial:
+  # https://cloud.google.com/community/tutorials/managing-gcp-projects-with-terraform
+
+  require 'json'
+  output = `#{@exekube_cmd} gcloud projects list --format='json' --filter='name:gpii-prd'`
+  hash = JSON.parse(output)
+  if hash.empty?
+    puts "gpii-prd not found, I'll create a new one"
+    sh "
+      #{@exekube_cmd} gcloud projects create gpii-prd \
+      --organization #{ENV["ORGANIZATION_ID"]} \
+      --set-as-default"
+  else
+    sh "
+      #{@exekube_cmd} gcloud config set project gpii-prd"
+  end
+  sh "
+    #{@exekube_cmd} gcloud beta billing projects link gpii-prd \
+    --billing-account #{ENV["BILLING_ID"]}"
+
+  output = `#{@exekube_cmd} gcloud iam service-accounts list --format='json' --filter='email:terraform@gpii-prd.iam.gserviceaccount.com'`
+  hash = JSON.parse(output)
+  if hash.empty?
+    sh "#{@exekube_cmd} gcloud iam service-accounts create terraform \
+        --display-name 'CI admin account'"
+  end
+
+  output = `#{@exekube_cmd} gcloud iam service-accounts keys list --iam-account=terraform@gpii-prd.iam.gserviceaccount.com --format='json'`
+  hash = JSON.parse(output)
+  if hash.empty?
+    sh "#{@exekube_cmd} gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
+        --iam-account terraform@gpii-prd.iam.gserviceaccount.com"
+  end
+
+  sh "#{@exekube_cmd} gcloud service-management enable cloudresourcemanager.googleapis.com"
+  sh "#{@exekube_cmd} gcloud service-management enable cloudbilling.googleapis.com"
+  sh "#{@exekube_cmd} gcloud service-management enable iam.googleapis.com"
+  sh "#{@exekube_cmd} gcloud service-management enable compute.googleapis.com"
+
+  sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding ${TF_VAR_org_id} \
+      --member serviceAccount:terraform@$gpii-prd.iam.gserviceaccount.com \
+      --role roles/resourcemanager.projectCreator"
+
+  sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding ${TF_VAR_org_id} \
+      --member serviceAccount:terraform@$gpii-prd.iam.gserviceaccount.com \
+      --role roles/billing.user"
+
+  `#{@exekube_cmd} gsutil ls gs://gpii-prd-tfstate`
+  if $?.exitstatus != 0
+    sh "#{@exekube_cmd} gsutil mb gs://gpii-prd-tfstate"
+  end
+
+  sh "#{@exekube_cmd} gsutil versioning set on gs://gpii-prd-tfstate"
+
 end
 
 # This duplicates information in docker-compose.yaml,
@@ -106,10 +161,11 @@ end
 
 desc '[ADVANCED] Run arbitrary exekube command -- rake xk"[kubectl get pods]"'
 task :xk, [:cmd] => :set_vars do |taskname, args|
-  unless args[:cmd]
-    raise "Argument :cmd -- the command to run inside the exekube container -- is required."
+  if args[:cmd]
+     sh "#{@exekube_cmd} #{args[:cmd]}"
+  else
+     sh "#{@exekube_cmd} sh"
   end
-  sh "#{@exekube_cmd} #{args[:cmd]}"
 end
 
 desc '[ADVANCED] Deploy provided module into the cluster -- rake deploy_module"[k8s/kube-system/cert-manager]"'
