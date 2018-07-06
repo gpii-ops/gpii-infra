@@ -18,4 +18,3 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
-encryption_keys = ["default"]
