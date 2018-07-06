@@ -95,13 +95,12 @@ end
 
 desc "Create cluster and deploy GPII components to it"
 task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :apply_infra, :set_secrets] do
-  sh_filter "#{$exekube_cmd} up"
   # Workaround for 'context deadline exceeded' issue:
   # https://github.com/exekube/exekube/issues/62
   # https://github.com/docker/for-mac/issues/2076
   # Remove this when docker for mac 18.05 becomes stable
   sh "docker run --rm --privileged alpine hwclock -s"
-#  sh_filter "#{@exekube_cmd} up"
+  sh_filter "#{@exekube_cmd} up"
 end
 
 desc "Destroy cluster and low-level infrastructure"
