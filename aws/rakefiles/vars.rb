@@ -1,4 +1,22 @@
+def check_versions()
+  required_versions = {
+    "terraform version": "v0.11.7",
+    "terragrunt --version": "v0.14.0",
+    "kubectl version --client": "v1.9.8",
+    "kops version": "Version 1.8.1",
+    "helm version --client": "v2.8.2",
+  }
+  required_versions.each do |command, version|
+    command_output = `#{command}`
+    unless command_output.include? version
+      raise "ERROR: Command #{command} must be #{version}. Version output was:\n#{command_output}"
+    end
+  end
+end
+
 def setup_vars(env_short)
+  check_versions
+
   shared_envs = ["stg", "prd"]
   if ENV["TF_VAR_environment"].nil?
     if shared_envs.include?(env_short)
