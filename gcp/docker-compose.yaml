@@ -71,6 +71,6 @@ services:
       - ./.config/${ENV}/kube:/root/.kube
 
       # EXEKUBE DEVELOPMENT
-      - ../../exekube/modules:/exekube-modules
+      # - ../../exekube/modules:/exekube-modules
       # ---
     command: kubectl proxy --address="0.0.0.0" --accept-hosts ".*"
