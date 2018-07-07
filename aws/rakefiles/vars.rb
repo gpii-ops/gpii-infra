@@ -1,3 +1,6 @@
+require "tmpdir"
+
+
 def check_versions()
   required_versions = {
     "terraform version": "v0.11.7",
@@ -6,10 +9,15 @@ def check_versions()
     "kops version": "Version 1.8.1",
     "helm version --client": "v2.8.2",
   }
-  required_versions.each do |command, version|
-    command_output = `#{command}`
-    unless command_output.include? version
-      raise "ERROR: Command #{command} must be #{version}. Version output was:\n#{command_output}"
+  # Because this code can run during 'rake clobber', which deletes
+  # ENV["TMPDIR"], we need to create and use our own TMPDIR for commands like
+  # terraform that otherwise complain ("Couldn't setup logging tempfile").
+  Dir.mktmpdir do |tmpdir|
+    required_versions.each do |command, version|
+      command_output = `TMPDIR=#{tmpdir} #{command}`
+      unless command_output.include? version
+        raise "ERROR: Command #{command} must be #{version}. Version output was:\n#{command_output}"
+      end
     end
   end
 end
