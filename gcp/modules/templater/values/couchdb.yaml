@@ -1,6 +1,12 @@
-# clusterSize is the initial size of the CouchDB cluster.
-clusterSize: 2
+clusterSize: ${env == "dev" ? 2 : 3}
 
 adminUsername: ${couchdb_admin_username}
 adminPassword: ${couchdb_admin_password}
 cookieAuthSecret: ${couchdb_secret}
+
+persistentVolume:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 5Gi
+  storageClass: "standard"
