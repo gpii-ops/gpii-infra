@@ -50,6 +50,11 @@ rule @gcp_creds_file do
   sh "#{@exekube_cmd} gcloud auth login"
 end
 
+desc "[EXPERT] Copy GCP credentials from local storage on CI worker"
+task :configure_ci_auth => [:set_vars, @dot_config_path] do
+  copy_entry("#{Dir.home}/.ssh/gcp-config", "#{@dot_config_path}/")
+end
+
 @kubectl_creds_file = "#{@dot_config_path}/kube/config"
 desc "[ADVANCED] Fetch kubectl credentials (gcloud auth login)"
 task :configure_kubectl => [:set_vars, @gcp_creds_file, @kubectl_creds_file]
