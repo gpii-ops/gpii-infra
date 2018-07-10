@@ -1,0 +1,53 @@
+{{- if .Values.rbac.create -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: {{ template "k8s-snapshots.name" . }}
+  name: {{ template "k8s-snapshots.name" . }}
+  namespace: {{ .Release.Namespace | quote }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app: {{ template "k8s-snapshots.name" . }}
+  name: {{ template "k8s-snapshots.name" . }}
+  namespace: {{ .Release.Namespace | quote }}
+rules:
+  - apiGroups:
+      - "k8s-snapshots.elsdoerfer.com"
+    resources:
+      - snapshotrules
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+      - pods
+      - persistentvolumeclaims
+      - persistentvolumes
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app: {{ template "k8s-snapshots.name" . }}
+  name: {{ template "k8s-snapshots.name" . }}
+  namespace: {{ .Release.Namespace | quote }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "k8s-snapshots.name" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "k8s-snapshots.name" . }}
+    namespace: {{ .Release.Namespace | quote }}
+{{- end -}}
