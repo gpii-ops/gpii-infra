@@ -21,7 +21,7 @@ Most MacOS users are looking for packages with names that contain `darwin_amd64`
    * There's nothing particularly special about this version. We could relax the constraint in Gemfile, but a single version for everyone is fine for now.
    * I like [rvm](https://rvm.io/) for ruby management.
    * If you're using a package manager, you may need to install "ruby-devel" as well.
-1. Install [Bundler](http://bundler.io/) **==1.16.1**, probably via `gem install bundler -v 1.16.1`.
+1. Install [Bundler](http://bundler.io/) **==1.16.2**, probably via `gem install bundler -v 1.16.2`.
 1. Install [rake](https://github.com/ruby/rake) **==12.3.0**, probably via `gem install rake -v 12.3.0`.
 1. Install [jq](https://stedolan.github.io/jq/) **==1.5**.
 
