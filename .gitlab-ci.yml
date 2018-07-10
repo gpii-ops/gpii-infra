@@ -75,11 +75,11 @@ gcp-dev:
   script:
     - cd gcp/live/dev
     - rake clobber
-    ###- rake setup_ci
+    - rake configure_ci_auth
     - rake
   after_script:
     # Clean up even if something failed.
-    - cd gcp/dev
+    - cd gcp/live/dev
     - rake destroy  ### destroy_infra?
     - rake clobber
 
@@ -127,7 +127,7 @@ gcp-stg:
   script:
     - cd gcp/live/stg
     - rake clobber
-    ###- rake setup_ci
+    - rake configure_ci_auth
     - rake
   environment:
     name: stg
@@ -182,7 +182,7 @@ gcp-prd:
   script:
     - cd gcp/live/prd  ### this env doesn't exist yet
     - rake clobber
-    ###- rake setup_ci
+    - rake configure_ci_auth
     - rake
   environment:
     name: prd
