@@ -20,7 +20,7 @@ end
 $exekube_cmd = "docker-compose run --rm --service-ports xk"
 $compose_env = []
 
-['secrets', 'values']. each do |dir|
+['secrets', 'values'].each do |dir|
   Dir.mkdir(dir) unless File.exists?(dir)
 end
 
