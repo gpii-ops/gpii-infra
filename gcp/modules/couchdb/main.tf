@@ -2,10 +2,57 @@ terraform {
   backend "gcs" {}
 }
 
+variable "project_id" {}
+variable "serviceaccount_key" {}
+
+provider "google" {
+  project     = "${var.project_id}"
+  credentials = "${var.serviceaccount_key}"
+}
+
+variable "env" {}
 variable "secrets_dir" {}
 variable "values_dir" {}
+
 variable "release_namespace" {
-	default = "gpii"
+  default = "gpii"
+}
+
+resource "google_compute_disk" "couchdb" {
+  count = "${var.env == "dev" ? 2 : 3}"
+  name  = "couchdb-${count.index}"
+  type  = "pd-ssd"
+  size  = 10
+  zone  = "us-central1-a"
+}
+
+data "template_file" "couchdb_pvs" {
+  template = "${file("resources/pv.yaml")}"
+  count    = "${var.env == "dev" ? 2 : 3}"
+
+  vars {
+    env   = "${var.env}"
+    index = "${count.index}"
+  }
+}
+
+resource "null_resource" "couchdb_pvs" {
+  depends_on = ["google_compute_disk.couchdb"]
+
+  provisioner "local-exec" {
+    command = <<EOF
+      echo "${join("", data.template_file.couchdb_pvs.*.rendered)}" | kubectl create -f -
+    EOF
+  }
+
+  provisioner "local-exec" {
+    when    = "destroy"
+    command = <<EOF
+      sleep 30 # Since there is no way to establish a proper dependency for module, we need to give couchdb helm release time to uninstall
+      echo "${join("", data.template_file.couchdb_pvs.*.rendered)}" | kubectl delete --ignore-not-found -f -
+    EOF
+  }
+
 }
 
 module "couchdb" {
