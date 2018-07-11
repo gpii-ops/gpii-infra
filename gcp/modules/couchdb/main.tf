@@ -2,6 +2,21 @@ terraform {
   backend "gcs" {}
 }
 
+variable "couchdb_prd_replicas" {
+  default = 3
+}
+
+variable "couchdb_dev_replicas" {
+  default = 2
+}
+
+variable "release_namespace" {
+  default = "gpii"
+}
+
+variable "env" {}
+variable "secrets_dir" {}
+variable "values_dir" {}
 variable "project_id" {}
 variable "serviceaccount_key" {}
 
@@ -10,16 +25,8 @@ provider "google" {
   credentials = "${var.serviceaccount_key}"
 }
 
-variable "env" {}
-variable "secrets_dir" {}
-variable "values_dir" {}
-
-variable "release_namespace" {
-  default = "gpii"
-}
-
 resource "google_compute_disk" "couchdb" {
-  count = "${var.env == "dev" ? 2 : 3}"
+  count = "${var.env == "dev" ? var.couchdb_dev_replicas : var.couchdb_prd_replicas}"
   name  = "couchdb-${count.index}"
   type  = "pd-ssd"
   size  = 10
@@ -28,7 +35,7 @@ resource "google_compute_disk" "couchdb" {
 
 data "template_file" "couchdb_pvs" {
   template = "${file("resources/pv.yaml")}"
-  count    = "${var.env == "dev" ? 2 : 3}"
+  count    = "${var.env == "dev" ? var.couchdb_dev_replicas : var.couchdb_prd_replicas}"
 
   vars {
     env   = "${var.env}"
