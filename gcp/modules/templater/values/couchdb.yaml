@@ -8,5 +8,5 @@ persistentVolume:
   enabled: true
   accessModes:
     - ReadWriteOnce
-  size: 5Gi
-  storageClass: "standard"
+  size: 10Gi
+  storageClass: "couchdb"
