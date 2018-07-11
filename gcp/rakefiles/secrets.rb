@@ -48,7 +48,6 @@ class Secrets
           secrets.each do |key, val|
             ENV["TF_VAR_#{key}"] = val
           end
-          File.delete(secrets_file)
         else
           populated_secrets = {}
           secrets.each do |secret|
@@ -60,8 +59,9 @@ class Secrets
           end
 
           sh_filter "#{$exekube_cmd} secrets-push #{key}"
-          File.delete(secrets_file)
         end
+
+        File.delete(secrets_file)
       end
     end
   end

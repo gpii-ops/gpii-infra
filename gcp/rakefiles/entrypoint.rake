@@ -20,10 +20,6 @@ end
 $exekube_cmd = "docker-compose run --rm --service-ports xk"
 $compose_env = []
 
-['secrets', 'values'].each do |dir|
-  Dir.mkdir(dir) unless File.exists?(dir)
-end
-
 desc "Create cluster and deploy GPII components to it"
 task :default => :deploy
 
@@ -108,10 +104,7 @@ task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_
 end
 
 desc "Destroy cluster and low-level infrastructure"
-task :destroy_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
-  # Terraform will fail if template files are missing
-  Rake::Task[:deploy_module].invoke('k8s/templater')
-  Rake::Task[:destroy].invoke
+task :destroy_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, :destroy] do
   sh "#{$exekube_cmd} down live/#{@env}/infra"
 end
 
