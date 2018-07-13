@@ -108,8 +108,13 @@ task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_
 end
 
 desc "Destroy cluster and low-level infrastructure"
-task :destroy_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, :destroy] do
-  sh "#{$exekube_cmd} down live/#{@env}/infra"
+task :destroy_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do #, :destroy] do
+  # All KMS resources (keys, keyrings) are indestructible in GCP
+  # We need this hack, while it is not possible to properly prevent resource destruction on Terraform / Terragrunt level
+  # https://github.com/gruntwork-io/terragrunt/issues/489
+  %x{ls infra | grep -v secret-mgmt}.split.each do |infra_module|
+    sh "echo #{$exekube_cmd} down live/#{@env}/infra/#{infra_module}"
+  end
 end
 
 desc "Undeploy GPII compoments and destroy cluster"
