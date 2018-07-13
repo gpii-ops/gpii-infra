@@ -19,6 +19,10 @@ end
 
 @exekube_cmd = "docker-compose run --rm --service-ports xk"
 
+['secrets', 'values'].each do |dir|
+  Dir.mkdir(dir) unless File.exists?(dir)
+end
+
 desc "Create cluster and deploy GPII components to it"
 task :default => :deploy
 
