@@ -51,7 +51,13 @@ class Secrets
         else
           populated_secrets = {}
           secrets.each do |secret|
-            ENV["TF_VAR_#{secret}"] = populated_secrets[secret] = SecureRandom.hex
+            if ENV[secret.upcase].to_s.empty?
+              secret_value = SecureRandom.hex
+            else
+              secret_value = ENV[secret.upcase]
+            end
+            ENV["TF_VAR_#{secret}"] = secret_value
+            populated_secrets[secret] = secret_value
           end
           puts "Secret file '#{secrets_file}' not found. I will create one."
           File.open(secrets_file, 'w+') do |file|
