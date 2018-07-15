@@ -9,4 +9,4 @@ persistentVolume:
   accessModes:
     - ReadWriteOnce
   size: 10Gi
-  storageClass: "couchdb"
+  storageClass: "standard"

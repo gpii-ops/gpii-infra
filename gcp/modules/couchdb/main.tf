@@ -2,65 +2,18 @@ terraform {
   backend "gcs" {}
 }
 
-variable "couchdb_prd_replicas" {
-  default = 3
-}
-
-variable "couchdb_dev_replicas" {
-  default = 2
-}
-
-variable "release_namespace" {
-  default = "gpii"
-}
-
 variable "env" {}
 variable "secrets_dir" {}
 variable "values_dir" {}
-variable "project_id" {}
-variable "serviceaccount_key" {}
 
-provider "google" {
-  project     = "${var.project_id}"
-  credentials = "${var.serviceaccount_key}"
-}
+# Terragrunt variables
+variable "couchdb_replicas" {}
+variable "backup_deltas" {}
+variable "release_namespace" {}
 
-resource "google_compute_disk" "couchdb" {
-  count = "${var.env == "dev" ? var.couchdb_dev_replicas : var.couchdb_prd_replicas}"
-  name  = "couchdb-${count.index}"
-  type  = "pd-ssd"
-  size  = 10
-  zone  = "us-central1-a"
-}
-
-data "template_file" "couchdb_pvs" {
-  template = "${file("resources/pv.yaml")}"
-  count    = "${var.env == "dev" ? var.couchdb_dev_replicas : var.couchdb_prd_replicas}"
-
-  vars {
-    env   = "${var.env}"
-    index = "${count.index}"
-  }
-}
-
-resource "null_resource" "couchdb_pvs" {
-  depends_on = ["google_compute_disk.couchdb"]
-
-  provisioner "local-exec" {
-    command = <<EOF
-      echo "${join("", data.template_file.couchdb_pvs.*.rendered)}" | kubectl create -f -
-    EOF
-  }
-
-  provisioner "local-exec" {
-    when    = "destroy"
-    command = <<EOF
-      sleep 30 # Since there is no way to establish a proper dependency for module, we need to give couchdb helm release time to uninstall
-      echo "${join("", data.template_file.couchdb_pvs.*.rendered)}" | kubectl delete --ignore-not-found -f -
-    EOF
-  }
-
-}
+# Secret variables
+variable "couchdb_admin_username" {}
+variable "couchdb_admin_password" {}
 
 module "couchdb" {
   source           = "/exekube-modules/helm-release"
@@ -73,9 +26,6 @@ module "couchdb" {
 
   chart_name = "../../../../../charts/couchdb"
 }
-
-variable "couchdb_admin_username" {}
-variable "couchdb_admin_password" {}
 
 resource "null_resource" "couchdb_finish_cluster" {
   depends_on = ["module.couchdb"]
@@ -114,6 +64,29 @@ resource "null_resource" "couchdb_finish_cluster" {
           exit 1
         fi
         sleep 10
+      done
+    EOF
+  }
+}
+
+resource "null_resource" "couchdb_enable_pv_backups" {
+  depends_on = ["module.couchdb"]
+
+  triggers = {
+    couchdb_replicas = "${var.couchdb_replicas}"
+    backup_deltas    = "${var.backup_deltas}"
+  }
+
+  provisioner "local-exec" {
+    command = <<EOF
+      # We have to rely on jq for filtering, since it is not possible to use regexp in jsonpath:
+      # https://github.com/kubernetes/kubernetes/issues/61406
+      for PV in $(kubectl get pv -o json | jq --raw-output '.items[] | select(.spec.claimRef.name | startswith("database-storage-couchdb")) | .metadata.name'); do
+        # We need this check, because kubectl exits with non-zero code, when there is no changes:
+        # https://github.com/kubernetes/kubernetes/issues/58212
+        if [ "$(kubectl get pv $PV -o jsonpath="{.metadata.annotations.backup\.kubernetes\.io/deltas}")" != "${var.backup_deltas}" ]; then
+          kubectl patch pv $PV -p '{"metadata": {"annotations": {"backup.kubernetes.io/deltas": "${var.backup_deltas}"}}}'
+        fi
       done
     EOF
   }
