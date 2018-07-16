@@ -24,6 +24,9 @@ nginx-ingress:
 cert-manager:
   release_name: cert-manager
   release_namespace: kube-system
+k8s-snapshots:
+  release_name: k8s-snapshots
+  release_namespace: kube-system
 gpii-dataloader:
   release_name: dataloader
   release_namespace: gpii

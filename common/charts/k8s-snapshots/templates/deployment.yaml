@@ -22,3 +22,12 @@ spec:
     {{- if .Values.rbac.create }}
       serviceAccountName: {{ template "k8s-snapshots.name" . }}
     {{- end }}
+    {{- if .Values.runOnMasters }}
+      tolerations:
+      - key: "node-role.kubernetes.io/master"
+        operator: "Equal"
+        value: ""
+        effect: "NoSchedule"
+      nodeSelector:
+        kubernetes.io/role: master
+    {{- end }}

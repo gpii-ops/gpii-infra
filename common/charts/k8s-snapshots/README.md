@@ -48,5 +48,6 @@ Parameter | Description | Default
 `image.tag` | container image tag | `v2.0`
 `image.pullPolicy` | container image pullPolicy | `IfNotPresent`
 `useClaimName` | If `true`, set USE_CLAIM_NAME environment variable for deployment | `true`
+`runOnMasters` | If `true`, apply toleration to run on master nodes to deployment | `false`
 `rbac.create` | If `true`, create and use RBAC resources | `true`
 `replicaCount` | desired number of deployment pods | `1`
