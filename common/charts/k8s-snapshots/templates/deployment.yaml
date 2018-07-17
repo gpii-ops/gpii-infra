@@ -1,0 +1,33 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: {{ .Release.Namespace | quote }}
+  name: {{ template "k8s-snapshots.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "k8s-snapshots.name" . }}
+    spec:
+      containers:
+      - name: k8s-snapshots
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        {{- if .Values.useClaimName }}
+          - name: USE_CLAIM_NAME
+            value: "true"
+        {{- end }}
+    {{- if .Values.rbac.create }}
+      serviceAccountName: {{ template "k8s-snapshots.name" . }}
+    {{- end }}
+    {{- if .Values.runOnMasters }}
+      tolerations:
+      - key: "node-role.kubernetes.io/master"
+        operator: "Equal"
+        value: ""
+        effect: "NoSchedule"
+      nodeSelector:
+        kubernetes.io/role: master
+    {{- end }}
