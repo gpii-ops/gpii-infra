@@ -20,5 +20,5 @@ terragrunt = {
 # ↓ Module configuration (empty means all default)
 
 couchdb_replicas = 3
-backup_deltas = "PT15M PT60M PT4H PT24H P7D"
+backup_deltas = "PT5M PT60M PT24H P7D P52W"
 release_namespace = "gpii"
