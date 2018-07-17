@@ -79,7 +79,7 @@ resource "null_resource" "couchdb_enable_pv_backups" {
 
   provisioner "local-exec" {
     command = <<EOF
-      # We have to rely on jq for filtering, since it is not possible to use regexp in jsonpath:
+      # We have to rely on jq for filtering, since it is not possible to use regexp or string functions in kubectl jsonpath:
       # https://github.com/kubernetes/kubernetes/issues/61406
       for PV in $(kubectl get pv -o json | jq --raw-output '.items[] | select(.spec.claimRef.name | startswith("database-storage-couchdb")) | .metadata.name'); do
         # We need this check, because kubectl exits with non-zero code, when there is no changes:
