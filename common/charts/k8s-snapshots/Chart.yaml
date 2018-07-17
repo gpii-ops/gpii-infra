@@ -1,0 +1,18 @@
+name: k8s-snapshots
+version: 0.0.1
+appVersion: v2.0
+home: https://github.com/gpii-ops/gpii-infra
+description: Chart for k8s-snapshots – AWS and GCP volume backup utility
+icon: https://gpii.net/sites/all/themes/gpii_main/logo.png
+keywords:
+  - volume
+  - snapshot
+sources:
+  - https://github.com/gpii-ops/gpii-infra
+maintainers:
+  - name: amatas
+    email: alfredo@raisingthefloor.org
+  - name: natarajaya
+    email: sergey@raisingthefloor.org
+  - name: mrtyler
+    email: tyler@raisingthefloor.org

@@ -20,11 +20,17 @@ task :wait_for_gpii_ready => :configure_kubectl do
   puts "Waiting for GPII components to be fully deployed..."
   puts "(You can Ctrl-C out of this safely. You may need to re-run :deploy_only afterward.)"
 
-  # Test preferences server
-  preferences_url = "preferences.#{ENV["TF_VAR_cluster_name"]}/preferences/carla"
-  flowmanager_url = "flowmanager.#{ENV["TF_VAR_cluster_name"]}/carla/settings/%7B%22OS%22:%7B%22id%22:%22linux%22%7D,%22solutions%22:\\[%7B%22id%22:%22org.gnome.desktop.a11y.magnifier%22%7D\\]%7D"
+  # Test preferences server and cloud based flow manager
+  preferences_test = {
+    :url => "preferences.#{ENV["TF_VAR_cluster_name"]}/preferences/carla",
+    :curl_options => ""
+  }
+  flowmanager_test = {
+    :url => "flowmanager.#{ENV["TF_VAR_cluster_name"]}/access_token",
+    :curl_options => " -H 'Content-Type: application/x-www-form-urlencoded' -X POST -d 'username=carla&password=dummy&client_id=pilot-computer&client_secret=pilot-computer-secret&grant_type=password' -X POST "
+  }
 
-  [preferences_url, flowmanager_url].each do |url|
+  [preferences_test, flowmanager_test].each do |test|
       if ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.")
         # This is the simplest one-liner I could find to GET a url and return just
         # the status code.
@@ -32,17 +38,19 @@ task :wait_for_gpii_ready => :configure_kubectl do
         #
         # The grep catches a 2xx status code.
         #
-        # We use /preferences/carla as a proxy for the overall health of the system.
+        # We use:
+        # 1. /preferences/carla as a proxy for the overall health of the preferences server.
+        # 2. /access_token as a proxy for the overall health of the cloud based flow manager.
         # It's not perfect but it's a good start.
-        wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' 'https://#{url}' | grep -q ^2")
+        wait_for("curl --silent --output /dev/stderr --write-out '%{http_code}' #{test[:curl_options]} 'https://#{test[:url]}' | grep -q ^2")
       else
         # For dev environments we need to make sure that plain http is working correctly too
         ['http', 'https'].each do |protocol|
-          wait_for("curl -k --silent --output /dev/stderr --write-out '%{http_code}' '#{protocol}://#{url}' | grep -q ^2")
+          wait_for("curl -k --silent --output /dev/stderr --write-out '%{http_code}' #{test[:curl_options]} '#{protocol}://#{test[:url]}' | grep -q ^2")
         end
         # We also need to make sure that certificate is issued by Letsencrypt
         wait_for(
-          "curl -k -vI 'https://#{url}' 2>&1 | grep 'CN=Fake LE Intermediate X1'",
+          "curl -k -vI 'https://#{test[:url]}' 2>&1 | grep 'CN=Fake LE Intermediate X1'",
           sleep_secs: 5,
           max_wait_secs: 20,
         )
