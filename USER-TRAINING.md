@@ -27,7 +27,6 @@ This document is for Ops team members setting up new developers to work in the G
 * Send login link to user: https://gpii-net.signin.aws.amazon.com/console
 * Send generated password to user, ask user to log in
    * User will be prompted to change password. Please do so.
-* 
 
 ## AWS: Your first cluster
 * Direct user to follow the Getting Started instructions in the [gpii-infra AWS README](aws/README.md).
