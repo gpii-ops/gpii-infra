@@ -2,11 +2,18 @@ terraform {
   backend "gcs" {}
 }
 
+variable "env" {}
 variable "secrets_dir" {}
 variable "values_dir" {}
-variable "release_namespace" {
-	default = "gpii"
-}
+
+# Terragrunt variables
+variable "couchdb_replicas" {}
+variable "backup_deltas" {}
+variable "release_namespace" {}
+
+# Secret variables
+variable "couchdb_admin_username" {}
+variable "couchdb_admin_password" {}
 
 module "couchdb" {
   source           = "/exekube-modules/helm-release"
@@ -19,9 +26,6 @@ module "couchdb" {
 
   chart_name = "../../../../../charts/couchdb"
 }
-
-variable "couchdb_admin_username" {}
-variable "couchdb_admin_password" {}
 
 resource "null_resource" "couchdb_finish_cluster" {
   depends_on = ["module.couchdb"]
@@ -60,6 +64,44 @@ resource "null_resource" "couchdb_finish_cluster" {
           exit 1
         fi
         sleep 10
+      done
+    EOF
+  }
+}
+
+resource "null_resource" "couchdb_enable_pv_backups" {
+  depends_on = ["module.couchdb"]
+
+  triggers = {
+    couchdb_replicas = "${var.couchdb_replicas}"
+    backup_deltas    = "${var.backup_deltas}"
+  }
+
+  provisioner "local-exec" {
+    command = <<EOF
+      # We want to get all PVs claimed by CouchDB, all of them got unique names with database-storage-couchdb as common part.
+      # To apply this condition in JSONPath filter we need either regexp match (=~) or string function (substring, i.e. startsWith).
+      # None of these available in kubectl jsonpath implementation (https://github.com/kubernetes/kubernetes/issues/61406)
+      # So we have to rely on jq for filtering
+      for PV in $(kubectl get pv -o json | jq --raw-output '.items[] | select(.spec.claimRef.name | startswith("database-storage-couchdb")) | .metadata.name'); do
+        # We need this check, because kubectl exits with non-zero code, when there is no changes:
+        # https://github.com/kubernetes/kubernetes/issues/58212
+        if [ "$(kubectl get pv $PV -o jsonpath="{.metadata.annotations.backup\.kubernetes\.io/deltas}")" != "${var.backup_deltas}" ]; then
+          kubectl patch pv $PV -p '{"metadata": {"annotations": {"backup.kubernetes.io/deltas": "${var.backup_deltas}"}}}'
+        fi
+      done
+    EOF
+  }
+}
+
+resource "null_resource" "couchdb_destroy_pvcs" {
+  depends_on = ["module.couchdb"]
+
+  provisioner "local-exec" {
+    when = "destroy"
+    command = <<EOF
+      for PVC in $(kubectl get pvc --namespace ${var.release_namespace} -o json | jq --raw-output '.items[] | select(.metadata.name | startswith("database-storage-couchdb")) | .metadata.name'); do
+        kubectl --namespace ${var.release_namespace} delete --ignore-not-found pvc $PVC
       done
     EOF
   }
