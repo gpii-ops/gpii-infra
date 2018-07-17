@@ -119,10 +119,13 @@ end
 
 desc '[ADVANCED] Run arbitrary exekube command -- rake xk"[kubectl get pods]"'
 task :xk, [:cmd] => :set_vars do |taskname, args|
-  unless args[:cmd]
-    raise "Argument :cmd -- the command to run inside the exekube container -- is required."
+  if args[:cmd]
+    cmd = args[:cmd]
+  else
+    puts "Argument :cmd -- the command to run inside the exekube container -- not present, defaulting to sh"
+    cmd = "sh"
   end
-  sh "#{@exekube_cmd} #{args[:cmd]}"
+  sh "#{@exekube_cmd} #{cmd}"
 end
 
 desc '[ADVANCED] Destroy provided module in the cluster, and then deploy it -- rake redeploy_module"[k8s/kube-system/cert-manager]"'
