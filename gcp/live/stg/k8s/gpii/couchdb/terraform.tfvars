@@ -6,7 +6,9 @@ terragrunt = {
 
   dependencies {
     paths = [
-      "../../kube-system/administration-tasks",
+      "../../templater",
+      "../../kube-system/helm-initializer",
+      "../../kube-system/cert-manager",
     ]
   }
 
@@ -17,3 +19,6 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
+couchdb_replicas = 3
+backup_deltas = "PT15M PT60M PT4H PT24H P7D"
+release_namespace = "gpii"

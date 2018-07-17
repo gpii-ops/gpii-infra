@@ -4,11 +4,29 @@ Following the pattern laid out in "[How to create reusable infrastructure with T
 
 ## Getting Started
 
+### Get an AWS account
+
+Ask the Ops team to set up an account and train you. (The training doc is [here](../USER-TRAINING.md) if you're curious.)
+
+### Enable Multi-Factor Authentication (MFA) on your AWS account
+
+I like [Duo](https://duo.com/product/trusted-users/two-factor-authentication/duo-mobile), but any tool from [Amazon's list](https://aws.amazon.com/iam/details/mfa/) should be fine.
+
+* From the AWS Dashboard, navigate to IAM controls (under Services or use the search box)
+   * Users
+   * Select your IAM
+   * Select "Security credentials"
+   * Edit "Assigned MFA device"
+   * Choose "Virtual MFA device" (unless you have a dedicate hardware device such as a Yubikey)
+   * Follow prompts to register MFA device
+
 ### Install packages
 
 **NOTE: Use exact versions for best results.** We have observed non-obvious problems from using even slightly different versions (especially terraform and kops).
 
 Most MacOS users are looking for packages with names that contain `darwin_amd64` or `osx-amd64`. Most Linux users are looking for packages with names that contain `linux_amd64`.
+
+I generally download and install these tools by hand (verifying checksums when available :)). You are welcome to use `homebrew` or your Linux package manager to install these tools, but you must be careful to use exactly the versions listed here.
 
 1. Install [terraform](https://releases.hashicorp.com/terraform/) **==0.11.7**.
 1. Install [terragrunt](https://github.com/gruntwork-io/terragrunt#install-terragrunt) **==0.14.0**.
@@ -37,9 +55,9 @@ Most MacOS users are looking for packages with names that contain `darwin_amd64`
 
 1. Place an SSH key you'd like to use at `~/.ssh/id_rsa.gpii-ci`
    * Make sure the file is owned by you with `600` permissions.
-   * Using your own key is fine if all you want is to test your own personal dev cluster. However, remember that your "fake" key won't let you log into shared environments like `stg`, or allow other developers to ssh to your cluster's nodes. For those purposes, you'll need a copy of the "official" `id_rsa.gpii-ci` from `~deploy/.ssh` on `i40`.
-   * This path is hardcoded into the code responsible for provisioning instances.
-   * The configuration process could create user accounts (there is already ansible code in the `ops` repo to do this) but for now we'll use this shared key.
+   * Most developers can use their regular ssh key (e.g. by `cd ~/.ssh && ln -s id_rsa id_rsa.gpii-ci && cd -`).
+      * Infrastructure developers will instead want a copy of the "official" `id_rsa.gpii-ci` from `~deploy/.ssh` on `i40` so they can log into shared environments like `stg`.
+   * This filename is hardcoded into the code responsible for provisioning instances.
 1. For ad-hoc debugging and ansible: `ssh-add ~/.ssh/id_rsa.gpii-ci`
 
 ### Provision an environment
@@ -55,36 +73,6 @@ Most MacOS users are looking for packages with names that contain `darwin_amd64`
 1. To see a list of other commands you can try: `rake -T`
 1. If something didn't work, see [Troubleshooting](#troubleshooting).
 
-#### One-time setup per AWS billing account
-
-Billing account means "the Raising the Floor account", not "the TylerRoscoe 'account' (really an IAM User)". Skip these steps if you are an RtF employee.
-
-##### Remote state
-
-1. Initialize an S3 bucket for kops remote state:
-   * `aws s3api create-bucket --bucket gpii-kubernetes-state --region us-east-2 --create-bucket-configuration LocationConstraint=us-east-2`
-   * `aws s3api put-bucket-versioning --bucket gpii-kubernetes-state --versioning-configuration Status=Enabled --region us-east-2`
-
-##### EBS Volume encryption key
-
-See https://github.com/ussjoin/gpii-backup-scripts#ec2-ebs-snapshot-replication, but this project never reached production.
-
-##### Alerts and notifications
-
-We use [Prometheus Alertmanager](https://github.com/prometheus/alertmanager), managed by [Prometheus Operator](https://github.com/coreos/prometheus-operator/) and some pieces from [kube-prometheus](https://github.com/coreos/prometheus-operator/tree/master/contrib/kube-prometheus), to handle alerts and notifications.
-
-1. Create [Amazon SES credentials](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/smtp-credentials.html).
-   * Add the usernamd and password to [Gitlab](../CI-CD.md#configure-gitlab-secret-variables).
-1. Create a dedicate Google Group (ours is `alerts@RtF`) to receive alerts and re-distribute them to Operations staff.
-   * Remove public access.
-   * Allow posts from the SES address you created above.
-   * Subscribe on-call personnel to this list.
-1. Create a Slack channel `#alerts` to receive alerts.
-   * Create an Incoming WebHook.
-   * Give it a name, description, and icon (I like the ambulance emoji :)).
-   * Add the WebHook URL to [Gitlab](../CI-CD.md#configure-gitlab-secret-variables).
-   * See also: https://www.robustperception.io/using-slack-with-the-alertmanager/
-
 ### Manual testing
 
 #### The Kubernetes dashboard
@@ -96,7 +84,7 @@ We use [Prometheus Alertmanager](https://github.com/prometheus/alertmanager), ma
    * Then you will authenticate to the Dashboard itself.
       * Select `Token`.
       * Token is the password from `rake display_admin_password`.
-1. Select a namespace in the in the "Namespace" dropdown in the left column (*not* the "Cluster `->` Namespaces" link). GPII developers likely want the `gpii` Namespace; infrastructure developers will likely want `All namespaces`.
+1. Select a namespace in the in the "Namespace" dropdown in the left column (*not* the "Cluster `->` Namespaces" link). Product developers likely want the `gpii` Namespace; infrastructure developers often want `All namespaces`.
 1. Click "Workloads" for a good overview of what's happening in the cluster.
 
 #### On the local machine
@@ -241,7 +229,7 @@ gpii-infra uses explicit SHAs to refer to specific Docker images for GPII compon
 If you don't want to deal with gpii-version-updater, you can instead:
 1. Edit `modules/deploy/version.yml`. Find your component and replace the entire image value (path and SHA) with your Docker Hub user account.
    * E.g., `flowmanager: "gpii/universal@sha256:4b3...64f" -> flowmanager: "mrtyler/universal"`
-1. Manually delete the component via Kubernetes Dashboard or `kubectl delete`.
+1. Manually delete the component via Kubernetes Dashboard or with `kubectl delete`.
 1. `cd aws/dev && rake deploy`
 
 #### A note about local changes and gpii-dataloader
@@ -399,6 +387,36 @@ aws \
   > undelete.sh
 sh undelete.sh
 ```
+
+## One-time setup per AWS billing account
+
+Billing account means "the Raising the Floor account", not "the TylerRoscoe 'account' (really an IAM User)". Skip these steps if you are an RtF employee.
+
+### Remote state
+
+1. Initialize an S3 bucket for kops remote state:
+   * `aws s3api create-bucket --bucket gpii-kubernetes-state --region us-east-2 --create-bucket-configuration LocationConstraint=us-east-2`
+   * `aws s3api put-bucket-versioning --bucket gpii-kubernetes-state --versioning-configuration Status=Enabled --region us-east-2`
+
+### EBS Volume encryption key
+
+See https://github.com/ussjoin/gpii-backup-scripts#ec2-ebs-snapshot-replication, but this project never reached production.
+
+### Alerts and notifications
+
+We use [Prometheus Alertmanager](https://github.com/prometheus/alertmanager), managed by [Prometheus Operator](https://github.com/coreos/prometheus-operator/) and some pieces from [kube-prometheus](https://github.com/coreos/prometheus-operator/tree/master/contrib/kube-prometheus), to handle alerts and notifications.
+
+1. Create [Amazon SES credentials](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/smtp-credentials.html).
+   * Add the usernamd and password to [Gitlab](../CI-CD.md#configure-gitlab-secret-variables).
+1. Create a dedicate Google Group (ours is `alerts@RtF`) to receive alerts and re-distribute them to Operations staff.
+   * Remove public access.
+   * Allow posts from the SES address you created above.
+   * Subscribe on-call personnel to this list.
+1. Create a Slack channel `#alerts` to receive alerts.
+   * Create an Incoming WebHook.
+   * Give it a name, description, and icon (I like the ambulance emoji :)).
+   * Add the WebHook URL to [Gitlab](../CI-CD.md#configure-gitlab-secret-variables).
+   * See also: https://www.robustperception.io/using-slack-with-the-alertmanager/
 
 ## History
 

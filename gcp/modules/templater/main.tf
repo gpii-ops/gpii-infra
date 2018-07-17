@@ -20,6 +20,7 @@ data "template_file" "couchdb_values" {
   template = "${file("values/couchdb.yaml")}"
 
   vars {
+    env                    = "${var.env}"
     couchdb_admin_username = "${var.couchdb_admin_username}"
     couchdb_admin_password = "${var.couchdb_admin_password}"
     couchdb_secret         = "${var.couchdb_secret}"
