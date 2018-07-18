@@ -3,7 +3,7 @@ require "yaml"
 class Vars
 
   # Hack to avoid changes in gpii-version-updater
-  VERSION_FILE = '../../../aws/modules/deploy/version.yml'
+  VERSION_FILE = "../../../aws/modules/deploy/version.yml"
 
   def self.set_vars(env, project_type)
     if ["dev"].include?(env)
@@ -36,16 +36,13 @@ class Vars
       zone = "#{ENV["USER"]}.#{env}.gcp.gpii.net."
       if ENV["TF_VAR_dns_zones"].nil?
         ENV["TF_VAR_dns_zones"] = %Q|{ #{env}-gcp-gpii-net = "#{zone}" }|
-        $compose_env << "TF_VAR_dns_zones"
       end
       if ENV["TF_VAR_dns_records"].nil?
         ENV["TF_VAR_dns_records"] = %Q|{ #{env}-gcp-gpii-net = "*.#{zone}" }|
-        $compose_env << "TF_VAR_dns_records"
       end
     end
 
     ENV["ENV"] = ENV["TF_VAR_env"] = env
-    $compose_env << "TF_VAR_env"
 
     if ENV["ORGANIZATION_ID"].nil?
       ENV["ORGANIZATION_ID"] = "247149361674"  # RtF Organization
@@ -54,8 +51,6 @@ class Vars
     if ENV["BILLING_ID"].nil?
       ENV["BILLING_ID"] = "01A0E1-B0B31F-349F4F"  # RtF Billing Account
     end
-
-    set_versions
   end
 
   def self.set_versions()
@@ -71,11 +66,6 @@ class Vars
     if versions['gpii-dataloader']
       ENV['TF_VAR_dataloader_repository'] = versions['gpii-dataloader'].split('@')[0]
       ENV['TF_VAR_dataloader_checksum'] = versions['gpii-dataloader'].split('@')[1]
-    end
-
-    ['flowmanager', 'preferences', 'dataloader'].each do |val|
-      $compose_env << "TF_VAR_#{val}_repository"
-      $compose_env << "TF_VAR_#{val}_checksum"
     end
   end
 end

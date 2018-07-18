@@ -5,8 +5,8 @@ def sh_filter(*cmd)
     out.gsub!(/-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----\\n/m, "<SENSITIVE>")
     out.gsub!(/-----BEGIN EC PRIVATE KEY-----.*?-----END EC PRIVATE KEY-----\\n/m, "<SENSITIVE>")
     if @secrets
-      # Secrets are groupped by module, i.e. {'module1' => ['secret1', 'secret2']}
-      @secrets.each do |mod, secrets_array|
+      # Secrets are grouped by encryption key, i.e. {'key1' => ['secret1', 'secret2']}
+      @secrets.each do |encryption_key, secrets_array|
         secrets_array.each do |secret|
           out.gsub!(Regexp.escape(ENV["TF_VAR_#{secret}"]), "<SENSITIVE>")
         end

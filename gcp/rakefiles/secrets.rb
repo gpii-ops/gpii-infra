@@ -4,71 +4,94 @@ require "yaml"
 class Secrets
 
   KMS_KEYRING = "keyring"
-  KMS_DEFAULT_KEY = "default"
+
+  SECRETS_DIR = "secrets"
+  VALUES_DIR = "values"
 
   SECRETS_FILE = "secrets.yaml"
 
+  # This method is looking for SECRETS_FILE files in module directories (modules/*), which should have the following structure:
+  #
+  # secrets:
+  #  - secret_name
+  #  - another_secret
+  #  - and_one_more_secret
+  # encryption_key: default
+  #
+  # Attribute "encryption_key" is optional – if not present, module name will be used as Key name
+  # After collecting, it returns the Hash with collected secrets, where the keys are KMS Encryption Keys and the values are
+  # lists of individual credentials (e.g. couchdb_password) managed with that KMS Encryption Key
   def self.collect_secrets()
     ENV['TF_VAR_keyring_name'] = Secrets::KMS_KEYRING
-    $compose_env << "TF_VAR_keyring_name"
 
     encryption_keys = []
-    secrets = {}
-    %x{find ../../modules -maxdepth 2 | grep #{Secrets::SECRETS_FILE}}.split.each do |mod|
-      mod_default_key = File.dirname(mod).split('/').last
-      mod_secrets_cfg = YAML.load(File.read(mod))
+    collected_secrets = {}
 
-      kms_key = mod_secrets_cfg['kms_key'] ? mod_secrets_cfg['kms_key'] : mod_default_key
-      encryption_keys << "\"#{kms_key}\"" unless encryption_keys.include? kms_key
+    Dir["../../modules/**/#{Secrets::SECRETS_FILE}"].each do |module_secrets_file|
+      module_default_key = File.basename(File.dirname(module_secrets_file))
+      module_secrets = YAML.load(File.read(module_secrets_file))
 
-      if secrets[kms_key]
-        secrets[kms_key].concat(mod_secrets_cfg['secrets'])
+      encryption_key = module_secrets['encryption_key'] ? module_secrets['encryption_key'] : module_default_key
+      encryption_keys << %Q|"#{encryption_key}"|
+
+      if collected_secrets[encryption_key]
+        collected_secrets[encryption_key].concat(module_secrets['secrets'])
       else
-        secrets[kms_key] = mod_secrets_cfg['secrets']
+        collected_secrets[encryption_key] = module_secrets['secrets']
       end
-      mod_secrets_cfg['secrets'].each do |secret|
-        $compose_env << "TF_VAR_#{secret}"
+      module_secrets['secrets'].each do |secret_name|
+        ENV["TF_VAR_#{secret_name}"] = ""
       end
+
+      collected_secrets[encryption_key].uniq!
     end
 
+    encryption_keys.uniq!
     ENV["TF_VAR_encryption_keys"] = %Q|[ #{encryption_keys.join(", ")} ]|
-    $compose_env << "TF_VAR_encryption_keys"
 
-    return secrets
+    return collected_secrets
   end
 
-  def self.set_secrets(secrets)
-    if secrets
-      secrets.each do |key, secrets|
-        sh_filter "#{$exekube_cmd} secrets-fetch #{key}"
+  def self.set_secrets(collected_secrets, exekube_cmd)
+    return if collected_secrets.empty?
 
-        secrets_file = "./secrets/#{key}/#{Secrets::SECRETS_FILE}"
+    FileUtils.mkdir_p Secrets::SECRETS_DIR
+    FileUtils.mkdir_p Secrets::VALUES_DIR
+
+    collected_secrets.each do |encryption_key, secrets|
+      sh_filter "#{exekube_cmd} secrets-fetch #{encryption_key}"
+
+      secrets_file = "./#{Secrets::SECRETS_DIR}/#{encryption_key}/#{Secrets::SECRETS_FILE}"
+
+      begin
         if File.file?(secrets_file)
           secrets = YAML.load(File.read(secrets_file))
-          secrets.each do |key, val|
-            ENV["TF_VAR_#{key}"] = val
+          secrets.each do |secret_name, secret_value|
+            ENV["TF_VAR_#{secret_name}"] = secret_value
           end
         else
           populated_secrets = {}
-          secrets.each do |secret|
-            if ENV[secret.upcase].to_s.empty?
+          secrets.each do |secret_name|
+            if ENV[secret_name.upcase].to_s.empty?
               secret_value = SecureRandom.hex
             else
-              secret_value = ENV[secret.upcase]
+              secret_value = ENV[secret_name.upcase]
             end
-            ENV["TF_VAR_#{secret}"] = secret_value
-            populated_secrets[secret] = secret_value
+            ENV["TF_VAR_#{secret_name}"] = secret_value
+            populated_secrets[secret_name] = secret_value
           end
           puts "Secret file '#{secrets_file}' not found. I will create one."
           File.open(secrets_file, 'w+') do |file|
             file.write(populated_secrets.to_yaml)
           end
 
-          sh_filter "#{$exekube_cmd} secrets-push #{key}"
+          sh_filter "#{exekube_cmd} secrets-push #{encryption_key}"
         end
-
-        File.delete(secrets_file)
+      rescue
+        FileUtils.rm_f(secrets_file)
       end
+
+      FileUtils.rm_f(secrets_file)
     end
   end
 end
