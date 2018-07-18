@@ -38,7 +38,7 @@ task :set_vars do
   end
 end
 
-task :set_secrets do
+task :set_secrets => [:apply_secret_mgmt] do
   Secrets.set_secrets(@secrets, @exekube_cmd)
 end
 
@@ -97,6 +97,11 @@ task :apply_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
   sh "#{@exekube_cmd} up live/#{@env}/infra"
 end
 
+desc "[ADVANCED] Create or update infrastructure for secret management, this has no corresponding destroy task"
+task :apply_secret_mgmt => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
+  sh "#{@exekube_cmd} up live/#{@env}/secret-mgmt"
+end
+
 desc "Create cluster and deploy GPII components to it"
 task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :apply_infra, :set_secrets] do
   # Workaround for 'context deadline exceeded' issue:
@@ -109,12 +114,7 @@ end
 
 desc "Destroy cluster and low-level infrastructure"
 task :destroy_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, :destroy] do
-  # All KMS resources (keys, keyrings) of secret-mgmt module are indestructible in GCP
-  # We need this hack, while it is not possible to properly prevent resource destruction on Terraform / Terragrunt level
-  # https://github.com/gruntwork-io/terragrunt/issues/489
-  %x{ls infra | grep -v secret-mgmt}.split.each do |infra_module|
-    sh "#{@exekube_cmd} down live/#{@env}/infra/#{infra_module}"
-  end
+  sh "#{@exekube_cmd} down live/#{@env}/infra"
 end
 
 desc "Undeploy GPII compoments and destroy cluster"
