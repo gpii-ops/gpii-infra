@@ -95,7 +95,7 @@ In this scenario we rely on CouchDB ability to recover from loss of one or more 
 * When new pod is created to replace deleted one, corresponding PVC will be created as well, and, thru it, new PV object for new GCE PD.
 * Please note that you'll have to patch newly created PV, so `k8s-snapshots` can continue to make its snapshots, for our example case:
    * Get volume name from `kubectl --namespace gpii get pvc database-storage-couchdb-couchdb-1`.
-   * Patch PV with `kubectl patch pv PV_NAME_FROM_PREVIOS_STEP -p '{"metadata": {"annotations": {"backup.kubernetes.io/deltas": "ENV_DELTAS"}}}'`
+   * Patch PV with `kubectl patch pv PV_NAME_FROM_PREVIOUS_STEP -p '{"metadata": {"annotations": {"backup.kubernetes.io/deltas": "ENV_DELTAS"}}}'`
    * To get proper ENV_DELTAS value, check CouchDB Terragrunt module for the environment you're working with (i.e. `live/prd/k8s/gpii/couchdb/terraform.tfvars` for production environment, with deltas `PT5M PT60M PT24H P7D P52W`).
 * CouchDB cluster will replicate data to recreated node automatically.
 * Corrupted node is now recovered.
