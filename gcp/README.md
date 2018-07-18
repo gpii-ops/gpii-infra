@@ -77,3 +77,43 @@ This happens when trying to enable an API that is already enabled. This shouldn'
 ```
 rake xk"[gcloud services disable container.googleapis.com]"
 ```
+
+### Restoring CouchDB data
+
+We are considering number of probable failure scenarios for our GCP infrastructure:
+
+1. Data corruption on a single CouchDB replica
+
+In this scenario we rely on internal CouchDB ability to recover from data loss. The best course of action as follows:
+
+* Make sure that you figured affected CouchDB pod properly
+* There is a PVC object, associated with affected CouchDB pod. Let's say affected pod is `couchdb-couchdb-1`, then corresponding PVC is `database-storage-couchdb-couchdb-1`, located in the same namespace.
+* Delete associated PVC and then affected pod. For our example case:
+   * `kubectl --namespace gpii delete pvc database-storage-couchdb-couchdb-1`
+   * `kubectl --namespace gpii delete pod couchdb-couchdb-1`
+* After target pod is terminated, Persistent Disk that was mounted into it thru corresponding PVC will be destroyed as well.
+* When new pod is created to replace deleted one, corresponding PVC will be created as well, and, thru it, new PV object for new GCE PD.
+* Please note that you'll have to patch newly created PV, so `k8s-snapshots` can continue to make its snapshots, for our example case:
+   * Get volume name from `kubectl --namespace gpii get pvc database-storage-couchdb-couchdb-1`
+   * Patch PV with `kubectl patch pv PV_NAME_FROM_PREVIOS_STEP -p '{"metadata": {"annotations": {"backup.kubernetes.io/deltas": "ENV_DELTAS"}}}'`
+   * To get proper ENV_DELTAS value, check `couchdb` Terragrunt module for the environment you're working with (i.e. `live/prd/k8s/gpii/couchdb/terraform.tfvars` for production environment, with deltas "PT5M PT60M PT24H P7D P52W").
+* CouchDB cluster will replicate data to recreated node automatically
+* Corrupted node is now recovered
+
+2. Data corruption on all replicas of CouchDB cluster
+
+There may be a situation, when we want to roll back entire DB data set to another point in the past. Current solution is disruptive, requires bringing entire CouchDB cluster down and some manual actions as well (we'll most likely automate this in future):
+
+* Choose a snapshot set that you want to restore, make sure that snapshots are present for all disks that CouchDB cluster currently uses
+* Collect CouchDB volume names from PVCs `kubectl --namespace gpii get pvc | grep database-storage-couchdb`
+* Get current number of CouchDB stateful set replicas with `kubectl --namespace gpii get statefulset couchdb-couchdb -o jsonpath="{.status.replicas}"`
+* Scale CouchDB stateful set to 0 replicas with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=0`
+* This will cause K8s to terminate all CouchDB pods, all PDs that were mounted into them will be released
+* Open Google Cloud console, go to "Compute Engine" -> "Disks"
+* Now, for every PD you collected:
+   * Remember PD's name, type, size and zone
+   * Pick proper snapshot
+   * Delete PD
+   * Create new PD with the same name, type, size and zone
+* Scale CouchDB stateful set back to number of replicas it used to have
+* Database is now restored to the state it used to have at the time of target snapshot
