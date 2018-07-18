@@ -50,7 +50,7 @@ task :wait_for_gpii_ready => :configure_kubectl do
         end
         # We also need to make sure that certificate is issued by Letsencrypt
         wait_for(
-          "curl -k -vI 'https://#{test[:url]}' 2>&1 | grep 'CN=Fake LE Intermediate X1'",
+          "curl -k -vI 'https://#{test[:url]}' 2>&1 | grep -C5 'CN=Fake LE Intermediate X1'",
           sleep_secs: 5,
           max_wait_secs: 20,
         )
