@@ -348,6 +348,15 @@ Examples of when you might want to do this:
    * Or, to add an additional dev cluster: `USER=mrtyler-experiment1 TF_VAR_environment=dev-mrtyler-experiment1`
    * `TF_VAR_environment` must contain `USER` as above. Otherwise, behavior is undefined.
 
+### I want to change Kubernetes versions, Instance types of Nodes, or similar [experimental]
+
+* For new clusters: edit the `kops` command in [modules/k8s/Rakefile](modules/k8s/Rakefile).
+* For existing clusters:
+   * `rake kops_edit_cluster`
+   * This will drop you into an editor several times to modify several different configs.
+   * Make needed changes in each relevant file.
+   * Follow the instructions to apply the changes to the pre-existing cluster.
+
 ### I want to change Grafana dashboards or Alertmanager alerts [experimental]
 
 The manifests that control Grafana dashboards and Alertmanager alerts are copied from [kube-prometheus](https://github.com/coreos/prometheus-operator/tree/master/contrib/kube-prometheus) and then modified locally (e.g. a few more things in the `monitoring` namespace, different Service types).
