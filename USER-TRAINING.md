@@ -7,6 +7,8 @@ This document is for Ops team members setting up new developers to work in the G
 * You are about to be granted administrative (aka "root") access to a number of resources on the public internet, including our staging and production environments. This is a serious responsiblity! You will be able to do harm to the system!
 * Measure twice, cut once.
 * If you're ever in doubt about what a command will do, STOP! Then ask for help.
+   * Ask other developers who have experience using gpii-infra
+   * Ask #ops in Slack
 * Be ethical. Don't steal data. Don't run your startup on RtF's billing account.
 * RtF pays for these resources so please destroy your cluster when you're done using it, or won't use it for a while (e.g. before the weekend).
 
