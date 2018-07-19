@@ -21,7 +21,7 @@ rule "#{KOPS_OUT_DIR}/kubernetes.tf" do
   # Create cluster iff it doesn't already exist.
   sh "kops get cluster #{ENV["TF_VAR_cluster_name"]}" do |ok, res|
     unless ok
-      node_size = ENV["TF_VAR_cluster_name"].start_with?("stg.","prd.") ? "c4.xlarge" : "t2.medium"
+      node_size = ENV["TF_VAR_cluster_name"].start_with?("stg.","prd.") ? "c5.xlarge" : "t2.medium"
       sh "kops create cluster \
         --name=#{ENV["TF_VAR_cluster_name"]} \
         --channel=alpha \
