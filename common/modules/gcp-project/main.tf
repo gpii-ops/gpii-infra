@@ -32,35 +32,48 @@ resource "google_project_services" "project" {
   ]
 }
 
-resource "google_project_iam_binding" "project" {
-  project = "${google_project.project.project_id}"
-  role    = "roles/owner"
-  members = [
-    "user:${var.project_owner}",
-  ]
-}
-
 resource "google_service_account" "project" {
   account_id   = "projectowner"
   display_name = "Project owner service account"
   project      = "${google_project.project.project_id}"
 }
 
-resource "google_project_iam_binding" "admin-account-iam" {
+resource "google_project_iam_binding" "project" {
   project = "${google_project.project.project_id}"
   role    = "roles/owner"
   members = [
+    "user:${var.project_owner}",
     "serviceAccount:${google_service_account.project.email}",
   ]
 }
-
-resource "google_dns_managed_zone" "prod" {
+ 
+resource "google_dns_managed_zone" "project" {
   project     = "${google_project.project.project_id}"
   name        = "${google_project.project.project_id}-zone"
   dns_name    = "${lookup(data.external.calculate_dns_zone.result, "zone")}"
   description = "${google_project.project.project_id} DNS zone"
 }
 
+resource "google_dns_record_set" "ns" {
+  name         = "${lookup(data.external.calculate_dns_zone.result, "zone")}"
+  managed_zone = "${google_dns_managed_zone.project.name}"
+  type         = "NS"
+  ttl          = 3600
+  project      = "gpii-gcp-${element(split("-", var.project_name), 0)}"
+  rrdatas      = ["${google_dns_managed_zone.project.name_servers}"]
+  count        = "${length(split("-", var.project_name)) == 2 ? 1 : 0}"
+}
+
+resource "google_dns_record_set" "ns-root" {
+  name         = "${lookup(data.external.calculate_dns_zone.result, "zone")}"
+  managed_zone = "${google_dns_managed_zone.project.name}"
+  type         = "NS"
+  ttl          = 3600
+  project      = "gpii-gcp-common-prd"
+  rrdatas      = ["${google_dns_managed_zone.project.name_servers}"]
+  count        = "${length(split("-", var.project_name)) == 1 ? 1 : 0}"
+}
+ 
 resource "google_storage_bucket" "project-tfstate" {
   project     = "${google_project.project.project_id}"
   name = "gpii-gcp-${var.project_name}-tfstate"
