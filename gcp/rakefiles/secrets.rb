@@ -52,6 +52,16 @@ class Secrets
     return collected_secrets
   end
 
+
+  # This method is setting secret ENV variables collected from modules
+  # It uses exekube secret-mgmt module scripts: secrets-fetch and secrets-push
+  #
+  # When encrypted secret file for current env is not present it GS bucket,
+  # for every secret it first looks for ENV[secret_name.upcase] and, if it is not set,
+  # populates secret with random nonse, and then uploads to corresponding GS bucket.
+  #
+  # When encrypted secret file is present, it always uses its decrypted data as a source for secrets.
+  # Use `rake destroy_secrets[KEY_NAME]` to forcefully repopulate secrets for target encryption key
   def self.set_secrets(collected_secrets, exekube_cmd)
     return if collected_secrets.empty?
 
@@ -64,9 +74,9 @@ class Secrets
       secrets_file = "./#{Secrets::SECRETS_DIR}/#{encryption_key}/#{Secrets::SECRETS_FILE}"
 
       begin
-        if File.file?(secrets_file)
-          secrets = YAML.load(File.read(secrets_file))
-          secrets.each do |secret_name, secret_value|
+        if File.exist?(secrets_file)
+          decrypted_secrets = YAML.load(File.read(secrets_file))
+          decrypted_secrets.each do |secret_name, secret_value|
             ENV["TF_VAR_#{secret_name}"] = secret_value
           end
         else
@@ -81,7 +91,7 @@ class Secrets
             populated_secrets[secret_name] = secret_value
           end
           puts "Secret file '#{secrets_file}' not found. I will create one."
-          File.open(secrets_file, 'w+') do |file|
+          File.open(secrets_file, 'w') do |file|
             file.write(populated_secrets.to_yaml)
           end
 
