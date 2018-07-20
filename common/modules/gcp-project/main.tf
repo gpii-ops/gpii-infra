@@ -6,7 +6,7 @@ terraform {
 
 variable "project_name" {}
 variable "project_owner" {}
-variable "billing_account" {}
+variable "billing_id" {}
 variable "organization_id" {}
 
 # compute the project_id to get the dns zone in JSON format
@@ -18,7 +18,7 @@ data "external" "calculate_dns_zone" {
 resource "google_project" "project" {
   name            = "gpii-gcp-${var.project_name}"
   project_id      = "gpii-gcp-${var.project_name}"
-  billing_account = "${var.billing_account}"
+  billing_account = "${var.billing_id}"
   org_id          = "${var.organization_id}"
 }
 

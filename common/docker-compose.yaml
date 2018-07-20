@@ -35,6 +35,9 @@ services:
       # The GCP KMS keyring name to use
       TF_VAR_keyring_name: keyring
 
+      TF_VAR_organization_id: ${ORGANIZATION_ID}
+      TF_VAR_billing_id: ${BILLING_ID}
+
     ports:
       - 8001:8001
     volumes:
