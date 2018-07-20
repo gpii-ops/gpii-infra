@@ -87,6 +87,7 @@ describe Vars do
     project_type = "fake-project-type"
     Vars.set_vars(env, project_type)
     expect(ENV).to have_received(:[]=).with("ENV", env)
+    expect(ENV).to have_received(:[]=).with("TF_VAR_env", env)
     expect(ENV).to have_received(:[]=).with("ORGANIZATION_ID", "247149361674")
     expect(ENV).to have_received(:[]=).with("BILLING_ID", "01A0E1-B0B31F-349F4F")
   end
