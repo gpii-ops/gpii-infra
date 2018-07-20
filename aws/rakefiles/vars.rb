@@ -2,6 +2,7 @@ require "tmpdir"
 
 
 def check_versions()
+  return if ENV["DISABLE_VERSIONS_CHECK"]
   required_versions = {
     "terraform version": "v0.11.7",
     "terragrunt --version": "v0.14.0",
