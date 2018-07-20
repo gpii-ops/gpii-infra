@@ -33,7 +33,7 @@ task :set_vars do
   ENV.each do |key, val|
    tf_vars << key if key.match(/^TF_VAR_/)
   end
-  File.open("#{@dot_config_path}/compose.env", 'w+') do |file|
+  File.open("#{@dot_config_path}/compose.env", 'w') do |file|
     file.write(tf_vars.join("\n"))
   end
 end
@@ -141,6 +141,18 @@ task :xk, [:cmd] => :set_vars do |taskname, args|
     cmd = "sh"
   end
   sh "#{@exekube_cmd} #{cmd}"
+end
+
+desc '[ADVANCED] Destroy secrets file stored in GS bucket for encryption key, passed as argument -- rake destroy_secrets"[default]"'
+task :destroy_secrets, [:encryption_key] => [:set_vars, @gcp_creds_file] do |taskname, args|
+  if args[:encryption_key].nil?
+    puts "  ERROR: args[:encryption_key] must be set!"
+    raise ArgumentError, "args[:encryption_key] must be set"
+  end
+  sh "#{@exekube_cmd} sh -c ' \
+    for secret_file in $(gsutil ls -R gs://#{ENV["TF_VAR_project_id"]}-#{args[:encryption_key]}-secrets/ | grep #{Secrets::SECRETS_FILE}); do \
+      gsutil rm $secret_file; \
+    done'"
 end
 
 desc '[ADVANCED] Destroy provided module in the cluster, and then deploy it -- rake redeploy_module"[k8s/kube-system/cert-manager]"'
