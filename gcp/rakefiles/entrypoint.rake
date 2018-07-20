@@ -30,6 +30,13 @@ task :default => :deploy
 task :set_vars do
   Vars.set_vars(@env, @project_type)
   @secrets = Secrets.set_secrets()
+  json_sa_key_file = File.read(@serviceaccount_key_file)
+  data_sa_key_file = JSON.parse(json_sa_key_file)
+  unless data_sa_key_file["project_id"] == ENV["TF_VAR_project_id"]
+    puts "Seems that the serviceAccount configured (#{data_sa_key_file["project_id"]}) doesn't match with the env where you're #{ENV["TF_VAR_project_id"]}"
+    puts "Please rerun project_init task to set the correct credentials or change the current active directory"
+    exit
+  end
 end
 
 @dot_config_path = "../../.config/#{@env}"
