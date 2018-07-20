@@ -66,7 +66,7 @@ resource "google_dns_record_set" "ns" {
 
 resource "google_dns_record_set" "ns-root" {
   name         = "${lookup(data.external.calculate_dns_zone.result, "zone")}"
-  managed_zone = "${google_dns_managed_zone.project.name}"
+  managed_zone = "gcp-gpii-net"
   type         = "NS"
   ttl          = 3600
   project      = "gpii-gcp-common-prd"
