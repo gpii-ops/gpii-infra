@@ -209,7 +209,7 @@ task :apply_projects => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] d
     exit
   end
 
-  sh "#{@exekube_cmd} plan live/#{@env}/infra"
+  sh "#{@exekube_cmd} up live/#{@env}/infra"
 end
 
 desc "Create cluster and deploy GPII components to it"
