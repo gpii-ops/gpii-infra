@@ -99,6 +99,7 @@ class Secrets
         end
       rescue
         FileUtils.rm_f(secrets_file)
+        raise IOError, "Unable to populate secrets for key #{encryption_key}"
       end
 
       FileUtils.rm_f(secrets_file)
