@@ -165,16 +165,25 @@ task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_co
     else
       chart_namespace = 'default'
     end
+    if attrs && !attrs['allow_upgrade'].nil? && attrs['allow_upgrade'] == false
+      allow_upgrade = false
+    else
+      allow_upgrade = true
+    end
 
     if installed_charts.include?(chart_name)
-      begin
-        wait_for(
-          "helm upgrade --namespace #{chart_namespace} --recreate-pods -f #{@tmpdir}-modules/deploy/charts/values/#{chart}.yaml #{chart_name} #{@chartdir}/#{chart}",
-          sleep_secs: 5,
-          max_wait_secs: 60,
-        )
-      rescue
-        puts "WARNING: Failed to install helm chart #{chart}. Run 'rake deploy_only' to try again. Continuing."
+      if allow_upgrade
+        begin
+          wait_for(
+            "helm upgrade --namespace #{chart_namespace} --recreate-pods -f #{@tmpdir}-modules/deploy/charts/values/#{chart}.yaml #{chart_name} #{@chartdir}/#{chart}",
+            sleep_secs: 5,
+            max_wait_secs: 60,
+          )
+        rescue
+          puts "WARNING: Failed to install helm chart #{chart}. Run 'rake deploy_only' to try again. Continuing."
+        end
+      else
+        puts "INFO: Helm chart #{chart} is already installed and upgrades are disabled for it. Continuing."
       end
     else
       begin
