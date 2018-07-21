@@ -133,7 +133,7 @@ task :unlock => [:set_vars, @gcp_creds_file] do
 end
 
 desc '[ADVANCED] Run arbitrary exekube command -- rake xk"[kubectl get pods]"'
-task :xk, [:cmd] => :set_vars do |taskname, args|
+task :xk, [:cmd] => [:set_vars, :set_secrets] do |taskname, args|
   if args[:cmd]
     cmd = args[:cmd]
   else
