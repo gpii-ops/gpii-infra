@@ -99,6 +99,7 @@ In this scenario we rely on CouchDB ability to recover from loss of one or more 
    * To get proper ENV_DELTAS value, check CouchDB Terragrunt module for the environment you're working with (i.e. `live/prd/k8s/gpii/couchdb/terraform.tfvars` for production environment, with deltas `PT5M PT60M PT24H P7D P52W`).
 * CouchDB cluster will replicate data to recreated node automatically.
 * Corrupted node is now recovered.
+   * You can check DB status on recovered node with `rake xk["kubectl exec --namespace gpii -it couchdb-couchdb-N -c couchdb -- curl -s http://\$TF_VAR_couchdb_admin_username:\$TF_VAR_couchdb_admin_password@127.0.0.1:5984/gpii/"]`, where N is node index.
 
 2. **Data corruption on all replicas of CouchDB cluster**
 
@@ -115,5 +116,6 @@ There may be a situation, when we want to roll back entire DB data set to anothe
    * Pick proper snapshot.
    * Delete PD.
    * Create new PD from snapshot with the same name, type, size and zone.
-* Scale CouchDB stateful set back to number of replicas it used to have before.
+* Scale CouchDB stateful set back to number of replicas it used to have before with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=N`
 * Database is now restored to the state at the time of target snapshot.
+   * You can check the status of all nodes with `for i in {0..N}; do rake xk["kubectl exec --namespace gpii -it couchdb-couchdb-$i -c couchdb -- curl -s http://\$TF_VAR_couchdb_admin_username:\$TF_VAR_couchdb_admin_password@127.0.0.1:5984/_up"]; done`, where N is a number of CouchDB replicas.
