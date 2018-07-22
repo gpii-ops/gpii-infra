@@ -38,7 +38,8 @@ task :set_vars do
   end
 end
 
-task :set_secrets => [:apply_secret_mgmt] do
+task :set_secrets, [:skip_secret_mgmt] do |taskname, args|
+  Rake::Task[:apply_secret_mgmt].invoke unless args[:skip_secret_mgmt]
   Secrets.set_secrets(@secrets, @exekube_cmd)
 end
 
@@ -133,7 +134,8 @@ task :unlock => [:set_vars, @gcp_creds_file] do
 end
 
 desc '[ADVANCED] Run arbitrary exekube command -- rake xk"[kubectl get pods]"'
-task :xk, [:cmd] => [:set_vars, :set_secrets] do |taskname, args|
+task :xk, [:cmd] => [:set_vars] do |taskname, args|
+  Rake::Task[:set_secrets].invoke(true)
   if args[:cmd]
     cmd = args[:cmd]
   else
