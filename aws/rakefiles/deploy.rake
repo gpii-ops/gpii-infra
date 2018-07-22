@@ -154,23 +154,11 @@ task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_co
   installed_charts = `helm list -q -a`
   installed_charts = installed_charts.split("\n")
   @gpii_helmcharts.each do |chart, attrs|
-    # Extracting release name and namespace
-    if attrs && attrs['release_name']
-      chart_name = attrs['release_name']
-    else
-      chart_name = chart.match(/^\d+\-(.*)/)[1]
-    end
-    if attrs && attrs['release_namespace']
-      chart_namespace = attrs['release_namespace']
-    else
-      chart_namespace = 'default'
-    end
-    if attrs && !attrs['allow_upgrade'].nil? && attrs['allow_upgrade'] == false
-      allow_upgrade = false
-    else
-      allow_upgrade = true
-    end
-
+    # Extracting release attributes
+    attrs ||= {}
+    chart_name = attrs.fetch('release_name', chart)
+    chart_namespace = attrs.fetch('release_namespace', 'default')
+    allow_upgrade = attrs.fetch('allow_upgrade', true)
     if installed_charts.include?(chart_name)
       if allow_upgrade
         begin
@@ -248,11 +236,8 @@ task :undeploy => [:configure_kubectl, :find_gpii_components] do
   @gpii_helmcharts = YAML.load_file("#{@tmpdir}-modules/deploy/charts/config.yml")
   @gpii_helmcharts.to_a.reverse.each do |chart, attrs|
     # Extracting release name
-    if attrs && attrs['release_name']
-      chart_name = attrs['release_name']
-    else
-      chart_name = chart.match(/^\d+\-(.*)/)[1]
-    end
+    attrs ||= {}
+    chart_name = attrs.fetch('release_name', chart)
     begin
       wait_for(
         "helm delete --purge #{chart_name}",
