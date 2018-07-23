@@ -219,7 +219,7 @@ end
 # Shut things down via kubernetes, otherwise terraform destroy will get stuck
 # on left-behind resources, e.g. ELBs and IGs.
 desc "Delete GPII components from cluster"
-task :undeploy => [:configure_kubectl, :find_gpii_components] do
+task :undeploy, [:delete_system_components] => [:configure_kubectl, :find_gpii_components] do |taskname, args|
   # Don't delete dashboard. It doesn't impede anything and it can be useful
   # even in an "undeployed" cluster.
   @gpii_components.reverse.each do |component|
@@ -254,15 +254,20 @@ task :undeploy => [:configure_kubectl, :find_gpii_components] do
       puts "WARNING: Failed to delete helm chart #{chart}. Run 'rake undeploy' to try again. Continuing."
     end
   end
-  begin
-    wait_for(
-      "kubectl --context #{ENV["TF_VAR_cluster_name"]} delete --ignore-not-found -f ../modules/deploy/system/",
-      sleep_secs: 5,
-      max_wait_secs: 20,
-    )
-  rescue
-    puts "WARNING: Failed to configure system components."
+
+  # By default, we don't want to delete system components if undeploy task invoked directly (not from destroy task)
+  if args[:delete_system_components]
+    begin
+      wait_for(
+        "kubectl --context #{ENV["TF_VAR_cluster_name"]} delete --ignore-not-found -f ../modules/deploy/system/",
+        sleep_secs: 5,
+        max_wait_secs: 20,
+      )
+    rescue
+      puts "WARNING: Failed to configure system components."
+    end
   end
+
   Rake::Task["wait_for_cluster_down"].invoke
 end
 

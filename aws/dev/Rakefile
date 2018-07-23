@@ -31,7 +31,8 @@ task :test_master do
 end
 
 desc "Destroy cluster"
-task :destroy => [@tmpdir, :generate_modules, :undeploy] do
+task :destroy => [@tmpdir, :generate_modules] do
+  Rake::Task["undeploy"].invoke(true)
   Rake::Task["_destroy"].invoke
 end
 
