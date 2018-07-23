@@ -1,4 +1,5 @@
-# this Terraform module creates the same resources as project_init script
+# this Terraform module creates the same resources as project_init script and
+# set the DNS zones structure.
 
 terraform {
   backend "gcs" {}
@@ -54,6 +55,8 @@ resource "google_dns_managed_zone" "project" {
   description = "${google_project.project.project_id} DNS zone"
 }
 
+# Set the NS records in the parent zone of the parent project if the
+# project_name has the pattern ${env}-${user}
 resource "google_dns_record_set" "ns" {
   name         = "${lookup(data.external.calculate_dns_zone.result, "zone")}"
   managed_zone = "${google_dns_managed_zone.project.name}"
@@ -64,6 +67,8 @@ resource "google_dns_record_set" "ns" {
   count        = "${length(split("-", var.project_name)) == 2 ? 1 : 0}"
 }
 
+# Set the NS records in the gcp.gpii.net zone of the gpii-gcp-common-prd if the
+# project name doesn't have a hyphen.
 resource "google_dns_record_set" "ns-root" {
   name         = "${lookup(data.external.calculate_dns_zone.result, "zone")}"
   managed_zone = "gcp-gpii-net"
