@@ -12,8 +12,8 @@ variable "backup_deltas" {}
 variable "release_namespace" {}
 
 # Secret variables
-variable "couchdb_admin_username" {}
-variable "couchdb_admin_password" {}
+variable "secret_couchdb_admin_username" {}
+variable "secret_couchdb_admin_password" {}
 
 module "couchdb" {
   source           = "/exekube-modules/helm-release"
@@ -54,7 +54,7 @@ resource "null_resource" "couchdb_finish_cluster" {
       while [ "$STATUS" != '"Cluster is already finished"' ]; do
         RESULT=$(
           kubectl exec --namespace ${var.release_namespace} couchdb-couchdb-0 -c couchdb -- \
-          curl -s http://${var.couchdb_admin_username}:${var.couchdb_admin_password}@127.0.0.1:5984/_cluster_setup \
+          curl -s http://${var.secret_couchdb_admin_username}:${var.secret_couchdb_admin_password}@127.0.0.1:5984/_cluster_setup \
           -X POST -H 'Content-Type: application/json' -d '{"action": "finish_cluster"}')
         echo "[Try $RETRY_COUNT of $RETRIES] CouchDB returned: $RESULT"
         STATUS=$(echo $RESULT | jq ".reason")

@@ -12,18 +12,18 @@ variable "dns_zones" {
 
 # COUCHDB
 
-variable "couchdb_admin_username" {}
-variable "couchdb_admin_password" {}
-variable "couchdb_secret" {}
+variable "secret_couchdb_admin_username" {}
+variable "secret_couchdb_admin_password" {}
+variable "secret_couchdb_auth_cookie" {}
 
 data "template_file" "couchdb_values" {
   template = "${file("values/couchdb.yaml")}"
 
   vars {
     env                    = "${var.env}"
-    couchdb_admin_username = "${var.couchdb_admin_username}"
-    couchdb_admin_password = "${var.couchdb_admin_password}"
-    couchdb_secret         = "${var.couchdb_secret}"
+    couchdb_admin_username = "${var.secret_couchdb_admin_username}"
+    couchdb_admin_password = "${var.secret_couchdb_admin_password}"
+    couchdb_auth_cookie    = "${var.secret_couchdb_auth_cookie}"
   }
 }
 
@@ -47,8 +47,8 @@ data "template_file" "preferences_values" {
     dns_name               = "${var.dns_zones["${var.env}-gcp-gpii-net"]}"
     preferences_repository = "${var.preferences_repository}"
     preferences_checksum   = "${var.preferences_checksum}"
-    couchdb_admin_username = "${var.couchdb_admin_username}"
-    couchdb_admin_password = "${var.couchdb_admin_password}"
+    couchdb_admin_username = "${var.secret_couchdb_admin_username}"
+    couchdb_admin_password = "${var.secret_couchdb_admin_password}"
   }
 }
 
@@ -72,8 +72,8 @@ data "template_file" "flowmanager_values" {
     dns_name               = "${var.dns_zones["${var.env}-gcp-gpii-net"]}"
     flowmanager_repository = "${var.flowmanager_repository}"
     flowmanager_checksum   = "${var.flowmanager_checksum}"
-    couchdb_admin_username = "${var.couchdb_admin_username}"
-    couchdb_admin_password = "${var.couchdb_admin_password}"
+    couchdb_admin_username = "${var.secret_couchdb_admin_username}"
+    couchdb_admin_password = "${var.secret_couchdb_admin_password}"
   }
 }
 
@@ -95,8 +95,8 @@ data "template_file" "dataloader_values" {
   vars {
     dataloader_repository  = "${var.dataloader_repository}"
     dataloader_checksum    = "${var.dataloader_checksum}"
-    couchdb_admin_username = "${var.couchdb_admin_username}"
-    couchdb_admin_password = "${var.couchdb_admin_password}"
+    couchdb_admin_username = "${var.secret_couchdb_admin_username}"
+    couchdb_admin_password = "${var.secret_couchdb_admin_password}"
   }
 }
 

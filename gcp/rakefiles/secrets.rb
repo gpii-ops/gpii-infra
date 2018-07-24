@@ -10,22 +10,22 @@ class Secrets
 
   SECRETS_FILE = "secrets.yaml"
 
-  FORBIDDEN_SECRET_NAMES = ["project_id", "serviceaccount_key", "default_dir", "secrets_dir", "values_dir", "env"]
-
   # This method is looking for SECRETS_FILE files in module directories (modules/*), which should have the following structure:
   #
   # secrets:
-  #  - module_secret
-  #  - module_another_secret
-  #  - module_and_one_more_secret
+  #  - secret_module_admin_password
+  #  - secret_module_another_secret
+  #  - secret_module_and_one_more_secret
   # encryption_key: default
+  #
+  # All secrets must start with "secret_" prefix, otherwise they will raise an exception
   #
   # Attribute "encryption_key" is optional – if not present, module name will be used as Key name
   # After collecting, it returns the Hash with collected secrets, where the keys are KMS Encryption Keys and the values are
   # lists of individual credentials (e.g. couchdb_password) managed with that KMS Encryption Key
   #
-  # We advice to use prefix with module name for every secret (e.g. couchdb_admin_password instead of just admin_password)
-  # to avoid collisions, since secrets scope is global
+  # We advice to use prefix with module name for every secret (e.g. secret_couchdb_admin_password instead of just secret_admin_password)
+  # to avoid collisions, since secrets scope is global, duplicated secrets will raise an exception
   def self.collect_secrets()
     ENV['TF_VAR_keyring_name'] = Secrets::KMS_KEYRING
 
@@ -46,9 +46,9 @@ class Secrets
         collected_secrets[encryption_key] = module_secrets['secrets']
       end
       module_secrets['secrets'].each do |secret_name|
-        if Secrets::FORBIDDEN_SECRET_NAMES.include? secret_name
+        if !secret_name.match(/^secret_/)
           raise "ERROR: Can not use secret with name '#{secret_name}' for module '#{module_name}'!\n \
-            Secret name '#{secret_name}' is forbidden!"
+            Secret name must start with 'secret_'!"
         elsif secrets_to_modules.include? secret_name
           raise "ERROR: Can not use secret with name '#{secret_name}' for module '#{module_name}'!\n \
             Secret '#{secret_name}' is already in use by module '#{secrets_to_modules[secret_name]}'!"
