@@ -10,28 +10,34 @@ class Secrets
 
   SECRETS_FILE = "secrets.yaml"
 
+  FORBIDDEN_SECRETS = ["project_id", "serviceaccount_key", "default_dir", "secrets_dir", "values_dir", "env"]
+
   # This method is looking for SECRETS_FILE files in module directories (modules/*), which should have the following structure:
   #
   # secrets:
-  #  - secret_name
-  #  - another_secret
-  #  - and_one_more_secret
+  #  - module_secret
+  #  - module_another_secret
+  #  - module_and_one_more_secret
   # encryption_key: default
   #
   # Attribute "encryption_key" is optional – if not present, module name will be used as Key name
   # After collecting, it returns the Hash with collected secrets, where the keys are KMS Encryption Keys and the values are
   # lists of individual credentials (e.g. couchdb_password) managed with that KMS Encryption Key
+  #
+  # We advice to use prefix with module name for every secret (e.g. couchdb_admin_password instead of just admin_password)
+  # to avoid collisions, since secrets scope is global
   def self.collect_secrets()
     ENV['TF_VAR_keyring_name'] = Secrets::KMS_KEYRING
 
     encryption_keys = []
     collected_secrets = {}
+    secrets_to_modules = {}
 
     Dir["../../modules/**/#{Secrets::SECRETS_FILE}"].each do |module_secrets_file|
-      module_default_key = File.basename(File.dirname(module_secrets_file))
+      module_name = File.basename(File.dirname(module_secrets_file))
       module_secrets = YAML.load(File.read(module_secrets_file))
 
-      encryption_key = module_secrets['encryption_key'] ? module_secrets['encryption_key'] : module_default_key
+      encryption_key = module_secrets['encryption_key'] ? module_secrets['encryption_key'] : module_name
       encryption_keys << %Q|"#{encryption_key}"|
 
       if collected_secrets[encryption_key]
@@ -40,10 +46,16 @@ class Secrets
         collected_secrets[encryption_key] = module_secrets['secrets']
       end
       module_secrets['secrets'].each do |secret_name|
+        if Secrets::FORBIDDEN_SECRETS.include? secret_name
+          raise "ERROR: Can not use secret with name '#{secret_name}' for module '#{module_name}'!\n \
+            Secret name '#{secret_name}' is forbidden!"
+        elsif secrets_to_modules.include? secret_name
+          raise "ERROR: Can not use secret with name '#{secret_name}' for module '#{module_name}'!\n \
+            Secret '#{secret_name}' is already in use by module '#{secrets_to_modules[secret_name]}'!"
+        end
         ENV["TF_VAR_#{secret_name}"] = ""
+        secrets_to_modules[secret_name] = module_name
       end
-
-      collected_secrets[encryption_key].uniq!
     end
 
     encryption_keys.uniq!
@@ -98,11 +110,11 @@ class Secrets
           sh_filter "#{exekube_cmd} secrets-push #{encryption_key}"
         end
       rescue
+        puts "ERROR: Unable to populate secrets for key '#{encryption_key}'"
+        raise
+      ensure
         FileUtils.rm_f(secrets_file)
-        raise IOError, "Unable to populate secrets for key #{encryption_key}"
       end
-
-      FileUtils.rm_f(secrets_file)
     end
   end
 end
