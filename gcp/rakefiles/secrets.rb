@@ -110,7 +110,7 @@ class Secrets
           sh_filter "#{exekube_cmd} secrets-push #{encryption_key}"
         end
       rescue
-        puts "ERROR: Unable to populate secrets for key '#{encryption_key}'"
+        puts "ERROR: Unable to populate secrets for key '#{encryption_key}'!"
         raise
       ensure
         FileUtils.rm_f(secrets_file)
