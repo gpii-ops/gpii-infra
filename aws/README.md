@@ -73,6 +73,21 @@ I generally download and install these tools by hand (verifying checksums when a
 1. To see a list of other commands you can try: `rake -T`
 1. If something didn't work, see [Troubleshooting](#troubleshooting).
 
+### Run in Docker alternative
+```
+docker run -it --rm -e USER -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_REGION \
+            -v $(pwd)/test.pub:/root/.ssh/id_rsa.gpii-ci.pub \
+            -v $(pwd)/test:/root/.ssh/id_rsa.gpii-ci \
+            gpii/gpii-infra-aws rake
+```
+
+- AWS credentials are passed into container via env `AWS_` variables
+- USER variable is used in naming the cluster `dev-${USER}`
+- `-v $(pwd)/test:/root/.ssh/id_rsa.gpii-ci`  mount the ssh private key
+- `-v $(pwd)/test.pub:/root/.ssh/id_rsa.gpii-ci.pub`  mount the ssh public key
+- (*optional*) if you want to run current code, instead the one in docker image,
+  add mount `-v "$(pwd)/..:/gpii-infra"`
+
 ### Manual testing
 
 #### The Kubernetes dashboard
