@@ -5,6 +5,7 @@ terraform {
 variable "env" {}
 variable "secrets_dir" {}
 variable "values_dir" {}
+variable "nonce" {}
 
 # Terragrunt variables
 variable "couchdb_replicas" {}
@@ -73,8 +74,7 @@ resource "null_resource" "couchdb_enable_pv_backups" {
   depends_on = ["module.couchdb"]
 
   triggers = {
-    couchdb_replicas = "${var.couchdb_replicas}"
-    backup_deltas    = "${var.backup_deltas}"
+    nonce = "${var.nonce}"
   }
 
   provisioner "local-exec" {
@@ -99,6 +99,7 @@ resource "null_resource" "couchdb_destroy_pvcs" {
 
   provisioner "local-exec" {
     when = "destroy"
+
     command = <<EOF
       for PVC in $(kubectl get pvc --namespace ${var.release_namespace} -o json | jq --raw-output '.items[] | select(.metadata.name | startswith("database-storage-couchdb")) | .metadata.name'); do
         kubectl --namespace ${var.release_namespace} delete --ignore-not-found pvc $PVC
