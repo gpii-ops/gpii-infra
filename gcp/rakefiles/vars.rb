@@ -1,5 +1,5 @@
-require "yaml"
 require "securerandom"
+require "yaml"
 
 class Vars
 
@@ -67,11 +67,10 @@ class Vars
       ENV['TF_VAR_dataloader_repository'] = versions['gpii-dataloader'].split('@')[0]
       ENV['TF_VAR_dataloader_checksum'] = versions['gpii-dataloader'].split('@')[1]
     end
+
+    # Hack to force Terraform to reapply some resources on every run
+    ENV["TF_VAR_nonce"] = SecureRandom.hex
   end
-
-  # Hack to force Terraform to reapply some resources on every run
-  ENV["TF_VAR_nonce"] = SecureRandom.hex
 end
-
 
 # vim: et ts=2 sw=2:
