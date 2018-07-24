@@ -10,7 +10,7 @@ class Secrets
 
   SECRETS_FILE = "secrets.yaml"
 
-  FORBIDDEN_SECRETS = ["project_id", "serviceaccount_key", "default_dir", "secrets_dir", "values_dir", "env"]
+  FORBIDDEN_SECRET_NAMES = ["project_id", "serviceaccount_key", "default_dir", "secrets_dir", "values_dir", "env"]
 
   # This method is looking for SECRETS_FILE files in module directories (modules/*), which should have the following structure:
   #
@@ -46,7 +46,7 @@ class Secrets
         collected_secrets[encryption_key] = module_secrets['secrets']
       end
       module_secrets['secrets'].each do |secret_name|
-        if Secrets::FORBIDDEN_SECRETS.include? secret_name
+        if Secrets::FORBIDDEN_SECRET_NAMES.include? secret_name
           raise "ERROR: Can not use secret with name '#{secret_name}' for module '#{module_name}'!\n \
             Secret name '#{secret_name}' is forbidden!"
         elsif secrets_to_modules.include? secret_name
