@@ -1,3 +1,4 @@
+require "securerandom"
 require "yaml"
 
 class Vars
@@ -51,6 +52,9 @@ class Vars
     if ENV["BILLING_ID"].nil?
       ENV["BILLING_ID"] = "01A0E1-B0B31F-349F4F"  # RtF Billing Account
     end
+
+    # Hack to force Terraform to reapply some resources on every run
+    ENV["TF_VAR_nonce"] = SecureRandom.hex
   end
 
   def self.set_versions()

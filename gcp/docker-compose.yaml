@@ -33,7 +33,7 @@ services:
        # TF_VAR_values_dir is used by templater to put rendered files into
       TF_VAR_values_dir: /project/live/${ENV}/values
 
-    # File with environment variables will be populated by rake
+    # File with other environment variables will be populated by rake
     env_file:
       - ./.config/${ENV}/compose.env
 
