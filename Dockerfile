@@ -18,6 +18,7 @@ RUN apk add --update --no-cache \
       py-pip \
       jq \
       openssh-client \
+      curl \
     && wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip -O /tmp/terraform.zip \
     && mkdir -p /opt/bin \
     && unzip /tmp/terraform.zip -d /opt/bin \
