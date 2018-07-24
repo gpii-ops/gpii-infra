@@ -18,14 +18,15 @@ class Secrets
   #  - secret_module_and_one_more_secret
   # encryption_key: default
   #
-  # All secrets must start with "secret_" prefix, otherwise they will raise an exception
-  #
   # Attribute "encryption_key" is optional – if not present, module name will be used as Key name
-  # After collecting, it returns the Hash with collected secrets, where the keys are KMS Encryption Keys and the values are
+  # After collecting, method returns the Hash with collected secrets, where the keys are KMS Encryption Keys and the values are
   # lists of individual credentials (e.g. couchdb_password) managed with that KMS Encryption Key
   #
-  # We advice to use prefix with module name for every secret (e.g. secret_couchdb_admin_password instead of just secret_admin_password)
-  # to avoid collisions, since secrets scope is global, duplicated secrets will raise an exception
+  # All secrets must start with "secret_" prefix, otherwise exception is raised
+  # In case duplicated secrets found, exception is raised
+  #
+  # We also advice to add module name to each secret's name (e.g. "secret_couchdb_admin_password" instead of just "secret_admin_password")
+  # to avoid naming collisions, since secrets scope is global
   def self.collect_secrets()
     ENV['TF_VAR_keyring_name'] = Secrets::KMS_KEYRING
 
