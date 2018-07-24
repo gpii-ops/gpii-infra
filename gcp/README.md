@@ -77,3 +77,42 @@ This happens when trying to enable an API that is already enabled. This shouldn'
 ```
 rake xk"[gcloud services disable container.googleapis.com]"
 ```
+
+### Restoring CouchDB data
+
+We are considering number of probable failure scenarios for our GCP infrastructure:
+
+1. **Data corruption on a single CouchDB replica**
+
+In this scenario we rely on CouchDB ability to recover from loss of one or more replicas (our current production CouchDB settings allow us to lose up to 2 random nodes and still keep data integrity). The best course of action as follows:
+
+* Make sure that you figured affected CouchDB pod properly
+* There is a PVC object, associated with affected CouchDB pod. Let's say affected pod is `couchdb-couchdb-1`, then corresponding PVC is `database-storage-couchdb-couchdb-1`, located in the same namespace.
+* Delete associated PVC and then affected pod. For our example case:
+   * `kubectl --namespace gpii delete pvc database-storage-couchdb-couchdb-1`
+   * `kubectl --namespace gpii delete pod couchdb-couchdb-1`
+* After target pod is terminated, Persistent Disk that was mounted into it thru corresponding PVC will be destroyed as well.
+* When new pod is created to replace deleted one, corresponding PVC will be created as well, and, thru it, new PV object for new GCE PD.
+* Run `rake deploy_module[couchdb]` to patch newly created PV with annotations for `k8s-snapshots`.
+* CouchDB cluster will replicate data to recreated node automatically.
+* Corrupted node is now recovered.
+   * You can check DB status on recovered node with `rake xk["kubectl exec --namespace gpii -it couchdb-couchdb-N -c couchdb -- curl -s http://\$TF_VAR_couchdb_admin_username:\$TF_VAR_couchdb_admin_password@127.0.0.1:5984/gpii/"]`, where N is node index.
+
+2. **Data corruption on all replicas of CouchDB cluster**
+
+There may be a situation, when we want to roll back entire DB data set to another point in the past. Current solution is disruptive, requires bringing entire CouchDB cluster down and some manual actions (we'll most likely automate this in future):
+
+* Choose a snapshot set that you want to restore, make sure that snapshots are present for all disks that are currently in use by CouchDB cluster.
+* Collect CouchDB volume names from PVCs with `kubectl --namespace gpii get pvc | grep database-storage-couchdb`.
+* Get current number of CouchDB stateful set replicas with `kubectl --namespace gpii get statefulset couchdb-couchdb -o jsonpath="{.status.replicas}"`.
+* Scale CouchDB stateful set to 0 replicas with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=0`.
+* This will cause K8s to terminate all CouchDB pods, all PDs that were mounted into them will be released.
+* Open Google Cloud console, go to "Compute Engine" -> "Disks".
+* Now, for every PD you collected:
+   * Remember PD's name, type, size and zone.
+   * Pick proper snapshot.
+   * Delete PD.
+   * Create new PD from snapshot with the same name, type, size and zone.
+* Scale CouchDB stateful set back to number of replicas it used to have before with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=N`
+* Database is now restored to the state at the time of target snapshot.
+   * You can check the status of all nodes with `for i in {0..N}; do rake xk["kubectl exec --namespace gpii -it couchdb-couchdb-$i -c couchdb -- curl -s http://\$TF_VAR_couchdb_admin_username:\$TF_VAR_couchdb_admin_password@127.0.0.1:5984/_up"]; done`, where N is a number of CouchDB replicas.
