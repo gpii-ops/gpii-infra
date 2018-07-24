@@ -264,7 +264,7 @@ task :undeploy, [:delete_system_components] => [:configure_kubectl, :find_gpii_c
         max_wait_secs: 20,
       )
     rescue
-      puts "WARNING: Failed to configure system components."
+      puts "WARNING: Failed to delete system components."
     end
   end
 
