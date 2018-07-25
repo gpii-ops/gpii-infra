@@ -4,7 +4,7 @@ require "yaml"
 class Vars
 
   # Hack to avoid changes in gpii-version-updater
-  VERSION_FILE = '../../../aws/modules/deploy/version.yml'
+  VERSION_FILE = "../../../aws/modules/deploy/version.yml"
 
   def self.set_vars(env, project_type)
     if ["dev"].include?(env)
@@ -43,7 +43,7 @@ class Vars
       end
     end
 
-    ENV["ENV"] = env
+    ENV["ENV"] = ENV["TF_VAR_env"] = env
 
     if ENV["ORGANIZATION_ID"].nil?
       ENV["ORGANIZATION_ID"] = "247149361674"  # RtF Organization
@@ -53,7 +53,11 @@ class Vars
       ENV["BILLING_ID"] = "01A0E1-B0B31F-349F4F"  # RtF Billing Account
     end
 
-    # Hack to avoid changes in gpii-version-updater
+    # Hack to force Terraform to reapply some resources on every run
+    ENV["TF_VAR_nonce"] = SecureRandom.hex
+  end
+
+  def self.set_versions()
     versions = YAML.load(File.read(Vars::VERSION_FILE))
     if versions['flowmanager']
       ENV['TF_VAR_flowmanager_repository'] = versions['flowmanager'].split('@')[0]
@@ -67,9 +71,6 @@ class Vars
       ENV['TF_VAR_dataloader_repository'] = versions['gpii-dataloader'].split('@')[0]
       ENV['TF_VAR_dataloader_checksum'] = versions['gpii-dataloader'].split('@')[1]
     end
-
-    # Hack to force Terraform to reapply some resources on every run
-    ENV["TF_VAR_nonce"] = SecureRandom.hex
   end
 end
 
