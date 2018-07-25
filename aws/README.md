@@ -356,6 +356,30 @@ Examples of when you might want to do this:
    * This will drop you into an editor several times to modify several different configs.
    * Make needed changes in each relevant file.
    * Follow the instructions to apply the changes to the pre-existing cluster.
+   * Manually verify that Prometheus, Alertmanager, and Grafana came back and are continuing to collect data
+      * Prometheus sometimes requires some special handling on restart. See the next section.
+
+### Prometheus lost all of its alerts
+
+Due to a [suspected bug](https://issues.gpii.net/browse/GPII-3103?focusedCommentId=33300&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-33300) in our version of Prometheus/prometheus-operator, Prometheus sometimes loses its Alerts when it restarts.
+
+You can check for this failure mode like this:
+
+```
+kubectl --namespace monitoring exec -it prometheus-k8s-0 find /etc/prometheus/rules/
+kubectl --namespace monitoring exec -it prometheus-k8s-1 find /etc/prometheus/rules/
+kubectl --namespace monitoring exec -it prometheus-k8s-[NUMBER] find /etc/prometheus/rules/
+```
+
+The command should list some rules files. If it shows nothing (i.e. an empty directory), then the target Prometheus Pod needs to be restarted so that it will detect the rules:
+
+```
+kubectl --namespace monitoring delete pod/prometheus-k8s-0
+kubectl --namespace monitoring delete pod/prometheus-k8s-1
+kubectl --namespace monitoring delete pod/prometheus-k8s-[NUMBER]
+```
+
+When the Pod restarts, run the `find` command again to make sure the rules files have appeared.
 
 ### I want to change Grafana dashboards or Alertmanager alerts [experimental]
 
