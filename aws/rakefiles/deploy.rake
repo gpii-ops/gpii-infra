@@ -154,27 +154,24 @@ task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_co
   installed_charts = `helm list -q -a`
   installed_charts = installed_charts.split("\n")
   @gpii_helmcharts.each do |chart, attrs|
-    # Extracting release name and namespace
-    if attrs && attrs['release_name']
-      chart_name = attrs['release_name']
-    else
-      chart_name = chart.match(/^\d+\-(.*)/)[1]
-    end
-    if attrs && attrs['release_namespace']
-      chart_namespace = attrs['release_namespace']
-    else
-      chart_namespace = 'default'
-    end
-
+    # Extracting release attributes
+    attrs ||= {}
+    chart_name = attrs.fetch('release_name', chart)
+    chart_namespace = attrs.fetch('release_namespace', 'default')
+    allow_upgrade = attrs.fetch('allow_upgrade', true)
     if installed_charts.include?(chart_name)
-      begin
-        wait_for(
-          "helm upgrade --namespace #{chart_namespace} --recreate-pods -f #{@tmpdir}-modules/deploy/charts/values/#{chart}.yaml #{chart_name} #{@chartdir}/#{chart}",
-          sleep_secs: 5,
-          max_wait_secs: 60,
-        )
-      rescue
-        puts "WARNING: Failed to install helm chart #{chart}. Run 'rake deploy_only' to try again. Continuing."
+      if allow_upgrade
+        begin
+          wait_for(
+            "helm upgrade --namespace #{chart_namespace} --recreate-pods -f #{@tmpdir}-modules/deploy/charts/values/#{chart}.yaml #{chart_name} #{@chartdir}/#{chart}",
+            sleep_secs: 5,
+            max_wait_secs: 60,
+          )
+        rescue
+          puts "WARNING: Failed to install helm chart #{chart}. Run 'rake deploy_only' to try again. Continuing."
+        end
+      else
+        puts "INFO: Helm chart #{chart} is already installed and upgrades are disabled for it. Continuing."
       end
     else
       begin
@@ -219,7 +216,7 @@ end
 # Shut things down via kubernetes, otherwise terraform destroy will get stuck
 # on left-behind resources, e.g. ELBs and IGs.
 desc "Delete GPII components from cluster"
-task :undeploy => [:configure_kubectl, :find_gpii_components] do
+task :undeploy, [:delete_system_components] => [:configure_kubectl, :find_gpii_components] do |taskname, args|
   # Don't delete dashboard. It doesn't impede anything and it can be useful
   # even in an "undeployed" cluster.
   @gpii_components.reverse.each do |component|
@@ -239,11 +236,8 @@ task :undeploy => [:configure_kubectl, :find_gpii_components] do
   @gpii_helmcharts = YAML.load_file("#{@tmpdir}-modules/deploy/charts/config.yml")
   @gpii_helmcharts.to_a.reverse.each do |chart, attrs|
     # Extracting release name
-    if attrs && attrs['release_name']
-      chart_name = attrs['release_name']
-    else
-      chart_name = chart.match(/^\d+\-(.*)/)[1]
-    end
+    attrs ||= {}
+    chart_name = attrs.fetch('release_name', chart)
     begin
       wait_for(
         "helm delete --purge #{chart_name}",
@@ -254,15 +248,20 @@ task :undeploy => [:configure_kubectl, :find_gpii_components] do
       puts "WARNING: Failed to delete helm chart #{chart}. Run 'rake undeploy' to try again. Continuing."
     end
   end
-  begin
-    wait_for(
-      "kubectl --context #{ENV["TF_VAR_cluster_name"]} delete --ignore-not-found -f ../modules/deploy/system/",
-      sleep_secs: 5,
-      max_wait_secs: 20,
-    )
-  rescue
-    puts "WARNING: Failed to configure system components."
+
+  # By default, we don't want to delete system components if undeploy task invoked directly (not from destroy task)
+  if args[:delete_system_components]
+    begin
+      wait_for(
+        "kubectl --context #{ENV["TF_VAR_cluster_name"]} delete --ignore-not-found -f ../modules/deploy/system/",
+        sleep_secs: 5,
+        max_wait_secs: 20,
+      )
+    rescue
+      puts "WARNING: Failed to delete system components."
+    end
   end
+
   Rake::Task["wait_for_cluster_down"].invoke
 end
 

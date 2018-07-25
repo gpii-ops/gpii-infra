@@ -2,7 +2,7 @@ clusterSize: ${env == "dev" ? 2 : 3}
 
 adminUsername: ${couchdb_admin_username}
 adminPassword: ${couchdb_admin_password}
-cookieAuthSecret: ${couchdb_secret}
+cookieAuthSecret: ${couchdb_auth_cookie}
 
 persistentVolume:
   enabled: true

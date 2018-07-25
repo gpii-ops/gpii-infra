@@ -87,6 +87,7 @@ describe Vars do
     project_type = "fake-project-type"
     Vars.set_vars(env, project_type)
     expect(ENV).to have_received(:[]=).with("ENV", env)
+    expect(ENV).to have_received(:[]=).with("TF_VAR_env", env)
     expect(ENV).to have_received(:[]=).with("ORGANIZATION_ID", "247149361674")
     expect(ENV).to have_received(:[]=).with("BILLING_ID", "01A0E1-B0B31F-349F4F")
   end
@@ -102,6 +103,16 @@ describe Vars do
     expect(ENV).not_to have_received(:[]=).with("TF_VAR_project_id", any_args)
     expect(ENV).not_to have_received(:[]=).with("ORGANIZATION_ID", any_args)
     expect(ENV).not_to have_received(:[]=).with("BILLING_ID", any_args)
+  end
+
+  it "set_vars sets TF_VAR_nonce" do
+    allow(ENV).to receive(:[]=)
+    allow(ENV).to receive(:[])
+    allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
+    env = "fake-env"
+    project_type = "fake-project-type"
+    Vars.set_vars(env, project_type)
+    expect(ENV).to have_received(:[]=).with("TF_VAR_nonce", a_value)
   end
 end
 
