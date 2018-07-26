@@ -5,7 +5,7 @@ terragrunt = {
     source = "/project/modules//gcp-project"
   }
   dependencies {
-    paths = ["../development"]
+    paths = ["../dev-zone"]
   }
   include = {
     path = "${find_in_parent_folders()}"
