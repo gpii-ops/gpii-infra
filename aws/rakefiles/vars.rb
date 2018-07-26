@@ -25,6 +25,10 @@ end
 def setup_vars(env_short)
   check_versions
 
+  if env_short == "prd" and ENV["RAKE_REALLY_RUN_IN_PRD"].nil?
+    raise "ERROR: Tried to run in prd but $RAKE_REALLY_RUN_IN_PRD is not set"
+  end
+
   shared_envs = ["stg", "prd"]
   if ENV["TF_VAR_environment"].nil?
     if shared_envs.include?(env_short)
