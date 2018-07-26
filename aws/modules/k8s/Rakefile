@@ -26,7 +26,7 @@ rule "#{KOPS_OUT_DIR}/kubernetes.tf" do
         --name=#{ENV["TF_VAR_cluster_name"]} \
         --channel=alpha \
         --cloud-labels='Env=#{ENV["TF_VAR_environment"]}' \
-        --kubernetes-version=1.8.15 \
+        --kubernetes-version=1.9.9 \
         --node-count=3 \
         --node-size=#{node_size} \
         --master-size=t2.small \
