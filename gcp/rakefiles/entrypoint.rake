@@ -135,6 +135,7 @@ end
 
 desc '[ADVANCED] Run arbitrary exekube command -- rake xk"[kubectl get pods]"'
 task :xk, [:cmd] => [:set_vars] do |taskname, args|
+  puts "If this hangs or fails, try running 'rake apply_secret_mgmt'"
   Rake::Task[:set_secrets].invoke(true)
   if args[:cmd]
     cmd = args[:cmd]
