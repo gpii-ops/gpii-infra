@@ -97,5 +97,8 @@ task :display_rolling_update_cmd => [@tmpdir, :configure_kops] do
 end
 
 task :kops_rolling_update => [@tmpdir, :configure_kops] do
-  sh "KOPS_FEATURE_FLAGS='+DrainAndValidateRollingUpdate' kops rolling-update cluster #{ENV["TF_VAR_cluster_name"]} --yes"
+  wait_for("\
+    KOPS_FEATURE_FLAGS='+DrainAndValidateRollingUpdate' \
+    kops rolling-update cluster #{ENV["TF_VAR_cluster_name"]} --yes
+  ")
 end
