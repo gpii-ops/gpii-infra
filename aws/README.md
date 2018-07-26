@@ -92,7 +92,21 @@ docker run -it --rm -e USER -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS
 task and not stored in TF state, so if your provisioning fails during the run, these
 might be recreated and cause an error. Partial solution is to run with  `-v
 "$(pwd)/..:/gpii-infra"` or start interactive terminal and run the rake task
-from there, so that the container won't get deleted between runs.
+from there, so that the container won't get deleted between runs.*
+
+#### docker-compose
+
+Docker-compose file is present for convenience. It expects `AWS_` variables
+setup (see above), ssh keys in `~/.ssh/id_rsa.gpii-ci` &
+`~/.ssh/id_rsa.gpii-ci.pub` and it mounts root `gpii-infra` directory inside the
+image as `/gpii-infra`, meaning current checked-out code will be used.
+
+```
+# to create
+docker-compose run gpii-infra-aws "rake"
+# to destroy
+docker-compose run gpii-infra-aws "rake destroy && rake clobber
+```
 
 ### Manual testing
 
