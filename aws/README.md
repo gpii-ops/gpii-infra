@@ -134,6 +134,22 @@ Deploying to `prd` requires a [manual action](https://docs.gitlab.com/ce/ci/yaml
 
 See [CI-CD.md](../CI-CD.md)
 
+## Production is broken, there's been a security breach, or there is some other operational emergency
+
+If you need to contact a human on the Ops team urgently, here are steps you can try. They escalate in urgency and disruptiveness, so favor earlier steps and patience, but use your best judgement. If production is down right before a big demo or an attack is happening now, it's more important to get an engineer's attention than it is to avoid sending notifications to a few extra people.
+
+1. Note that we do not currently have a formal on-call rotation. 24x7 support is Best Effort.
+1. Go to #ops in Slack. Ask for help using `@here`. [More on Slack announcements](https://get.slack.help/hc/en-us/articles/202009646-Make-an-announcement).
+1. Go to #ops in Slack. Ask for help using `@channel`.
+1. Email `infrastructure at lists.gpii.net`.
+   * This is a public mailing list, so provide a brief description of the affected system but avoid discussing details. (We believe in transparency but it can be dangerous in certain kinds of emergencies.)
+1. Call or text specific Ops engineers. [Contact info](https://docs.google.com/document/d/1EDYhWYipUluzG6K8S-W4clsAGInm2RdjkpKq9Lw_dhE/edit).
+   * If possible, pick an engineer who is in the middle of their work day over an engineer who is likely asleep. Timezone information is in [Contact info](https://docs.google.com/document/d/1EDYhWYipUluzG6K8S-W4clsAGInm2RdjkpKq9Lw_dhE/edit)
+   * Repeat until you've reached an Ops engineer, or exhausted the list of Ops engineers (likely-awake or otherwise).
+   * TODO: phone numbers in contact info doc? elsewhere? no phone numbers?
+   * TODO: better timezone visualization / guidance on working hours?
+1. Slack, Skype, text, or call Sandra, Colin, or Gregg. These people may know where to find an Ops engineer.
+
 ## Troubleshooting / FAQ
 
 * Currently, this system builds everything in `us-east-2`. When inspecting cloud resources manually (e.g. via the AWS web dashboard), make sure this region is selected.
