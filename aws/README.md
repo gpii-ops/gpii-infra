@@ -242,6 +242,9 @@ If you don't want to deal with gpii-version-updater, you can instead:
    * Re-deploy the Job: `cd aws/dev && rake deploy`
 1. We abuse the fact that Kubernetes doesn't allow a Job's Docker image to be changed to prevent the dataloader Job from running (and deleting all data from CouchDB) every time. See [The Job "gpii-dataloder" is invalid](#the-job-gpii-dataloader-is-invalid) and [this architecture@ thread](https://lists.gpii.net/pipermail/infrastructure/2017-September/000070.html).
 
+### I want to see metrics, graphs, or alerts for my cluster
+  * `rake display_cluster_info`
+  * Follow the instructions under "Metrics, Graphs, and Alerts"
 
 ### Restoring a volume from a backup/snapshot
 
@@ -353,10 +356,12 @@ Examples of when you might want to do this:
 * For new clusters: edit the `kops` command in [modules/k8s/Rakefile](modules/k8s/Rakefile).
 * For existing clusters:
    * `rake kops_edit_cluster`
-   * This will drop you into an editor several times to modify several different configs.
+   * This will drop you into an editor several times to modify several different configs (cluster, nodes, masters).
    * Make needed changes in each relevant file.
-   * Follow the instructions to apply the changes to the pre-existing cluster.
-   * Manually verify that Prometheus, Alertmanager, and Grafana came back and are continuing to collect data
+      * Look only for the specific change you care about (e.g. Kubernetes version is in the cluster config, Instance Type for worker nodes is in the node config, Instance Type for masters is in each master's config, etc.).
+   * Follow the displayed instructions at the end (e.g. `rake clean`, `rake apply`).
+   * Manually verify that Prometheus, Alertmanager, and Grafana came back and are continuing to collect data.
+      * See [I want to see metrics, graphs, or alerts for my cluster](#i-want-to-see-metrics-graphs-or-alerts-for-my-cluster).
       * Prometheus sometimes requires some special handling on restart. See the next section.
 
 ### Prometheus lost all of its alerts
