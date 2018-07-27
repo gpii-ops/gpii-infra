@@ -136,7 +136,11 @@ See [CI-CD.md](../CI-CD.md)
 
 ## Production is broken, there's been a security breach, or there is some other operational emergency
 
-If you need to contact a human on the Ops team urgently, here are steps you can try. They escalate in urgency and disruptiveness, so favor earlier steps and patience, but use your best judgement. If production is down right before a big demo or an attack is happening now, it's more important to get an engineer's attention than it is to avoid sending notifications to a few extra people.
+First of all, DON'T PANIC! Everything is going to be fine. :)
+
+Your next task is to find a human on the Ops team. Ops engineers are trained to handle emergencies (including asking other experts for help).
+
+The steps below for finding an Ops person escalate in urgency and disruptiveness. Favor earlier steps and waiting for a response, but use your best judgement. If production is down right before a big demo or an attack is in progress, it's more important to get an engineer's attention than it is to avoid sending notifications to a few extra people.
 
 1. Note that we do not currently have a formal on-call rotation. 24x7 support is Best Effort.
 1. Go to #ops in Slack. Ask for help using `@here`. [More on Slack announcements](https://get.slack.help/hc/en-us/articles/202009646-Make-an-announcement).
@@ -146,8 +150,6 @@ If you need to contact a human on the Ops team urgently, here are steps you can 
 1. Call or text specific Ops engineers. [Contact info](https://docs.google.com/document/d/1EDYhWYipUluzG6K8S-W4clsAGInm2RdjkpKq9Lw_dhE/edit).
    * If possible, pick an engineer who is in the middle of their work day over an engineer who is likely asleep. Timezone information is in [Contact info](https://docs.google.com/document/d/1EDYhWYipUluzG6K8S-W4clsAGInm2RdjkpKq9Lw_dhE/edit)
    * Repeat until you've reached an Ops engineer, or exhausted the list of Ops engineers (likely-awake or otherwise).
-   * TODO: phone numbers in contact info doc? elsewhere? no phone numbers?
-   * TODO: better timezone visualization / guidance on working hours?
 1. Slack, Skype, text, or call Sandra, Colin, or Gregg. These people may know where to find an Ops engineer.
 
 ## Troubleshooting / FAQ
