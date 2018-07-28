@@ -20,21 +20,30 @@ end
 @exekube_cmd = "docker-compose run --rm --service-ports xk"
 
 @dot_config_path = "../../.config/#{@env}"
+directory @dot_config_path
 CLOBBER << @dot_config_path
 
 desc "Create cluster and deploy GPII components to it"
 task :default => :deploy
 
-task :set_vars do
+task :set_vars => [@dot_config_path] do
   Vars.set_vars(@env, @project_type)
   Vars.set_versions()
   @secrets = Secrets.collect_secrets()
+  Rake::Task[:write_compose_env].invoke
+end
+
+@compose_env_file = "#{@dot_config_path}/compose.env"
+CLEAN << @compose_env_file
+# We do this with a task rather than a rule so that compose_env_file is always
+# re-written.
+task :write_compose_env do
   tf_vars = []
   ENV.each do |key, val|
-   tf_vars << key if key.match(/^TF_VAR_/)
+   tf_vars << key if key.start_with?("TF_VAR_")
   end
-  File.open("#{@dot_config_path}/compose.env", 'w') do |file|
-    file.write(tf_vars.join("\n"))
+  File.open(@compose_env_file, 'w') do |file|
+    file.write(tf_vars.sort.join("\n"))
   end
 end
 
