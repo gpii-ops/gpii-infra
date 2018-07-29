@@ -7,16 +7,13 @@ variable "serviceaccount_key" {}
 variable "project_id" {}
 variable "secrets_dir" {}
 
-variable "key_tfstate_encryption_key" {}
-
 data "terraform_remote_state" "network" {
   backend = "gcs"
 
   config {
-    credentials    = "${var.serviceaccount_key}"
-    prefix         = "${var.env}/infra/network"
-    bucket         = "${var.project_id}-tfstate"
-    encryption_key = "${var.key_tfstate_encryption_key}"
+    credentials = "${var.serviceaccount_key}"
+    bucket      = "${var.project_id}-tfstate"
+    prefix      = "${var.env}/infra/network"
   }
 }
 

@@ -104,7 +104,7 @@ task :apply_secret_mgmt => [:set_vars, @gcp_creds_file, @serviceaccount_key_file
 end
 
 desc "Create cluster and deploy GPII components to it"
-task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :set_secrets, :apply_infra] do
+task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :apply_infra, :set_secrets] do
   # Workaround for 'context deadline exceeded' issue:
   # https://github.com/exekube/exekube/issues/62
   # https://github.com/docker/for-mac/issues/2076
@@ -156,6 +156,16 @@ task :destroy_secrets, [:encryption_key] => [:set_vars, @gcp_creds_file] do |tas
     for secret_file in $(gsutil ls -R gs://#{ENV["TF_VAR_project_id"]}-#{args[:encryption_key]}-secrets/ | grep #{Secrets::SECRETS_FILE}); do \
       gsutil rm $secret_file; \
     done'"
+end
+
+desc '[ADVANCED] Destroy Terraform state stored in GS bucket for prefix, passed as argument -- rake destroy_tfstate"[k8s]"'
+task :destroy_tfstate, [:prefix] => [:set_vars, @gcp_creds_file] do |taskname, args|
+  if args[:prefix].nil? || args[:prefix].size == 0
+    puts "  ERROR: args[:prefix] must be set!"
+    raise ArgumentError, "args[:prefix] must be set"
+  end
+  sh "#{@exekube_cmd} sh -c 'gsutil -m rm -r gs://#{ENV["TF_VAR_project_id"]}-tfstate/#{@env}/#{args[:prefix]}'"
+  sh "rm -rf #{@dot_config_path}/terragrunt"
 end
 
 desc '[ADVANCED] Destroy provided module in the cluster, and then deploy it -- rake redeploy_module"[k8s/kube-system/cert-manager]"'
