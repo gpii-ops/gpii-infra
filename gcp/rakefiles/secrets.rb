@@ -6,7 +6,6 @@ require "yaml"
 class Secrets
 
   KMS_KEYRING = "keyring"
-  KMS_DEFAULT_KEY = "default"
 
   SECRETS_DIR = "secrets"
   VALUES_DIR = "values"
