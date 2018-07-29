@@ -127,12 +127,10 @@ end
 
 desc "[ADVANCED] Remove stale Terraform locks from GS -- for non-dev environments coordinate with the team first"
 task :unlock => [:set_vars, @gcp_creds_file] do
-  ["tfstate", "tfstate-encrypted"].each do |tfstate|
-    sh "#{@exekube_cmd} sh -c ' \
-      for lock in $(gsutil ls -R gs://#{ENV["TF_VAR_project_id"]}-#{tfstate}/#{@env}/ | grep .tflock); do \
-        gsutil rm $lock; \
-      done'"
-  end
+  sh "#{@exekube_cmd} sh -c ' \
+    for lock in $(gsutil ls -R gs://#{ENV["TF_VAR_project_id"]}-tfstate/#{@env}/ | grep .tflock); do \
+      gsutil rm $lock; \
+    done'"
 end
 
 desc '[ADVANCED] Run arbitrary exekube command -- rake xk"[kubectl get pods]"'
