@@ -38,6 +38,7 @@ task :set_vars do
   end
 end
 
+desc "[ADVANCED] Generate or fetch secrets, switch Terraform to use encrypted remote state"
 task :set_secrets, [:skip_secret_mgmt] do |taskname, args|
   Rake::Task[:apply_secret_mgmt].invoke unless args[:skip_secret_mgmt]
   Secrets.set_secrets(@secrets, @exekube_cmd)
@@ -95,7 +96,7 @@ end
 
 desc "[ADVANCED] Create or update low-level infrastructure"
 task :apply_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
-  sh "#{@exekube_cmd} up live/#{@env}/infra"
+  sh_filter "#{@exekube_cmd} up live/#{@env}/infra"
 end
 
 desc "[ADVANCED] Create or update infrastructure for secret management, this has no corresponding destroy task"
@@ -104,7 +105,7 @@ task :apply_secret_mgmt => [:set_vars, @gcp_creds_file, @serviceaccount_key_file
 end
 
 desc "Create cluster and deploy GPII components to it"
-task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :apply_infra, :set_secrets] do
+task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :set_secrets, :apply_infra] do
   # Workaround for 'context deadline exceeded' issue:
   # https://github.com/exekube/exekube/issues/62
   # https://github.com/docker/for-mac/issues/2076
@@ -127,10 +128,12 @@ end
 
 desc "[ADVANCED] Remove stale Terraform locks from GS -- for non-dev environments coordinate with the team first"
 task :unlock => [:set_vars, @gcp_creds_file] do
-  sh "#{@exekube_cmd} sh -c ' \
-    for lock in $(gsutil ls -R gs://#{ENV["TF_VAR_project_id"]}-tfstate/#{@env}/ | grep .tflock); do \
-      gsutil rm $lock; \
-    done'"
+  ["tfstate", "tfstate-encrypted"].each do |tfstate|
+    sh "#{@exekube_cmd} sh -c ' \
+      for lock in $(gsutil ls -R gs://#{ENV["TF_VAR_project_id"]}-#{tfstate}/#{@env}/ | grep .tflock); do \
+        gsutil rm $lock; \
+      done'"
+  end
 end
 
 desc '[ADVANCED] Run arbitrary exekube command -- rake xk"[kubectl get pods]"'
@@ -185,7 +188,7 @@ task :destroy_module, [:module] => [:set_vars, @gcp_creds_file, :set_secrets] do
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
     raise IOError, "args[:module] must point to existing Terragrunt directory"
   end
-  sh "#{@exekube_cmd} down live/#{@env}/#{args[:module]}"
+  sh_filter "#{@exekube_cmd} down live/#{@env}/#{args[:module]}"
 end
 
 # vim: et ts=2 sw=2:

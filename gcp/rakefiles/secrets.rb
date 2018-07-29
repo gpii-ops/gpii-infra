@@ -1,9 +1,12 @@
+require "base64"
+require "openssl"
 require "securerandom"
 require "yaml"
 
 class Secrets
 
   KMS_KEYRING = "keyring"
+  KMS_DEFAULT_KEY = "default"
 
   SECRETS_DIR = "secrets"
   VALUES_DIR = "values"
@@ -59,6 +62,10 @@ class Secrets
       end
     end
 
+    # We store tfstate encryption key as another default key secret
+    encryption_keys << %Q|"#{Secrets::KMS_DEFAULT_KEY}"|
+    collected_secrets[Secrets::KMS_DEFAULT_KEY] << "tfstate_encryption_key"
+
     encryption_keys.uniq!
     ENV["TF_VAR_encryption_keys"] = %Q|[ #{encryption_keys.join(", ")} ]|
 
@@ -96,7 +103,12 @@ class Secrets
           populated_secrets = {}
           secrets.each do |secret_name|
             if ENV[secret_name.upcase].to_s.empty?
-              secret_value = SecureRandom.hex
+              if secret_name == "tfstate_encryption_key"
+                tfstate_encryption_key = OpenSSL::Cipher.new("aes-256-cfb").encrypt.random_key
+                secret_value = Base64.encode64(tfstate_encryption_key).chomp
+              else
+                secret_value = SecureRandom.hex
+              end
             else
               secret_value = ENV[secret_name.upcase]
             end
@@ -110,6 +122,9 @@ class Secrets
 
           sh_filter "#{exekube_cmd} secrets-push #{encryption_key}"
         end
+
+        # Once we generated / downloaded tfstate encryption key – switch to encrypted bucket
+        ENV["TF_VAR_tfstate_bucket"] = "#{ENV["TF_VAR_project_id"]}-tfstate-encrypted"
       rescue
         puts "ERROR: Unable to populate secrets for key '#{encryption_key}'!"
         raise

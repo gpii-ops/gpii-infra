@@ -55,6 +55,9 @@ class Vars
 
     # Hack to force Terraform to reapply some resources on every run
     ENV["TF_VAR_nonce"] = SecureRandom.hex
+
+    ENV["TF_VAR_tfstate_bucket"] = "#{ENV["TF_VAR_project_id"]}-tfstate"
+    ENV["TF_VAR_tfstate_encryption_key"] = ""
   end
 
   def self.set_versions()
