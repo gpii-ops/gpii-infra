@@ -25,8 +25,11 @@ class Secrets
   # After collecting, method returns the Hash with collected secrets, where the keys are KMS Encryption Keys and the values are
   # lists of individual credentials (e.g. couchdb_password) managed with that KMS Encryption Key
   #
-  # All secrets must start with "secret_" prefix, otherwise exception is raised
   # In case duplicated secrets found, exception is raised
+  # All secrets must start with special prefix, otherwise exception is raised
+  #
+  # For prefix "secret_" random hexadecimal string(16) will be generated if ENV value not set
+  # For prefix "key_" new OpenSSL aes-256-cfb key will be generated and packed in Base64 if ENV value not set
   #
   # We also advice to add module name to each secret's name (e.g. "secret_couchdb_admin_password" instead of just "secret_admin_password")
   # to avoid naming collisions, since secrets scope is global
@@ -50,9 +53,9 @@ class Secrets
         collected_secrets[encryption_key] = module_secrets['secrets']
       end
       module_secrets['secrets'].each do |secret_name|
-        if !secret_name.match(/^secret_/)
+        if !secret_name.match(/^(secret|key)_/)
           raise "ERROR: Can not use secret with name '#{secret_name}' for module '#{module_name}'!\n \
-            Secret name must start with 'secret_'!"
+            Secret name must start with 'secret_' or 'key_'!"
         elsif secrets_to_modules.include? secret_name
           raise "ERROR: Can not use secret with name '#{secret_name}' for module '#{module_name}'!\n \
             Secret '#{secret_name}' is already in use by module '#{secrets_to_modules[secret_name]}'!"
@@ -61,10 +64,6 @@ class Secrets
         secrets_to_modules[secret_name] = module_name
       end
     end
-
-    # We store tfstate encryption key as another default key secret
-    encryption_keys << %Q|"#{Secrets::KMS_DEFAULT_KEY}"|
-    collected_secrets[Secrets::KMS_DEFAULT_KEY] << "tfstate_encryption_key"
 
     encryption_keys.uniq!
     ENV["TF_VAR_encryption_keys"] = %Q|[ #{encryption_keys.join(", ")} ]|
@@ -103,9 +102,9 @@ class Secrets
           populated_secrets = {}
           secrets.each do |secret_name|
             if ENV[secret_name.upcase].to_s.empty?
-              if secret_name == "tfstate_encryption_key"
-                tfstate_encryption_key = OpenSSL::Cipher.new("aes-256-cfb").encrypt.random_key
-                secret_value = Base64.encode64(tfstate_encryption_key).chomp
+              if secret_name.match(/^(key)_/)
+                key = OpenSSL::Cipher.new("aes-256-cfb").encrypt.random_key
+                secret_value = Base64.encode64(key).chomp
               else
                 secret_value = SecureRandom.hex
               end
@@ -115,6 +114,7 @@ class Secrets
             ENV["TF_VAR_#{secret_name}"] = secret_value
             populated_secrets[secret_name] = secret_value
           end
+
           puts "Secret file '#{secrets_file}' not found. I will create one."
           File.open(secrets_file, 'w') do |file|
             file.write(populated_secrets.to_yaml)

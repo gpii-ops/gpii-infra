@@ -7,7 +7,7 @@ terragrunt = {
       credentials    = "${get_env("TF_VAR_serviceaccount_key", "")}"
       bucket         = "${get_env("TF_VAR_project_id", "")}-tfstate"
       prefix         = "${path_relative_to_include()}"
-      encryption_key = "${get_env("TF_VAR_tfstate_encryption_key", "")}"
+      encryption_key = "${get_env("TF_VAR_key_tfstate_encryption_key", "")}"
     }
   }
 
