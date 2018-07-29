@@ -122,9 +122,6 @@ class Secrets
 
           sh_filter "#{exekube_cmd} secrets-push #{encryption_key}"
         end
-
-        # Once we generated / downloaded tfstate encryption key – switch to encrypted bucket
-        ENV["TF_VAR_tfstate_bucket"] = "#{ENV["TF_VAR_project_id"]}-tfstate-encrypted"
       rescue
         puts "ERROR: Unable to populate secrets for key '#{encryption_key}'!"
         raise

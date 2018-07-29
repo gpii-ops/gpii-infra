@@ -38,7 +38,6 @@ task :set_vars do
   end
 end
 
-desc "[ADVANCED] Generate or fetch secrets, switch Terraform to use encrypted remote state"
 task :set_secrets, [:skip_secret_mgmt] do |taskname, args|
   Rake::Task[:apply_secret_mgmt].invoke unless args[:skip_secret_mgmt]
   Secrets.set_secrets(@secrets, @exekube_cmd)

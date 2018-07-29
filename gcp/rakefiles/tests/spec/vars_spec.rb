@@ -115,16 +115,6 @@ describe Vars do
     expect(ENV).to have_received(:[]=).with("TF_VAR_nonce", a_value)
   end
 
-  it "set_vars sets TF_VAR_tfstate_bucket properly" do
-    allow(ENV).to receive(:[]=)
-    allow(ENV).to receive(:[])
-    allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
-    env = "fake-env"
-    project_type = "fake-project-type"
-    Vars.set_vars(env, project_type)
-    expect(ENV).to have_received(:[]=).with("TF_VAR_tfstate_bucket", "fake-project-id-tfstate")
-  end
-
   it "set_vars sets TF_VAR_tfstate_encryption_key to empty value" do
     allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[])
