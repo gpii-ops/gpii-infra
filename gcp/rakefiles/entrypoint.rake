@@ -26,6 +26,7 @@ desc "Create cluster and deploy GPII components to it"
 task :default => :deploy
 
 task :set_vars do
+  FileUtils.mkdir_p @dot_config_path
   Vars.set_vars(@env, @project_type)
   Vars.set_versions()
   @secrets = Secrets.collect_secrets()
