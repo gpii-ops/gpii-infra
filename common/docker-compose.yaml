@@ -30,18 +30,18 @@ services:
       # TF_VAR_secrets_dir is used by multiple modules to source secrets from
       TF_VAR_secrets_dir: /project/live/${ENV}/secrets
 
-      # Keyring is used by the gcp-secret-mgmt module
-      # Also by secrets-fetch and secrets-push scripts
-      # The GCP KMS keyring name to use
-      TF_VAR_keyring_name: keyring
+       # TF_VAR_values_dir is used by templater to put rendered files into
+      TF_VAR_values_dir: /project/live/${ENV}/values
 
-      TF_VAR_organization_id: ${ORGANIZATION_ID}
-      TF_VAR_billing_id: ${BILLING_ID}
+    # File with other environment variables will be populated by rake
+    env_file:
+      - ./.config/${ENV}/compose.env
 
     ports:
       - 8001:8001
     volumes:
       - .:/project
+      - ../common/charts:/charts
       - ./.config/${ENV}/helm:/root/.helm
       - ./.config/${ENV}/terragrunt:/root/.terragrunt
       - ./.config/${ENV}/gcloud:/root/.config/gcloud

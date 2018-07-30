@@ -48,10 +48,12 @@ class Vars
     if ENV["ORGANIZATION_ID"].nil?
       ENV["ORGANIZATION_ID"] = "247149361674"  # RtF Organization
     end
+    ENV["TF_VAR_organization_id"] = ENV["ORGANIZATION_ID"]
 
     if ENV["BILLING_ID"].nil?
       ENV["BILLING_ID"] = "01A0E1-B0B31F-349F4F"  # RtF Billing Account
     end
+    ENV["TF_VAR_billing_id"] = ENV["BILLING_ID"]
 
     # Hack to force Terraform to reapply some resources on every run
     ENV["TF_VAR_nonce"] = SecureRandom.hex

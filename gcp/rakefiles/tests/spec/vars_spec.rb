@@ -89,7 +89,9 @@ describe Vars do
     expect(ENV).to have_received(:[]=).with("ENV", env)
     expect(ENV).to have_received(:[]=).with("TF_VAR_env", env)
     expect(ENV).to have_received(:[]=).with("ORGANIZATION_ID", "247149361674")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_organization_id", "247149361674")
     expect(ENV).to have_received(:[]=).with("BILLING_ID", "01A0E1-B0B31F-349F4F")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_billing_id", "01A0E1-B0B31F-349F4F")
   end
 
   it "set_vars doesn't clobber vars that are already set (even when env=stg)" do
@@ -102,7 +104,9 @@ describe Vars do
     Vars.set_vars(env, project_type)
     expect(ENV).not_to have_received(:[]=).with("TF_VAR_project_id", any_args)
     expect(ENV).not_to have_received(:[]=).with("ORGANIZATION_ID", any_args)
+    expect(ENV).not_to have_received(:[]=).with("TF_VAR_organization_id", any_args)
     expect(ENV).not_to have_received(:[]=).with("BILLING_ID", any_args)
+    expect(ENV).not_to have_received(:[]=).with("TF_VAR_billing_id", any_args)
   end
 
   it "set_vars sets TF_VAR_nonce" do
