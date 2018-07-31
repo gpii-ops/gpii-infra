@@ -120,7 +120,9 @@ end
 
 desc "Undeploy GPII compoments and destroy cluster"
 task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :set_secrets] do
-  # Terraform will fail if template files are missing
+  # Terraform will fail if template files are missing, and since values_dir is not mounted
+  # from host machine anymore, all templates vanish after docker-compose container is terminated.
+  # So we have to invoke templater with the main exekube command
   sh "#{@exekube_cmd} sh -c 'xk up live/#{@env}/k8s/templater && xk down'"
 end
 
