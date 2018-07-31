@@ -20,6 +20,8 @@ end
 
 @exekube_cmd = "docker-compose run --rm --service-ports xk"
 
+@serviceaccount_key_json = "secrets/kube-system/owner.json"
+
 @dot_config_path = "../../.config/#{@env}"
 CLOBBER << @dot_config_path
 
@@ -30,11 +32,11 @@ task :set_vars do
   Vars.set_vars(@env, @project_type)
   Vars.set_versions()
   @secrets = Secrets.collect_secrets()
-  json_sa_key_file = File.read(@serviceaccount_key_file)
-  data_sa_key_file = JSON.parse(json_sa_key_file)
-  unless data_sa_key_file["project_id"] == ENV["TF_VAR_project_id"]
-    puts "Seems that the serviceAccount configured (#{data_sa_key_file["project_id"]}) doesn't match with the env where you're #{ENV["TF_VAR_project_id"]}"
-    puts "Please rerun project_init task to set the correct credentials or change the current active directory"
+  json_sa_key_file = File.read(@serviceaccount_key_json)
+  @serviceaccount_key_data = JSON.parse(json_sa_key_file)
+  unless @serviceaccount_key_data["project_id"] == ENV["TF_VAR_project_id"]
+    puts "The configured Serviceaccount is for project_id #{@serviceaccount_key_data["project_id"]}, but the current project_id is #{ENV["TF_VAR_project_id"]}."
+    puts "Please re-run `rake project_init` to set the correct credentials, or change to a different live/<env> directory and try again."
     exit 
   end
   tf_vars = []
@@ -185,10 +187,9 @@ end
 
 # This duplicates information in docker-compose.yaml,
 # TF_VAR_serviceaccount_key.
-@serviceaccount_key_file = "secrets/kube-system/owner.json"
 desc "[ADVANCED] Create credentials for projectowner service account"
-task :creds => [:set_vars, @gcp_creds_file, @serviceaccount_key_file]
-rule @serviceaccount_key_file do
+task :creds => [:set_vars, @gcp_creds_file, @serviceaccount_key_json]
+rule @serviceaccount_key_json do
   # TODO: This command is duplicated from exekube's gcp-project-init (and
   # hardcodes 'projectowner' instead of $SA_NAME which is only defined in
   # gcp-project-init). If gcp-project-init becomes idempotent (GPII-2989,
@@ -199,20 +200,20 @@ rule @serviceaccount_key_file do
     #{@exekube_cmd} sh -c 'gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
       --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com'"
 end
-CLOBBER << @serviceaccount_key_file
+CLOBBER << @serviceaccount_key_json
 
 desc "[ADVANCED] Tell gcloud to use TF_VAR_project_id as the default Project; can be useful after 'rake clobber'"
-task :set_current_project => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
+task :set_current_project => [:set_vars, @gcp_creds_file, @serviceaccount_key_json] do
   sh "#{@exekube_cmd} gcloud config set project #{ENV["TF_VAR_project_id"]}"
 end
 
 desc "[ADVANCED] Create or update low-level infrastructure"
-task :apply_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
+task :apply_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_json] do
   sh "#{@exekube_cmd} up live/#{@env}/infra"
 end
 
 desc "[ONLY ADMINS] Create or update projects in the organization"
-task :apply_projects => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
+task :apply_projects => [:set_vars, @gcp_creds_file, @serviceaccount_key_json] do
   if @project_type != "common" or @env != "prd"
     puts "apply_projects task must run inside common/live/prd"
     exit
@@ -222,12 +223,12 @@ task :apply_projects => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] d
 end
 
 desc "[ADVANCED] Create or update infrastructure for secret management, this has no corresponding destroy task"
-task :apply_secret_mgmt => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
+task :apply_secret_mgmt => [:set_vars, @gcp_creds_file, @serviceaccount_key_json] do
   sh "#{@exekube_cmd} up live/#{@env}/secret-mgmt"
 end
 
 desc "Create cluster and deploy GPII components to it"
-task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :apply_infra, :set_secrets] do
+task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_json, @kubectl_creds_file, :apply_infra, :set_secrets] do
   # Workaround for 'context deadline exceeded' issue:
   # https://github.com/exekube/exekube/issues/62
   # https://github.com/docker/for-mac/issues/2076
@@ -237,12 +238,12 @@ task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_
 end
 
 desc "Destroy cluster and low-level infrastructure"
-task :destroy_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, :destroy] do
+task :destroy_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_json, :destroy] do
   sh "#{@exekube_cmd} down live/#{@env}/infra"
 end
 
 desc "Undeploy GPII compoments and destroy cluster"
-task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :set_secrets] do
+task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_json, @kubectl_creds_file, :set_secrets] do
   # Terraform will fail if template files are missing
   Rake::Task[:deploy_module].invoke('k8s/templater')
   sh "#{@exekube_cmd} down"
