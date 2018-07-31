@@ -37,7 +37,7 @@ task :set_vars do
   unless @serviceaccount_key_data["project_id"] == ENV["TF_VAR_project_id"]
     puts "The configured Serviceaccount is for project_id #{@serviceaccount_key_data["project_id"]}, but the current project_id is #{ENV["TF_VAR_project_id"]}."
     puts "Please re-run `rake project_init` to set the correct credentials, or change to a different live/<env> directory and try again."
-    exit 
+    exit
   end
   tf_vars = []
   ENV.each do |key, val|
@@ -89,6 +89,7 @@ task :infra_init => [:set_vars, @gcp_creds_file] do
     puts "infra_init must run inside common/live/prd"
     exit
   end
+
   output = `#{@exekube_cmd} gcloud projects list --format='json' --filter='name:#{ENV["TF_VAR_project_id"]}'`
   hash = JSON.parse(output)
   if hash.empty?
@@ -101,6 +102,7 @@ task :infra_init => [:set_vars, @gcp_creds_file] do
     sh "
       #{@exekube_cmd} gcloud config set project #{ENV["TF_VAR_project_id"]}"
   end
+
   sh "
     #{@exekube_cmd} gcloud beta billing projects link #{ENV["TF_VAR_project_id"]} \
     --billing-account #{ENV["BILLING_ID"]}"
@@ -122,6 +124,7 @@ task :infra_init => [:set_vars, @gcp_creds_file] do
     sh "#{@exekube_cmd} sh -c 'gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
         --iam-account projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com'"
   end
+
   sh "#{@exekube_cmd} gcloud projects add-iam-policy-binding #{ENV["TF_VAR_project_id"]} \
             --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com \
             --role roles/viewer"
@@ -136,7 +139,6 @@ task :infra_init => [:set_vars, @gcp_creds_file] do
   hash.each do |service|
     servicesEnabled.push(service["serviceName"])
   end
-
   sh "#{@exekube_cmd} gcloud services enable cloudresourcemanager.googleapis.com" unless servicesEnabled.include?("cloudresourcemanager.googleapis.com")
   sh "#{@exekube_cmd} gcloud services enable cloudbilling.googleapis.com" unless servicesEnabled.include?("cloudbilling.googleapis.com")
   sh "#{@exekube_cmd} gcloud services enable iam.googleapis.com" unless servicesEnabled.include?("iam.googleapis.com")
