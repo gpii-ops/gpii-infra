@@ -99,8 +99,7 @@ task :infra_init => [:set_vars, @gcp_creds_file] do
       --organization #{ENV["ORGANIZATION_ID"]} \
       --set-as-default"
   else
-    sh "
-      #{@exekube_cmd} gcloud config set project #{ENV["TF_VAR_project_id"]}"
+    Rake::Task[:set_current_project].invoke
   end
 
   sh "
@@ -169,8 +168,7 @@ task :project_init => [:set_vars, @gcp_creds_file] do
     puts "#{ENV["TF_VAR_project_id"]} not found. Run infra_init task"
     exit
   else
-    sh "
-      #{@exekube_cmd} gcloud config set project #{ENV["TF_VAR_project_id"]}"
+    Rake::Task[:set_current_project].invoke
   end
 
   output = `#{@exekube_cmd} gcloud iam service-accounts keys list \
