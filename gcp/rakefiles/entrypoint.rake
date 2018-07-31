@@ -109,7 +109,7 @@ task :infra_init => [:set_vars, @gcp_creds_file] do
             --filter='email:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com'`
   hash = JSON.parse(output)
   if hash.empty?
-    sh "#{@exekube_cmd} gcloud iam service-accounts create terraform \
+    sh "#{@exekube_cmd} gcloud iam service-accounts create projectowner \
         --display-name 'CI account'"
   end
 
