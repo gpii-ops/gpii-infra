@@ -173,8 +173,6 @@ task :project_init => [:set_vars, @gcp_creds_file] do
 
   output = `#{@exekube_cmd} gcloud iam service-accounts keys list \
             --iam-account=projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com --format='json'`
-  puts "#{@exekube_cmd} gcloud iam service-accounts keys list \
-       --iam-account=projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com --format='json'"
   hash = JSON.parse(output)
 
   if hash.empty?
