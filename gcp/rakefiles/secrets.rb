@@ -101,7 +101,7 @@ class Secrets
           populated_secrets = {}
           secrets.each do |secret_name|
             if ENV[secret_name.upcase].to_s.empty?
-              if secret_name.match(/^(key)_/)
+              if secret_name.match(/^key_/)
                 key = OpenSSL::Cipher.new("aes-256-cfb").encrypt.random_key
                 secret_value = Base64.encode64(key).chomp
               else
