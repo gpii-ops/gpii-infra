@@ -172,7 +172,7 @@ task :deploy_module, [:module] => [:set_vars, @gcp_creds_file, :set_secrets] do 
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
     raise IOError, "args[:module] must point to existing Terragrunt directory"
   end
-  sh_filter "#{@exekube_cmd} up live/#{@env}/#{args[:module]}"
+  sh_filter "#{@exekube_cmd} sh -c 'xk up live/#{@env}/k8s/templater && xk up live/#{@env}/#{args[:module]}'"
 end
 
 desc '[ADVANCED] Destroy provided module in the cluster -- rake destroy_module"[k8s/kube-system/cert-manager]"'
@@ -184,7 +184,7 @@ task :destroy_module, [:module] => [:set_vars, @gcp_creds_file, :set_secrets] do
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
     raise IOError, "args[:module] must point to existing Terragrunt directory"
   end
-  sh "#{@exekube_cmd} down live/#{@env}/#{args[:module]}"
+  sh_filter "#{@exekube_cmd} sh -c 'xk up live/#{@env}/k8s/templater && xk down live/#{@env}/#{args[:module]}'"
 end
 
 # vim: et ts=2 sw=2:
