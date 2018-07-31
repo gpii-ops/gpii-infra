@@ -121,8 +121,7 @@ end
 desc "Undeploy GPII compoments and destroy cluster"
 task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :set_secrets] do
   # Terraform will fail if template files are missing
-  Rake::Task[:deploy_module].invoke('k8s/templater')
-  sh "#{@exekube_cmd} down"
+  sh "#{@exekube_cmd} sh -c 'xk up live/#{@env}/k8s/templater && xk down'"
 end
 
 desc "[ADVANCED] Remove stale Terraform locks from GS -- for non-dev environments coordinate with the team first"
