@@ -6,6 +6,7 @@ variable "env" {}
 variable "serviceaccount_key" {}
 variable "project_id" {}
 variable "secrets_dir" {}
+variable "charts_dir" {}
 
 data "terraform_remote_state" "network" {
   backend = "gcs"
@@ -25,7 +26,7 @@ module "nginx-ingress" {
   release_name      = "nginx-ingress"
   release_namespace = "gpii"
 
-  chart_name = "../../../../../charts/nginx-ingress"
+  chart_name = "${var.charts_dir}/nginx-ingress"
 
   load_balancer_ip = "${data.terraform_remote_state.network.static_ip_address}"
 }
