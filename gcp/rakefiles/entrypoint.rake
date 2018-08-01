@@ -158,7 +158,7 @@ task :project_init => [:set_vars, @gcp_creds_file] do
   output = `#{@exekube_cmd} gcloud projects list --format='json' --filter='name:#{ENV["TF_VAR_project_id"]}'`
   hash = JSON.parse(output)
   if hash.empty?
-    puts "#{ENV["TF_VAR_project_id"]} not found. Run infra_init task"
+    puts "Project #{ENV["TF_VAR_project_id"]} not found. Run `rake infra_init` task from gpii-infra/common/live/prd."
     exit
   else
     Rake::Task[:set_current_project].invoke
