@@ -52,7 +52,7 @@ class Secrets
         collected_secrets[encryption_key] = module_secrets['secrets']
       end
       module_secrets['secrets'].each do |secret_name|
-        if !secret_name.match(/^(secret|key)_/)
+        if !(secret_name.start_with?("secret_") || secret_name.start_with?("key_"))
           raise "ERROR: Can not use secret with name '#{secret_name}' for module '#{module_name}'!\n \
             Secret name must start with 'secret_' or 'key_'!"
         elsif secrets_to_modules.include? secret_name
@@ -101,7 +101,7 @@ class Secrets
           populated_secrets = {}
           secrets.each do |secret_name|
             if ENV[secret_name.upcase].to_s.empty?
-              if secret_name.match(/^key_/)
+              if secret_name.start_with?("key_")
                 key = OpenSSL::Cipher.new("aes-256-cfb").encrypt.random_key
                 secret_value = Base64.encode64(key).chomp
               else
