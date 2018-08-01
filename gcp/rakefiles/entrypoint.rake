@@ -1,8 +1,8 @@
 require "rake/clean"
 
-require_relative "./vars.rb"
 require_relative "./secrets.rb"
 require_relative "./sh_filter.rb"
+require_relative "./vars.rb"
 
 if @env.nil?
   puts "  ERROR: @env must be set!"
@@ -30,14 +30,14 @@ task :set_vars => [@dot_config_path] do
   Vars.set_vars(@env, @project_type)
   Vars.set_versions()
   @secrets = Secrets.collect_secrets()
-  Rake::Task[:write_compose_env].invoke
+  Rake::Task[:set_compose_env].invoke
 end
 
 @compose_env_file = "#{@dot_config_path}/compose.env"
 CLEAN << @compose_env_file
 # We do this with a task rather than a rule so that compose_env_file is always
 # re-written.
-task :write_compose_env do
+task :set_compose_env do
   tf_vars = []
   ENV.each do |key, val|
    tf_vars << key if key.start_with?("TF_VAR_")
@@ -54,14 +54,11 @@ end
 
 @gcp_creds_file = "#{@dot_config_path}/gcloud/credentials.db"
 desc "[ADVANCED] Authenticate and generate GCP credentials (gcloud auth login)"
-task :auth => [:set_vars, @gcp_creds_file]
+task :configure_login => [:set_vars, @gcp_creds_file]
 rule @gcp_creds_file do
+  # This authenticates to GCP/the `gcloud` command in the normal, interactive
+  # way. This is the default method, best for human users.
   sh "#{@exekube_cmd} gcloud auth login"
-end
-
-desc "[EXPERT] Copy GCP credentials from local storage on CI worker"
-task :configure_ci_auth => [:set_vars, @dot_config_path] do
-  copy_entry("#{Dir.home}/.ssh/gcp-config", "#{@dot_config_path}/")
 end
 
 @kubectl_creds_file = "#{@dot_config_path}/kube/config"
@@ -79,16 +76,9 @@ rule @kubectl_creds_file do
     fi"
 end
 
-desc "[NOT IDEMPOTENT, RUN ONCE PER ENVIRONMENT] Initialize GCP Project where this environment's resources will live"
-task :project_init => [:set_vars, @gcp_creds_file] do
-  sh "#{@exekube_cmd} gcp-project-init"
-end
-
-# This duplicates information in docker-compose.yaml,
-# TF_VAR_serviceaccount_key.
 @serviceaccount_key_file = "secrets/kube-system/owner.json"
-desc "[ADVANCED] Create credentials for projectowner service account"
-task :creds => [:set_vars, @gcp_creds_file, @serviceaccount_key_file]
+desc "[ADVANCED] Create and download credentials for projectowner service account"
+task :configure_serviceaccount => [:set_vars, @gcp_creds_file, @serviceaccount_key_file]
 rule @serviceaccount_key_file do
   # TODO: This command is duplicated from exekube's gcp-project-init (and
   # hardcodes 'projectowner' instead of $SA_NAME which is only defined in
@@ -103,18 +93,23 @@ end
 CLOBBER << @serviceaccount_key_file
 
 desc "[ADVANCED] Tell gcloud to use TF_VAR_project_id as the default Project; can be useful after 'rake clobber'"
-task :set_current_project => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
+task :configure_current_project => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
   sh "#{@exekube_cmd} gcloud config set project #{ENV["TF_VAR_project_id"]}"
 end
 
-desc "[ADVANCED] Create or update low-level infrastructure"
-task :apply_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
-  sh "#{@exekube_cmd} up live/#{@env}/infra"
+desc "[NOT IDEMPOTENT, RUN ONCE PER ENVIRONMENT] Initialize GCP Project where this environment's resources will live"
+task :project_init => [:set_vars, @gcp_creds_file] do
+  sh "#{@exekube_cmd} gcp-project-init"
 end
 
 desc "[ADVANCED] Create or update infrastructure for secret management, this has no corresponding destroy task"
 task :apply_secret_mgmt => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
   sh "#{@exekube_cmd} up live/#{@env}/secret-mgmt"
+end
+
+desc "[ADVANCED] Create or update low-level infrastructure"
+task :apply_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
+  sh "#{@exekube_cmd} up live/#{@env}/infra"
 end
 
 desc "Create cluster and deploy GPII components to it"
@@ -127,17 +122,17 @@ task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_
   sh_filter "#{@exekube_cmd} up"
 end
 
-desc "Destroy cluster and low-level infrastructure"
-task :destroy_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, :destroy] do
-  sh "#{@exekube_cmd} down live/#{@env}/infra"
-end
-
 desc "Undeploy GPII compoments and destroy cluster"
 task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :set_secrets] do
   # Terraform will fail if template files are missing, and since values_dir is not mounted
   # from host machine anymore, all templates vanish after docker-compose container is terminated.
   # So we have to invoke templater with the main exekube command
   sh "#{@exekube_cmd} sh -c 'xk up live/#{@env}/k8s/templater && xk down'"
+end
+
+desc "Destroy cluster and low-level infrastructure"
+task :destroy_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, :destroy] do
+  sh "#{@exekube_cmd} down live/#{@env}/infra"
 end
 
 desc "[ADVANCED] Remove stale Terraform locks from GS -- for non-dev environments coordinate with the team first"
