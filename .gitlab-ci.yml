@@ -75,12 +75,12 @@ gcp-dev:
   script:
     - cd gcp/live/dev
     - rake clobber
-    - rake configure_ci_auth
+    - rake configure_serviceaccount_ci
     - rake
   after_script:
     # Clean up even if something failed.
     - cd gcp/live/dev
-    - rake destroy  ### destroy_infra?
+    - rake destroy
     - rake clobber
 
 aws-promote-to-stg:
@@ -127,7 +127,7 @@ gcp-stg:
   script:
     - cd gcp/live/stg
     - rake clobber
-    - rake configure_ci_auth
+    - rake configure_serviceaccount_ci
     - rake
   environment:
     name: stg
@@ -180,9 +180,9 @@ gcp-prd:
   tags:
     - gcp
   script:
-    - cd gcp/live/prd  ### this env doesn't exist yet
+    - cd gcp/live/prd
     - rake clobber
-    - rake configure_ci_auth
+    - rake configure_serviceaccount_ci
     - rake
   environment:
     name: prd
