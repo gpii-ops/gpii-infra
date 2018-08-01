@@ -45,7 +45,14 @@ resource "google_project_iam_binding" "project" {
 resource "google_dns_managed_zone" "project" {
   project     = "${google_project.project.project_id}"
   name        = "${google_project.project.project_id}-zone"
-  dns_name    = "${lookup(data.external.calculate_dns_zone.result, "zone")}"
+  dns_name    = "${replace(
+                     replace(
+                       google_project.project.project_id,
+                       "/([a-z]+)-([a-z]+)-([a-z]+)-?([a-z]+)?/",
+                       "$4.$3.$2.$1.net."),
+                     "/^\\./",
+                     "")
+                   }"
   description = "${google_project.project.project_id} DNS zone"
 }
 
