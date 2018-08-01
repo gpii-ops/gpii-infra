@@ -92,6 +92,20 @@ rule @serviceaccount_key_file do
 end
 CLOBBER << @serviceaccount_key_file
 
+desc "[EXPERT] Copy GCP credentials from local storage on CI worker"
+task :configure_serviceaccount_ci => [:set_vars, @dot_config_path] do
+  # The automated CI process cannot (and does not want to) authenticate in the
+  # normal, interactive way. Instead, we will fetch previously downloaded
+  # credentials, copy them to the expected place, and activate them for later
+  # use by `gcloud` commands.
+  #
+  # Another way to think of it: this task uses an alternate strategy to build
+  # @gcp_creds_file and @serviceaccount_key_file.
+  FileUtils.mkdir_p(File.dirname(@serviceaccount_key_file))
+  FileUtils.install("#{Dir.home}/.ssh/gcp-config/#{@env}/owner.json", "#{@serviceaccount_key_file}", :mode => 0400)
+  sh "#{@exekube_cmd} sh -c 'gcloud auth activate-service-account --key-file $TF_VAR_serviceaccount_key --project $TF_VAR_project_id'"
+end
+
 desc "[ADVANCED] Tell gcloud to use TF_VAR_project_id as the default Project; can be useful after 'rake clobber'"
 task :configure_current_project => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
   sh "#{@exekube_cmd} gcloud config set project #{ENV["TF_VAR_project_id"]}"
