@@ -31,7 +31,10 @@ services:
       TF_VAR_secrets_dir: /project/live/${ENV}/secrets
 
        # TF_VAR_values_dir is used by templater to put rendered files into
-      TF_VAR_values_dir: /project/live/${ENV}/values
+      TF_VAR_values_dir: /tmp/${ENV}/values
+
+      # TF_VAR_charts_dir is the place where common charts live, relative to modules
+      TF_VAR_charts_dir: ../../../../../charts
 
     # File with other environment variables will be populated by rake
     env_file:

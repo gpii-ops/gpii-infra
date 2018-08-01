@@ -474,6 +474,25 @@ We use [Prometheus Alertmanager](https://github.com/prometheus/alertmanager), ma
    * Add the WebHook URL to [Gitlab](../CI-CD.md#configure-gitlab-secret-variables).
    * See also: https://www.robustperception.io/using-slack-with-the-alertmanager/
 
+### Additional monitoring
+
+We bolster our internal monitoring with an external [Route 53 Health Check](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover.html).
+
+Currently it is manually configured, in production only, and monitors only preferences server. (Meaningful interaction with flowmanager requires POST, which is not supported by Route 53.)
+
+1. From the AWS Dashboard, navigate to Route 53 (under Services or use the search box)
+   * Health checks
+   * Create health check
+   * Specify endpoint by: Domain name
+   * Point the health check at `https://preferences.prd.gpii.net/preferences/carla`
+   * Next page
+   * Create alarm: Yes
+   * Send notification to: New SNS Topic (unless someone has already done this and you are setting up an additional Health Check)
+   * Topic name: Something like `route53-healthcheck-preferences-prd`
+   * Recipient email address: alerts+prd@RtF (or alerts+stg or whatever)
+1. Allow Amazon's SNS email address to post to alerts@ mailing list (admins of the list should receive a moderation email)
+1. Click confirmation link in SNS email
+
 ## History
 
 This repo is the union of two older repos: [gpii-terraform-modules](https://github.com/mrtyler/gpii-terraform-modules) (formerly called `gpii-terraform`) and [gpii-terraform-live](https://github.com/mrtyler/gpii-terraform-live). I (@mrtyler) did not retain history when merging these two repos. Please refer to the above repos for archaeological expeditions.

@@ -8,7 +8,6 @@ class Secrets
   KMS_KEYRING = "keyring"
 
   SECRETS_DIR = "secrets"
-  VALUES_DIR = "values"
 
   SECRETS_FILE = "secrets.yaml"
 
@@ -84,7 +83,6 @@ class Secrets
     return if collected_secrets.empty?
 
     FileUtils.mkdir_p Secrets::SECRETS_DIR
-    FileUtils.mkdir_p Secrets::VALUES_DIR
 
     collected_secrets.each do |encryption_key, secrets|
       sh_filter "#{exekube_cmd} secrets-fetch #{encryption_key}"

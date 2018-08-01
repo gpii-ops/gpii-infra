@@ -3,6 +3,7 @@ terraform {
 }
 
 variable "secrets_dir" {}
+variable "charts_dir" {}
 
 module "k8s-snapshots" {
   source           = "/exekube-modules/helm-release"
@@ -12,5 +13,5 @@ module "k8s-snapshots" {
   release_name      = "k8s-snapshots"
   release_namespace = "kube-system"
 
-  chart_name = "../../../../../charts/k8s-snapshots"
+  chart_name = "${var.charts_dir}/k8s-snapshots"
 }
