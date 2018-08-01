@@ -20,6 +20,14 @@ describe Vars do
     scrub_env
   end
 
+  it "set_vars requires ENV['RAKE_REALLY_RUN_IN_PRD'] when env=prd" do
+    allow(ENV).to receive(:[]=)
+    allow(ENV).to receive(:[])
+    env = "prd"
+    project_type = "fake-project-type"
+    expect { Vars.set_vars(env, project_type) }.to raise_error(ArgumentError, "Tried to run in env 'prd' but RAKE_REALLY_RUN_IN_PRD is not set")
+  end
+
   it "set_vars requires ENV['USER'] when env=dev" do
     allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[])
