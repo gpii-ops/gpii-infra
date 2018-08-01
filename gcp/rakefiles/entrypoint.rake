@@ -114,15 +114,8 @@ task :infra_init => [:set_vars, @gcp_creds_file] do
         --display-name 'CI account'"
   end
 
-  output = `#{@exekube_cmd} gcloud iam service-accounts keys list \
-            --iam-account=projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com --format='json'`
-  hash = JSON.parse(output)
-  if hash.empty?
-    puts "projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com NOT FOUND"
-  else
-    sh "#{@exekube_cmd} sh -c 'gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
-        --iam-account projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com'"
-  end
+  sh "#{@exekube_cmd} sh -c 'gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
+      --iam-account projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com'"
 
   sh "#{@exekube_cmd} gcloud projects add-iam-policy-binding #{ENV["TF_VAR_project_id"]} \
             --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com \
