@@ -5,7 +5,7 @@ terragrunt = {
     source = "/project/modules//gcp-project"
   }
   dependencies {
-    paths = ["../dev-zone"]
+    paths = ["../../dns-root"]
   }
   include = {
     path = "${find_in_parent_folders()}"
@@ -14,6 +14,6 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
-project_name    = "dev-natarajaya"
-project_owner   = "sergey@raisingthefloor.org"
+project_name    = "dev"
+project_owner   = "gpii-bot@raisingthefloor.org"
 
