@@ -114,8 +114,7 @@ task :infra_init => [:set_vars, @gcp_creds_file] do
         --display-name 'CI account'"
   end
 
-  sh "#{@exekube_cmd} sh -c 'gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
-      --iam-account projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com'"
+  Rake::Task[:creds].invoke
 
   sh "#{@exekube_cmd} gcloud projects add-iam-policy-binding #{ENV["TF_VAR_project_id"]} \
             --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com \
@@ -150,7 +149,6 @@ task :infra_init => [:set_vars, @gcp_creds_file] do
   end
 
   sh "#{@exekube_cmd} gsutil versioning set on gs://#{ENV["TF_VAR_project_id"]}-tfstate"
-
 end
 
 desc "Get the credentials needed to create all the resources inside the project"
@@ -164,16 +162,7 @@ task :project_init => [:set_vars, @gcp_creds_file] do
     Rake::Task[:set_current_project].invoke
   end
 
-  output = `#{@exekube_cmd} gcloud iam service-accounts keys list \
-            --iam-account=projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com --format='json'`
-  hash = JSON.parse(output)
-
-  if hash.empty?
-    puts "projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com NOT FOUND"
-  else
-    sh "#{@exekube_cmd} sh -c 'gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
-        --iam-account projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com'"
-  end
+  Rake::Task[:creds].invoke
 end
 
 # This duplicates information in docker-compose.yaml,
