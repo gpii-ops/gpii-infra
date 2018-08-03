@@ -31,20 +31,7 @@ The DNS zones are:
 
 ## Creating the infrastructure
 
-1. Clone this repo.
-1. (Optional) Clone [the gpii-ops fork of exekube](https://github.com/gpii-ops/exekube).
-   * The `gpii-infra` clone and the `exekube` clone should be siblings in the same directory (there are some references to `../exekube`).
-1. By default you'll use the RtF Organization and Billing Account.
-   * You can use a different Organization or Billing Account, e.g. from a GCP Free Trial Account, with `export ORGANIZATION_ID=111111111111` and/or `export BILLING_ID=222222-222222-222222`.
-1. Check that you have the AWS credentials.
-1. `cd gpii-infra/common/live/prd`
-1. `rake infra_init`
-   * This will create a project called `gpii-common-prd`, with all the resources needed to run Terraform and create all the organization projects.
-   * This step must be executed by an user with admin privileges in the organization, because it needs to create IAMs that are able to create projects and associate the billing account to them.
-1. `rake project_init`
-   * This will set the credentials and the default project needed for the next step
-1. `rake apply_projects`
-   * This will create all the projects in the organization. Each project is defined by the content of a directory in `common/live/prd/infra`
+The environments that run in GCP need some initial resources that must be created by an administrator first. The [common part of this repository](../common) has the code and the instructions to do so.
 
 ## Creating an environment
 
