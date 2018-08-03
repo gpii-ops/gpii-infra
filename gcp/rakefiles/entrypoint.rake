@@ -116,16 +116,6 @@ task :apply_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_json] do
   sh "#{@exekube_cmd} up live/#{@env}/infra"
 end
 
-desc "[ONLY ADMINS] Create or update projects in the organization"
-task :apply_projects => [:set_vars, @gcp_creds_file, @serviceaccount_key_json] do
-  if @project_type != "common" or @env != "prd"
-    puts "apply_projects task must run inside common/live/prd"
-    exit
-  end
-
-  sh "#{@exekube_cmd} up live/#{@env}/infra"
-end
-
 desc "[ADVANCED] Create or update infrastructure for secret management, this has no corresponding destroy task"
 task :apply_secret_mgmt => [:set_vars, @gcp_creds_file, @serviceaccount_key_json] do
   sh "#{@exekube_cmd} up live/#{@env}/secret-mgmt"

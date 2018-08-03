@@ -73,3 +73,13 @@ task :infra_init => [:set_vars, @gcp_creds_file] do
 
   sh "#{@exekube_cmd} gsutil versioning set on gs://#{ENV["TF_VAR_project_id"]}-tfstate"
 end
+
+desc "[ONLY ADMINS] Create or update projects in the organization"
+task :apply_projects => [:set_vars, @gcp_creds_file, @serviceaccount_key_json] do
+  if @project_type != "common" or @env != "prd"
+    puts "apply_projects task must run inside common/live/prd"
+    exit
+  end
+
+  sh "#{@exekube_cmd} up live/#{@env}/infra"
+end
