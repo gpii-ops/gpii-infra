@@ -5,6 +5,7 @@ terraform {
 variable "env" {}
 variable "secrets_dir" {}
 variable "values_dir" {}
+variable "charts_dir" {}
 variable "nonce" {}
 
 # Terragrunt variables
@@ -25,7 +26,7 @@ module "couchdb" {
   release_namespace = "${var.release_namespace}"
   release_values    = "${var.values_dir}/couchdb.yaml"
 
-  chart_name = "../../../../../charts/couchdb"
+  chart_name = "${var.charts_dir}/couchdb"
 }
 
 resource "null_resource" "couchdb_finish_cluster" {

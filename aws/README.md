@@ -134,6 +134,24 @@ Deploying to `prd` requires a [manual action](https://docs.gitlab.com/ce/ci/yaml
 
 See [CI-CD.md](../CI-CD.md)
 
+## Production is broken, there's been a security breach, or there is some other operational emergency
+
+First of all, DON'T PANIC! Everything is going to be fine. :)
+
+Your next task is to find a human on the Ops team. Ops engineers are trained to handle emergencies (including asking other experts for help).
+
+The steps below for finding an Ops person escalate in urgency and disruptiveness. Favor earlier steps and waiting for a response, but use your best judgement. If production is down right before a big demo or an attack is in progress, it's more important to get an engineer's attention than it is to avoid sending notifications to a few extra people.
+
+1. Note that we do not currently have a formal on-call rotation. 24x7 support is Best Effort.
+1. Go to #ops in Slack. Ask for help using `@here`. [More on Slack announcements](https://get.slack.help/hc/en-us/articles/202009646-Make-an-announcement).
+1. Go to #ops in Slack. Ask for help using `@channel`.
+1. Email `infrastructure at lists.gpii.net`.
+   * This is a public mailing list, so provide a brief description of the affected system but avoid discussing details. (We believe in transparency but it can be dangerous in certain kinds of emergencies.)
+1. Call or text specific Ops engineers. [Contact info](https://docs.google.com/document/d/1EDYhWYipUluzG6K8S-W4clsAGInm2RdjkpKq9Lw_dhE/edit).
+   * If possible, pick an engineer who is in the middle of their work day over an engineer who is likely asleep. Timezone information is in [Contact info](https://docs.google.com/document/d/1EDYhWYipUluzG6K8S-W4clsAGInm2RdjkpKq9Lw_dhE/edit)
+   * Repeat until you've reached an Ops engineer, or exhausted the list of Ops engineers (likely-awake or otherwise).
+1. Slack, Skype, text, or call Sandra, Colin, or Gregg. These people may know where to find an Ops engineer.
+
 ## Troubleshooting / FAQ
 
 * Currently, this system builds everything in `us-east-2`. When inspecting cloud resources manually (e.g. via the AWS web dashboard), make sure this region is selected.
@@ -242,6 +260,9 @@ If you don't want to deal with gpii-version-updater, you can instead:
    * Re-deploy the Job: `cd aws/dev && rake deploy`
 1. We abuse the fact that Kubernetes doesn't allow a Job's Docker image to be changed to prevent the dataloader Job from running (and deleting all data from CouchDB) every time. See [The Job "gpii-dataloder" is invalid](#the-job-gpii-dataloader-is-invalid) and [this architecture@ thread](https://lists.gpii.net/pipermail/infrastructure/2017-September/000070.html).
 
+### I want to see metrics, graphs, or alerts for my cluster
+  * `rake display_cluster_info`
+  * Follow the instructions under "Metrics, Graphs, and Alerts"
 
 ### Restoring a volume from a backup/snapshot
 
@@ -348,6 +369,41 @@ Examples of when you might want to do this:
    * Or, to add an additional dev cluster: `USER=mrtyler-experiment1 TF_VAR_environment=dev-mrtyler-experiment1`
    * `TF_VAR_environment` must contain `USER` as above. Otherwise, behavior is undefined.
 
+### I want to change Kubernetes versions, Instance types of Nodes, or similar [experimental]
+
+* For new clusters: edit the `kops` command in [modules/k8s/Rakefile](modules/k8s/Rakefile).
+* For existing clusters:
+   * `rake kops_edit_cluster`
+   * This will drop you into an editor several times to modify several different configs (cluster, nodes, masters).
+   * Make needed changes in each relevant file.
+      * Look only for the specific change you care about (e.g. Kubernetes version is in the cluster config, Instance Type for worker nodes is in the node config, Instance Type for masters is in each master's config, etc.).
+   * Follow the displayed instructions at the end (e.g. `rake clean`, `rake apply`).
+   * Manually verify that Prometheus, Alertmanager, and Grafana came back and are continuing to collect data.
+      * See [I want to see metrics, graphs, or alerts for my cluster](#i-want-to-see-metrics-graphs-or-alerts-for-my-cluster).
+      * Prometheus sometimes requires some special handling on restart. See the next section.
+
+### Prometheus lost all of its alerts
+
+Due to a [suspected bug](https://issues.gpii.net/browse/GPII-3103?focusedCommentId=33300&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-33300) in our version of Prometheus/prometheus-operator, Prometheus sometimes loses its Alerts when it restarts.
+
+You can check for this failure mode like this:
+
+```
+kubectl --namespace monitoring exec -it prometheus-k8s-0 find /etc/prometheus/rules/
+kubectl --namespace monitoring exec -it prometheus-k8s-1 find /etc/prometheus/rules/
+kubectl --namespace monitoring exec -it prometheus-k8s-[NUMBER] find /etc/prometheus/rules/
+```
+
+The command should list some rules files. If it shows nothing (i.e. an empty directory), then the target Prometheus Pod needs to be restarted so that it will detect the rules:
+
+```
+kubectl --namespace monitoring delete pod/prometheus-k8s-0
+kubectl --namespace monitoring delete pod/prometheus-k8s-1
+kubectl --namespace monitoring delete pod/prometheus-k8s-[NUMBER]
+```
+
+When the Pod restarts, run the `find` command again to make sure the rules files have appeared.
+
 ### I want to change Grafana dashboards or Alertmanager alerts [experimental]
 
 The manifests that control Grafana dashboards and Alertmanager alerts are copied from [kube-prometheus](https://github.com/coreos/prometheus-operator/tree/master/contrib/kube-prometheus) and then modified locally (e.g. a few more things in the `monitoring` namespace, different Service types).
@@ -417,6 +473,25 @@ We use [Prometheus Alertmanager](https://github.com/prometheus/alertmanager), ma
    * Give it a name, description, and icon (I like the ambulance emoji :)).
    * Add the WebHook URL to [Gitlab](../CI-CD.md#configure-gitlab-secret-variables).
    * See also: https://www.robustperception.io/using-slack-with-the-alertmanager/
+
+### Additional monitoring
+
+We bolster our internal monitoring with an external [Route 53 Health Check](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover.html).
+
+Currently it is manually configured, in production only, and monitors only preferences server. (Meaningful interaction with flowmanager requires POST, which is not supported by Route 53.)
+
+1. From the AWS Dashboard, navigate to Route 53 (under Services or use the search box)
+   * Health checks
+   * Create health check
+   * Specify endpoint by: Domain name
+   * Point the health check at `https://preferences.prd.gpii.net/preferences/carla`
+   * Next page
+   * Create alarm: Yes
+   * Send notification to: New SNS Topic (unless someone has already done this and you are setting up an additional Health Check)
+   * Topic name: Something like `route53-healthcheck-preferences-prd`
+   * Recipient email address: alerts+prd@RtF (or alerts+stg or whatever)
+1. Allow Amazon's SNS email address to post to alerts@ mailing list (admins of the list should receive a moderation email)
+1. Click confirmation link in SNS email
 
 ## History
 

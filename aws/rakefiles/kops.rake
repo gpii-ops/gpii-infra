@@ -82,12 +82,7 @@ task :kops_edit_cluster => [@tmpdir, :configure_kops] do
 end
 
 task :display_rolling_update_cmd => [@tmpdir, :configure_kops] do
-  puts
-  puts "Here's what 'kops update cluster' and 'kops rolling-update cluster' will do:"
-  sh "kops update cluster #{ENV["TF_VAR_cluster_name"]} --target terraform"
-  sh "kops rolling-update cluster #{ENV["TF_VAR_cluster_name"]}"
-  puts
-  puts "If that looks right, run:"
+  puts "If you're happy with your changes, run:"
   puts
   puts "  # Clears existing generated files. NOTE: will clean up other generated files for other modules."
   puts "  rake clean"
@@ -97,5 +92,9 @@ task :display_rolling_update_cmd => [@tmpdir, :configure_kops] do
 end
 
 task :kops_rolling_update => [@tmpdir, :configure_kops] do
-  sh "KOPS_FEATURE_FLAGS='+DrainAndValidateRollingUpdate' kops rolling-update cluster #{ENV["TF_VAR_cluster_name"]} --yes"
+  wait_for(
+    "KOPS_FEATURE_FLAGS='+DrainAndValidateRollingUpdate' \
+      kops rolling-update cluster #{ENV["TF_VAR_cluster_name"]} --yes",
+    max_wait_secs: 60,
+  )
 end

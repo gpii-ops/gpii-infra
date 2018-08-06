@@ -3,6 +3,7 @@ terraform {
 }
 
 variable "secrets_dir" {}
+variable "charts_dir" {}
 
 module "cert-manager" {
   source           = "/exekube-modules/helm-release"
@@ -12,7 +13,7 @@ module "cert-manager" {
   release_name      = "cert-manager"
   release_namespace = "kube-system"
 
-  chart_name = "../../../../../charts/cert-manager"
+  chart_name = "${var.charts_dir}/cert-manager"
 }
 
 resource "null_resource" "cert_manager_resources" {
