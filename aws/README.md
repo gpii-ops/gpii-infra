@@ -44,7 +44,7 @@ I generally download and install these tools by hand (verifying checksums when a
 1. Install [jq](https://stedolan.github.io/jq/) **==1.5**.
 1. If on macOS version prior to High Sierra (10.13), install curl with openssl
    (`brew install curl --with-openssl` and add to your path by adding following line
-   to your shell rc `export PATH="/usr/local/opt/curl/bin:$PATH" >> ~/zshrc`).
+   to your shell rc `export PATH="/usr/local/opt/curl/bin:$PATH" >> ~/.bashrc`).
    *This is required due to native macOS curl not supporting TLS SNI in insecure mode.*
 
 ### Configure cloud provider credentials
