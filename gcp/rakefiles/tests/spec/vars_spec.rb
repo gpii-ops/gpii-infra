@@ -95,13 +95,13 @@ describe Vars do
   it "set_vars sets default vars for billing and organization" do
     allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
-    allow(ENV).to receive(:[]).with("ORGANIZATION_ID").and_return("247149361674")
-    allow(ENV).to receive(:[]).with("BILLING_ID").and_return("01A0E1-B0B31F-349F4F")
+    allow(ENV).to receive(:[]).with("ORGANIZATION_ID").and_return("fake-organization-id")
+    allow(ENV).to receive(:[]).with("BILLING_ID").and_return("fake-billing-id")
     env = "fake-env"
     project_type = "fake-project-type"
     Vars.set_vars(env, project_type)
-    expect(ENV).to have_received(:[]=).with("TF_VAR_billing_id", "01A0E1-B0B31F-349F4F")
-    expect(ENV).to have_received(:[]=).with("TF_VAR_organization_id", "247149361674")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_organization_id", "fake-organization-id")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_billing_id", "fake-billing-id")
   end
 
   it "set_vars doesn't clobber vars that are already set (even when env=stg)" do
