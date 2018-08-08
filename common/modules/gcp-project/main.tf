@@ -10,6 +10,19 @@ variable "project_owner" {}
 variable "billing_id" {}
 variable "organization_id" {}
 
+resource "null_resource" "dns_name" {
+  triggers = {
+    name = "${replace(
+                replace(
+                  google_project.project.project_id,
+                  "/([a-z]+)-([a-z]+)-([a-z]+)-?([a-z]+)?/",
+                  "$4.$3.$2.$1.net."),
+                "/^\\./",
+                "")
+              }"
+  }
+}
+
 resource "google_project" "project" {
   name            = "gpii-gcp-${var.project_name}"
   project_id      = "gpii-gcp-${var.project_name}"
@@ -45,28 +58,14 @@ resource "google_project_iam_binding" "project" {
 resource "google_dns_managed_zone" "project" {
   project     = "${google_project.project.project_id}"
   name        = "${google_project.project.project_id}-zone"
-  dns_name    = "${replace(
-                     replace(
-                       google_project.project.project_id,
-                       "/([a-z]+)-([a-z]+)-([a-z]+)-?([a-z]+)?/",
-                       "$4.$3.$2.$1.net."),
-                     "/^\\./",
-                     "")
-                   }"
+  dns_name    = "${null_resource.dns_name.triggers.name}"
   description = "${google_project.project.project_id} DNS zone"
 }
 
 # Set the NS records in the parent zone of the parent project if the
 # project_name has the pattern ${env}-${user}
 resource "google_dns_record_set" "ns" {
-  name         = "${replace(
-                      replace(
-                        google_project.project.project_id,
-                        "/([a-z]+)-([a-z]+)-([a-z]+)-?([a-z]+)?/",
-                        "$4.$3.$2.$1.net."),
-                      "/^\\./",
-                      "")
-                    }"
+  name         = "${null_resource.dns_name.triggers.name}"
   managed_zone = "${google_dns_managed_zone.project.name}"
   type         = "NS"
   ttl          = 3600
@@ -78,14 +77,7 @@ resource "google_dns_record_set" "ns" {
 # Set the NS records in the gcp.gpii.net zone of the gpii-gcp-common-prd if the
 # project name doesn't have a hyphen.
 resource "google_dns_record_set" "ns-root" {
-  name         = "${replace(
-                      replace(
-                        google_project.project.project_id,
-                        "/([a-z]+)-([a-z]+)-([a-z]+)-?([a-z]+)?/",
-                        "$4.$3.$2.$1.net."),
-                      "/^\\./",
-                      "")
-                    }"
+  name         = "${null_resource.dns_name.triggers.name}"
   managed_zone = "gcp-gpii-net"
   type         = "NS"
   ttl          = 3600
