@@ -33,9 +33,9 @@ task :set_vars do
   Vars.set_versions()
   @secrets = Secrets.collect_secrets()
   json_sa_key_file = File.read(@serviceaccount_key_json)
-  @serviceaccount_key_data = JSON.parse(json_sa_key_file)
-  unless @serviceaccount_key_data["project_id"] == ENV["TF_VAR_project_id"]
-    puts "The configured Serviceaccount is for project_id #{@serviceaccount_key_data["project_id"]}, but the current project_id is #{ENV["TF_VAR_project_id"]}."
+  serviceaccount_key_data = JSON.parse(json_sa_key_file)
+  unless serviceaccount_key_data["project_id"] == ENV["TF_VAR_project_id"]
+    puts "The configured Serviceaccount is for project_id #{serviceaccount_key_data["project_id"]}, but the current project_id is #{ENV["TF_VAR_project_id"]}."
     puts "Please re-run `rake project_init` to set the correct credentials, or change to a different live/<env> directory and try again."
     exit
   end
