@@ -49,14 +49,13 @@ task :infra_init => [:set_vars, @gcp_creds_file] do
 
   output = `#{@exekube_cmd} gcloud services list --format='json'`
   hash = JSON.parse(output)
-  servicesEnabled = []
-  hash.each do |service|
-    servicesEnabled.push(service["serviceName"])
+
+  ["cloudresourcemanager.googleapis.com",
+   "cloudbilling.googleapis.com",
+   "iam.googleapis.com",
+   "compute.googleapis.com"].each do |service|
+     sh "#{@exekube_cmd} gcloud services enable #{service}" unless hash.any? { |s| s['serviceName'] == service }
   end
-  sh "#{@exekube_cmd} gcloud services enable cloudresourcemanager.googleapis.com" unless servicesEnabled.include?("cloudresourcemanager.googleapis.com")
-  sh "#{@exekube_cmd} gcloud services enable cloudbilling.googleapis.com" unless servicesEnabled.include?("cloudbilling.googleapis.com")
-  sh "#{@exekube_cmd} gcloud services enable iam.googleapis.com" unless servicesEnabled.include?("iam.googleapis.com")
-  sh "#{@exekube_cmd} gcloud services enable compute.googleapis.com" unless servicesEnabled.include?("compute.googleapis.com")
 
   sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
       --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com \
