@@ -74,7 +74,7 @@ task :infra_init => [:set_vars, @gcp_creds_file] do
 end
 
 desc "[ONLY ADMINS] Create or update projects in the organization"
-task :apply_projects => [:set_vars, @gcp_creds_file, @serviceaccount_key_json] do
+task :apply_projects => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
   if @project_type != "common" or @env != "prd"
     puts "apply_projects task must run inside common/live/prd"
     exit
