@@ -138,19 +138,28 @@ Deploying to `prd` requires a [manual action](https://docs.gitlab.com/ce/ci/yaml
 
 See [CI-CD.md](../CI-CD.md)
 
-## Production is broken, there's been a security breach, or there is some other operational emergency
+## Contacting the Ops team
+
+The steps below for finding an Ops person escalate in urgency and disruptiveness. Favor earlier steps and waiting for a response, but use your best judgement.
+
+If there is an emergency -- production is down right before a big demo, an attack is in progress -- then it's more important to get an engineer's attention than it is to avoid sending notifications to a few extra people.
+
+1. Note that we do not currently have a formal on-call rotation. 24x7 support is Best Effort.
+1. If you don't have an account on the RtF Slack, skip the next few steps.
+1. Go to #ops in Slack. Ask for help using `@here`. [More on Slack announcements](https://get.slack.help/hc/en-us/articles/202009646-Make-an-announcement).
+1. Go to #ops in Slack. Ask for help using `@channel`.
+1. Email `ops at raisingthefloor dot org`.
+
+### There is an operational emergency (production is broken, there's been a security breach, etc.)
 
 First of all, DON'T PANIC! Everything is going to be fine. :)
 
 Your next task is to find a human on the Ops team. Ops engineers are trained to handle emergencies (including asking other experts for help).
 
-The steps below for finding an Ops person escalate in urgency and disruptiveness. Favor earlier steps and waiting for a response, but use your best judgement. If production is down right before a big demo or an attack is in progress, it's more important to get an engineer's attention than it is to avoid sending notifications to a few extra people.
+Start with the procedure above -- it is the quickest way to notify as many Ops team members as possible -- but bias toward action rather than waiting. For example, for an ordinary question or non-urgent problem, I would post in Slack and wait a while before trying again or moving to the next contact step. If production were down, I would post in Slack but wait only a minute or two before moving to the next contact step.
 
-1. Note that we do not currently have a formal on-call rotation. 24x7 support is Best Effort.
-1. Go to #ops in Slack. Ask for help using `@here`. [More on Slack announcements](https://get.slack.help/hc/en-us/articles/202009646-Make-an-announcement).
-1. Go to #ops in Slack. Ask for help using `@channel`.
-1. Email `infrastructure at lists.gpii.net`.
-   * This is a public mailing list, so provide a brief description of the affected system but avoid discussing details. (We believe in transparency but it can be dangerous in certain kinds of emergencies.)
+If you have exhausted the contact steps above, move on to these steps only for emergencies:
+
 1. Call or text specific Ops engineers. [Contact info](https://docs.google.com/document/d/1EDYhWYipUluzG6K8S-W4clsAGInm2RdjkpKq9Lw_dhE/edit).
    * If possible, pick an engineer who is in the middle of their work day over an engineer who is likely asleep. Timezone information is in [Contact info](https://docs.google.com/document/d/1EDYhWYipUluzG6K8S-W4clsAGInm2RdjkpKq9Lw_dhE/edit)
    * Repeat until you've reached an Ops engineer, or exhausted the list of Ops engineers (likely-awake or otherwise).
@@ -241,7 +250,7 @@ See [CI-CD.md#running-in-non-dev-environments](../CI-CD.md#running-manually-in-n
 1. Edit `components.conf`. Find your component and edit the `image` field to point to your Docker Hub user account.
    * E.g., `gpii/universal -> mrtyler/universal`
 1. Run `update-version`. It will generate a `version.yml` in the current directory.
-1. `cp version.yml ../gpii-infra/modules/deploy`
+1. `cp version.yml ../gpii-infra/aws/modules/deploy`
 1. `cd ../gpii-infra/aws/dev && rake deploy`
 
 #### Can't I just edit `version.yml` by hand?
@@ -260,7 +269,7 @@ If you don't want to deal with gpii-version-updater, you can instead:
 1. Note that the dataloader **deletes all data in CouchDB** when it runs.
 1. Because of how Kubernetes Jobs work, the dataloader will not re-run when a new Docker image becomes available (this is different from Deployments like `flowmanager`, which are updated when the Docker image changes).
 1. Thus, to make changes to the dataloader:
-   * Delete the Job: `kubectl -n gpii delete job gpii-dataloader`
+   * Delete the Job: `helm delete --purge dataloader`
    * Re-deploy the Job: `cd aws/dev && rake deploy`
 1. We abuse the fact that Kubernetes doesn't allow a Job's Docker image to be changed to prevent the dataloader Job from running (and deleting all data from CouchDB) every time. See [The Job "gpii-dataloder" is invalid](#the-job-gpii-dataloader-is-invalid) and [this architecture@ thread](https://lists.gpii.net/pipermail/infrastructure/2017-September/000070.html).
 
