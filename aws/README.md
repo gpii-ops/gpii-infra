@@ -91,6 +91,15 @@ I generally download and install these tools by hand (verifying checksums when a
 1. Select a namespace in the in the "Namespace" dropdown in the left column (*not* the "Cluster `->` Namespaces" link). Product developers likely want the `gpii` Namespace; infrastructure developers often want `All namespaces`.
 1. Click "Workloads" for a good overview of what's happening in the cluster.
 
+#### Viewing logs
+
+1. `cd aws/dev`
+1. `rake configure_kubectl`
+1. `kubectl -n gpii logs -l app=flowmanager | less`
+   * To see what else the `logs` subcommand can do: `kubectl logs --help`
+   * To see what Labels are available for filtering (the `-l` argument above): `kubectl -n gpii get pods --show-labels`
+      * More on [working with Labels and Selectors](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
+
 #### On the local machine
 
 1. `KOPS_STATE_STORE=s3://gpii-kubernetes-state kops validate cluster`
