@@ -30,7 +30,7 @@ gcp-setup:
   script:
     - docker version
     - docker-compose version
-    - docker pull gpii/exekube:0.3.1-google
+    - docker pull gpii/exekube:0.4.0-google
     - docker images | grep exekube
     - ruby --version
     - bundle version
