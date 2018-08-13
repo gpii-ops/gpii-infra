@@ -23,10 +23,24 @@ end
 directory @dot_config_path
 CLOBBER << @dot_config_path
 
+# This duplicates information in docker-compose.yml: mount points for .config
+# directories.
+#
+# When we create the host side of the Volume, it is owned by us.  If we allow
+# docker-compose to create it (even with `user:` set), it is instead owned by
+# root. This is unexpected and leads to trouble e.g.  during cleanup.
+@dot_config_dirs = [@dot_config_path]
+["gcloud", "helm", "kube", "terragrunt"].each do |config_subdir|
+  config_dir = "#{@dot_config_path}/#{config_subdir}"
+  directory config_dir
+  CLEAN << config_dir unless config_subdir == "gcloud"
+  @dot_config_dirs.push(config_dir)
+end
+
 desc "Create cluster and deploy GPII components to it"
 task :default => :deploy
 
-task :set_vars => [@dot_config_path] do
+task :set_vars => [] + @dot_config_dirs do
   Vars.set_vars(@env, @project_type)
   Vars.set_versions()
   @secrets = Secrets.collect_secrets()
@@ -93,7 +107,7 @@ end
 CLOBBER << @serviceaccount_key_file
 
 desc "[EXPERT] Copy GCP credentials from local storage on CI worker"
-task :configure_serviceaccount_ci => [:set_vars, @dot_config_path] do
+task :configure_serviceaccount_ci => [:set_vars, @dot_config_dirs] do
   # The automated CI process cannot (and does not want to) authenticate in the
   # normal, interactive way. Instead, we will fetch previously downloaded
   # credentials, copy them to the expected place, and activate them for later
