@@ -50,6 +50,7 @@ resource "google_project_iam_binding" "project" {
   members = [
     "user:${var.project_owner}",
     "serviceAccount:${google_service_account.project.email}",
+    "serviceAccount:projectowner@gpii-common-prd.iam.gserviceaccount.com",
   ]
 }
 
