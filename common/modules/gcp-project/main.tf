@@ -21,9 +21,14 @@ locals  {
             }"
 }
 
+resource "random_string" "id" {
+  length      = 4
+  min_numeric = 4
+}
+
 resource "google_project" "project" {
   name            = "gpii-gcp-${var.project_name}"
-  project_id      = "gpii-gcp-${var.project_name}"
+  project_id      = "gpii-gcp-${var.project_name}-${random_string.id.result}"
   billing_account = "${var.billing_id}"
   org_id          = "${var.organization_id}"
 }

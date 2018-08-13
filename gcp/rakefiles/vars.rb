@@ -16,20 +16,31 @@ class Vars
       end
     end
 
-    if ENV["TF_VAR_project_id"].nil?
+
+    if ENV["TF_VAR_project_name"].nil?
       if ["dev"].include?(env)
-        ENV["TF_VAR_project_id"] = "gpii-#{project_type}-#{env}-#{ENV["USER"]}"
+        ENV["TF_VAR_project_name"] = "gpii-#{project_type}-#{env}-#{ENV["USER"]}"
       elsif ["stg", "prd"].include?(env)
-        ENV["TF_VAR_project_id"] = "gpii-#{project_type}-#{env}"
+        ENV["TF_VAR_project_name"] = "gpii-#{project_type}-#{env}"
       else
-        puts "  ERROR: TF_VAR_project_id must be set!"
+        puts "  ERROR: TF_VAR_project_name must be set!"
         puts "  Usually, this value will be calculated for you, but you are"
         puts "  using an env I don't recognize: #{env}."
         puts "  Either pick a different env or, if you know what you're doing,"
-        puts "  you may override TF_VAR_project_id directly:"
-        puts "    export TF_VAR_project_id=<env>-<your name>"
+        puts "  you may override TF_VAR_project_name directly:"
+        puts "    export TF_VAR_project_name=<env>-<your name>"
         puts "  Do one of those and try again."
-        raise ArgumentError, "TF_VAR_project_id must be set"
+        raise ArgumentError, "TF_VAR_project_name must be set"
+      end
+    end
+
+    if ENV["TF_VAR_project_id"].nil?
+      project_id = `#{@exekube_cmd} gcloud projects list --format='value(project_id)' --filter='project_id ~ ^#{ENV["TF_VAR_project_name"]}-\d{4,4}'`
+      if project_id.empty?
+        nonce = rand.to_s[2..5]
+        ENV["TF_VAR_project_id"] = "#{ENV["TF_VAR_project_name"]}-#{nonce}"
+      else
+        ENV["TF_VAR_project_id"] = project_id
       end
     end
 

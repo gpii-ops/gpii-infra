@@ -17,6 +17,7 @@ services:
       #   via the gcp-project-init script
       # It's then used by modules as a space to create resources in
       TF_VAR_project_id:
+      TF_VAR_project_name:
 
       # TF_VAR_serviceaccount_key will be used by the gcp-project-init script
       #    to put the service account key upon the creation of the GCP project
