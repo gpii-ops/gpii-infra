@@ -51,6 +51,7 @@ resource "google_project_iam_binding" "project" {
   role    = "roles/owner"
   members = [
     "user:${var.project_owner}",
+    "group:ops@raisingthefloor.org",
     "serviceAccount:${google_service_account.project.email}",
     "serviceAccount:projectowner@gpii-common-prd.iam.gserviceaccount.com",
   ]
