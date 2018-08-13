@@ -70,7 +70,7 @@ resource "google_dns_managed_zone" "project" {
 # project_name has the pattern ${env}-${user}
 resource "google_dns_record_set" "ns" {
   name         = "${local.dnsname}"
-  managed_zone = "${google_dns_managed_zone.project.name}"
+  managed_zone = "gpii-gcp-${element(split("-", var.project_name), 0)}-zone"
   type         = "NS"
   ttl          = 3600
   project      = "gpii-gcp-${element(split("-", var.project_name), 0)}"
