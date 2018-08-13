@@ -32,12 +32,14 @@ task :set_vars do
   Vars.set_vars(@env, @project_type)
   Vars.set_versions()
   @secrets = Secrets.collect_secrets()
-  serviceaccount_key_json = File.read(@serviceaccount_key_file)
-  serviceaccount_key_data = JSON.parse(serviceaccount_key_json)
-  unless serviceaccount_key_data["project_id"] == ENV["TF_VAR_project_id"]
-    puts "The configured Serviceaccount is for project_id #{serviceaccount_key_data["project_id"]}, but the current project_id is #{ENV["TF_VAR_project_id"]}."
-    puts "Please re-run `rake project_init` to set the correct credentials, or change to a different live/<env> directory and try again."
-    exit
+  if File.exist?(@serviceaccount_key_file)
+    serviceaccount_key_json = File.read(@serviceaccount_key_file)
+    serviceaccount_key_data = JSON.parse(serviceaccount_key_json)
+    if serviceaccount_key_data.key?("project_id") and serviceaccount_key_data["project_id"] != ENV["TF_VAR_project_id"]
+      puts "The configured Serviceaccount is for project_id #{serviceaccount_key_data["project_id"]}, but the current project_id is #{ENV["TF_VAR_project_id"]}."
+      puts "Please re-run `rake project_init` to set the correct credentials, or change to a different live/<env> directory and try again."
+      exit
+    end
   end
   tf_vars = []
   ENV.each do |key, val|
