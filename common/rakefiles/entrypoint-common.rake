@@ -53,6 +53,7 @@ task :infra_init => [:set_vars, @gcp_creds_file] do
   ["cloudresourcemanager.googleapis.com",
    "cloudbilling.googleapis.com",
    "iam.googleapis.com",
+   "dns.googleapis.com",
    "compute.googleapis.com"].each do |service|
      sh "#{@exekube_cmd} gcloud services enable #{service}" unless hash.any? { |s| s['serviceName'] == service }
   end
