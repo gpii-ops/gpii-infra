@@ -31,9 +31,11 @@ resource "google_project" "project" {
 resource "google_project_services" "project" {
   project = "${google_project.project.project_id}"
   services = [
+    "oslogin.googleapis.com",
     "compute.googleapis.com",
     "logging.googleapis.com",
     "monitoring.googleapis.com",
+    "appengine.googleapis.com",
     "dns.googleapis.com"
   ]
 }
