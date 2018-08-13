@@ -61,6 +61,8 @@ resource "google_dns_managed_zone" "project" {
   name        = "${google_project.project.project_id}-zone"
   dns_name    = "${local.dnsname}"
   description = "${google_project.project.project_id} DNS zone"
+  depends_on  = ["google_project_services.project",
+                 "google_project_iam_binding.project"]
 }
 
 # Set the NS records in the parent zone of the parent project if the
