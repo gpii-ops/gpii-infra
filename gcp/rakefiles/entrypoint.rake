@@ -121,10 +121,7 @@ end
 
 desc "Undeploy GPII compoments and destroy cluster"
 task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :set_secrets] do
-  # Terraform will fail if template files are missing, and since values_dir is not mounted
-  # from host machine anymore, all templates vanish after docker-compose container is terminated.
-  # So we have to invoke templater with the main exekube command
-  sh "#{@exekube_cmd} sh -c 'xk up live/#{@env}/k8s/templater && xk down'"
+  sh "#{@exekube_cmd} xk down"
 end
 
 desc "[ADVANCED] Remove stale Terraform locks from GS -- for non-dev environments coordinate with the team first"
@@ -185,7 +182,7 @@ task :deploy_module, [:module] => [:set_vars, @gcp_creds_file, :set_secrets] do 
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
     raise IOError, "args[:module] must point to existing Terragrunt directory"
   end
-  sh_filter "#{@exekube_cmd} sh -c 'xk up live/#{@env}/k8s/templater && xk up live/#{@env}/#{args[:module]}'"
+  sh_filter "#{@exekube_cmd} xk up live/#{@env}/#{args[:module]}"
 end
 
 desc '[ADVANCED] Destroy provided module in the cluster -- rake destroy_module"[k8s/kube-system/cert-manager]"'
@@ -197,7 +194,7 @@ task :destroy_module, [:module] => [:set_vars, @gcp_creds_file, :set_secrets] do
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
     raise IOError, "args[:module] must point to existing Terragrunt directory"
   end
-  sh_filter "#{@exekube_cmd} sh -c 'xk up live/#{@env}/k8s/templater && xk down live/#{@env}/#{args[:module]}'"
+  sh_filter "#{@exekube_cmd} xk down live/#{@env}/#{args[:module]}"
 end
 
 # vim: et ts=2 sw=2:
