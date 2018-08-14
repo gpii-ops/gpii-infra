@@ -60,6 +60,9 @@ class Vars
       ENV["BILLING_ID"] = "01A0E1-B0B31F-349F4F"  # RtF Billing Account
     end
 
+    ENV["MY_UID"] = Process.uid.to_s
+    ENV["MY_GID"] = Process.gid.to_s
+
     # Hack to force Terraform to reapply some resources on every run
     ENV["TF_VAR_nonce"] = SecureRandom.hex
   end

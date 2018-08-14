@@ -23,6 +23,8 @@ describe Vars do
   before :each do
     allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[])
+    allow(Process).to receive(:uid)
+    allow(Process).to receive(:gid)
   end
 
   it "set_vars requires ENV['RAKE_REALLY_RUN_IN_PRD'] when env=prd" do
@@ -100,6 +102,17 @@ describe Vars do
     expect(ENV).not_to have_received(:[]=).with("TF_VAR_project_id", any_args)
     expect(ENV).not_to have_received(:[]=).with("ORGANIZATION_ID", any_args)
     expect(ENV).not_to have_received(:[]=).with("BILLING_ID", any_args)
+  end
+
+  it "set_vars sets MY_UID and MY_GID" do
+    allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
+    allow(Process).to receive(:uid).and_return(6666)
+    allow(Process).to receive(:gid).and_return(7777)
+    env = "fake-env"
+    project_type = "fake-project-type"
+    Vars.set_vars(env, project_type)
+    expect(ENV).to have_received(:[]=).with("MY_UID", "6666")
+    expect(ENV).to have_received(:[]=).with("MY_GID", "7777")
   end
 
   it "set_vars sets TF_VAR_nonce" do
