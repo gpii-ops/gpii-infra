@@ -10,3 +10,5 @@ persistentVolume:
     - ReadWriteOnce
   size: 10Gi
   storageClass: "standard"
+
+podAntiAffinity: true
