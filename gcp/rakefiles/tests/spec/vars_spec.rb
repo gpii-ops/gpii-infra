@@ -126,6 +126,16 @@ describe Vars do
     Vars.set_vars(env, project_type)
     expect(ENV).to have_received(:[]=).with("TF_VAR_nonce", a_value)
   end
+
+  it "Create directory path" do
+    allow(Dir).to receive(:mkdir).and_return("a", "b", "c", "d")
+    allow(File).to receive(:directory).and_return(true)
+    Vars.create_dir_if_not_exists("a/b/c/d")
+    expect(Dir).to have_received(:mkdir).with("a/")
+    expect(Dir).to have_received(:mkdir).with("a/b/")
+    expect(Dir).to have_received(:mkdir).with("a/b/c/")
+    expect(Dir).to have_received(:mkdir).with("a/b/c/d/")
+  end
 end
 
 

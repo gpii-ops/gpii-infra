@@ -45,6 +45,7 @@ task :set_vars do
   ENV.each do |key, val|
    tf_vars << key if key.match(/^TF_VAR_/)
   end
+  Vars.create_dir_if_not_exists(@dot_config_path)
   File.open("#{@dot_config_path}/compose.env", 'w') do |file|
     file.write(tf_vars.join("\n"))
   end

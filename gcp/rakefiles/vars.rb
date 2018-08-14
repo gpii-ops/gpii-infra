@@ -74,6 +74,14 @@ class Vars
       ENV['TF_VAR_dataloader_checksum'] = versions['gpii-dataloader'].split('@')[1]
     end
   end
+  def self.create_dir_if_not_exists(path)
+    recursive = path.split('/')
+    directory = ''
+    recursive.each do |sub_directory|
+      directory += sub_directory + '/'
+      Dir.mkdir(directory) unless (File.directory? directory)
+    end
+  end
 end
 
 # vim: et ts=2 sw=2:
