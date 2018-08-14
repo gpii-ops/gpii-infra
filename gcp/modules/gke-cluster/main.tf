@@ -10,12 +10,12 @@ module "gke_cluster" {
   project_id         = "${var.project_id}"
   serviceaccount_key = "${var.serviceaccount_key}"
 
-  initial_node_count = 2
+  initial_node_count = 1
   node_type          = "n1-standard-2"
   kubernetes_version = "1.9.7-gke.5"
 
   main_compute_zone = "us-central1-a"
-  additional_zones  = []
+  additional_zones  = ["us-central1-b", "us-central1-c"]
 
   oauth_scopes = [
     "https://www.googleapis.com/auth/compute",
