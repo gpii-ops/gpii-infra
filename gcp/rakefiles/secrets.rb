@@ -41,7 +41,7 @@ class Secrets
     collected_secrets = {}
     secrets_to_modules = {}
 
-    Dir["../../modules/**/#{Secrets::SECRETS_FILE}"].each do |module_secrets_file|
+    Dir["./modules/**/#{Secrets::SECRETS_FILE}"].each do |module_secrets_file|
       module_name = File.basename(File.dirname(module_secrets_file))
       module_secrets = YAML.load(File.read(module_secrets_file))
 
