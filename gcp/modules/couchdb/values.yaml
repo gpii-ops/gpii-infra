@@ -1,0 +1,12 @@
+clusterSize: ${env == "dev" ? 2 : 3}
+
+adminUsername: ${couchdb_admin_username}
+adminPassword: ${couchdb_admin_password}
+cookieAuthSecret: ${couchdb_auth_cookie}
+
+persistentVolume:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi
+  storageClass: "standard"
