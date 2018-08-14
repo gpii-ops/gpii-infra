@@ -9,11 +9,13 @@ variable "nonce" {}
 
 # Terragrunt variables
 variable "couchdb_replicas" {}
+
 variable "backup_deltas" {}
 variable "release_namespace" {}
 
 # Secret variables
 variable "secret_couchdb_admin_username" {}
+
 variable "secret_couchdb_admin_password" {}
 variable "secret_couchdb_auth_cookie" {}
 

@@ -1,6 +1,7 @@
 terraform {
   backend "gcs" {}
 }
+
 variable "env" {}
 variable "secrets_dir" {}
 variable "charts_dir" {}

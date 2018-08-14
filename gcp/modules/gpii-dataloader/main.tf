@@ -23,7 +23,7 @@ data "template_file" "dataloader_values" {
 }
 
 module "gpii-dataloader" {
-  source = "/exekube-modules/helm-release"
+  source           = "/exekube-modules/helm-release"
   tiller_namespace = "kube-system"
   client_auth      = "${var.secrets_dir}/kube-system/helm-tls"
 
