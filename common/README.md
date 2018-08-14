@@ -37,6 +37,7 @@ The DNS zones are:
 1. By default you'll use the RtF Organization and Billing Account.
    * You can use a different Organization or Billing Account, e.g. from a GCP Free Trial Account, with `export ORGANIZATION_ID=111111111111` and/or `export BILLING_ID=222222-222222-222222`.
 1. Check that [you have the AWS credentials](../aws#configure-cloud-provider-credentials).
+   * Copy the `credentials` file to the `common/.config/prd/aws` directory.
 1. `cd gpii-infra/common/live/prd`
 1. `rake auth`
    * This will give you a link to initiate the authentication process. Go to that link, use your Google account and paste back the token given.
