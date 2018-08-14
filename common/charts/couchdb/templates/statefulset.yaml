@@ -21,6 +21,18 @@ spec:
         app: {{ template "couchdb.name" . }}
         release: {{ .Release.Name }}
     spec:
+    {{- if .Values.podAntiAffinity }}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: "app"
+                    operator: In
+                    values:
+                    - {{ template "couchdb.name" . }}
+              topologyKey: "kubernetes.io/hostname"
+    {{- end }}
       initContainers:
         - name: init-copy
           image: busybox

@@ -54,6 +54,12 @@ helperImage:
 ## `OrderedReady`
 podManagementPolicy: Parallel
 
+
+## To better tolerate Node failures, we can enable Kubernetes scheduler to not assign
+## more than one Pod of CouchDB StatefulSet per Node using podAntiAffinity.
+## This is still a beta feature, and will get stable in Kubernetes 1.2
+podAntiAffinity: false
+
 ## A StatefulSet requires a headless Service to establish the stable network
 ## identities of the Pods, and that Service is created automatically by this
 ## chart without any additional configuration. The Service block below refers
