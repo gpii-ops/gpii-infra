@@ -84,8 +84,6 @@ class Secrets
   def self.set_secrets(collected_secrets, exekube_cmd)
     return if collected_secrets.empty?
 
-    FileUtils.mkdir_p Secrets::SECRETS_DIR
-
     collected_secrets.each do |encryption_key, secrets|
       decrypted_secrets = fetch_secrets(encryption_key, exekube_cmd)
 
