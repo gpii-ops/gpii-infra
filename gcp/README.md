@@ -118,4 +118,4 @@ There may be a situation, when we want to roll back entire DB data set to anothe
 * Database is now restored to the state at the time of target snapshot.
    * You can check the status of all nodes with `for i in {0..N}; do rake xk["kubectl exec --namespace gpii -it couchdb-couchdb-$i -c couchdb -- curl -s http://\$TF_VAR_couchdb_admin_username:\$TF_VAR_couchdb_admin_password@127.0.0.1:5984/_up"]; done`, where N is a number of CouchDB replicas.
 * Once DB state is verified and you sure that everything went as desired, you can scale `preferences` and `flowmanager` deployments back as well. From this point system functionality for the customer is fully restored.
-* Deploy `k8s-snapshots` module to resume regular snapshot process.
+* Deploy `k8s-snapshots` module to resume regular snapshot process with `rake deploy_module["k8s/kube-system/k8s-snapshots"]`.
