@@ -47,6 +47,10 @@ task :infra_init => [:set_vars, @gcp_creds_file] do
             --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com \
             --role roles/storage.admin"
 
+  sh "#{@exekube_cmd} gcloud projects add-iam-policy-binding #{ENV["TF_VAR_project_id"]} \
+            --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com \
+            --role roles/dns.admin"
+
   output = `#{@exekube_cmd} gcloud services list --format='json'`
   hash = JSON.parse(output)
 
