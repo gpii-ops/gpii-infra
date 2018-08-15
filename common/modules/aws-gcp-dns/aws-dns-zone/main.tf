@@ -1,5 +1,7 @@
 variable "record_name" {}
 
+variable "aws_zone_id" {}
+
 variable "ns_records" {
   type        = "list"
   default     = []
@@ -10,7 +12,7 @@ resource "aws_route53_zone" "main" {
   name = "${var.record_name}.gpii.net"
   lifecycle   {
      prevent_destroy = "true"
-  } 
+  }
   tags {
     Terraform = true
   }
@@ -18,7 +20,7 @@ resource "aws_route53_zone" "main" {
 
 
 resource "aws_route53_record" "main_ns" {
-  zone_id = "Z26C1YEN96KOGI"  # Unmanaged route53 zone for gpii.net
+  zone_id = "${var.aws_zone_id}"  # Unmanaged route53 zone for gpii.net
   name    = "${aws_route53_zone.main.name}"
   type    = "NS"
   ttl     = "60"
