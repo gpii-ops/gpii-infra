@@ -5,10 +5,25 @@ terraform {
   backend "gcs" {}
 }
 
-variable "project_name" {}
+variable "project_name" {} # name of the project to create
+
 variable "project_owner" {}
+
 variable "billing_id" {}
+
 variable "organization_id" {}
+
+variable "serviceaccount_key" {}
+
+variable "project_id" {} # id of the project which owns the credentials used by the provider
+
+
+provider "google" {
+  credentials = "${var.serviceaccount_key}"
+  project     = "${var.project_id}"
+  region      = "us-central1"
+}
+
 
 locals  {
   dnsname = "${replace(
