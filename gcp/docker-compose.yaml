@@ -1,4 +1,4 @@
-version: "3"
+version: "3.4"
 
 services:
   xk:
@@ -38,19 +38,29 @@ services:
 
     # File with other environment variables will be populated by rake
     env_file:
-      - ./.config/${ENV}/compose.env
+      - live/${ENV}/compose.env
 
     ports:
       - 8001:8001
     volumes:
       - .:/project
       - ../common/charts:/charts
-      - ./.config/${ENV}/helm:/root/.helm
-      - ./.config/${ENV}/terragrunt:/root/.terragrunt
-      - ./.config/${ENV}/gcloud:/root/.config/gcloud
-      - ./.config/${ENV}/kube:/root/.kube
+      - helm:/root/.helm
+      - terragrunt:/root/.terragrunt
+      - gcloud:/root/.config/gcloud
+      - kube:/root/.kube
 
       # EXEKUBE DEVELOPMENT
       # - ../../exekube/modules:/exekube-modules
       # ---
     command: kubectl proxy --address="0.0.0.0" --accept-hosts ".*"
+
+volumes:
+  helm:
+    name: gpii-gcp-${ENV}-helm
+  terragrunt:
+    name: gpii-gcp-${ENV}-terragrunt
+  gcloud:
+    name: gpii-gcp-${ENV}-gcloud
+  kube:
+    name: gpii-gcp-${ENV}-kube

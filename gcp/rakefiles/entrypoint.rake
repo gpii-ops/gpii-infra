@@ -19,21 +19,27 @@ end
 
 @exekube_cmd = "docker-compose run --rm --service-ports xk"
 
-@dot_config_path = "../../.config/#{@env}"
-directory @dot_config_path
-CLOBBER << @dot_config_path
+Rake::Task["clean"].enhance do
+  sh "docker volume rm -f gpii-gcp-#{@env}-helm"
+  sh "docker volume rm -f gpii-gcp-#{@env}-terragrunt"
+  sh "docker volume rm -f gpii-gcp-#{@env}-kube"
+end
+
+Rake::Task["clobber"].enhance do
+  sh "docker volume rm -f gpii-gcp-#{@env}-gcloud"
+end
 
 desc "Create cluster and deploy GPII components to it"
 task :default => :deploy
 
-task :set_vars => [@dot_config_path] do
+task :set_vars do
   Vars.set_vars(@env, @project_type)
   Vars.set_versions()
   @secrets = Secrets.collect_secrets()
   Rake::Task[:set_compose_env].invoke
 end
 
-@compose_env_file = "#{@dot_config_path}/compose.env"
+@compose_env_file = "compose.env"
 CLEAN << @compose_env_file
 # We do this with a task rather than a rule so that compose_env_file is always
 # re-written.
@@ -52,19 +58,15 @@ task :set_secrets, [:skip_secret_mgmt] do |taskname, args|
   Secrets.set_secrets(@secrets, @exekube_cmd)
 end
 
-@gcp_creds_file = "#{@dot_config_path}/gcloud/credentials.db"
 desc "[ADVANCED] Authenticate and generate GCP credentials (gcloud auth login)"
-task :configure_login => [:set_vars, @gcp_creds_file]
-rule @gcp_creds_file do
+task :configure_login => [:set_vars] do
   # This authenticates to GCP/the `gcloud` command in the normal, interactive
   # way. This is the default method, best for human users.
   sh "#{@exekube_cmd} gcloud auth login"
 end
 
-@kubectl_creds_file = "#{@dot_config_path}/kube/config"
 desc "[ADVANCED] Fetch kubectl credentials (gcloud auth login)"
-task :configure_kubectl => [:set_vars, @gcp_creds_file, @kubectl_creds_file]
-rule @kubectl_creds_file do
+task :configure_kubectl => [:set_vars] do
   # This duplicates information in terraform code, 'k8s-cluster'
   cluster_name = 'k8s-cluster'
   # This duplicates information in terraform code, 'zone'. Could be a variable with some plumbing.
@@ -78,7 +80,7 @@ end
 
 @serviceaccount_key_file = "secrets/kube-system/owner.json"
 desc "[ADVANCED] Create and download credentials for projectowner service account"
-task :configure_serviceaccount => [:set_vars, @gcp_creds_file, @serviceaccount_key_file]
+task :configure_serviceaccount => [:set_vars, @serviceaccount_key_file]
 rule @serviceaccount_key_file do
   # TODO: This command is duplicated from exekube's gcp-project-init (and
   # hardcodes 'projectowner' instead of $SA_NAME which is only defined in
@@ -93,41 +95,41 @@ end
 CLOBBER << @serviceaccount_key_file
 
 desc "[EXPERT] Copy GCP credentials from local storage on CI worker"
-task :configure_serviceaccount_ci => [:set_vars, @dot_config_path] do
+task :configure_serviceaccount_ci => [:set_vars] do
   # The automated CI process cannot (and does not want to) authenticate in the
   # normal, interactive way. Instead, we will fetch previously downloaded
   # credentials, copy them to the expected place, and activate them for later
   # use by `gcloud` commands.
   #
   # Another way to think of it: this task uses an alternate strategy to build
-  # @gcp_creds_file and @serviceaccount_key_file.
+  # @serviceaccount_key_file.
   FileUtils.mkdir_p(File.dirname(@serviceaccount_key_file))
   FileUtils.install("#{Dir.home}/.ssh/gcp-config/#{@env}/owner.json", "#{@serviceaccount_key_file}", :mode => 0400)
   sh "#{@exekube_cmd} sh -c 'gcloud auth activate-service-account --key-file $TF_VAR_serviceaccount_key --project $TF_VAR_project_id'"
 end
 
 desc "[ADVANCED] Tell gcloud to use TF_VAR_project_id as the default Project; can be useful after 'rake clobber'"
-task :configure_current_project => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
+task :configure_current_project => [:set_vars, @serviceaccount_key_file] do
   sh "#{@exekube_cmd} gcloud config set project #{ENV["TF_VAR_project_id"]}"
 end
 
 desc "[NOT IDEMPOTENT, RUN ONCE PER ENVIRONMENT] Initialize GCP Project where this environment's resources will live"
-task :project_init => [:set_vars, @gcp_creds_file] do
+task :project_init => [:set_vars] do
   sh "#{@exekube_cmd} gcp-project-init"
 end
 
 desc "[ADVANCED] Create or update infrastructure for secret management, this has no corresponding destroy task"
-task :apply_secret_mgmt => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
+task :apply_secret_mgmt => [:set_vars, @serviceaccount_key_file] do
   sh "#{@exekube_cmd} up live/#{@env}/secret-mgmt"
 end
 
 desc "[ADVANCED] Create or update low-level infrastructure"
-task :apply_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
+task :apply_infra => [:set_vars, @serviceaccount_key_file] do
   sh "#{@exekube_cmd} up live/#{@env}/infra"
 end
 
 desc "Create cluster and deploy GPII components to it"
-task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :apply_infra, :set_secrets] do
+task :deploy => [:set_vars, @serviceaccount_key_file, :configure_kubectl, :apply_infra, :set_secrets] do
   # Workaround for 'context deadline exceeded' issue:
   # https://github.com/exekube/exekube/issues/62
   # https://github.com/docker/for-mac/issues/2076
@@ -137,7 +139,7 @@ task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_
 end
 
 desc "Undeploy GPII compoments and destroy cluster"
-task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :set_secrets] do
+task :destroy => [:set_vars, @serviceaccount_key_file, :configure_kubectl, :set_secrets] do
   # Terraform will fail if template files are missing, and since values_dir is not mounted
   # from host machine anymore, all templates vanish after docker-compose container is terminated.
   # So we have to invoke templater with the main exekube command
@@ -145,12 +147,12 @@ task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl
 end
 
 desc "Destroy cluster and low-level infrastructure"
-task :destroy_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, :destroy] do
+task :destroy_infra => [:set_vars, @serviceaccount_key_file, :destroy] do
   sh "#{@exekube_cmd} down live/#{@env}/infra"
 end
 
 desc "[ADVANCED] Remove stale Terraform locks from GS -- for non-dev environments coordinate with the team first"
-task :unlock => [:set_vars, @gcp_creds_file] do
+task :unlock => [:set_vars] do
   sh "#{@exekube_cmd} sh -c ' \
     for lock in $(gsutil ls -R gs://#{ENV["TF_VAR_project_id"]}-tfstate/#{@env}/ | grep .tflock); do \
       gsutil rm $lock; \
@@ -171,7 +173,7 @@ task :xk, [:cmd] => [:set_vars] do |taskname, args|
 end
 
 desc '[ADVANCED] Destroy secrets file stored in GS bucket for encryption key, passed as argument -- rake destroy_secrets"[default]"'
-task :destroy_secrets, [:encryption_key] => [:set_vars, @gcp_creds_file] do |taskname, args|
+task :destroy_secrets, [:encryption_key] => [:set_vars] do |taskname, args|
   if args[:encryption_key].nil?
     puts "  ERROR: args[:encryption_key] must be set!"
     raise ArgumentError, "args[:encryption_key] must be set"
@@ -183,13 +185,13 @@ task :destroy_secrets, [:encryption_key] => [:set_vars, @gcp_creds_file] do |tas
 end
 
 desc '[ADVANCED] Destroy provided module in the cluster, and then deploy it -- rake redeploy_module"[k8s/kube-system/cert-manager]"'
-task :redeploy_module, [:module] => [:set_vars, @gcp_creds_file] do |taskname, args|
+task :redeploy_module, [:module] => [:set_vars] do |taskname, args|
   Rake::Task[:destroy_module].invoke(args[:module])
   Rake::Task[:deploy_module].invoke(args[:module])
 end
 
 desc '[ADVANCED] Deploy provided module into the cluster -- rake deploy_module"[k8s/kube-system/cert-manager]"'
-task :deploy_module, [:module] => [:set_vars, @gcp_creds_file, :set_secrets] do |taskname, args|
+task :deploy_module, [:module] => [:set_vars, :configure_kubectl, :set_secrets] do |taskname, args|
   if args[:module].nil?
     puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
     raise ArgumentError, "args[:module] must be set"
@@ -201,7 +203,7 @@ task :deploy_module, [:module] => [:set_vars, @gcp_creds_file, :set_secrets] do 
 end
 
 desc '[ADVANCED] Destroy provided module in the cluster -- rake destroy_module"[k8s/kube-system/cert-manager]"'
-task :destroy_module, [:module] => [:set_vars, @gcp_creds_file, :set_secrets] do |taskname, args|
+task :destroy_module, [:module] => [:set_vars, :configure_kubectl, :set_secrets] do |taskname, args|
   if args[:module].nil?
     puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
     raise ArgumentError, "args[:module] must be set"
