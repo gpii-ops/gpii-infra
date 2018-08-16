@@ -23,12 +23,15 @@ end
 @serviceaccount_key_file = "secrets/kube-system/owner.json"
 
 @dot_config_path = "../../.config/#{@env}"
+rule @dot_config_path do
+  Vars.create_directory_if_not_exists(@dot_config_path)
+end
 CLOBBER << @dot_config_path
 
 desc "Create cluster and deploy GPII components to it"
 task :default => :deploy
 
-task :set_vars do
+task :set_vars => [@dot_config_path] do
   Vars.set_vars(@env, @project_type)
   Vars.set_versions()
   @secrets = Secrets.collect_secrets()
@@ -45,7 +48,6 @@ task :set_vars do
   ENV.each do |key, val|
    tf_vars << key if key.match(/^TF_VAR_/)
   end
-  Vars.create_dir_if_not_exists(@dot_config_path)
   File.open("#{@dot_config_path}/compose.env", 'w') do |file|
     file.write(tf_vars.join("\n"))
   end
