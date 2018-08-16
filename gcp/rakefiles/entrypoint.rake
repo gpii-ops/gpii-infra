@@ -19,14 +19,20 @@ end
 
 @exekube_cmd = "docker-compose run --rm --service-ports xk"
 
+task :clean_volumes => :set_vars do
+  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-helm"
+  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-terragrunt"
+  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-kube"
+end
 Rake::Task["clean"].enhance do
-  sh "docker volume rm -f #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-helm"
-  sh "docker volume rm -f #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-terragrunt"
-  sh "docker volume rm -f #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-kube"
+  Rake::Task["clean_volumes"].invoke
 end
 
+task :clobber_volumes => :set_vars do
+  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-gcloud"
+end
 Rake::Task["clobber"].enhance do
-  sh "docker volume rm -f #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-gcloud"
+  Rake::Task["clobber_volumes"].invoke
 end
 
 desc "Create cluster and deploy GPII components to it"
