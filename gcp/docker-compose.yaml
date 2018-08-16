@@ -5,7 +5,7 @@ services:
     image: gpii/exekube:0.4.0-google
     working_dir: /project
     environment:
-      USER: root
+      USER: ${USER:?err}
       ENV: ${ENV:?err}
       ORGANIZATION_ID:
       BILLING_ID:
@@ -57,10 +57,16 @@ services:
 
 volumes:
   helm:
-    name: gpii-gcp-${ENV}-helm
+    # We add USER -- potentially a second time as
+    # TF_VAR_project_id may contain USER already, e.g.
+    # gcp-gpii-dev-mrtyler) -- to prevent conflicts when
+    # two users (e.g. mrtyler and gitlab-runner) are
+    # working on the same environment on the same machine
+    # (e.g. the CI worker).
+    name: ${TF_VAR_project_id}-${USER}-helm
   terragrunt:
-    name: gpii-gcp-${ENV}-terragrunt
+    name: ${TF_VAR_project_id}-${USER}-terragrunt
   gcloud:
-    name: gpii-gcp-${ENV}-gcloud
+    name: ${TF_VAR_project_id}-${USER}-gcloud
   kube:
-    name: gpii-gcp-${ENV}-kube
+    name: ${TF_VAR_project_id}-${USER}-kube
