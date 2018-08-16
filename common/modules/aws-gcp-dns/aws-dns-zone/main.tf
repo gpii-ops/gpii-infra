@@ -20,7 +20,7 @@ resource "aws_route53_zone" "main" {
 
 
 resource "aws_route53_record" "main_ns" {
-  zone_id = "${var.aws_zone_id}"  # Unmanaged route53 zone for gpii.net
+  zone_id = "${var.aws_zone_id}"
   name    = "${aws_route53_zone.main.name}"
   type    = "NS"
   ttl     = "60"

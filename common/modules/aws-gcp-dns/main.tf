@@ -15,7 +15,7 @@ variable "project_id" {}
 variable "serviceaccount_key" {}
 
 variable "aws_zone_id" {
-  default     = "Z26C1YEN96KOGI"
+  default     = "Z26C1YEN96KOGI" # Unmanaged route53 zone for gpii.net
 }
 
 
