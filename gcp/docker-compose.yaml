@@ -3,10 +3,20 @@ version: "3"
 services:
   xk:
     image: gpii/exekube:0.4.0-google
+    # With this stanza, the docker container runs -- and creates files as --
+    # the user invoking docker-compose. This keeps file ownership correct on
+    # Volumes that are mounted from the host machine..
+    #
+    # Without this, the docker container runs -- and creates files as -- root,
+    # even on Volumes that are mounted from the host machine. This is
+    # unexpected and leads to trouble e.g. during cleanup.
+    user: ${MY_UID:?err_uid}:${MY_GID:?err_gid}
     working_dir: /project
     environment:
-      USER: root
       ENV: ${ENV:?err}
+      # Override HOME so that tools running inside the container can find their
+      # configs.
+      HOME: /config
       ORGANIZATION_ID:
       BILLING_ID:
 
@@ -45,12 +55,21 @@ services:
     volumes:
       - .:/project
       - ../common/charts:/charts
-      - ./.config/${ENV}/helm:/root/.helm
-      - ./.config/${ENV}/terragrunt:/root/.terragrunt
-      - ./.config/${ENV}/gcloud:/root/.config/gcloud
-      - ./.config/${ENV}/kube:/root/.kube
+      - ./.config/${ENV}/helm:/config/.helm
+      - ./.config/${ENV}/terragrunt:/config/.terragrunt
+      - ./.config/${ENV}/gcloud:/config/.config/gcloud
+      - ./.config/${ENV}/kube:/config/.kube
+
+      # Allows us to look up users and groups from the host. This is related to
+      # ownership on Volumes mounted from the host. Idea is from @reduardo7:
+      # https://github.com/docker/compose/issues/2380#issuecomment-392530292
+      #
+      # (This doesn't really help on MacOS as regular users don't appear in
+      # these files.)
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/group:/etc/group:ro
 
       # EXEKUBE DEVELOPMENT
-      - ../../exekube/modules:/exekube-modules
+      # - ../../exekube/modules:/exekube-modules
       # ---
     command: kubectl proxy --address="0.0.0.0" --accept-hosts ".*"

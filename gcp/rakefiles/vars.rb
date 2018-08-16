@@ -7,6 +7,13 @@ class Vars
   VERSION_FILE = "../../../aws/modules/deploy/version.yml"
 
   def self.set_vars(env, project_type)
+    if ["prd"].include?(env)
+      if ENV["RAKE_REALLY_RUN_IN_PRD"].nil?
+        puts "  ERROR: Tried to run in env 'prd' but RAKE_REALLY_RUN_IN_PRD is not set"
+        raise ArgumentError, "Tried to run in env 'prd' but RAKE_REALLY_RUN_IN_PRD is not set"
+      end
+    end
+
     if ["dev"].include?(env)
       if ENV["USER"].nil?
         puts "  ERROR: USER must be set!"
@@ -52,6 +59,9 @@ class Vars
     if ENV["BILLING_ID"].nil?
       ENV["BILLING_ID"] = "01A0E1-B0B31F-349F4F"  # RtF Billing Account
     end
+
+    ENV["MY_UID"] = Process.uid.to_s
+    ENV["MY_GID"] = Process.gid.to_s
 
     # Hack to force Terraform to reapply some resources on every run
     ENV["TF_VAR_nonce"] = SecureRandom.hex

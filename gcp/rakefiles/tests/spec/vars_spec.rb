@@ -20,17 +20,26 @@ describe Vars do
     scrub_env
   end
 
-  it "set_vars requires ENV['USER'] when env=dev" do
+  before :each do
     allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[])
+    allow(Process).to receive(:uid)
+    allow(Process).to receive(:gid)
+  end
+
+  it "set_vars requires ENV['RAKE_REALLY_RUN_IN_PRD'] when env=prd" do
+    env = "prd"
+    project_type = "fake-project-type"
+    expect { Vars.set_vars(env, project_type) }.to raise_error(ArgumentError, "Tried to run in env 'prd' but RAKE_REALLY_RUN_IN_PRD is not set")
+  end
+
+  it "set_vars requires ENV['USER'] when env=dev" do
     env = "dev"
     project_type = "fake-project-type"
     expect { Vars.set_vars(env, project_type) }.to raise_error(ArgumentError, "USER must be set")
   end
 
   it "set_vars calculates ENV['TF_VAR_project_id'] when env=dev" do
-    allow(ENV).to receive(:[]=)
-    allow(ENV).to receive(:[])
     allow(ENV).to receive(:[]).with("USER").and_return("fake-user")
     env = "dev"
     project_type = "fake-project-type"
@@ -39,8 +48,6 @@ describe Vars do
   end
 
   it "set_vars calculates ENV['TF_VAR_project_id'] when env=stg" do
-    allow(ENV).to receive(:[]=)
-    allow(ENV).to receive(:[])
     env = "stg"
     project_type = "fake-project-type"
     Vars.set_vars(env, project_type)
@@ -48,7 +55,6 @@ describe Vars do
   end
 
   it "set_vars requires ENV['TF_VAR_project_id'] for unknown values of env" do
-    allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return(nil)
     env = "fake-env"
     project_type = "fake-project-type"
@@ -56,8 +62,6 @@ describe Vars do
   end
 
   it "set_vars calculates ENV['dns_(zones|records)'] when env=dev" do
-    allow(ENV).to receive(:[]=)
-    allow(ENV).to receive(:[])
     allow(ENV).to receive(:[]).with("USER").and_return("fake-user")
     env = "dev"
     project_type = "fake-project-type"
@@ -67,8 +71,6 @@ describe Vars do
   end
 
   it "set_vars doesn't clobber ENV['dns_(zones|records)'] when already set and env=dev" do
-    allow(ENV).to receive(:[]=)
-    allow(ENV).to receive(:[])
     allow(ENV).to receive(:[]).with("USER").and_return("fake-user")
     allow(ENV).to receive(:[]).with("TF_VAR_dns_zones").and_return("fake-custom-dns-zone.")
     allow(ENV).to receive(:[]).with("TF_VAR_dns_records").and_return("fake-custom-dns-record.")
@@ -80,8 +82,6 @@ describe Vars do
   end
 
   it "set_vars sets default vars" do
-    allow(ENV).to receive(:[]=)
-    allow(ENV).to receive(:[])
     allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
     env = "fake-env"
     project_type = "fake-project-type"
@@ -93,7 +93,6 @@ describe Vars do
   end
 
   it "set_vars doesn't clobber vars that are already set (even when env=stg)" do
-    allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
     allow(ENV).to receive(:[]).with("ORGANIZATION_ID").and_return("fake-organization-id")
     allow(ENV).to receive(:[]).with("BILLING_ID").and_return("fake-billing-id")
@@ -105,9 +104,18 @@ describe Vars do
     expect(ENV).not_to have_received(:[]=).with("BILLING_ID", any_args)
   end
 
+  it "set_vars sets MY_UID and MY_GID" do
+    allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
+    allow(Process).to receive(:uid).and_return(6666)
+    allow(Process).to receive(:gid).and_return(7777)
+    env = "fake-env"
+    project_type = "fake-project-type"
+    Vars.set_vars(env, project_type)
+    expect(ENV).to have_received(:[]=).with("MY_UID", "6666")
+    expect(ENV).to have_received(:[]=).with("MY_GID", "7777")
+  end
+
   it "set_vars sets TF_VAR_nonce" do
-    allow(ENV).to receive(:[]=)
-    allow(ENV).to receive(:[])
     allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
     env = "fake-env"
     project_type = "fake-project-type"
