@@ -11,4 +11,13 @@ persistentVolume:
   size: 10Gi
   storageClass: "standard"
 
-podAntiAffinity: true
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: "app"
+              operator: In
+              values:
+              - couchdb
+        topologyKey: "kubernetes.io/hostname"
