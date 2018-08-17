@@ -75,12 +75,13 @@ Error 403: The caller does not have permission, forbidden
 This happens when trying to enable an API that is already enabled. This shouldn't happen in normal operation, but a quick fix is to run something like this for each affected API:
 
 ```
-rake xk"[gcloud services disable container.googleapis.com]"
+rake sh["gcloud services disable container.googleapis.com"]
 ```
 
 ### Restoring CouchDB data
 
-We are considering number of probable failure scenarios for our GCP infrastructure:
+We are considering number of probable failure scenarios for our GCP infrastructure.
+You can run all `kubectl` commands mentioned below inside of interactive shell started with `rake sh`.
 
 1. **Data corruption on a single CouchDB replica**
 
@@ -96,7 +97,7 @@ In this scenario we rely on CouchDB ability to recover from loss of one or more 
 * Run `rake deploy_module[couchdb]` to patch newly created PV with annotations for `k8s-snapshots`.
 * CouchDB cluster will replicate data to recreated node automatically.
 * Corrupted node is now recovered.
-   * You can check DB status on recovered node with `rake xk["kubectl exec --namespace gpii -it couchdb-couchdb-N -c couchdb -- curl -s http://\$TF_VAR_couchdb_admin_username:\$TF_VAR_couchdb_admin_password@127.0.0.1:5984/gpii/"]`, where N is node index.
+   * You can check DB status on recovered node with `kubectl exec --namespace gpii -it couchdb-couchdb-N -c couchdb -- curl -s http://$TF_VAR_couchdb_admin_username:$TF_VAR_couchdb_admin_password@127.0.0.1:5984/gpii/`, where N is node index.
 
 2. **Data corruption on all replicas of CouchDB cluster**
 
@@ -116,6 +117,6 @@ There may be a situation, when we want to roll back entire DB data set to anothe
    * Create new PD from snapshot with the same name, type, size and zone.
 * Scale CouchDB stateful set back to number of replicas it used to have before with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=N`
 * Database is now restored to the state at the time of target snapshot.
-   * You can check the status of all nodes with `for i in {0..N}; do rake xk["kubectl exec --namespace gpii -it couchdb-couchdb-$i -c couchdb -- curl -s http://\$TF_VAR_couchdb_admin_username:\$TF_VAR_couchdb_admin_password@127.0.0.1:5984/_up"]; done`, where N is a number of CouchDB replicas.
+   * You can check the status of all nodes with `for i in {0..N}; do kubectl exec --namespace gpii -it couchdb-couchdb-$i -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/_up; done`, where N is a number of CouchDB replicas.
 * Once DB state is verified and you sure that everything went as desired, you can scale `preferences` and `flowmanager` deployments back as well. From this point system functionality for the customer is fully restored.
 * Deploy `k8s-snapshots` module to resume regular snapshot process with `rake deploy_module["k8s/kube-system/k8s-snapshots"]`.
