@@ -127,7 +127,7 @@ task :sh, [:cmd] => [:set_vars] do |taskname, args|
     puts "Argument :cmd -- the command to run inside the exekube container -- not present, defaulting to bash"
     cmd = "bash"
   end
-  sh "#{@exekube_cmd} rake xk['#{cmd}',true,true]"
+  sh "#{@exekube_cmd} rake xk['#{cmd}',skip_infra,skip_secret_mgmt]"
 end
 
 desc '[ADVANCED] Destroy secrets file stored in GS bucket for encryption key, passed as argument -- rake destroy_secrets"[default]"'
@@ -167,7 +167,7 @@ task :deploy_module, [:module] => [:set_vars, @gcp_creds_file] do |taskname, arg
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
     raise
   end
-  sh "#{@exekube_cmd} rake xk['up live/#{@env}/#{args[:module]}',true,true]"
+  sh "#{@exekube_cmd} rake xk['up live/#{@env}/#{args[:module]}',skip_infra,skip_secret_mgmt]"
 end
 
 desc '[ADVANCED] Destroy provided module in the cluster -- rake destroy_module"[k8s/kube-system/cert-manager]"'
@@ -179,7 +179,7 @@ task :destroy_module, [:module] => [:set_vars, @gcp_creds_file] do |taskname, ar
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
     raise
   end
-  sh "#{@exekube_cmd} rake xk['down live/#{@env}/#{args[:module]}',true,true]"
+  sh "#{@exekube_cmd} rake xk['down live/#{@env}/#{args[:module]}',skip_infra,skip_secret_mgmt]"
 end
 
 # vim: et ts=2 sw=2:

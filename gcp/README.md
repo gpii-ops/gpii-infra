@@ -80,7 +80,8 @@ rake sh["gcloud services disable container.googleapis.com"]
 
 ### Restoring CouchDB data
 
-We are considering number of probable failure scenarios for our GCP infrastructure:
+We are considering number of probable failure scenarios for our GCP infrastructure.
+You can run all `kubectl` commands mentioned below inside of interactive shell started with `rake sh`.
 
 1. **Data corruption on a single CouchDB replica**
 

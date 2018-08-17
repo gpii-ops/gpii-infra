@@ -5,7 +5,9 @@ require_relative "./sh_filter.rb"
 
 @exekube_cmd = "/usr/local/bin/xk"
 
-desc 'From inside of exekube container: apply infra, secret-mgmt, set secrets, and then execute arbitrary command -- do not call directly!'
+# This task is being called from entrypoint.rake and runs inside exekube container.
+# It applies infra, secret-mgmt, sets secrets, and then executes arbitrary command from args[:cmd].
+# You should not invoke this task directly!
 task :xk, [:cmd, :skip_infra, :skip_secret_mgmt] do |taskname, args|
   @secrets = Secrets.collect_secrets()
 
