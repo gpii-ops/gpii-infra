@@ -5,6 +5,14 @@ terraform {
   backend "gcs" {}
 }
 
+variable "organization_name" {
+  default = "gpii"
+}
+
+variable "organization_domain" {
+  default = "gpii.net"
+}
+
 variable "project_name" {} # name of the project to create
 
 variable "project_owner" {}
@@ -37,8 +45,8 @@ locals  {
 }
 
 resource "google_project" "project" {
-  name            = "gpii-gcp-${var.project_name}"
-  project_id      = "gpii-gcp-${var.project_name}"
+  name            = "${var.organization_name}-gcp-${var.project_name}"
+  project_id      = "${var.organization_name}-gcp-${var.project_name}"
   billing_account = "${var.billing_id}"
   org_id          = "${var.organization_id}"
 }
@@ -68,7 +76,7 @@ resource "google_project_iam_binding" "project" {
     "user:${var.project_owner}",
     "group:ops@raisingthefloor.org",
     "serviceAccount:${google_service_account.project.email}",
-    "serviceAccount:projectowner@gpii-common-prd.iam.gserviceaccount.com",
+    "serviceAccount:projectowner@${var.organization_name}-common-prd.iam.gserviceaccount.com",
   ]
 }
 
@@ -85,30 +93,30 @@ resource "google_dns_managed_zone" "project" {
 # project_name has the pattern ${env}-${user}
 resource "google_dns_record_set" "ns" {
   name         = "${local.dnsname}"
-  managed_zone = "gpii-gcp-${element(split("-", var.project_name), 0)}-zone"
+  managed_zone = "${var.organization_name}-gcp-${element(split("-", var.project_name), 0)}-zone"
   type         = "NS"
   ttl          = 3600
-  project      = "gpii-gcp-${element(split("-", var.project_name), 0)}"
+  project      = "${var.organization_name}-gcp-${element(split("-", var.project_name), 0)}"
   rrdatas      = ["${google_dns_managed_zone.project.name_servers}"]
   count        = "${length(split("-", var.project_name)) == 2 ? 1 : 0}"
 }
 
-# Set the NS records in the gcp.gpii.net zone of the gpii-gcp-common-prd if the
+# Set the NS records in the gcp.$organization_domain zone of the $organization_name-gcp-common-prd if the
 # project name doesn't have a hyphen.
 resource "google_dns_record_set" "ns-root" {
   name         = "${local.dnsname}"
-  managed_zone = "gcp-gpii-net"
+  managed_zone = "gcp-${replace(var.organization_domain, ".", "-")}"
   type         = "NS"
   ttl          = 3600
-  project      = "gpii-gcp-common-prd"
+  project      = "${var.organization_name}-gcp-common-prd"
   rrdatas      = ["${google_dns_managed_zone.project.name_servers}"]
   count        = "${length(split("-", var.project_name)) == 1 ? 1 : 0}"
 }
 
 resource "google_storage_bucket" "project-tfstate" {
   project     = "${google_project.project.project_id}"
-  name = "gpii-gcp-${var.project_name}-tfstate"
-  versioning = {
+  name        = "${var.organization_name}-gcp-${var.project_name}-tfstate"
+  versioning  = {
     enabled = "true"
   }
 }

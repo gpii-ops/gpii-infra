@@ -1,3 +1,5 @@
+variable "organization_domain" {}
+
 variable "record_name" {}
 
 variable "aws_zone_id" {}
@@ -9,7 +11,7 @@ variable "ns_records" {
 
 
 resource "aws_route53_zone" "main" {
-  name = "${var.record_name}.gpii.net"
+  name = "${var.record_name}.${var.organization_domain}"
   lifecycle   {
      prevent_destroy = "true"
   }
