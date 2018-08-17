@@ -6,6 +6,7 @@
 aws/dev/terraform.tfstate*
 graph*.png
 gcp/live/*/**/owner.json
+gcp/live/*/compose.env
 gcp/live/*/*secrets/**
 gcp/live/*/*values/**
 common/live/*/*secrets/**
