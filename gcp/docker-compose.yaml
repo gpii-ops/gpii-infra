@@ -58,12 +58,10 @@ services:
 
 volumes:
   secrets:
-    # We add USER -- potentially a second time as
-    # TF_VAR_project_id may contain USER already, e.g.
-    # gcp-gpii-dev-mrtyler) -- to prevent conflicts when
-    # two users (e.g. mrtyler and gitlab-runner) are
-    # working on the same environment on the same machine
-    # (e.g. the CI worker).
+    # We add USER -- potentially a second time as TF_VAR_project_id may contain
+    # USER already, e.g.  gcp-gpii-dev-mrtyler -- to prevent conflicts when two
+    # users (e.g. mrtyler and gitlab-runner) are working on the same
+    # environment on the same machine (e.g. the CI worker).
     name: ${TF_VAR_project_id}-${USER}-secrets
   helm:
     name: ${TF_VAR_project_id}-${USER}-helm

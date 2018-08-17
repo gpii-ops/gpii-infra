@@ -85,10 +85,11 @@ task :configure_kubectl => [:set_vars] do
     fi"
 end
 
-@serviceaccount_key_file = "secrets/kube-system/owner.json"
+# This duplicates information in docker-compose.yaml,
+# TF_VAR_serviceaccount_key.
+@serviceaccount_key_file = "/project/live/#{@env}/secrets/kube-system/owner.json"
 desc "[ADVANCED] Create and download credentials for projectowner service account"
-task :configure_serviceaccount => [:set_vars, @serviceaccount_key_file]
-rule @serviceaccount_key_file do
+task :configure_serviceaccount => [:set_vars] do
   # TODO: This command is duplicated from exekube's gcp-project-init (and
   # hardcodes 'projectowner' instead of $SA_NAME which is only defined in
   # gcp-project-init). If gcp-project-init becomes idempotent (GPII-2989,
@@ -96,10 +97,11 @@ rule @serviceaccount_key_file do
   # step moves somewhere else in exekube, call this command from that place
   # instead.
   sh "
-    #{@exekube_cmd} sh -c 'gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
-      --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com'"
+    #{@exekube_cmd} sh -c '
+      [ -f $TF_VAR_serviceaccount_key ] || \
+        gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
+        --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com'"
 end
-CLOBBER << @serviceaccount_key_file
 
 desc "[EXPERT] Copy GCP credentials from local storage on CI worker"
 task :configure_serviceaccount_ci => [:set_vars] do
@@ -108,15 +110,15 @@ task :configure_serviceaccount_ci => [:set_vars] do
   # credentials, copy them to the expected place, and activate them for later
   # use by `gcloud` commands.
   #
-  # Another way to think of it: this task uses an alternate strategy to build
-  # @serviceaccount_key_file.
+  # Another way to think of it: this task uses an alternate strategy to
+  # accomplish the same result as @serviceaccount_key_file.
   FileUtils.mkdir_p(File.dirname(@serviceaccount_key_file))
   FileUtils.install("#{Dir.home}/.ssh/gcp-config/#{@env}/owner.json", "#{@serviceaccount_key_file}", :mode => 0400)
   sh "#{@exekube_cmd} sh -c 'gcloud auth activate-service-account --key-file $TF_VAR_serviceaccount_key --project $TF_VAR_project_id'"
 end
 
 desc "[ADVANCED] Tell gcloud to use TF_VAR_project_id as the default Project; can be useful after 'rake clobber'"
-task :configure_current_project => [:set_vars, @serviceaccount_key_file] do
+task :configure_current_project => [:set_vars] do
   sh "#{@exekube_cmd} gcloud config set project #{ENV["TF_VAR_project_id"]}"
 end
 
@@ -126,17 +128,17 @@ task :project_init => [:set_vars] do
 end
 
 desc "[ADVANCED] Create or update infrastructure for secret management, this has no corresponding destroy task"
-task :apply_secret_mgmt => [:set_vars, @serviceaccount_key_file] do
+task :apply_secret_mgmt => [:set_vars, :configure_serviceaccount] do
   sh "#{@exekube_cmd} up live/#{@env}/secret-mgmt"
 end
 
 desc "[ADVANCED] Create or update low-level infrastructure"
-task :apply_infra => [:set_vars, @serviceaccount_key_file] do
+task :apply_infra => [:set_vars, :configure_serviceaccount] do
   sh "#{@exekube_cmd} up live/#{@env}/infra"
 end
 
 desc "Create cluster and deploy GPII components to it"
-task :deploy => [:set_vars, @serviceaccount_key_file, :configure_kubectl, :apply_infra, :set_secrets] do
+task :deploy => [:set_vars, :configure_serviceaccount, :configure_kubectl, :apply_infra, :set_secrets] do
   # Workaround for 'context deadline exceeded' issue:
   # https://github.com/exekube/exekube/issues/62
   # https://github.com/docker/for-mac/issues/2076
@@ -146,7 +148,7 @@ task :deploy => [:set_vars, @serviceaccount_key_file, :configure_kubectl, :apply
 end
 
 desc "Undeploy GPII compoments and destroy cluster"
-task :destroy => [:set_vars, @serviceaccount_key_file, :configure_kubectl, :set_secrets] do
+task :destroy => [:set_vars, :configure_serviceaccount, :configure_kubectl, :set_secrets] do
   # Terraform will fail if template files are missing, and since values_dir is not mounted
   # from host machine anymore, all templates vanish after docker-compose container is terminated.
   # So we have to invoke templater with the main exekube command
@@ -154,7 +156,7 @@ task :destroy => [:set_vars, @serviceaccount_key_file, :configure_kubectl, :set_
 end
 
 desc "Destroy cluster and low-level infrastructure"
-task :destroy_infra => [:set_vars, @serviceaccount_key_file, :destroy] do
+task :destroy_infra => [:set_vars, :configure_serviceaccount, :destroy] do
   sh "#{@exekube_cmd} down live/#{@env}/infra"
 end
 
