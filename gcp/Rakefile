@@ -1,4 +1,4 @@
-import "rakefiles/deploy.rake"
+import "rakefiles/xk.rake"
 
 unless ENV['ENV']
   puts "  ERROR: Wrong entry point!"

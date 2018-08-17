@@ -21,7 +21,7 @@ if @project_type.nil?
 end
 
 desc "Create cluster and deploy GPII components to it"
-task :default => :call_deploy
+task :default => :deploy
 
 task :set_vars do
   Vars.set_vars(@env, @project_type)
@@ -87,28 +87,28 @@ task :set_current_project => [:set_vars, @gcp_creds_file, @serviceaccount_key_fi
 end
 
 desc "Create cluster and deploy GPII components to it"
-task :call_deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file] do
+task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file] do
   # Workaround for 'context deadline exceeded' issue:
   # https://github.com/exekube/exekube/issues/62
   # https://github.com/docker/for-mac/issues/2076
   # Remove this when docker for mac 18.05 becomes stable
   sh "docker run --rm --privileged alpine hwclock -s"
-  sh "#{@exekube_cmd} rake deploy"
+  sh "#{@exekube_cmd} rake xk[up]"
 end
 
 desc "Undeploy GPII compoments and destroy cluster"
-task :call_destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file] do
-  sh "#{@exekube_cmd} rake destroy"
+task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file] do
+  sh "#{@exekube_cmd} rake xk[down]"
 end
 
 desc "[ADVANCED] Create or update low-level infrastructure"
-task :call_apply_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
-  sh "#{@exekube_cmd} rake apply_infra"
+task :apply_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
+  sh "#{@exekube_cmd} up live/#{@env}/infra"
 end
 
 desc "Destroy cluster and low-level infrastructure"
-task :call_destroy_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
-  sh "#{@exekube_cmd} rake destroy_infra"
+task :destroy_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
+  sh "#{@exekube_cmd} down live/#{@env}/infra"
 end
 
 desc "[ADVANCED] Remove stale Terraform locks from GS -- for non-dev environments coordinate with the team first"
@@ -119,15 +119,15 @@ task :unlock => [:set_vars, @gcp_creds_file] do
     done'"
 end
 
-desc '[ADVANCED] Run arbitrary exekube command -- rake xk"[kubectl get pods]"'
-task :xk, [:cmd] => [:set_vars] do |taskname, args|
+desc '[ADVANCED] Run arbitrary exekube command -- rake sh["kubectl --namespace gpii get pods"]'
+task :sh, [:cmd] => [:set_vars] do |taskname, args|
   if args[:cmd]
     cmd = args[:cmd]
   else
     puts "Argument :cmd -- the command to run inside the exekube container -- not present, defaulting to sh"
-    cmd = "sh"
+    cmd = "bash"
   end
-  sh "#{@exekube_cmd} #{cmd}"
+  sh "#{@exekube_cmd} rake xk['#{cmd}',true,true]"
 end
 
 desc '[ADVANCED] Destroy secrets file stored in GS bucket for encryption key, passed as argument -- rake destroy_secrets"[default]"'
@@ -159,27 +159,27 @@ task :redeploy_module, [:module] => [:set_vars, @gcp_creds_file] do |taskname, a
 end
 
 desc '[ADVANCED] Deploy provided module into the cluster -- rake deploy_module"[k8s/kube-system/cert-manager]"'
-task :deploy_module, [:module] => [:set_vars, @gcp_creds_file, :set_secrets] do |taskname, args|
+task :deploy_module, [:module] => [:set_vars, @gcp_creds_file] do |taskname, args|
   if args[:module].nil?
     puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
-    raise ArgumentError, "args[:module] must be set"
+    raise
   elsif !File.directory?(args[:module])
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
-    raise IOError, "args[:module] must point to existing Terragrunt directory"
+    raise
   end
-  sh "#{@exekube_cmd} xk up live/#{@env}/#{args[:module]}"
+  sh "#{@exekube_cmd} rake xk['up live/#{@env}/#{args[:module]}',true]"
 end
 
 desc '[ADVANCED] Destroy provided module in the cluster -- rake destroy_module"[k8s/kube-system/cert-manager]"'
-task :destroy_module, [:module] => [:set_vars, @gcp_creds_file, :set_secrets] do |taskname, args|
+task :destroy_module, [:module] => [:set_vars, @gcp_creds_file] do |taskname, args|
   if args[:module].nil?
     puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
-    raise ArgumentError, "args[:module] must be set"
+    raise
   elsif !File.directory?(args[:module])
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
-    raise IOError, "args[:module] must point to existing Terragrunt directory"
+    raise
   end
-  sh "#{@exekube_cmd} xk down live/#{@env}/#{args[:module]}"
+  sh "#{@exekube_cmd} rake xk['down live/#{@env}/#{args[:module]}',true]"
 end
 
 # vim: et ts=2 sw=2:
