@@ -5,6 +5,10 @@ metadata:
   name: {{ template "flowmanager.name" . }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  strategy:
+    rollingUpdate:
+      maxSurge: {{ .Values.rollingUpdate.maxSurge }}
+      maxUnavailable: {{ .Values.maxUnavailable }}
   template:
     metadata:
       labels:
