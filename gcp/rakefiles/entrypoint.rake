@@ -29,6 +29,7 @@ Rake::Task["clean"].enhance do
 end
 
 task :clobber_volumes => :set_vars do
+  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-secrets"
   sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-gcloud"
 end
 Rake::Task["clobber"].enhance do
@@ -64,7 +65,7 @@ task :set_secrets, [:skip_secret_mgmt] do |taskname, args|
   Secrets.set_secrets(@secrets, @exekube_cmd)
 end
 
-desc "[ADVANCED] Authenticate and generate GCP credentials (gcloud auth login)"
+desc "Authenticate and generate GCP credentials (gcloud auth login)"
 task :configure_login => [:set_vars] do
   # This authenticates to GCP/the `gcloud` command in the normal, interactive
   # way. This is the default method, best for human users.

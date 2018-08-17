@@ -45,6 +45,7 @@ services:
     volumes:
       - .:/project
       - ../common/charts:/charts
+      - secrets:/project/live/${ENV}/secrets
       - helm:/root/.helm
       - terragrunt:/root/.terragrunt
       - gcloud:/root/.config/gcloud
@@ -56,13 +57,15 @@ services:
     command: kubectl proxy --address="0.0.0.0" --accept-hosts ".*"
 
 volumes:
-  helm:
+  secrets:
     # We add USER -- potentially a second time as
     # TF_VAR_project_id may contain USER already, e.g.
     # gcp-gpii-dev-mrtyler) -- to prevent conflicts when
     # two users (e.g. mrtyler and gitlab-runner) are
     # working on the same environment on the same machine
     # (e.g. the CI worker).
+    name: ${TF_VAR_project_id}-${USER}-secrets
+  helm:
     name: ${TF_VAR_project_id}-${USER}-helm
   terragrunt:
     name: ${TF_VAR_project_id}-${USER}-terragrunt
