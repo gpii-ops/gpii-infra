@@ -14,7 +14,7 @@ task :xk, [:cmd, :skip_infra, :skip_secret_mgmt] do |taskname, args|
 
   Secrets.set_secrets(@secrets)
 
-  sh_filter "#{@exekube_cmd} #{args[:cmd]} #{args[:module]}" if args[:cmd]
+  sh_filter "#{@exekube_cmd} #{args[:cmd]}" if args[:cmd]
 end
 
 # vim: et ts=2 sw=2:
