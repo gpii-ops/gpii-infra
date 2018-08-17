@@ -1,6 +1,6 @@
 import "rakefiles/deploy.rake"
 
-if !ENV['ENV']
+unless ENV['ENV']
   puts "  ERROR: Wrong entry point!"
   puts "  You should run rake from live/ENV folder,"
   puts "  where ENV is target environment (i.e. dev/stg/prd)!"

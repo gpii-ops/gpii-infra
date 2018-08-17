@@ -8,7 +8,7 @@ require_relative "./sh_filter.rb"
 task :set_secrets, [:skip_secret_mgmt] do |taskname, args|
   @secrets = Secrets.collect_secrets()
   Rake::Task[:apply_secret_mgmt].invoke unless args[:skip_secret_mgmt]
-  Secrets.set_secrets(@secrets, @exekube_cmd)
+  Secrets.set_secrets(@secrets)
 end
 
 task :apply_infra do

@@ -24,13 +24,13 @@ desc "Create cluster and deploy GPII components to it"
 task :default => :call_deploy
 
 task :set_vars do
-  FileUtils.mkdir_p @dot_config_path
   Vars.set_vars(@env, @project_type)
   Vars.set_versions()
   tf_vars = []
   ENV.each do |key, val|
    tf_vars << key if key.match(/^TF_VAR_/)
   end
+  FileUtils.mkdir_p @dot_config_path
   File.open("#{@dot_config_path}/compose.env", 'w') do |file|
     file.write(tf_vars.join("\n"))
   end

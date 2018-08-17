@@ -1,7 +1,7 @@
 require "base64"
+require "json"
 require "openssl"
 require "securerandom"
-require "json"
 require "yaml"
 
 class Secrets
@@ -81,11 +81,9 @@ class Secrets
   #
   # When encrypted secret file is present, it always uses its decrypted data as a source for secrets.
   # Use `rake destroy_secrets[KEY_NAME]` to forcefully repopulate secrets for target encryption key
-  def self.set_secrets(collected_secrets, exekube_cmd)
-    return if collected_secrets.empty?
-
+  def self.set_secrets(collected_secrets)
     collected_secrets.each do |encryption_key, secrets|
-      decrypted_secrets = fetch_secrets(encryption_key, exekube_cmd)
+      decrypted_secrets = fetch_secrets(encryption_key)
 
       if decrypted_secrets
         decrypted_secrets.each do |secret_name, secret_value|
@@ -108,26 +106,26 @@ class Secrets
           populated_secrets[secret_name] = secret_value
         end
 
-        push_secrets(populated_secrets, encryption_key, exekube_cmd)
+        push_secrets(populated_secrets, encryption_key)
       end
     end
   end
 
-  def self.push_secrets(secrets, encryption_key, exekube_cmd)
+  def self.push_secrets(secrets, encryption_key)
     gs_bucket = "#{ENV['TF_VAR_project_id']}-#{encryption_key}-secrets"
     encoded_secrets = Base64.encode64(secrets.to_json).delete!("\n")
 
     puts "[secret-mgmt] Encrypting secrets for key '#{encryption_key}'..."
     encrypted_secrets = %x{
-      #{exekube_cmd} sh -c 'curl -s \
+      curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
       -H \"Content-Type:application/json\" \
       -X POST \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{ENV['TF_VAR_project_id']}/locations/global/keyRings/#{Secrets::KMS_KEYRING}/cryptoKeys/#{encryption_key}:encrypt\" \
-      -d \"{\\\"plaintext\\\":\\\"#{encoded_secrets}\\\"}\"'
+      -d \"{\\\"plaintext\\\":\\\"#{encoded_secrets}\\\"}\"
     }
 
     begin
-      responce_check = JSON.parse(encrypted_secrets)
+      response_check = JSON.parse(encrypted_secrets)
     rescue
       puts "ERROR: Unable to parse encrypted secrets data for key '#{encryption_key}', terminating!"
       raise
@@ -136,29 +134,29 @@ class Secrets
     puts "[secret-mgmt] Uploading encrypted secrets for key '#{encryption_key}' into GS bucket..."
     encrypted_secrets = Base64.encode64(encrypted_secrets).delete!("\n")
     api_call_data = %x{
-      #{exekube_cmd} sh -c 'curl -s \
+      curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
       -X POST \"#{Secrets::GOOGLE_CLOUD_API}/upload/storage/v1/b/#{gs_bucket}/o?uploadType=media&name=#{Secrets::SECRETS_FILE}\" \
-      -d \"#{encrypted_secrets}\"'
+      -d \"#{encrypted_secrets}\"
     }
 
     begin
-      responce_check = JSON.parse(api_call_data)
+      response_check = JSON.parse(api_call_data)
     rescue
       puts "ERROR: Unable to upload encrypted secrets for key '#{encryption_key}' into GS bucket, terminating!"
       raise
     end
   end
 
-  def self.fetch_secrets(encryption_key, exekube_cmd)
+  def self.fetch_secrets(encryption_key)
     gs_bucket = "#{ENV['TF_VAR_project_id']}-#{encryption_key}-secrets"
     gs_secrets_file = "#{gs_bucket}/o/#{Secrets::SECRETS_FILE}"
 
     puts "[secret-mgmt] Checking if secrets file for key '#{encryption_key}' is present in GS bucket..."
     api_call_data = %x{
-      #{exekube_cmd} sh -c 'curl -s \
+      curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
-      -X GET \"#{Secrets::GOOGLE_CLOUD_API}/storage/v1/b/#{gs_secrets_file}\"'
+      -X GET \"#{Secrets::GOOGLE_CLOUD_API}/storage/v1/b/#{gs_secrets_file}\"
     }
 
     begin
@@ -175,9 +173,9 @@ class Secrets
 
     puts "[secret-mgmt] Retrieving encrypted secrets for key '#{encryption_key}' from GS bucket..."
     api_call_data = %x{
-      #{exekube_cmd} sh -c 'curl -s \
+      curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
-      -X GET \"#{Secrets::GOOGLE_CLOUD_API}/storage/v1/b/#{gs_secrets_file}?alt=media\"'
+      -X GET \"#{Secrets::GOOGLE_CLOUD_API}/storage/v1/b/#{gs_secrets_file}?alt=media\"
     }
 
     gs_secrets = JSON.parse(Base64.decode64(api_call_data))
@@ -188,11 +186,11 @@ class Secrets
 
     puts "[secret-mgmt] Decrypting secrets for key '#{encryption_key}' with KMS cert..."
     decrypted_secrets = %x{
-      #{exekube_cmd} sh -c 'curl -s \
+      curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
       -H \"Content-Type:application/json\" \
       -X POST \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{ENV['TF_VAR_project_id']}/locations/global/keyRings/#{Secrets::KMS_KEYRING}/cryptoKeys/#{encryption_key}:decrypt\" \
-      -d \"{\\\"ciphertext\\\":\\\"#{gs_secrets['ciphertext']}\\\"}\"'
+      -d \"{\\\"ciphertext\\\":\\\"#{gs_secrets['ciphertext']}\\\"}\"
     }
 
     begin
