@@ -23,6 +23,8 @@ describe Vars do
   it "set_vars requires ENV['USER'] when env=dev" do
     allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[])
+    allow(ENV).to receive(:[]).with("TF_VAR_organization_name").and_return("fakecorp")
+    allow(ENV).to receive(:[]).with("TF_VAR_organization_domain").and_return("corp.es")
     env = "dev"
     project_type = "fake-project-type"
     expect { Vars.set_vars(env, project_type) }.to raise_error(ArgumentError, "USER must be set")
@@ -32,24 +34,30 @@ describe Vars do
     allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[])
     allow(ENV).to receive(:[]).with("USER").and_return("fake-user")
+    allow(ENV).to receive(:[]).with("TF_VAR_organization_name").and_return("fakecorp")
+    allow(ENV).to receive(:[]).with("TF_VAR_organization_domain").and_return("corp.es")
     env = "dev"
     project_type = "fake-project-type"
     Vars.set_vars(env, project_type)
-    expect(ENV).to have_received(:[]=).with("TF_VAR_project_id", "gpii-#{project_type}-#{env}-fake-user")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_project_id", "fakecorp-#{project_type}-#{env}-fake-user")
   end
 
   it "set_vars calculates ENV['TF_VAR_project_id'] when env=stg" do
     allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[])
+    allow(ENV).to receive(:[]).with("TF_VAR_organization_name").and_return("fakecorp")
+    allow(ENV).to receive(:[]).with("TF_VAR_organization_domain").and_return("corp.es")
     env = "stg"
     project_type = "fake-project-type"
     Vars.set_vars(env, project_type)
-    expect(ENV).to have_received(:[]=).with("TF_VAR_project_id", "gpii-#{project_type}-#{env}")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_project_id", "fakecorp-#{project_type}-#{env}")
   end
 
   it "set_vars requires ENV['TF_VAR_project_id'] for unknown values of env" do
     allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return(nil)
+    allow(ENV).to receive(:[]).with("TF_VAR_organization_name").and_return("fakecorp")
+    allow(ENV).to receive(:[]).with("TF_VAR_organization_domain").and_return("corp.es")
     env = "fake-env"
     project_type = "fake-project-type"
     expect { Vars.set_vars(env, project_type) }.to raise_error(ArgumentError, "TF_VAR_project_id must be set")
@@ -59,11 +67,13 @@ describe Vars do
     allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[])
     allow(ENV).to receive(:[]).with("USER").and_return("fake-user")
+    allow(ENV).to receive(:[]).with("TF_VAR_organization_name").and_return("fakecorp")
+    allow(ENV).to receive(:[]).with("TF_VAR_organization_domain").and_return("corp.es")
     env = "dev"
     project_type = "fake-project-type"
     Vars.set_vars(env, project_type)
-    expect(ENV).to have_received(:[]=).with("TF_VAR_dns_zones", %Q|{ dev-gcp-gpii-net = "fake-user.dev.gcp.gpii.net." }|)
-    expect(ENV).to have_received(:[]=).with("TF_VAR_dns_records", %Q|{ dev-gcp-gpii-net = "*.fake-user.dev.gcp.gpii.net." }|)
+    expect(ENV).to have_received(:[]=).with("TF_VAR_dns_zones", %Q|{ dev-gcp-corp-es = "fake-user.dev.gcp.corp.es." }|)
+    expect(ENV).to have_received(:[]=).with("TF_VAR_dns_records", %Q|{ dev-gcp-corp-es = "*.fake-user.dev.gcp.corp.es." }|)
   end
 
   it "set_vars doesn't clobber ENV['dns_(zones|records)'] when already set and env=dev" do
@@ -72,6 +82,8 @@ describe Vars do
     allow(ENV).to receive(:[]).with("USER").and_return("fake-user")
     allow(ENV).to receive(:[]).with("TF_VAR_dns_zones").and_return("fake-custom-dns-zone.")
     allow(ENV).to receive(:[]).with("TF_VAR_dns_records").and_return("fake-custom-dns-record.")
+    allow(ENV).to receive(:[]).with("TF_VAR_organization_name").and_return("fakecorp")
+    allow(ENV).to receive(:[]).with("TF_VAR_organization_domain").and_return("corp.es")
     env = "dev"
     project_type = "fake-project-type"
     Vars.set_vars(env, project_type)
@@ -83,6 +95,8 @@ describe Vars do
     allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[])
     allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
+    allow(ENV).to receive(:[]).with("TF_VAR_organization_name").and_return(nil)
+    allow(ENV).to receive(:[]).with("TF_VAR_organization_domain").and_return(nil)
     env = "fake-env"
     project_type = "fake-project-type"
     Vars.set_vars(env, project_type)
@@ -90,6 +104,8 @@ describe Vars do
     expect(ENV).to have_received(:[]=).with("TF_VAR_env", env)
     expect(ENV).to have_received(:[]=).with("ORGANIZATION_ID", "247149361674")
     expect(ENV).to have_received(:[]=).with("BILLING_ID", "01A0E1-B0B31F-349F4F")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_organization_name", "gpii")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_organization_domain", "gpii.net")
   end
 
   it "set_vars sets default vars for billing and organization" do
@@ -97,6 +113,8 @@ describe Vars do
     allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
     allow(ENV).to receive(:[]).with("ORGANIZATION_ID").and_return("fake-organization-id")
     allow(ENV).to receive(:[]).with("BILLING_ID").and_return("fake-billing-id")
+    allow(ENV).to receive(:[]).with("TF_VAR_organization_name").and_return("fakecorp")
+    allow(ENV).to receive(:[]).with("TF_VAR_organization_domain").and_return("corp.es")
     env = "fake-env"
     project_type = "fake-project-type"
     Vars.set_vars(env, project_type)
@@ -109,12 +127,16 @@ describe Vars do
     allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
     allow(ENV).to receive(:[]).with("ORGANIZATION_ID").and_return("fake-organization-id")
     allow(ENV).to receive(:[]).with("BILLING_ID").and_return("fake-billing-id")
+    allow(ENV).to receive(:[]).with("TF_VAR_organization_name").and_return("fakecorp")
+    allow(ENV).to receive(:[]).with("TF_VAR_organization_domain").and_return("corp.es")
     env = "stg"
     project_type = "fake-project-type"
     Vars.set_vars(env, project_type)
     expect(ENV).not_to have_received(:[]=).with("TF_VAR_project_id", any_args)
     expect(ENV).not_to have_received(:[]=).with("ORGANIZATION_ID", any_args)
     expect(ENV).not_to have_received(:[]=).with("BILLING_ID", any_args)
+    expect(ENV).not_to have_received(:[]=).with("TF_VAR_organization_name", any_args)
+    expect(ENV).not_to have_received(:[]=).with("TF_VAR_organization_domain", any_args)
   end
 
   it "set_vars sets TF_VAR_nonce" do

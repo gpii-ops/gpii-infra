@@ -16,11 +16,15 @@ class Vars
       end
     end
 
+    ENV["TF_VAR_organization_name"] = "gpii" if ENV["TF_VAR_organization_name"].nil?
+
+    ENV["TF_VAR_organization_domain"] = "gpii.net" if ENV["TF_VAR_organization_domain"].nil?
+
     if ENV["TF_VAR_project_id"].nil?
       if ["dev"].include?(env)
-        ENV["TF_VAR_project_id"] = "gpii-#{project_type}-#{env}-#{ENV["USER"]}"
+        ENV["TF_VAR_project_id"] = "#{ENV["TF_VAR_organization_name"]}-#{project_type}-#{env}-#{ENV["USER"]}"
       elsif ["stg", "prd"].include?(env)
-        ENV["TF_VAR_project_id"] = "gpii-#{project_type}-#{env}"
+        ENV["TF_VAR_project_id"] = "#{ENV["TF_VAR_organization_name"]}-#{project_type}-#{env}"
       else
         puts "  ERROR: TF_VAR_project_id must be set!"
         puts "  Usually, this value will be calculated for you, but you are"
@@ -34,12 +38,12 @@ class Vars
     end
 
     if ["dev"].include?(env)
-      zone = "#{ENV["USER"]}.#{env}.gcp.gpii.net."
+      zone = "#{ENV["USER"]}.#{env}.gcp.#{ENV["TF_VAR_organization_domain"]}."
       if ENV["TF_VAR_dns_zones"].nil?
-        ENV["TF_VAR_dns_zones"] = %Q|{ #{env}-gcp-gpii-net = "#{zone}" }|
+        ENV["TF_VAR_dns_zones"] = %Q|{ #{env}-gcp-#{ENV["TF_VAR_organization_domain"].tr('.','-')} = "#{zone}" }|
       end
       if ENV["TF_VAR_dns_records"].nil?
-        ENV["TF_VAR_dns_records"] = %Q|{ #{env}-gcp-gpii-net = "*.#{zone}" }|
+        ENV["TF_VAR_dns_records"] = %Q|{ #{env}-gcp-#{ENV["TF_VAR_organization_domain"].tr('.','-')} = "*.#{zone}" }|
       end
     end
 

@@ -38,7 +38,7 @@ locals  {
               replace(
                 google_project.project.name,
                 "/([\\w]+)-([\\w]+)-([\\w]+)-?([\\w]+)?/",
-                "$4.$3.$2.$1.net."),
+                "$4.$3.$2.${var.organization_domain}."),
               "/^\\./",
               "")
             }"
