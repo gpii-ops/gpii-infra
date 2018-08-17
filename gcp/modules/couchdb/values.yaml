@@ -10,3 +10,14 @@ persistentVolume:
     - ReadWriteOnce
   size: 10Gi
   storageClass: "standard"
+
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: "app"
+              operator: In
+              values:
+              - couchdb
+        topologyKey: "kubernetes.io/hostname"
