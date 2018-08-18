@@ -40,7 +40,6 @@ task :default => :deploy
 task :set_vars do
   Vars.set_vars(@env, @project_type)
   Vars.set_versions()
-  @secrets = Secrets.collect_secrets()
   Rake::Task[:set_compose_env].invoke
 end
 
@@ -56,11 +55,6 @@ task :set_compose_env do
   File.open(@compose_env_file, 'w') do |file|
     file.write(tf_vars.sort.join("\n"))
   end
-end
-
-task :set_secrets, [:skip_secret_mgmt] do |taskname, args|
-  Rake::Task[:apply_secret_mgmt].invoke unless args[:skip_secret_mgmt]
-  Secrets.set_secrets(@secrets, @exekube_cmd)
 end
 
 desc "Authenticate and generate GCP credentials (gcloud auth login)"
@@ -125,18 +119,13 @@ task :project_init => [:set_vars] do
   sh "#{@exekube_cmd} gcp-project-init"
 end
 
-desc "[ADVANCED] Create or update infrastructure for secret management, this has no corresponding destroy task"
-task :apply_secret_mgmt => [:set_vars, :configure_serviceaccount] do
-  sh "#{@exekube_cmd} up live/#{@env}/secret-mgmt"
-end
-
 desc "[ADVANCED] Create or update low-level infrastructure"
 task :apply_infra => [:set_vars, :configure_serviceaccount] do
   sh "#{@exekube_cmd} up live/#{@env}/infra"
 end
 
 desc "Create cluster and deploy GPII components to it"
-task :deploy => [:set_vars, :configure_serviceaccount, :configure_kubectl, :apply_infra, :set_secrets] do
+task :deploy => [:set_vars, :configure_serviceaccount, :configure_kubectl, :apply_infra] do
   # Workaround for 'context deadline exceeded' issue:
   # https://github.com/exekube/exekube/issues/62
   # https://github.com/docker/for-mac/issues/2076
@@ -146,13 +135,8 @@ task :deploy => [:set_vars, :configure_serviceaccount, :configure_kubectl, :appl
 end
 
 desc "Undeploy GPII compoments and destroy cluster"
-task :destroy => [:set_vars, :configure_serviceaccount, :configure_kubectl, :set_secrets] do
+task :destroy => [:set_vars, :configure_serviceaccount, :configure_kubectl] do
   sh "#{@exekube_cmd} rake xk[down]"
-end
-
-desc "[ADVANCED] Create or update low-level infrastructure"
-task :apply_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
-  sh "#{@exekube_cmd} up live/#{@env}/infra"
 end
 
 desc "Destroy cluster and low-level infrastructure"
@@ -208,7 +192,7 @@ task :redeploy_module, [:module] => [:set_vars] do |taskname, args|
 end
 
 desc '[ADVANCED] Deploy provided module into the cluster -- rake deploy_module"[k8s/kube-system/cert-manager]"'
-task :deploy_module, [:module] => [:set_vars, :configure_kubectl, :set_secrets] do |taskname, args|
+task :deploy_module, [:module] => [:set_vars, :configure_kubectl] do |taskname, args|
   if args[:module].nil?
     puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
     raise
@@ -220,7 +204,7 @@ task :deploy_module, [:module] => [:set_vars, :configure_kubectl, :set_secrets] 
 end
 
 desc '[ADVANCED] Destroy provided module in the cluster -- rake destroy_module"[k8s/kube-system/cert-manager]"'
-task :destroy_module, [:module] => [:set_vars, :configure_kubectl, :set_secrets] do |taskname, args|
+task :destroy_module, [:module] => [:set_vars, :configure_kubectl] do |taskname, args|
   if args[:module].nil?
     puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
     raise
