@@ -21,9 +21,9 @@ Initial instructions based on [exekube's Getting Started](https://exekube.github
 
 ## Tearing down an environment
 
-1. `rake destroy_cluster`
-   * This is the important one since it shuts down the expensive bits (VMs in the Kubernetes cluster, mostly)
 1. `rake destroy`
+   * This is the important one since it shuts down the expensive bits (VMs in the Kubernetes cluster, mostly)
+1. `rake destroy_infra`
    * Exekube recommends leaving these resources up since they are cheap
 1. There's no automation for destroying the Project and starting over. I usually use the GCP Dashboard.
    * Note that "deleting" a Project really marks it for deletion in 30 days. You can't create a new Project with the same name until the old one is culled.
