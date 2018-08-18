@@ -1,0 +1,6 @@
+master:
+  config:
+    target-host: ${target_host}
+
+worker:
+  replicaCount: ${locust_workers}
