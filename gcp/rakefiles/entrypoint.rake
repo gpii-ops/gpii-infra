@@ -64,19 +64,6 @@ task :configure_login => [:set_vars] do
   sh "#{@exekube_cmd} gcloud auth login"
 end
 
-desc "[ADVANCED] Fetch kubectl credentials (gcloud auth login)"
-task :configure_kubectl => [:set_vars] do
-  # This duplicates information in terraform code, 'k8s-cluster'
-  cluster_name = 'k8s-cluster'
-  # This duplicates information in terraform code, 'zone'. Could be a variable with some plumbing.
-  zone = 'us-central1-a'
-  sh "
-    if [[ $(#{@exekube_cmd} gcloud container clusters list --filter #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}) ]] ; \
-    then \
-      #{@exekube_cmd} gcloud container clusters get-credentials #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}
-    fi"
-end
-
 # This duplicates information in docker-compose.yaml,
 # TF_VAR_serviceaccount_key.
 @serviceaccount_key_file = "/project/live/#{@env}/secrets/kube-system/owner.json"
@@ -112,6 +99,19 @@ end
 desc "[ADVANCED] Tell gcloud to use TF_VAR_project_id as the default Project; can be useful after 'rake clobber'"
 task :configure_current_project => [:set_vars] do
   sh "#{@exekube_cmd} gcloud config set project #{ENV["TF_VAR_project_id"]}"
+end
+
+desc "[ADVANCED] Fetch kubectl credentials (gcloud auth login)"
+task :configure_kubectl => [:set_vars] do
+  # This duplicates information in terraform code, 'k8s-cluster'
+  cluster_name = 'k8s-cluster'
+  # This duplicates information in terraform code, 'zone'. Could be a variable with some plumbing.
+  zone = 'us-central1-a'
+  sh "
+    if [[ $(#{@exekube_cmd} gcloud container clusters list --filter #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}) ]] ; \
+    then \
+      #{@exekube_cmd} gcloud container clusters get-credentials #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}
+    fi"
 end
 
 desc "[NOT IDEMPOTENT, RUN ONCE PER ENVIRONMENT] Initialize GCP Project where this environment's resources will live"
