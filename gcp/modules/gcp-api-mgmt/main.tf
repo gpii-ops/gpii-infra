@@ -6,7 +6,7 @@ variable "project_id" {}
 variable "serviceaccount_key" {}
 
 variable "waiting_period" {
-	default = 60
+  default = 60
 }
 
 module "gcp-api-mgmt" {
