@@ -17,8 +17,6 @@ end
 
 @exekube_cmd = "docker-compose run --rm --service-ports xk"
 
-@dot_config_path = "../../.config/#{@env}"
-
 task :clean_volumes => :set_vars do
   sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-helm"
   sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-terragrunt"
@@ -200,7 +198,7 @@ task :destroy_tfstate, [:prefix] => [:set_vars, @gcp_creds_file] do |taskname, a
     raise ArgumentError, "args[:prefix] must be set"
   end
   sh "#{@exekube_cmd} sh -c 'gsutil -m rm -r gs://#{ENV["TF_VAR_project_id"]}-tfstate/#{@env}/#{args[:prefix]}'"
-  sh "rm -rf #{@dot_config_path}/terragrunt"
+  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-terragrunt"
 end
 
 desc '[ADVANCED] Destroy provided module in the cluster, and then deploy it -- rake redeploy_module"[k8s/kube-system/cert-manager]"'
