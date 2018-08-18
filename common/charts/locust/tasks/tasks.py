@@ -1,11 +1,15 @@
 from locust import HttpLocust, TaskSet, task
 
-class ElbTasks(TaskSet):
+class GpiiTasks(TaskSet):
   @task
-  def status(self):
-      self.client.get("/status")
+  def carla(self):
+      self.client.get("/preferences/carla")
 
-class ElbWarmer(HttpLocust):
-  task_set = ElbTasks
+  @task
+  def vladimir(self):
+      self.client.get("/preferences/vladimir")
+
+class GpiiWarmer(HttpLocust):
+  task_set = GpiiTasks
   min_wait = 1000
   max_wait = 3000
