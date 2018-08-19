@@ -83,11 +83,6 @@ task :configure_serviceaccount_ci => [:set_vars] do
   sh "#{@exekube_cmd} sh -c 'gcloud auth activate-service-account --key-file $TF_VAR_serviceaccount_key --project $TF_VAR_project_id'"
 end
 
-desc "[ADVANCED] Tell gcloud to use TF_VAR_project_id as the default Project; can be useful after 'rake clobber'"
-task :configure_current_project => [:set_vars] do
-  sh "#{@exekube_cmd} gcloud config set project #{ENV["TF_VAR_project_id"]}"
-end
-
 desc "[ADVANCED] Fetch kubectl credentials (gcloud auth login)"
 task :configure_kubectl => [:set_vars] do
   # This duplicates information in terraform code, 'k8s-cluster'
@@ -99,6 +94,11 @@ task :configure_kubectl => [:set_vars] do
     then \
       #{@exekube_cmd} gcloud container clusters get-credentials #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}
     fi"
+end
+
+desc "[ADVANCED] Tell gcloud to use TF_VAR_project_id as the default Project; can be useful after 'rake clobber'"
+task :configure_current_project => [:set_vars] do
+  sh "#{@exekube_cmd} gcloud config set project #{ENV["TF_VAR_project_id"]}"
 end
 
 desc "[NOT IDEMPOTENT, RUN ONCE PER ENVIRONMENT] Initialize GCP Project where this environment's resources will live"
