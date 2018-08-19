@@ -28,7 +28,7 @@ rule @serviceaccount_key_file => [@gcp_creds_file] do
         --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com"
 end
 
-@kubectl_creds_file = "/root/.config/kube/config"
+@kubectl_creds_file = "/root/.kube/config"
 task :configure_kubectl => [@kubectl_creds_file]
 rule @kubectl_creds_file => [@gcp_creds_file] do
   # This duplicates information in terraform code, 'k8s-cluster'
@@ -36,9 +36,9 @@ rule @kubectl_creds_file => [@gcp_creds_file] do
   # This duplicates information in terraform code, 'zone'. Could be a variable with some plumbing.
   zone = 'us-central1-a'
   sh "
-    if [[ $(#{@exekube_cmd} gcloud container clusters list --filter #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}) ]] ; \
-    then \
-      #{@exekube_cmd} gcloud container clusters get-credentials #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}
+    existing_cluster=$(gcloud container clusters list --filter #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]})
+    if [ $? == 0 ] && [ \"$existing_cluster\" != \"\" ]; then \
+      gcloud container clusters get-credentials #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}
     fi"
 end
 
