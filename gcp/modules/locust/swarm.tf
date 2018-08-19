@@ -1,3 +1,5 @@
+variable "nonce" {}
+
 resource "null_resource" "locust_swarm_session" {
   depends_on = ["module.locust"]
 
@@ -16,7 +18,7 @@ resource "null_resource" "locust_swarm_session" {
       sleep 5
 
       echo
-      echo "Starting Locust swarm with ${var.locust_users} users and ${var.locust_hatch_rate} hatch rate!"
+      echo "Starting Locust swarm with ${var.locust_users} users and hatch rate of ${var.locust_hatch_rate}!"
       curl -s -XPOST $LOCUST_URL/swarm -d"locust_count=${var.locust_users}&hatch_rate=${var.locust_hatch_rate}"
 
       echo
@@ -35,6 +37,7 @@ resource "null_resource" "locust_swarm_session" {
       echo
       echo "Processing stats..."
       SESSION_STATS=$(curl -s $LOCUST_URL/stats/requests)
+      total_rps=$(echo $SESSION_STATS | jq -r ".total_rps | floor")
       median_response_time=$(echo $SESSION_STATS | jq -r '.stats[] | select(.name == "Total").median_response_time | floor')
       max_response_time=$(echo $SESSION_STATS | jq -r '.stats[] | select(.name == "Total").max_response_time | floor')
       num_failures=$(echo $SESSION_STATS | jq -r '.stats[] | select(.name == "Total").num_failures')
@@ -43,23 +46,30 @@ resource "null_resource" "locust_swarm_session" {
       echo $SESSION_STATS
       SESSION_SUCCEEDED=1
 
+      if [ $total_rps -lt ${var.locust_desired_total_rps} ]; then
+        echo
+        echo "Looks like total_rps ($total_rps) is worse than desired (${var.locust_desired_total_rps})!"
+        echo "This is unacceptable!"
+        SESSION_SUCCEEDED=0
+      fi
+
       if [ $median_response_time -gt ${var.locust_desired_median_response_time} ]; then
         echo
-        echo "Looks like median_response_time($median_response_time) is worse than desired(${var.locust_desired_median_response_time})!"
+        echo "Looks like median_response_time ($median_response_time) is worse than desired (${var.locust_desired_median_response_time})!"
         echo "This is unacceptable!"
         SESSION_SUCCEEDED=0
       fi
 
       if [ $max_response_time -gt ${var.locust_desired_max_response_time} ]; then
         echo
-        echo "Looks like max_response_time($max_response_time) is worse than desired(${var.locust_desired_max_response_time})!"
+        echo "Looks like max_response_time ($max_response_time) is worse than desired (${var.locust_desired_max_response_time})!"
         echo "This is unacceptable!"
         SESSION_SUCCEEDED=0
       fi
 
       if [ $num_failures -gt ${var.locust_desired_num_failures} ]; then
         echo
-        echo "Looks like num_failures($num_failures) is worse than desired(${var.locust_desired_num_failures})!"
+        echo "Looks like num_failures ($num_failures) is worse than desired (${var.locust_desired_num_failures})!"
         echo "This is unacceptable!"
         SESSION_SUCCEEDED=0
       fi

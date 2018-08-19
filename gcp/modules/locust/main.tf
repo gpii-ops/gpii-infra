@@ -6,8 +6,6 @@ variable "env" {}
 variable "secrets_dir" {}
 variable "charts_dir" {}
 
-variable "nonce" {}
-
 variable "dns_zones" {
   type = "map"
 }
@@ -16,7 +14,7 @@ data "template_file" "locust_values" {
   template = "${file("values.yaml")}"
 
   vars {
-    locust_workers = "${var.env == "dev" ? "2" : "5"}"
+    locust_workers = "${var.env == "dev" ? "3" : "6"}"
     target_host    = "${var.env == "dev" ? "http" : "https"}://preferences.${
       var.locust_target_host == "" ? substr(
         var.dns_zones["${var.env}-gcp-gpii-net"], 0,

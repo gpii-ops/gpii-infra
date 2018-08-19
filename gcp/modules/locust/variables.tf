@@ -18,12 +18,16 @@ variable "locust_hatch_rate" {
   default = 10
 }
 
+variable "locust_desired_total_rps" {
+  default = 40
+}
+
 variable "locust_desired_median_response_time" {
   default = 100
 }
 
 variable "locust_desired_max_response_time" {
-  default = 500
+  default = 800
 }
 
 variable "locust_desired_num_failures" {
