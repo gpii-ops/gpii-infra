@@ -85,15 +85,7 @@ end
 
 desc "[ADVANCED] Fetch kubectl credentials (gcloud auth login)"
 task :configure_kubectl => [:set_vars] do
-  # This duplicates information in terraform code, 'k8s-cluster'
-  cluster_name = 'k8s-cluster'
-  # This duplicates information in terraform code, 'zone'. Could be a variable with some plumbing.
-  zone = 'us-central1-a'
-  sh "
-    if [[ $(#{@exekube_cmd} gcloud container clusters list --filter #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}) ]] ; \
-    then \
-      #{@exekube_cmd} gcloud container clusters get-credentials #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}
-    fi"
+  sh "#{@exekube_cmd} rake configure_kubectl"
 end
 
 desc "[ADVANCED] Tell gcloud to use TF_VAR_project_id as the default Project; can be useful after 'rake clobber'"

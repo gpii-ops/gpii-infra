@@ -4,8 +4,8 @@ require_relative "./secrets.rb"
 require_relative "./sh_filter.rb"
 
 @exekube_cmd = "/usr/local/bin/xk"
-@gcp_creds_file = "/root/.config/gcloud/credentials.db"
 
+@gcp_creds_file = "/root/.config/gcloud/credentials.db"
 task :configure_login => [@gcp_creds_file]
 rule @gcp_creds_file do
   # This authenticates to GCP/the `gcloud` command in the normal, interactive
@@ -28,10 +28,24 @@ rule @serviceaccount_key_file => [@gcp_creds_file] do
         --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com"
 end
 
+@kubectl_creds_file = "/root/.config/kube/config"
+task :configure_kubectl => [@kubectl_creds_file]
+rule @kubectl_creds_file => [@gcp_creds_file] do
+  # This duplicates information in terraform code, 'k8s-cluster'
+  cluster_name = 'k8s-cluster'
+  # This duplicates information in terraform code, 'zone'. Could be a variable with some plumbing.
+  zone = 'us-central1-a'
+  sh "
+    if [[ $(#{@exekube_cmd} gcloud container clusters list --filter #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}) ]] ; \
+    then \
+      #{@exekube_cmd} gcloud container clusters get-credentials #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}
+    fi"
+end
+
 # This task is being called from entrypoint.rake and runs inside exekube container.
 # It applies infra, secret-mgmt, sets secrets, and then executes arbitrary command from args[:cmd].
 # You should not invoke this task directly!
-task :xk, [:cmd, :skip_infra, :skip_secret_mgmt] => [@serviceaccount_key_file] do |taskname, args|
+task :xk, [:cmd, :skip_infra, :skip_secret_mgmt] => [@serviceaccount_key_file, @kubectl_creds_file] do |taskname, args|
   @secrets = Secrets.collect_secrets()
 
   sh "#{@exekube_cmd} up live/#{@env}/infra" unless args[:skip_infra]
