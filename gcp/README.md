@@ -47,16 +47,8 @@ Initial instructions based on [exekube's Getting Started](https://exekube.github
       * He only authorized his own email for now, to see what it did. But it's possible other Ops team members will need to go through this step.
 
 ## One-time CI Setup
-1. Download credentials for `projectowner@gpii-gcp-dev-gitlab-runner.iam.gserviceaccount.com`.
-   * `cd live/dev`
-   * `rm secrets/kube-system/owner.json`
-   * `USER=gitlab-runner rake configure_serviceaccount`
-      * The `USER=` is only needed for the `dev` environment.
-   * On the CI Worker, as the user that runs the CI agent (e.g. `gitlab-runner`):
-      * `mkdir -m700 -p ~/.ssh/gcp-config/dev`
-      * Copy `live/dev/secrets/kube-system/owner.json` from where you run `rake` to the directory you created above.
-   * (Or, you can do this via the GCP Dashboard: IAM & Admin `->` Service accounts `->` ... Menu `->` Create key.)
-1. Repeat the above steps for other environments where CI will run (e.g. `stg`, `prd`), substituting the new environment for `dev` in each instruction.
+1. Log in to the CI Worker and clone this repo.
+1. `cd gpii-infra/ && rake -f rakefiles/ci_save_all.rake`
 
 ## FAQ / Troubleshooting
 

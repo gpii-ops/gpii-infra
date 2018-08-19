@@ -1,8 +1,9 @@
 task :set_vars_ci => [:set_vars] do
+  @secrets_backup_volume = "#{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-secrets-backup"
   # --volume must come after 'docker-compose run', before service name.
   @exekube_cmd_with_backups = @exekube_cmd.sub(
     " run ",
-    " run --volume #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-secrets-backup:/secrets-backup ",
+    " run --volume #{@secrets_backup_volume}:/secrets-backup ",
   )
   # This duplicates information in docker-compose.yaml,
   # TF_VAR_serviceaccount_key.
@@ -43,6 +44,11 @@ task :configure_serviceaccount_ci_save => [:set_vars_ci] do
     mkdir -p $(dirname #{@serviceaccount_key_file_in_backups}) && \
     cp -av $TF_VAR_serviceaccount_key #{@serviceaccount_key_file_in_backups} \
   '"
+end
+
+desc "[CI ONLY] Clobber local backup on CI worker"
+task :configure_serviceaccount_ci_clobber => [:set_vars_ci]  do
+  sh "docker volume rm -f -- #{@secrets_backup_volume}"
 end
 
 # vim: et ts=2 sw=2:
