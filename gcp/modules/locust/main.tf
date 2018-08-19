@@ -14,11 +14,14 @@ data "template_file" "locust_values" {
   template = "${file("values.yaml")}"
 
   vars {
-    locust_workers = "${var.env == "dev" ? "3" : "6"}"
-    target_host    = "${var.env == "dev" ? "http" : "https"}://preferences.${
-      var.locust_target_host == "" ? substr(
-        var.dns_zones["${var.env}-gcp-gpii-net"], 0,
-        length(var.dns_zones["${var.env}-gcp-gpii-net"]) - 1)
+    locust_workers = "${var.locust_workers == "" ?
+      "${var.env == "dev" ? "3" : "6"}"
+      : var.locust_workers
+    }"
+    target_host    = "${var.locust_target_host == "" ?
+      "${var.env == "dev" ? "http" : "https"}://preferences.${
+        substr(var.dns_zones["${var.env}-gcp-gpii-net"], 0,
+        length(var.dns_zones["${var.env}-gcp-gpii-net"]) - 1)}"
         : var.locust_target_host
     }"
   }
