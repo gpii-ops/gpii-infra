@@ -13,7 +13,7 @@ task :set_vars_ci => [:set_vars] do
   )
 end
 
-desc "[EXPERT] Restore GCP credentials from local backup on CI worker"
+desc "[CI ONLY] Restore GCP credentials from local backup on CI worker"
 task :configure_serviceaccount_ci_restore => [:set_vars_ci] do
   # The automated CI process cannot (and does not want to) authenticate in the
   # normal, interactive way. Instead, we will fetch previously downloaded
@@ -37,7 +37,7 @@ task :configure_serviceaccount_ci_restore => [:set_vars_ci] do
   '"
 end
 
-desc "[EXPERT] Save GCP credentials to local backup on CI worker"
+desc "[CI ONLY] Save GCP credentials to local backup on CI worker"
 task :configure_serviceaccount_ci_save => [:set_vars_ci] do
   sh "#{@exekube_cmd_with_backups} sh -c '\
     mkdir -p $(dirname #{@serviceaccount_key_file_in_backups}) && \
