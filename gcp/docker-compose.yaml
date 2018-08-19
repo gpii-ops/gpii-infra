@@ -68,3 +68,5 @@ volumes:
     name: ${TF_VAR_project_id}-${USER}-gcloud
   kube:
     name: ${TF_VAR_project_id}-${USER}-kube
+
+# vim: et ts=2 sw=2:

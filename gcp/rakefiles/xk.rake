@@ -13,9 +13,7 @@ rule @gcp_creds_file do
   sh "gcloud auth login"
 end
 
-# This duplicates information in docker-compose.yaml,
-# TF_VAR_serviceaccount_key.
-@serviceaccount_key_file = "/project/live/#{@env}/secrets/kube-system/owner.json"
+@serviceaccount_key_file = ENV["TF_VAR_serviceaccount_key"]
 task :configure_serviceaccount => [@serviceaccount_key_file]
 rule @serviceaccount_key_file => [@gcp_creds_file] do
   # TODO: This command is duplicated from exekube's gcp-project-init (and

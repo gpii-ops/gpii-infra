@@ -75,7 +75,7 @@ gcp-dev:
   script:
     - cd gcp/live/dev
     - rake clobber
-    - rake configure_serviceaccount_ci
+    - rake configure_serviceaccount_ci_restore
     - rake
   after_script:
     # Clean up even if something failed.
@@ -127,7 +127,7 @@ gcp-stg:
   script:
     - cd gcp/live/stg
     - rake clobber
-    - rake configure_serviceaccount_ci
+    - rake configure_serviceaccount_ci_restore
     - rake
   environment:
     name: stg
@@ -184,7 +184,7 @@ gcp-prd:
   script:
     - cd gcp/live/prd
     - rake clobber
-    - rake configure_serviceaccount_ci
+    - rake configure_serviceaccount_ci_restore
     - rake
   environment:
     name: prd
