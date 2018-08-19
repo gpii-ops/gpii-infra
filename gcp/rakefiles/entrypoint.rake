@@ -57,7 +57,7 @@ task :set_compose_env do
   end
 end
 
-desc "Authenticate and generate GCP credentials (gcloud auth login)"
+desc "[ADVANCED] Authenticate and generate GCP credentials (gcloud auth login)"
 task :configure_login => [:set_vars] do
   sh "#{@exekube_cmd} rake configure_login"
 end
@@ -94,7 +94,7 @@ task :configure_current_project => [:set_vars] do
 end
 
 desc "[NOT IDEMPOTENT, RUN ONCE PER ENVIRONMENT] Initialize GCP Project where this environment's resources will live"
-task :project_init => [:set_vars] do
+task :project_init => [:set_vars, :configure_serviceaccount] do
   sh "#{@exekube_cmd} gcp-project-init"
 end
 
