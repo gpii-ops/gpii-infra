@@ -104,7 +104,7 @@ task :apply_infra => [:set_vars, :configure_serviceaccount] do
 end
 
 desc "Create cluster and deploy GPII components to it"
-task :deploy => [:set_vars, :configure_kubectl, :apply_infra] do
+task :deploy => [:set_vars, :apply_infra] do
   # Workaround for 'context deadline exceeded' issue:
   # https://github.com/exekube/exekube/issues/62
   # https://github.com/docker/for-mac/issues/2076
@@ -114,7 +114,7 @@ task :deploy => [:set_vars, :configure_kubectl, :apply_infra] do
 end
 
 desc "Undeploy GPII compoments and destroy cluster"
-task :destroy => [:set_vars, :configure_kubectl] do
+task :destroy => [:set_vars] do
   sh "#{@exekube_cmd} rake xk[down]"
 end
 
@@ -171,7 +171,7 @@ task :redeploy_module, [:module] => [:set_vars] do |taskname, args|
 end
 
 desc '[ADVANCED] Deploy provided module into the cluster -- rake deploy_module"[k8s/kube-system/cert-manager]"'
-task :deploy_module, [:module] => [:set_vars, :configure_kubectl] do |taskname, args|
+task :deploy_module, [:module] => [:set_vars] do |taskname, args|
   if args[:module].nil?
     puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
     raise
@@ -183,7 +183,7 @@ task :deploy_module, [:module] => [:set_vars, :configure_kubectl] do |taskname, 
 end
 
 desc '[ADVANCED] Destroy provided module in the cluster -- rake destroy_module"[k8s/kube-system/cert-manager]"'
-task :destroy_module, [:module] => [:set_vars, :configure_kubectl] do |taskname, args|
+task :destroy_module, [:module] => [:set_vars] do |taskname, args|
   if args[:module].nil?
     puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
     raise
