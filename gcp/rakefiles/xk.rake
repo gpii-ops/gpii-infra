@@ -4,11 +4,34 @@ require_relative "./secrets.rb"
 require_relative "./sh_filter.rb"
 
 @exekube_cmd = "/usr/local/bin/xk"
+@gcp_creds_file = "/root/.config/gcloud/credentials.db"
+
+task :configure_login => [@gcp_creds_file]
+rule @gcp_creds_file do
+  # This authenticates to GCP/the `gcloud` command in the normal, interactive
+  # way. This is the default method, best for human users.
+  sh "gcloud auth login"
+end
+
+# This duplicates information in docker-compose.yaml,
+# TF_VAR_serviceaccount_key.
+@serviceaccount_key_file = "/project/live/#{@env}/secrets/kube-system/owner.json"
+task :configure_serviceaccount => [@serviceaccount_key_file]
+rule @serviceaccount_key_file => [@gcp_creds_file] do
+  # TODO: This command is duplicated from exekube's gcp-project-init (and
+  # hardcodes 'projectowner' instead of $SA_NAME which is only defined in
+  # gcp-project-init). If gcp-project-init becomes idempotent (GPII-2989,
+  # https://github.com/exekube/exekube/issues/92), or if this 'keys create'
+  # step moves somewhere else in exekube, call this command from that place
+  # instead.
+  sh "gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
+        --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com"
+end
 
 # This task is being called from entrypoint.rake and runs inside exekube container.
 # It applies infra, secret-mgmt, sets secrets, and then executes arbitrary command from args[:cmd].
 # You should not invoke this task directly!
-task :xk, [:cmd, :skip_infra, :skip_secret_mgmt] do |taskname, args|
+task :xk, [:cmd, :skip_infra, :skip_secret_mgmt] => [@serviceaccount_key_file] do |taskname, args|
   @secrets = Secrets.collect_secrets()
 
   sh "#{@exekube_cmd} up live/#{@env}/infra" unless args[:skip_infra]

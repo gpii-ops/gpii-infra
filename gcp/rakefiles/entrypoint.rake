@@ -59,27 +59,14 @@ end
 
 desc "Authenticate and generate GCP credentials (gcloud auth login)"
 task :configure_login => [:set_vars] do
-  # This authenticates to GCP/the `gcloud` command in the normal, interactive
-  # way. This is the default method, best for human users.
-  sh "#{@exekube_cmd} gcloud auth login"
+  sh "#{@exekube_cmd} rake configure_login"
 end
 
 # This duplicates information in docker-compose.yaml,
 # TF_VAR_serviceaccount_key.
-@serviceaccount_key_file = "/project/live/#{@env}/secrets/kube-system/owner.json"
 desc "[ADVANCED] Create and download credentials for projectowner service account"
 task :configure_serviceaccount => [:set_vars] do
-  # TODO: This command is duplicated from exekube's gcp-project-init (and
-  # hardcodes 'projectowner' instead of $SA_NAME which is only defined in
-  # gcp-project-init). If gcp-project-init becomes idempotent (GPII-2989,
-  # https://github.com/exekube/exekube/issues/92), or if this 'keys create'
-  # step moves somewhere else in exekube, call this command from that place
-  # instead.
-  sh "
-    #{@exekube_cmd} sh -c '
-      [ -f $TF_VAR_serviceaccount_key ] || \
-        gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
-        --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com'"
+  sh "#{@exekube_cmd} rake configure_serviceaccount"
 end
 
 desc "[EXPERT] Copy GCP credentials from local storage on CI worker"
@@ -125,7 +112,7 @@ task :apply_infra => [:set_vars, :configure_serviceaccount] do
 end
 
 desc "Create cluster and deploy GPII components to it"
-task :deploy => [:set_vars, :configure_serviceaccount, :configure_kubectl, :apply_infra] do
+task :deploy => [:set_vars, :configure_kubectl, :apply_infra] do
   # Workaround for 'context deadline exceeded' issue:
   # https://github.com/exekube/exekube/issues/62
   # https://github.com/docker/for-mac/issues/2076
@@ -135,7 +122,7 @@ task :deploy => [:set_vars, :configure_serviceaccount, :configure_kubectl, :appl
 end
 
 desc "Undeploy GPII compoments and destroy cluster"
-task :destroy => [:set_vars, :configure_serviceaccount, :configure_kubectl] do
+task :destroy => [:set_vars, :configure_kubectl] do
   sh "#{@exekube_cmd} rake xk[down]"
 end
 
@@ -176,7 +163,7 @@ task :destroy_secrets, [:encryption_key] => [:set_vars] do |taskname, args|
 end
 
 desc '[ADVANCED] Destroy Terraform state stored in GS bucket for prefix, passed as argument -- rake destroy_tfstate"[k8s]"'
-task :destroy_tfstate, [:prefix] => [:set_vars, @gcp_creds_file] do |taskname, args|
+task :destroy_tfstate, [:prefix] => [:set_vars] do |taskname, args|
   if args[:prefix].nil? || args[:prefix].size == 0
     puts "  ERROR: args[:prefix] must be set!"
     raise ArgumentError, "args[:prefix] must be set"
