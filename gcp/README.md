@@ -13,16 +13,16 @@ Initial instructions based on [exekube's Getting Started](https://exekube.github
    * You can use a different Organization or Billing Account, e.g. from a GCP Free Trial Account, with `export ORGANIZATION_ID=111111111111` and/or `export BILLING_ID=222222-222222-222222`.
 1. `cd gpii-infra/gcp/live/dev`
 1. `rake project_init`
-   * This will create a project called `gpii-dev-$USER` where `$USER` comes from your shell.
    * Follow the instructions to authenticate.
-   * This step is not idempotent. It will fail if you've already initialized the project named in `$TF_VAR_project_id` (e.g. `gpii-dev-$USER` or `gpii-prd`).
+   * This will create a project called `gpii-dev-$USER` where `$USER` comes from your shell.
+   * This step is not idempotent. It will fail if you've already initialized the project named in `$TF_VAR_project_id` (e.g. `gpii-gcp-dev-$USER` or `gpii-gcp-prd`).
 1. `rake`
 
 ## Tearing down an environment
 
-1. `rake destroy_cluster`
-   * This is the important one since it shuts down the expensive bits (VMs in the Kubernetes cluster, mostly)
 1. `rake destroy`
+   * This is the important one since it shuts down the expensive bits (VMs in the Kubernetes cluster, mostly)
+1. `rake destroy_infra`
    * Exekube recommends leaving these resources up since they are cheap
 1. There's no automation for destroying the Project and starting over. I usually use the GCP Dashboard.
    * Note that "deleting" a Project really marks it for deletion in 30 days. You can't create a new Project with the same name until the old one is culled.
@@ -45,6 +45,10 @@ Initial instructions based on [exekube's Getting Started](https://exekube.github
 * https://support.google.com/code/contact/billing_quota_increase
    * @mrtyler requested a quota bump to 100 Projects.
       * He only authorized his own email for now, to see what it did. But it's possible other Ops team members will need to go through this step.
+
+## One-time CI Setup
+1. Log in to the CI Worker and clone this repo.
+1. `cd gpii-infra/ && rake -f rakefiles/ci_save_all.rake`
 
 ## FAQ / Troubleshooting
 
