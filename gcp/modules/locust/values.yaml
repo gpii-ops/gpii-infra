@@ -4,3 +4,5 @@ master:
 
 worker:
   replicaCount: ${locust_workers}
+  config:
+    locust-script: /locust-tasks/${locust_script}

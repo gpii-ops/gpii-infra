@@ -13,6 +13,25 @@ resource "null_resource" "locust_swarm_session" {
         echo "Looks like TF_VAR_locust_swarm is unset, terminating!"
         exit
       fi
+
+      RETRIES=10
+      RETRY_COUNT=1
+      while [ "$WORKERS_READY" != "${var.locust_workers}" ]; do
+        echo "[Try $RETRY_COUNT of $RETRIES] Waiting for all Locust workers to join the master..."
+        WORKERS_READY=$(kubectl -n locust logs deployment/locust-master --tail 1 | grep -oE "Currently \d+ clients" | grep -oE "\d+")
+        if [ "$WORKERS_READY" != "" ]; then
+          echo "Number of ready workers: $WORKERS_READY out of ${var.locust_workers}!"
+        else
+          echo "Number of ready workers: 0 out of ${var.locust_workers}!"
+        fi
+        RETRY_COUNT=$(($RETRY_COUNT+1))
+        if [ "$RETRY_COUNT" -eq "$RETRIES" ] ; then
+          echo "Retry limit reached, giving up!"
+          exit 1
+        fi
+        sleep 5
+      done
+
       LOCUST_URL=http://127.0.0.1:8089
       kubectl --namespace locust port-forward deployment/locust-master 8089:8089 </dev/null &>/dev/null &
       sleep 5
