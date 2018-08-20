@@ -358,6 +358,109 @@ data='
 1. Before the restore: verify that the new record is present.
 1. After the restore: verify that the new record is no longer present.
 
+### Manual process: Generating db data of user preferences and load it into a cluster's preferences server
+
+#### Generate the data
+
+1. `git clone git://github.com/gpii/universal.git && cd universal && npm install`
+1. Put the preferences set you want to load into a folder, i.e.: _testData/myPrefsSets_.
+1. Create a folder to store the db data, i.e.: _testData/myDbData_.
+1. `node ./scripts/convertPrefs.js testData/myPrefsSets testData/myDbData`
+
+Now there are two new files inside _testData/myDbData_, _gpiiKeys.json_ and _prefsSafes.json_.
+Both files contain an array of JSON objects, i.e.:
+
+```
+[
+    {
+        "_id": "GPII-270-rbmm-demo",
+        "type": "gpiiKey",
+        "schemaVersion": "0.1",
+        "prefsSafeId": "prefsSafe-GPII-270-rbmm-demo",
+        "prefsSetId": "gpii-default",
+        "revoked": false,
+        "revokedReason": null,
+        "timestampCreated": "2018-08-12T16:34:04.656Z",
+        "timestampUpdated": null
+    },
+    {
+        "_id": "MikelVargas",
+        "type": "gpiiKey",
+        "schemaVersion": "0.1",
+        "prefsSafeId": "prefsSafe-MikelVargas",
+        "prefsSetId": "gpii-default",
+        "revoked": false,
+        "revokedReason": null,
+        "timestampCreated": "2018-08-12T16:34:04.661Z",
+        "timestampUpdated": null
+    }
+]
+```
+
+And we want to edit these files to look like the following:
+
+```
+{ "docs":
+    [
+        {
+            "_id": "GPII-270-rbmm-demo",
+            "type": "gpiiKey",
+            "schemaVersion": "0.1",
+            "prefsSafeId": "prefsSafe-GPII-270-rbmm-demo",
+            "prefsSetId": "gpii-default",
+            "revoked": false,
+            "revokedReason": null,
+            "timestampCreated": "2018-08-12T16:34:04.656Z",
+            "timestampUpdated": null
+        },
+        {
+            "_id": "MikelVargas",
+            "type": "gpiiKey",
+            "schemaVersion": "0.1",
+            "prefsSafeId": "prefsSafe-MikelVargas",
+            "prefsSetId": "gpii-default",
+            "revoked": false,
+            "revokedReason": null,
+            "timestampCreated": "2018-08-12T16:34:04.661Z",
+            "timestampUpdated": null
+        }
+    ]
+}
+
+```
+
+For the lazy:
+* `cd testData/myDbData`
+* `sed -i '1i { "docs": ' prefsSafes.json gpiiKeys.json`
+* `sed -i '$ a }' prefsSafes.json gpiiKeys.json`
+
+Congratulations, half of the work is done, now on to the load step.
+
+#### Load the data into a cluster
+
+Requirements:
+* You are either an Op or you have been trained by one of them in using gpii-infra.
+* Your computer is already set up to work with gpii-infra.
+* And the most important thing, you know what you are doing. If not, ask the Ops team ;)
+
+Note that we assume that you are going to perform these steps into an already up & running cluster. Also, remember that you always need to test the changes in your "dev" cluster first. In case that everything worked in your "dev" cluster, then proceed with "stg". If everything worked in "stg" too, then, proceed with "prd". In order for you to understand the differences beetween the different environments, check [this section](https://github.com/gpii-ops/gpii-infra/blob/master/aws/README.md#what-are-all-these-environments) from our documentation.
+
+The process:
+
+1. Go into the corresponding folder with the cluster name where you want to perform the process, "stg", "prd" or "dev". In this case We are going to perform the process in "dev": `cd gpii-infra/aws/dev`.
+1. Set up the env you are going to deal with: rake configure_kubectl
+1. Optional, re-run the current dataloader to be sure that it's using the original dbData, run `helm delete --purge dataloader && rake deploy` as described [here](https://github.com/gpii-ops/gpii-infra/blob/master/aws/README.md#a-note-about-local-changes-and-gpii-dataloader). Note that if you are going to perform this step in either "prd" or "stg" environments, take into account that the same CouchDB credentials usded in "stg"/"prd" must be set in the _secrets.yml_ to avoid authentication failures. For that, you will need to ask an Op for such credentials which are set in the CI configuration.
+1. Open a port forwarding between the cluster's couchdb host:port and your local machine: `kubectl --namespace gpii port-forward couchdb-0 5984`
+
+The port forwarding will be there until you hit _Ctrl-C_, so leave it running until we are done loading the preferences sets.
+__Note__ that if you are going to perform this in production (prd) you should do it from the _prd_ folder and remember to use the _RAKE_REALLY_RUN_IN_PRD=true_ variable when issuing the commands against the production cluster.
+
+Let's load the data, go back to the folder _testData/myDbData_ and run:
+1. `curl -d @gpiiKeys.json -H "Content-type: application/json" -X POST http://localhost:5984/gpii/_bulk_docs`
+1. `curl -d @.json -H "Content-type: application/json" -X POST http://localhost:5984/gpii/_bulk_docs`
+
+Unless you get errors, that's all. Now you can close the port forwarding as mentioned earlier.
+
 ### Increasing the size of a volume
 
 Uh-oh, the Persistent Volumes that back the database are getting full (or need more provisioned IOPS, or some other change to the configuration of the underlying Volume)!
