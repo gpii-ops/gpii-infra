@@ -81,6 +81,10 @@ gcp-dev:
     # Clean up even if something failed.
     - cd gcp/live/dev
     - rake destroy
+    # Destroy secrets, so they can be repopulated on the next run to exercise
+    # managing secrets from scratch.
+    - rake destroy_tfstate[k8s]
+    - rake destroy_secrets[default]
     - rake clobber
 
 aws-promote-to-stg:
