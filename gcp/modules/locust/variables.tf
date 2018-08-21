@@ -11,7 +11,7 @@ variable "locust_swarm_duration" {
 }
 
 variable "locust_workers" {
-  default = "3"
+  default = 3
 }
 
 variable "locust_users" {
