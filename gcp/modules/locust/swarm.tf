@@ -7,11 +7,6 @@ resource "null_resource" "locust_swarm_session" {
 
   provisioner "local-exec" {
     command = <<EOF
-      if [ "${var.locust_swarm}" == "" ]; then
-        echo "Looks like TF_VAR_locust_swarm is unset, terminating!"
-        exit
-      fi
-
       RETRIES=10
       RETRY_COUNT=1
       while [ "$WORKERS_READY" != "${var.locust_workers}" ]; do

@@ -18,7 +18,6 @@ resource "null_resource" "locust_link_tasks" {
 
   provisioner "local-exec" {
     command = <<EOF
-      rm -rf ${var.charts_dir}/locust/tasks
       mkdir -p ${var.charts_dir}/locust/tasks
       for FILE in tasks/*.py; do
         echo "Creating link for $FILE"
@@ -54,4 +53,18 @@ module "locust" {
   release_values_rendered = "${data.template_file.locust_values.rendered}"
 
   chart_name = "${var.charts_dir}/locust"
+}
+
+resource "null_resource" "locust_link_cleanup" {
+  depends_on = ["module.locust"]
+
+  triggers = {
+    nonce = "${var.nonce}"
+  }
+
+  provisioner "local-exec" {
+    command = <<EOF
+      rm -rf ${var.charts_dir}/locust/tasks
+    EOF
+  }
 }

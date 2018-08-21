@@ -6,10 +6,6 @@ variable "locust_target_host" {
   default = ""
 }
 
-variable "locust_swarm" {
-  default = ""
-}
-
 variable "locust_swarm_duration" {
   default = 60
 }
