@@ -18,10 +18,11 @@ resource "null_resource" "locust_link_tasks" {
 
   provisioner "local-exec" {
     command = <<EOF
+      rm -rf ${var.charts_dir}/locust/tasks
       mkdir -p ${var.charts_dir}/locust/tasks
       for FILE in tasks/*.py; do
         echo "Creating link for $FILE"
-        ln -sf -T $PWD/$FILE /charts/locust/$FILE
+        ln -sf -T $PWD/$FILE ${var.charts_dir}/locust/$FILE
       done
     EOF
   }
