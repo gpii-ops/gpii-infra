@@ -112,7 +112,7 @@ end
 CLOBBER << @serviceaccount_key_file
 
 desc "[ADVANCED] Tell gcloud to use TF_VAR_project_id as the default Project; can be useful after 'rake clobber'"
-task :set_current_project => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
+task :set_current_project => [:set_vars, @gcp_creds_file] do
   sh "#{@exekube_cmd} gcloud config set project #{ENV["TF_VAR_project_id"]}"
 end
 
