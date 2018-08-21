@@ -1,5 +1,3 @@
-variable "nonce" {}
-
 resource "null_resource" "locust_swarm_session" {
   depends_on = ["module.locust"]
 

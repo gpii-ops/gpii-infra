@@ -5,6 +5,7 @@ terraform {
 variable "env" {}
 variable "secrets_dir" {}
 variable "charts_dir" {}
+variable "nonce" {}
 
 variable "dns_zones" {
   type = "map"
@@ -18,10 +19,9 @@ resource "null_resource" "locust_link_tasks" {
   provisioner "local-exec" {
     command = <<EOF
       mkdir -p ${var.charts_dir}/locust/tasks
-      cd tasks
-      for FILE in *.py; do
+      for FILE in tasks/*.py; do
         echo "Creating link for $FILE"
-        ln -sf -T $PWD/$FILE /charts/locust/tasks/$FILE
+        ln -sf -T $PWD/$FILE /charts/locust/$FILE
       done
     EOF
   }
