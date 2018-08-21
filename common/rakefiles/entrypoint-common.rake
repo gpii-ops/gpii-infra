@@ -8,8 +8,8 @@ task :infra_init => [:set_vars, @gcp_creds_file] do
   # Due to the needed permissions for creating the following resources, only an
   # administrator of the organization can run this task.
 
-  if @project_type != "common" or @env != "prd"
-    puts "infra_init must run inside common/live/prd"
+  if @project_type != "common"
+    puts "infra_init must run inside common/live/[prd|stg]"
     exit
   end
 
@@ -80,8 +80,8 @@ end
 
 desc "[ONLY ADMINS] Create or update projects in the organization"
 task :apply_projects => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
-  if @project_type != "common" or @env != "prd"
-    puts "apply_projects task must run inside common/live/prd"
+  if @project_type != "common"
+    puts "apply_projects task must run inside common/live/[prd|stg]"
     exit
   end
 
