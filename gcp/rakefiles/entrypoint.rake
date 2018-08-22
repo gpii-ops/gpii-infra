@@ -147,7 +147,7 @@ task :destroy_tfstate, [:prefix] => [:set_vars] do |taskname, args|
   else
     prefix = args[:prefix]
   end
-  sh "#{@exekube_cmd} sh -c 'gsutil -m rm -r gs://#{ENV["TF_VAR_project_id"]}-tfstate/#{@env}/#{prefix}'"
+  sh "#{@exekube_cmd} sh -c 'gsutil rm -r gs://#{ENV["TF_VAR_project_id"]}-tfstate/#{@env}/#{prefix}'"
   sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-terragrunt"
 end
 
