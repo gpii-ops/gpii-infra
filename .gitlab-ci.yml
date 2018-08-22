@@ -83,8 +83,9 @@ gcp-dev:
     - rake destroy
     # Destroy secrets, so they can be repopulated on the next run to exercise
     # managing secrets from scratch.
-    - rake destroy_secrets[default]
-    - rake destroy_tfstate[k8s]
+    - rake destroy_secrets
+    # Terraform state encryption key is also gone with secrets, we have to destroy tfstate as well
+    - rake destroy_tfstate
     - rake clobber
 
 aws-promote-to-stg:
