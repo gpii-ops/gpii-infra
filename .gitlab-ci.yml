@@ -7,8 +7,10 @@ stages:
   - promote-to-prd
   - prd
 
-setup:
+aws-setup:
   stage: setup
+  tags:
+    - aws
   script:
     - terraform -version
     - terragrunt -version
@@ -21,14 +23,40 @@ setup:
     - bundle version
     - rake --version
 
-unit-tests:
+gcp-setup:
+  stage: setup
+  tags:
+    - gcp
+  script:
+    - docker version
+    - docker-compose version
+    - docker pull gpii/exekube:0.4.0-google
+    - docker images | grep exekube
+    - ruby --version
+    - bundle version
+    - rake --version
+
+aws-unit-tests:
   stage: unit-tests
+  tags:
+    - aws
   script:
     - cd aws/rakefiles/tests
     - rake
 
-dev:
+gcp-unit-tests:
+  stage: unit-tests
+  tags:
+    - gcp
+  script:
+    - cd gcp/rakefiles/tests
+    - bundle install --path "vendor/bundle"
+    - rake
+
+aws-dev:
   stage: dev
+  tags:
+    - aws
   script:
     - cd aws/dev
     - bundle install --path "vendor/bundle"
@@ -40,19 +68,51 @@ dev:
     - rake destroy
     - rake clobber
 
-promote-to-stg:
+gcp-dev:
+  stage: dev
+  tags:
+    - gcp
+  script:
+    - cd gcp/live/dev
+    - rake clobber
+    - rake configure_serviceaccount_ci_restore
+    - rake
+  after_script:
+    # Clean up even if something failed.
+    - cd gcp/live/dev
+    - rake destroy
+    - rake clobber
+
+aws-promote-to-stg:
   stage: promote-to-stg
+  tags:
+    - aws
   script:
     - export DATESTAMP="$(date -u '+%Y%m%d%H%M%S')"  # e.g. 20170603220542. Uses UTC.
     - echo "DATESTAMP is $DATESTAMP"  # So it's visible in the log
-    - git tag "deploy-stg-$DATESTAMP"
+    - git tag "deploy-aws-stg-$DATESTAMP"
     # gitlab is not clever enough to clean up an added remote and git complains
     # if we add a remote that already exists.
     - git remote | grep -q "^origin-rw" || git remote add origin-rw git@github.com:gpii-ops/gpii-infra
     - git push --tags origin-rw
 
-stg:
+gcp-promote-to-stg:
+  stage: promote-to-stg
+  tags:
+    - gcp
+  script:
+    - export DATESTAMP="$(date -u '+%Y%m%d%H%M%S')"  # e.g. 20170603220542. Uses UTC.
+    - echo "DATESTAMP is $DATESTAMP"  # So it's visible in the log
+    - git tag "deploy-gcp-stg-$DATESTAMP"
+    # gitlab is not clever enough to clean up an added remote and git complains
+    # if we add a remote that already exists.
+    - git remote | grep -q "^origin-rw" || git remote add origin-rw git@github.com:gpii-ops/gpii-infra
+    - git push --tags origin-rw
+
+aws-stg:
   stage: stg
+  tags:
+    - aws
   script:
     - cd aws/stg
     - rake clobber
@@ -60,12 +120,27 @@ stg:
   environment:
     name: stg
 
-promote-to-prd:
+# DISABLED while we sort out the gcp-stg -> gcp-gpii-stg migration.
+.gcp-stg:
+  stage: stg
+  tags:
+    - gcp
+  script:
+    - cd gcp/live/stg
+    - rake clobber
+    - rake configure_serviceaccount_ci_restore
+    - rake
+  environment:
+    name: stg
+
+aws-promote-to-prd:
   stage: promote-to-prd
+  tags:
+    - aws
   script:
     - export DATESTAMP="$(date -u '+%Y%m%d%H%M%S')"  # e.g. 20170603220542. Uses UTC.
     - echo "DATESTAMP is $DATESTAMP"  # So it's visible in the log
-    - git tag "deploy-prd-$DATESTAMP"
+    - git tag "deploy-aws-prd-$DATESTAMP"
     # gitlab is not clever enough to clean up an added remote and git complains
     # if we add a remote that already exists.
     - git remote | grep -q "^origin-rw" || git remote add origin-rw git@github.com:gpii-ops/gpii-infra
@@ -73,13 +148,46 @@ promote-to-prd:
   when: manual
   allow_failure: false
 
-prd:
+# DISABLED while we sort out the gcp-stg -> gcp-gpii-stg migration.
+.gcp-promote-to-prd:
+  stage: promote-to-prd
+  tags:
+    - gcp
+  script:
+    - export DATESTAMP="$(date -u '+%Y%m%d%H%M%S')"  # e.g. 20170603220542. Uses UTC.
+    - echo "DATESTAMP is $DATESTAMP"  # So it's visible in the log
+    - git tag "deploy-gcp-prd-$DATESTAMP"
+    # gitlab is not clever enough to clean up an added remote and git complains
+    # if we add a remote that already exists.
+    - git remote | grep -q "^origin-rw" || git remote add origin-rw git@github.com:gpii-ops/gpii-infra
+    - git push --tags origin-rw
+  when: manual
+  allow_failure: false
+
+aws-prd:
   stage: prd
   variables:
     RAKE_REALLY_RUN_IN_PRD: "true"
+  tags:
+    - aws
   script:
     - cd aws/prd
     - rake clobber
+    - rake
+  environment:
+    name: prd
+
+# DISABLED while we sort out the gcp-stg -> gcp-gpii-stg migration.
+.gcp-prd:
+  stage: prd
+  variables:
+    RAKE_REALLY_RUN_IN_PRD: "true"
+  tags:
+    - gcp
+  script:
+    - cd gcp/live/prd
+    - rake clobber
+    - rake configure_serviceaccount_ci_restore
     - rake
   environment:
     name: prd

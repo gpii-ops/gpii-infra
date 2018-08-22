@@ -2,7 +2,7 @@
 
 terragrunt = {
   terraform {
-    source = "/project/modules//templater"
+    source = "/project/modules//gcp-api-mgmt"
   }
 
   include = {
@@ -11,3 +11,5 @@ terragrunt = {
 }
 
 # ↓ Module configuration (empty means all default)
+
+waiting_period = 60

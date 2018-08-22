@@ -20,9 +20,18 @@ describe Vars do
     scrub_env
   end
 
-  it "set_vars requires ENV['USER'] when env=dev" do
+  before :each do
     allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[])
+  end
+
+  it "set_vars requires ENV['RAKE_REALLY_RUN_IN_PRD'] when env=prd" do
+    env = "prd"
+    project_type = "fake-project-type"
+    expect { Vars.set_vars(env, project_type) }.to raise_error(ArgumentError, "Tried to run in env 'prd' but RAKE_REALLY_RUN_IN_PRD is not set")
+  end
+
+  it "set_vars requires ENV['USER'] when env=dev" do
     allow(ENV).to receive(:[]).with("TF_VAR_organization_name").and_return("fakecorp")
     allow(ENV).to receive(:[]).with("TF_VAR_organization_domain").and_return("corp.es")
     env = "dev"
@@ -31,8 +40,6 @@ describe Vars do
   end
 
   it "set_vars calculates ENV['TF_VAR_project_id'] when env=dev" do
-    allow(ENV).to receive(:[]=)
-    allow(ENV).to receive(:[])
     allow(ENV).to receive(:[]).with("USER").and_return("fake-user")
     allow(ENV).to receive(:[]).with("TF_VAR_organization_name").and_return("fakecorp")
     allow(ENV).to receive(:[]).with("TF_VAR_organization_domain").and_return("corp.es")
@@ -43,8 +50,6 @@ describe Vars do
   end
 
   it "set_vars calculates ENV['TF_VAR_project_id'] when env=stg" do
-    allow(ENV).to receive(:[]=)
-    allow(ENV).to receive(:[])
     allow(ENV).to receive(:[]).with("TF_VAR_organization_name").and_return("fakecorp")
     allow(ENV).to receive(:[]).with("TF_VAR_organization_domain").and_return("corp.es")
     env = "stg"
@@ -54,7 +59,6 @@ describe Vars do
   end
 
   it "set_vars requires ENV['TF_VAR_project_id'] for unknown values of env" do
-    allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return(nil)
     allow(ENV).to receive(:[]).with("TF_VAR_organization_name").and_return("fakecorp")
     allow(ENV).to receive(:[]).with("TF_VAR_organization_domain").and_return("corp.es")
@@ -64,8 +68,6 @@ describe Vars do
   end
 
   it "set_vars calculates ENV['dns_(zones|records)'] when env=dev" do
-    allow(ENV).to receive(:[]=)
-    allow(ENV).to receive(:[])
     allow(ENV).to receive(:[]).with("USER").and_return("fake-user")
     allow(ENV).to receive(:[]).with("TF_VAR_organization_name").and_return("fakecorp")
     allow(ENV).to receive(:[]).with("TF_VAR_organization_domain").and_return("corp.es")
@@ -77,8 +79,6 @@ describe Vars do
   end
 
   it "set_vars doesn't clobber ENV['dns_(zones|records)'] when already set and env=dev" do
-    allow(ENV).to receive(:[]=)
-    allow(ENV).to receive(:[])
     allow(ENV).to receive(:[]).with("USER").and_return("fake-user")
     allow(ENV).to receive(:[]).with("TF_VAR_dns_zones").and_return("fake-custom-dns-zone.")
     allow(ENV).to receive(:[]).with("TF_VAR_dns_records").and_return("fake-custom-dns-record.")
@@ -92,8 +92,6 @@ describe Vars do
   end
 
   it "set_vars sets default vars" do
-    allow(ENV).to receive(:[]=)
-    allow(ENV).to receive(:[])
     allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
     allow(ENV).to receive(:[]).with("TF_VAR_organization_name").and_return(nil)
     allow(ENV).to receive(:[]).with("TF_VAR_organization_domain").and_return(nil)
@@ -123,7 +121,6 @@ describe Vars do
   end
 
   it "set_vars doesn't clobber vars that are already set (even when env=stg)" do
-    allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
     allow(ENV).to receive(:[]).with("ORGANIZATION_ID").and_return("fake-organization-id")
     allow(ENV).to receive(:[]).with("BILLING_ID").and_return("fake-billing-id")
@@ -140,8 +137,6 @@ describe Vars do
   end
 
   it "set_vars sets TF_VAR_nonce" do
-    allow(ENV).to receive(:[]=)
-    allow(ENV).to receive(:[])
     allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
     env = "fake-env"
     project_type = "fake-project-type"

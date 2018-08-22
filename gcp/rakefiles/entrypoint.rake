@@ -1,9 +1,7 @@
 require "rake/clean"
-require "json"
 
+import "../../rakefiles/ci.rake"
 require_relative "./vars.rb"
-require_relative "./secrets.rb"
-require_relative "./sh_filter.rb"
 
 if @env.nil?
   puts "  ERROR: @env must be set!"
@@ -22,194 +20,161 @@ end
 
 @serviceaccount_key_file = "secrets/kube-system/owner.json"
 
-@dot_config_path = "../../.config/#{@env}"
-rule @dot_config_path do
-  Vars.create_directory_if_not_exists(@dot_config_path)
+task :clean_volumes => :set_vars do
+  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-helm"
+  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-terragrunt"
+  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-kube"
 end
-CLOBBER << @dot_config_path
+Rake::Task["clean"].enhance do
+  Rake::Task["clean_volumes"].invoke
+end
+
+task :clobber_volumes => :set_vars do
+  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-secrets"
+  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-gcloud"
+end
+Rake::Task["clobber"].enhance do
+  Rake::Task["clobber_volumes"].invoke
+end
 
 desc "Create cluster and deploy GPII components to it"
 task :default => :deploy
 
-task :set_vars => [@dot_config_path] do
+task :set_vars do
   Vars.set_vars(@env, @project_type)
   Vars.set_versions()
-  @secrets = Secrets.collect_secrets()
-  if File.exist?(@serviceaccount_key_file)
-    serviceaccount_key_json = File.read(@serviceaccount_key_file)
-    serviceaccount_key_data = JSON.parse(serviceaccount_key_json)
-    if serviceaccount_key_data.key?("project_id") and serviceaccount_key_data["project_id"] != ENV["TF_VAR_project_id"]
-      puts "The configured Serviceaccount is for project_id #{serviceaccount_key_data["project_id"]}, but the current project_id is #{ENV["TF_VAR_project_id"]}."
-      puts "Please re-run `rake project_init` to set the correct credentials, or change to a different live/<env> directory and try again."
-      exit
-    end
-  end
+  Rake::Task[:set_compose_env].invoke
+end
+
+@compose_env_file = "compose.env"
+CLEAN << @compose_env_file
+# We do this with a task rather than a rule so that compose_env_file is always
+# re-written.
+task :set_compose_env do
   tf_vars = []
   ENV.each do |key, val|
-   tf_vars << key if key.match(/^TF_VAR_/)
+   tf_vars << key if key.start_with?("TF_VAR_")
   end
-  File.open("#{@dot_config_path}/compose.env", 'w') do |file|
-    file.write(tf_vars.join("\n"))
+  File.open(@compose_env_file, 'w') do |file|
+    file.write(tf_vars.sort.join("\n"))
   end
 end
 
-task :set_secrets, [:skip_secret_mgmt] do |taskname, args|
-  Rake::Task[:apply_secret_mgmt].invoke unless args[:skip_secret_mgmt]
-  Secrets.set_secrets(@secrets, @exekube_cmd)
-end
-
-@gcp_creds_file = "#{@dot_config_path}/gcloud/credentials.db"
 desc "[ADVANCED] Authenticate and generate GCP credentials (gcloud auth login)"
-task :auth => [:set_vars, @gcp_creds_file]
-rule @gcp_creds_file do
-  sh "#{@exekube_cmd} gcloud auth login"
-end
-
-@kubectl_creds_file = "#{@dot_config_path}/kube/config"
-desc "[ADVANCED] Fetch kubectl credentials (gcloud auth login)"
-task :configure_kubectl => [:set_vars, @gcp_creds_file, @kubectl_creds_file]
-rule @kubectl_creds_file do
-  # This duplicates information in terraform code, 'k8s-cluster'
-  cluster_name = 'k8s-cluster'
-  # This duplicates information in terraform code, 'zone'. Could be a variable with some plumbing.
-  zone = 'us-central1-a'
-  sh "
-    if [[ $(#{@exekube_cmd} gcloud container clusters list --filter #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}) ]] ; \
-    then \
-      #{@exekube_cmd} gcloud container clusters get-credentials #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}
-    fi"
-end
-
-desc "Get the credentials needed to create all the resources inside the project"
-task :project_init => [:set_vars, @gcp_creds_file] do
-  output = `#{@exekube_cmd} gcloud projects list --format='json' --filter='name:#{ENV["TF_VAR_project_id"]}'`
-  hash = JSON.parse(output)
-  if hash.empty?
-    puts "Project #{ENV["TF_VAR_project_id"]} not found. Run `rake infra_init` task from gpii-infra/common/live/prd."
-    exit
-  else
-    Rake::Task[:set_current_project].invoke
-  end
-
-  Rake::Task[:creds].invoke
+task :configure_login => [:set_vars] do
+  sh "#{@exekube_cmd} rake configure_login"
 end
 
 # This duplicates information in docker-compose.yaml,
 # TF_VAR_serviceaccount_key.
-desc "[ADVANCED] Create credentials for projectowner service account"
-task :creds => [:set_vars, @gcp_creds_file, @serviceaccount_key_file]
-rule @serviceaccount_key_file do
-  # TODO: This command is duplicated from exekube's gcp-project-init (and
-  # hardcodes 'projectowner' instead of $SA_NAME which is only defined in
-  # gcp-project-init). If gcp-project-init becomes idempotent (GPII-2989,
-  # https://github.com/exekube/exekube/issues/92), or if this 'keys create'
-  # step moves somewhere else in exekube, call this command from that place
-  # instead.
-  sh "
-    #{@exekube_cmd} sh -c 'gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
-      --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com'"
+desc "[ADVANCED] Create and download credentials for projectowner service account"
+task :configure_serviceaccount => [:set_vars] do
+  sh "#{@exekube_cmd} rake configure_serviceaccount"
 end
-CLOBBER << @serviceaccount_key_file
+
+desc "Get the credentials needed to create all the resources inside the project"
+task :project_init => [:set_vars, :configure_current_project, :configure_serviceaccount]
+
 
 desc "[ADVANCED] Tell gcloud to use TF_VAR_project_id as the default Project; can be useful after 'rake clobber'"
-task :set_current_project => [:set_vars, @gcp_creds_file] do
+task :configure_current_project => [:set_vars] do
   sh "#{@exekube_cmd} gcloud config set project #{ENV["TF_VAR_project_id"]}"
 end
 
 desc "[ADVANCED] Create or update low-level infrastructure"
-task :apply_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
+task :apply_infra => [:set_vars, :configure_serviceaccount] do
   sh "#{@exekube_cmd} up live/#{@env}/infra"
 end
 
-desc "[ADVANCED] Create or update infrastructure for secret management, this has no corresponding destroy task"
-task :apply_secret_mgmt => [:set_vars, @gcp_creds_file, @serviceaccount_key_file] do
-  sh "#{@exekube_cmd} up live/#{@env}/secret-mgmt"
-end
-
 desc "Create cluster and deploy GPII components to it"
-task :deploy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :apply_infra, :set_secrets] do
+task :deploy => [:set_vars, :apply_infra] do
   # Workaround for 'context deadline exceeded' issue:
   # https://github.com/exekube/exekube/issues/62
   # https://github.com/docker/for-mac/issues/2076
   # Remove this when docker for mac 18.05 becomes stable
   sh "docker run --rm --privileged alpine hwclock -s"
-  sh_filter "#{@exekube_cmd} up"
-end
-
-desc "Destroy cluster and low-level infrastructure"
-task :destroy_infra => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, :destroy] do
-  sh "#{@exekube_cmd} down live/#{@env}/infra"
+  sh "#{@exekube_cmd} rake xk[up]"
 end
 
 desc "Undeploy GPII compoments and destroy cluster"
-task :destroy => [:set_vars, @gcp_creds_file, @serviceaccount_key_file, @kubectl_creds_file, :set_secrets] do
-  # Terraform will fail if template files are missing, and since values_dir is not mounted
-  # from host machine anymore, all templates vanish after docker-compose container is terminated.
-  # So we have to invoke templater with the main exekube command
-  sh "#{@exekube_cmd} sh -c 'xk up live/#{@env}/k8s/templater && xk down'"
+task :destroy => [:set_vars] do
+  sh "#{@exekube_cmd} rake xk[down]"
+end
+
+desc "Destroy cluster and low-level infrastructure"
+task :destroy_infra => [:set_vars, :configure_serviceaccount, :destroy] do
+  sh "#{@exekube_cmd} down live/#{@env}/infra"
 end
 
 desc "[ADVANCED] Remove stale Terraform locks from GS -- for non-dev environments coordinate with the team first"
-task :unlock => [:set_vars, @gcp_creds_file] do
+task :unlock => [:set_vars] do
   sh "#{@exekube_cmd} sh -c ' \
     for lock in $(gsutil ls -R gs://#{ENV["TF_VAR_project_id"]}-tfstate/#{@env}/ | grep .tflock); do \
       gsutil rm $lock; \
     done'"
 end
 
-desc '[ADVANCED] Run arbitrary exekube command -- rake xk"[kubectl get pods]"'
-task :xk, [:cmd] => [:set_vars] do |taskname, args|
-  puts "If this hangs or fails, try running 'rake apply_secret_mgmt'"
-  Rake::Task[:set_secrets].invoke(true)
+desc '[ADVANCED] Run arbitrary exekube command -- rake sh["kubectl --namespace gpii get pods"]'
+task :sh, [:cmd] => [:set_vars] do |taskname, args|
   if args[:cmd]
     cmd = args[:cmd]
   else
-    puts "Argument :cmd -- the command to run inside the exekube container -- not present, defaulting to sh"
-    cmd = "sh"
+    puts "Argument :cmd -- the command to run inside the exekube container -- not present, defaulting to bash"
+    cmd = "bash"
   end
-  sh "#{@exekube_cmd} #{cmd}"
+  sh "#{@exekube_cmd} rake xk['#{cmd}',skip_infra,skip_secret_mgmt]"
 end
 
 desc '[ADVANCED] Destroy secrets file stored in GS bucket for encryption key, passed as argument -- rake destroy_secrets"[default]"'
-task :destroy_secrets, [:encryption_key] => [:set_vars, @gcp_creds_file] do |taskname, args|
+task :destroy_secrets, [:encryption_key] => [:set_vars] do |taskname, args|
   if args[:encryption_key].nil?
     puts "  ERROR: args[:encryption_key] must be set!"
     raise ArgumentError, "args[:encryption_key] must be set"
   end
   sh "#{@exekube_cmd} sh -c ' \
-    for secret_file in $(gsutil ls -R gs://#{ENV["TF_VAR_project_id"]}-#{args[:encryption_key]}-secrets/ | grep #{Secrets::SECRETS_FILE}); do \
+    for secret_file in $(gsutil ls -R gs://#{ENV["TF_VAR_project_id"]}-#{args[:encryption_key]}-secrets/ | grep yaml); do \
       gsutil rm $secret_file; \
     done'"
 end
 
+desc '[ADVANCED] Destroy Terraform state stored in GS bucket for prefix, passed as argument -- rake destroy_tfstate"[k8s]"'
+task :destroy_tfstate, [:prefix] => [:set_vars] do |taskname, args|
+  if args[:prefix].nil? || args[:prefix].size == 0
+    puts "  ERROR: args[:prefix] must be set!"
+    raise ArgumentError, "args[:prefix] must be set"
+  end
+  sh "#{@exekube_cmd} sh -c 'gsutil -m rm -r gs://#{ENV["TF_VAR_project_id"]}-tfstate/#{@env}/#{args[:prefix]}'"
+  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-terragrunt"
+end
+
 desc '[ADVANCED] Destroy provided module in the cluster, and then deploy it -- rake redeploy_module"[k8s/kube-system/cert-manager]"'
-task :redeploy_module, [:module] => [:set_vars, @gcp_creds_file] do |taskname, args|
+task :redeploy_module, [:module] => [:set_vars] do |taskname, args|
   Rake::Task[:destroy_module].invoke(args[:module])
   Rake::Task[:deploy_module].invoke(args[:module])
 end
 
 desc '[ADVANCED] Deploy provided module into the cluster -- rake deploy_module"[k8s/kube-system/cert-manager]"'
-task :deploy_module, [:module] => [:set_vars, @gcp_creds_file, :set_secrets] do |taskname, args|
+task :deploy_module, [:module] => [:set_vars] do |taskname, args|
   if args[:module].nil?
     puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
-    raise ArgumentError, "args[:module] must be set"
+    raise
   elsif !File.directory?(args[:module])
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
-    raise IOError, "args[:module] must point to existing Terragrunt directory"
+    raise
   end
-  sh_filter "#{@exekube_cmd} sh -c 'xk up live/#{@env}/k8s/templater && xk up live/#{@env}/#{args[:module]}'"
+  sh "#{@exekube_cmd} rake xk['up live/#{@env}/#{args[:module]}',skip_infra,skip_secret_mgmt]"
 end
 
 desc '[ADVANCED] Destroy provided module in the cluster -- rake destroy_module"[k8s/kube-system/cert-manager]"'
-task :destroy_module, [:module] => [:set_vars, @gcp_creds_file, :set_secrets] do |taskname, args|
+task :destroy_module, [:module] => [:set_vars] do |taskname, args|
   if args[:module].nil?
     puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
-    raise ArgumentError, "args[:module] must be set"
+    raise
   elsif !File.directory?(args[:module])
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
-    raise IOError, "args[:module] must point to existing Terragrunt directory"
+    raise
   end
-  sh_filter "#{@exekube_cmd} sh -c 'xk up live/#{@env}/k8s/templater && xk down live/#{@env}/#{args[:module]}'"
+  sh "#{@exekube_cmd} rake xk['down live/#{@env}/#{args[:module]}',skip_infra,skip_secret_mgmt]"
 end
 
 # vim: et ts=2 sw=2:

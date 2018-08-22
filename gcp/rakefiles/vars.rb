@@ -7,6 +7,13 @@ class Vars
   VERSION_FILE = "../../../aws/modules/deploy/version.yml"
 
   def self.set_vars(env, project_type)
+    if ["prd"].include?(env)
+      if ENV["RAKE_REALLY_RUN_IN_PRD"].nil?
+        puts "  ERROR: Tried to run in env 'prd' but RAKE_REALLY_RUN_IN_PRD is not set"
+        raise ArgumentError, "Tried to run in env 'prd' but RAKE_REALLY_RUN_IN_PRD is not set"
+      end
+    end
+
     if ["dev"].include?(env)
       if ENV["USER"].nil?
         puts "  ERROR: USER must be set!"

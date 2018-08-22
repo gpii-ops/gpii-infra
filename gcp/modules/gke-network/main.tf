@@ -39,10 +39,10 @@ variable "static_ip_region" {
 module "gke_network" {
   source = "/exekube-modules/gke-network"
 
-  dns_zones        = "${var.dns_zones}"
-  dns_records      = "${var.dns_records}"
-  cluster_subnets  = "${var.cluster_subnets}"
-  static_ip_region = "${var.static_ip_region}"
+  dns_zones                = "${var.dns_zones}"
+  dns_records              = "${var.dns_records}"
+  cluster_subnets          = "${var.cluster_subnets}"
+  static_ip_region         = "${var.static_ip_region}"
   create_static_ip_address = "${var.create_static_ip_address}"
 }
 

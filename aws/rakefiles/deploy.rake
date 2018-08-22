@@ -23,14 +23,19 @@ task :wait_for_gpii_ready => :configure_kubectl do
   # Test preferences server and cloud based flow manager
   preferences_test = {
     :url => "preferences.#{ENV["TF_VAR_cluster_name"]}/preferences/carla",
-    :curl_options => ""
+    :curl_options => "",
+    :cert_resource_name => "preferences-cert"
   }
   flowmanager_test = {
     :url => "flowmanager.#{ENV["TF_VAR_cluster_name"]}/access_token",
-    :curl_options => " -H 'Content-Type: application/x-www-form-urlencoded' -X POST -d 'username=carla&password=dummy&client_id=pilot-computer&client_secret=pilot-computer-secret&grant_type=password' -X POST "
+    :curl_options => " -H 'Content-Type: application/x-www-form-urlencoded' -X POST -d 'username=carla&password=dummy&client_id=pilot-computer&client_secret=pilot-computer-secret&grant_type=password' -X POST ",
+    :cert_resource_name => "flowmanager-cert"
   }
 
   [preferences_test, flowmanager_test].each do |test|
+    # First we wait for certificate object to be ready
+    puts "Waiting for certificates from Let's Encrypt"
+    wait_for("kubectl get certificate #{test[:cert_resource_name]} --namespace gpii --output json | jq -e '.status.conditions[] | select(.type == \"Ready\" and .status == \"True\")'")
       if ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.")
         # This is the simplest one-liner I could find to GET a url and return just
         # the status code.
@@ -165,7 +170,7 @@ task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_co
       if allow_upgrade
         begin
           wait_for(
-            "helm upgrade --namespace #{chart_namespace} --recreate-pods -f #{@tmpdir}-modules/deploy/charts/values/#{chart}.yaml #{chart_name} #{@chartdir}/#{chart}",
+            "helm upgrade --namespace #{chart_namespace} -f #{@tmpdir}-modules/deploy/charts/values/#{chart}.yaml #{chart_name} #{@chartdir}/#{chart}",
             sleep_secs: 5,
             max_wait_secs: 60,
           )
