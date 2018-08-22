@@ -1,0 +1,14 @@
+version: '2.4'
+services:
+  gpii-infra-aws:
+    image: gpii/gpii-infra-aws:latest
+    command: rake
+    environment:
+      - USER
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_REGION
+    volumes:
+      - ~/.ssh/id_rsa.gpii-ci:/root/.ssh/id_rsa.gpii-ci
+      - ~/.ssh/id_rsa.gpii-ci.pub:/root/.ssh/id_rsa.gpii-ci.pub:ro
+      - ../:/gpii-infra
