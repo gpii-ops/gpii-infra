@@ -82,6 +82,11 @@ This happens when trying to enable an API that is already enabled. This shouldn'
 rake sh["gcloud services disable container.googleapis.com"]
 ```
 
+### Error (gcloud.iam.service-accounts.keys.create) RESOURCE_EXHAUSTED: Maximum number of keys on account reached
+
+This happens due to limitation of maximum 10 keys per ServiceAccount.
+If you see this error during any `rake` execution, run `rake destroy_sa_keys` and then try again.
+
 ### Restoring CouchDB data
 
 We are considering number of probable failure scenarios for our GCP infrastructure.

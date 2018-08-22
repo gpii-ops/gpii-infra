@@ -35,21 +35,6 @@ task :configure_serviceaccount => [@gcp_creds_file] do
     gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
       --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com
   "
-
-  # This removes all SA keys except current one to prevent hitting 10 keys
-  # per SA limit (GPII-3299)
-  sh "
-    existing_keys=$(gcloud iam service-accounts keys list \
-      --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com \
-      --managed-by user | grep -oE \"^[a-z0-9]+\")
-    current_key=$(cat $TF_VAR_serviceaccount_key | jq -r '.private_key_id')
-    for key in $existing_keys; do
-      if [ \"$key\" != \"$current_key\" ]; then
-        yes | gcloud iam service-accounts keys delete \
-          --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com $key
-      fi
-    done
-  "
 end
 
 @kubectl_creds_file = "/root/.kube/config"

@@ -129,6 +129,21 @@ task :sh, [:cmd] => [:set_vars] do |taskname, args|
   sh "#{@exekube_cmd} rake xk['#{cmd}',skip_infra,skip_secret_mgmt]"
 end
 
+desc '[ADVANCED] Destroy all SA keys except current one'
+task :destroy_sa_keys => [:set_vars] do
+  sh "#{@exekube_cmd} sh -c ' \
+    existing_keys=$(gcloud iam service-accounts keys list \
+      --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com \
+      --managed-by user | grep -oE \"^[a-z0-9]+\"); \
+    current_key=$(cat $TF_VAR_serviceaccount_key 2>/dev/null | jq -r '.private_key_id'); \
+    for key in $existing_keys; do \
+      if [ \"$key\" != \"$current_key\" ]; then \
+        yes | gcloud iam service-accounts keys delete \
+          --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com $key; \
+      fi \
+    done'"
+end
+
 desc '[ADVANCED] Destroy secrets file stored in GS bucket for encryption key, passed as argument -- rake destroy_secrets"[default]"'
 task :destroy_secrets, [:encryption_key] => [:set_vars] do |taskname, args|
   sh "#{@exekube_cmd} sh -c ' \
