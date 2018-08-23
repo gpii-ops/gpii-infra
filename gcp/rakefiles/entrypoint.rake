@@ -129,25 +129,40 @@ task :sh, [:cmd] => [:set_vars] do |taskname, args|
   sh "#{@exekube_cmd} rake xk['#{cmd}',skip_infra,skip_secret_mgmt]"
 end
 
+desc '[ADVANCED] Destroy all SA keys except current one'
+task :destroy_sa_keys => [:set_vars] do
+  sh "#{@exekube_cmd} sh -c ' \
+    existing_keys=$(gcloud iam service-accounts keys list \
+      --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com \
+      --managed-by user | grep -oE \"^[a-z0-9]+\"); \
+    current_key=$(cat $TF_VAR_serviceaccount_key 2>/dev/null | jq -r '.private_key_id'); \
+    for key in $existing_keys; do \
+      if [ \"$key\" != \"$current_key\" ]; then \
+        yes | gcloud iam service-accounts keys delete \
+          --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com $key; \
+      fi \
+    done'"
+end
+
 desc '[ADVANCED] Destroy secrets file stored in GS bucket for encryption key, passed as argument -- rake destroy_secrets"[default]"'
 task :destroy_secrets, [:encryption_key] => [:set_vars] do |taskname, args|
-  if args[:encryption_key].nil?
-    puts "  ERROR: args[:encryption_key] must be set!"
-    raise ArgumentError, "args[:encryption_key] must be set"
-  end
   sh "#{@exekube_cmd} sh -c ' \
-    for secret_file in $(gsutil ls -R gs://#{ENV["TF_VAR_project_id"]}-#{args[:encryption_key]}-secrets/ | grep yaml); do \
-      gsutil rm $secret_file; \
+    for secret_bucket in $(gsutil ls -p #{ENV["TF_VAR_project_id"]} | grep #{args[:encryption_key]}-secrets/); do \
+      for secret_file in $(gsutil ls -R $secret_bucket | grep yaml); do \
+        gsutil rm $secret_file; \
+      done \
     done'"
 end
 
 desc '[ADVANCED] Destroy Terraform state stored in GS bucket for prefix, passed as argument -- rake destroy_tfstate"[k8s]"'
 task :destroy_tfstate, [:prefix] => [:set_vars] do |taskname, args|
   if args[:prefix].nil? || args[:prefix].size == 0
-    puts "  ERROR: args[:prefix] must be set!"
-    raise ArgumentError, "args[:prefix] must be set"
+    puts "Argument :prefix not present, defaulting to k8s"
+    prefix = "k8s"
+  else
+    prefix = args[:prefix]
   end
-  sh "#{@exekube_cmd} sh -c 'gsutil -m rm -r gs://#{ENV["TF_VAR_project_id"]}-tfstate/#{@env}/#{args[:prefix]}'"
+  sh "#{@exekube_cmd} sh -c 'gsutil rm -r gs://#{ENV["TF_VAR_project_id"]}-tfstate/#{@env}/#{prefix}'"
   sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-terragrunt"
 end
 

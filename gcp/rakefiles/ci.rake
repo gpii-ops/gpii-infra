@@ -27,14 +27,10 @@ task :configure_serviceaccount_ci_restore => [:set_vars_ci] do
     mkdir -p $(dirname $TF_VAR_serviceaccount_key) && \
     cp -av #{@serviceaccount_key_file_in_backups} $TF_VAR_serviceaccount_key \
   '"
-  # The 'touch' is to keep serviceaccount_key_file newer than gcloud's
-  # credentials.db. Otherwise, serviceaccount_key_file is always generated on
-  # the next run since it is always older than credentials.db.
   sh "#{@exekube_cmd} sh -c '\
     gcloud auth activate-service-account \
       --key-file $TF_VAR_serviceaccount_key \
-      --project $TF_VAR_project_id && \
-    touch $TF_VAR_serviceaccount_key \
+      --project $TF_VAR_project_id \
   '"
 end
 
