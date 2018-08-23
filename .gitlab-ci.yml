@@ -86,6 +86,8 @@ gcp-dev:
     - rake destroy_secrets
     # Terraform state encryption key is also gone with secrets, we have to destroy tfstate as well
     - rake destroy_tfstate
+    # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
+    - rake destroy_sa_keys
     - rake clobber
 
 aws-promote-to-stg:
@@ -137,6 +139,11 @@ aws-stg:
     - rake
   environment:
     name: stg
+  after_script:
+    # Clean up even if something failed.
+    - cd gcp/live/stg
+    # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
+    - rake destroy_sa_keys
 
 aws-promote-to-prd:
   stage: promote-to-prd
@@ -196,3 +203,8 @@ aws-prd:
     - rake
   environment:
     name: prd
+  after_script:
+    # Clean up even if something failed.
+    - cd gcp/live/prd
+    # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
+    - rake destroy_sa_keys
