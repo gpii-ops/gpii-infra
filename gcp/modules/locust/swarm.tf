@@ -12,11 +12,10 @@ resource "null_resource" "locust_swarm_session" {
       while [ "$WORKERS_READY" != "${var.locust_workers}" ]; do
         echo "[Try $RETRY_COUNT of $RETRIES] Waiting for all Locust workers to join the master..."
         WORKERS_READY=$(kubectl -n locust logs deployment/locust-master --tail 1 | grep -oE "Currently \d+ clients" | grep -oE "\d+")
-        if [ "$WORKERS_READY" != "" ]; then
-          echo "Number of ready workers: $WORKERS_READY out of ${var.locust_workers}!"
-        else
-          echo "Number of ready workers: 0 out of ${var.locust_workers}!"
+        if [ "$WORKERS_READY" == "" ]; then
+          WORKERS_READY=0
         fi
+        echo "Number of ready workers: $WORKERS_READY out of ${var.locust_workers}!"
         RETRY_COUNT=$(($RETRY_COUNT+1))
         if [ "$RETRY_COUNT" -eq "$RETRIES" ] ; then
           echo "Retry limit reached, giving up!"
@@ -26,7 +25,7 @@ resource "null_resource" "locust_swarm_session" {
       done
 
       LOCUST_URL=http://127.0.0.1:8089
-      kubectl --namespace locust port-forward deployment/locust-master 8089:8089 </dev/null &>/dev/null &
+      kubectl -n locust port-forward deployment/locust-master 8089:8089 </dev/null &>/dev/null &
       sleep 5
 
       echo
@@ -93,7 +92,7 @@ resource "null_resource" "locust_swarm_session" {
       echo
       echo "Resetting stats..."
       curl -s $LOCUST_URL/stats/reset
-      kill $(pgrep kubectl)
+      kill $(pgrep -f "^kubectl -n locust port-forward")
       exit $EXIT_STATUS
     EOF
   }
