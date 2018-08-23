@@ -21,7 +21,7 @@ resource "null_resource" "locust_swarm_session" {
           echo "Retry limit reached, giving up!"
           exit 1
         fi
-        sleep 5
+        sleep 10
       done
 
       LOCUST_URL=http://127.0.0.1:8089
