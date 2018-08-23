@@ -1,6 +1,6 @@
 require "rake/clean"
 
-import "../../rakefiles/ci.rake"
+import "../../../shared/rakefiles/ci.rake"
 require_relative "./vars.rb"
 
 if @env.nil?
