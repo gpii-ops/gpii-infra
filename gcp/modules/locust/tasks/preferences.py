@@ -1,25 +1,12 @@
 from locust import HttpLocust, TaskSet, task
+import random
 
 class GpiiTasks(TaskSet):
+  _keys = ['carla', 'vladimir', 'wayne', 'omar', 'telugu']
   @task
-  def carla(self):
-      self.client.get("/preferences/carla")
+  def prefByKey(self):
+      self.client.get("/preferences/" + random.choice(self._keys))
 
-  @task
-  def vladimir(self):
-      self.client.get("/preferences/vladimir")
-
-  @task
-  def wayne(self):
-      self.client.get("/preferences/wayne")
-
-  @task
-  def omar(self):
-      self.client.get("/preferences/omar")
-
-  @task
-  def telugu(self):
-      self.client.get("/preferences/telugu")
 
 class GpiiWarmer(HttpLocust):
   task_set = GpiiTasks
