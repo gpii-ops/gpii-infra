@@ -19,5 +19,5 @@ task :infra_init => [:set_vars] do
   sh "#{@exekube_cmd_with_volume} sh -c '\
     cp -av /aws-backup/* /root/.aws/ \
   '"
-  #sh "#{@exekube_cmd} rake infra_init"
+  sh "#{@exekube_cmd} rake infra_init"
 end
