@@ -48,6 +48,7 @@ services:
       - terragrunt:/root/.terragrunt
       - gcloud:/root/.config/gcloud
       - kube:/root/.kube
+      - aws:/root/.aws
 
       # EXEKUBE DEVELOPMENT
       # - ../../exekube/modules:/exekube-modules
@@ -69,5 +70,7 @@ volumes:
     name: ${TF_VAR_project_id}-${USER}-gcloud
   kube:
     name: ${TF_VAR_project_id}-${USER}-kube
+  aws:
+    name: ${TF_VAR_project_id}-${USER}-aws
 
 # vim: et ts=2 sw=2:
