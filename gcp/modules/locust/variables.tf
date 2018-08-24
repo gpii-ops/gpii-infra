@@ -15,7 +15,7 @@ variable "locust_workers" {
 }
 
 variable "locust_users" {
-  default = 100
+  default = 50
 }
 
 variable "locust_hatch_rate" {
@@ -23,7 +23,7 @@ variable "locust_hatch_rate" {
 }
 
 variable "locust_desired_total_rps" {
-  default = 40
+  default = 20
 }
 
 variable "locust_desired_median_response_time" {
@@ -31,7 +31,7 @@ variable "locust_desired_median_response_time" {
 }
 
 variable "locust_desired_max_response_time" {
-  default = 800
+  default = 500
 }
 
 variable "locust_desired_num_failures" {
