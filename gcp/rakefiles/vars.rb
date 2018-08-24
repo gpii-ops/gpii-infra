@@ -4,7 +4,7 @@ require "yaml"
 class Vars
 
   # Hack to avoid changes in gpii-version-updater
-  VERSION_FILE = "../../../aws/modules/deploy/version.yml"
+  VERSION_FILE = "../../../common/versions.yml"
 
   def self.set_vars(env, project_type)
     if ["prd"].include?(env)
@@ -67,12 +67,12 @@ class Vars
   def self.set_versions()
     versions = YAML.load(File.read(Vars::VERSION_FILE))
     if versions['flowmanager']
-      ENV['TF_VAR_flowmanager_repository'] = versions['flowmanager'].split('@')[0]
-      ENV['TF_VAR_flowmanager_checksum'] = versions['flowmanager'].split('@')[1]
+      ENV['TF_VAR_flowmanager_repository'] = versions['gpii-flowmanager'].split('@')[0]
+      ENV['TF_VAR_flowmanager_checksum'] = versions['gpii-flowmanager'].split('@')[1]
     end
     if versions['preferences']
-      ENV['TF_VAR_preferences_repository'] = versions['preferences'].split('@')[0]
-      ENV['TF_VAR_preferences_checksum'] = versions['preferences'].split('@')[1]
+      ENV['TF_VAR_preferences_repository'] = versions['gpii-preferences'].split('@')[0]
+      ENV['TF_VAR_preferences_checksum'] = versions['gpii-preferences'].split('@')[1]
     end
     if versions['gpii-dataloader']
       ENV['TF_VAR_dataloader_repository'] = versions['gpii-dataloader'].split('@')[0]
