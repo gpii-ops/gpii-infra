@@ -117,12 +117,11 @@ end
 desc '[ADVANCED] Run arbitrary exekube command -- rake sh["kubectl --namespace gpii get pods"]'
 task :sh, [:cmd] => [:set_vars] do |taskname, args|
   if args[:cmd]
-    cmd = args[:cmd]
+    sh "#{@exekube_cmd} rake xk['#{args[:cmd]}',skip_infra,skip_secret_mgmt]"
   else
     puts "Argument :cmd -- the command to run inside the exekube container -- not present, defaulting to bash"
-    cmd = "bash"
+    sh "#{@exekube_cmd} sh"
   end
-  sh "#{@exekube_cmd} rake xk['#{cmd}',skip_infra,skip_secret_mgmt]"
 end
 
 desc '[ADVANCED] Destroy secrets file stored in GS bucket for encryption key, passed as argument -- rake destroy_secrets"[default]"'
