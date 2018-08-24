@@ -15,8 +15,6 @@ variable "organization_domain" {
 
 variable "project_name" {} # name of the project to create
 
-variable "project_owner" {}
-
 variable "billing_id" {}
 
 variable "organization_id" {}
@@ -73,10 +71,8 @@ resource "google_project_iam_binding" "project" {
   project = "${google_project.project.project_id}"
   role    = "roles/owner"
   members = [
-    "user:${var.project_owner}",
-    "group:ops@raisingthefloor.org",
     "serviceAccount:${google_service_account.project.email}",
-    "serviceAccount:projectowner@${var.organization_name}-common-${element(split("-", var.project_name), 0)}.iam.gserviceaccount.com",
+    "serviceAccount:projectowner@${var.project_id}.iam.gserviceaccount.com",
   ]
 }
 
@@ -108,7 +104,7 @@ resource "google_dns_record_set" "ns-root" {
   managed_zone = "gcp-${replace(var.organization_domain, ".", "-")}"
   type         = "NS"
   ttl          = 3600
-  project      = "${var.organization_name}-gcp-common-${element(split("-", var.project_name), 0)}"
+  project      = "${var.project_id}"
   rrdatas      = ["${google_dns_managed_zone.project.name_servers}"]
   count        = "${length(split("-", var.project_name)) == 1 ? 1 : 0}"
 }

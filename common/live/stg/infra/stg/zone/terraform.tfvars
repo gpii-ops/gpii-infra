@@ -15,5 +15,4 @@ terragrunt = {
 # ↓ Module configuration (empty means all default)
 
 project_name    = "stg"
-project_owner   = "gpii-bot@raisingthefloor.org"
 
