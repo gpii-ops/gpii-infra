@@ -5,10 +5,7 @@ terraform {
 variable "env" {}
 variable "secrets_dir" {}
 variable "charts_dir" {}
-
-variable "dns_zones" {
-  type = "map"
-}
+variable "domain_name" {}
 
 variable "secret_couchdb_admin_username" {}
 variable "secret_couchdb_admin_password" {}
@@ -21,7 +18,7 @@ data "template_file" "flowmanager_values" {
 
   vars {
     env                    = "${var.env}"
-    dns_name               = "${var.dns_zones["${var.env}-gcp-gpii-net"]}"
+    domain_name            = "${var.domain_name}"
     flowmanager_repository = "${var.flowmanager_repository}"
     flowmanager_checksum   = "${var.flowmanager_checksum}"
     couchdb_admin_username = "${var.secret_couchdb_admin_username}"
