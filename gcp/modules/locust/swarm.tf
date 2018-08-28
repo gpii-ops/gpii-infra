@@ -25,8 +25,10 @@ resource "null_resource" "locust_swarm_session" {
         sleep 10
       done
 
-      LOCUST_URL=http://127.0.0.1:8089
-      kubectl -n locust port-forward deployment/locust-master 8089:8089 </dev/null &>/dev/null &
+      LOCUST_URL="http://127.0.0.1:8089"
+      KUBECTL_CMD="kubectl -n locust port-forward deployment/locust-master 8089:8089"
+
+      $KUBECTL_CMD </dev/null &>/dev/null &
       sleep 5
 
       echo
@@ -35,7 +37,7 @@ resource "null_resource" "locust_swarm_session" {
 
       echo
       echo "USERS  RPS     STATUS"
-      SWARM_DURATION=${var.locust_swarm_duration}
+      SWARM_DURATION=$((${var.locust_swarm_duration}+10))
       while [ "$SWARM_DURATION" != "0" ]; do
         curl -s $LOCUST_URL/stats/requests | jq -r '[.user_count, (.total_rps | floor), .state] | @tsv'
         SWARM_DURATION=$(($SWARM_DURATION-1))
@@ -93,7 +95,7 @@ resource "null_resource" "locust_swarm_session" {
       echo
       echo "Resetting stats..."
       curl -s $LOCUST_URL/stats/reset
-      kill $(pgrep -f "^kubectl -n locust port-forward")
+      kill $(pgrep -f "^$KUBECTL_CMD")
       exit $EXIT_STATUS
     EOF
   }

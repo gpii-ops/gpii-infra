@@ -1,5 +1,5 @@
 variable "locust_script" {
-  default = "preferences.py"
+  default = ""
 }
 
 variable "locust_target_host" {
@@ -7,7 +7,7 @@ variable "locust_target_host" {
 }
 
 variable "locust_swarm_duration" {
-  default = 60
+  default = 50
 }
 
 variable "locust_workers" {

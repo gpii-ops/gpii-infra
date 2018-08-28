@@ -7,10 +7,6 @@ variable "secrets_dir" {}
 variable "charts_dir" {}
 variable "nonce" {}
 
-variable "dns_zones" {
-  type = "map"
-}
-
 resource "null_resource" "locust_link_tasks" {
   triggers = {
     nonce = "${var.nonce}"
@@ -32,12 +28,7 @@ data "template_file" "locust_values" {
 
   vars {
     locust_workers = "${var.locust_workers}"
-    target_host    = "${var.locust_target_host == "" ?
-      "${var.env == "dev" ? "http" : "https"}://preferences.${
-        substr(var.dns_zones["${var.env}-gcp-gpii-net"], 0,
-        length(var.dns_zones["${var.env}-gcp-gpii-net"]) - 1)}"
-        : var.locust_target_host
-    }"
+    target_host    = "${var.locust_target_host}"
     locust_script  = "${var.locust_script}"
   }
 }
