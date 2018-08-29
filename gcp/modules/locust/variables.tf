@@ -7,7 +7,7 @@ variable "locust_target_host" {
 }
 
 variable "locust_swarm_duration" {
-  default = 50
+  default = 30
 }
 
 variable "locust_workers" {
@@ -19,7 +19,7 @@ variable "locust_users" {
 }
 
 variable "locust_hatch_rate" {
-  default = 10
+  default = 15
 }
 
 variable "locust_desired_total_rps" {
