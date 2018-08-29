@@ -7,6 +7,11 @@ resource "null_resource" "locust_swarm_session" {
 
   provisioner "local-exec" {
     command = <<EOF
+      if [ "${var.locust_swarm_duration}" == "" ]; then
+        echo "Looks like TF_VAR_locust_swarm_duration is unset, terminating!"
+        exit 1
+      fi
+
       RETRIES=10
       RETRY_COUNT=1
       WORKERS_READY=0
@@ -26,9 +31,9 @@ resource "null_resource" "locust_swarm_session" {
       done
 
       LOCUST_URL="http://127.0.0.1:8089"
-      KUBECTL_CMD="kubectl -n locust port-forward deployment/locust-master 8089:8089"
+      PORT_FORWARD_CMD="kubectl -n locust port-forward deployment/locust-master 8089:8089"
 
-      $KUBECTL_CMD </dev/null &>/dev/null &
+      $PORT_FORWARD_CMD </dev/null &>/dev/null &
       sleep 5
 
       echo
@@ -37,7 +42,7 @@ resource "null_resource" "locust_swarm_session" {
 
       echo
       echo "USERS  RPS     STATUS"
-      SWARM_DURATION=$((${var.locust_swarm_duration}+10))
+      SWARM_DURATION="${var.locust_swarm_duration}"
       while [ "$SWARM_DURATION" != "0" ]; do
         curl -s $LOCUST_URL/stats/requests | jq -r '[.user_count, (.total_rps | floor), .state] | @tsv'
         SWARM_DURATION=$(($SWARM_DURATION-1))
@@ -95,7 +100,7 @@ resource "null_resource" "locust_swarm_session" {
       echo
       echo "Resetting stats..."
       curl -s $LOCUST_URL/stats/reset
-      kill $(pgrep -f "^$KUBECTL_CMD")
+      kill $(pgrep -f "^$PORT_FORWARD_CMD")
       exit $EXIT_STATUS
     EOF
   }
