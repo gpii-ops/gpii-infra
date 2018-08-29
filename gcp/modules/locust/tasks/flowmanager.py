@@ -6,7 +6,7 @@ class FlowmanagerTasks(TaskSet):
   _keys = ["carla", "vladimir", "wayne", "omar", "telugu"]
 
   @task
-  def postAccessToken(self):
+  def post_access_token(self):
       self.client.post("/access_token", {
         "username": random.choice(self._keys),
         "password": "dummy",

@@ -6,7 +6,7 @@ class PreferencesTasks(TaskSet):
   _keys = ["carla", "vladimir", "wayne", "omar", "telugu"]
 
   @task
-  def getPrefByKey(self):
+  def get_pref_by_key(self):
       self.client.get("/preferences/" + random.choice(self._keys))
 
 
