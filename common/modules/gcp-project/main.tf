@@ -52,12 +52,22 @@ resource "google_project" "project" {
 resource "google_project_services" "project" {
   project = "${google_project.project.project_id}"
   services = [
-    "oslogin.googleapis.com",
+    "bigquery-json.googleapis.com",
+    "cloudbilling.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com",
-    "logging.googleapis.com",
-    "monitoring.googleapis.com",
-    "appengine.googleapis.com",
-    "dns.googleapis.com"
+    "container.googleapis.com",
+    "containerregistry.googleapis.com",
+    "deploymentmanager.googleapis.com",
+    "dns.googleapis.com",
+    "iam.googleapis.com",
+    "oslogin.googleapis.com",
+    "pubsub.googleapis.com",
+    "replicapool.googleapis.com",
+    "replicapoolupdater.googleapis.com",
+    "resourceviews.googleapis.com",
+    "serviceusage.googleapis.com",
+    "storage-api.googleapis.com",
   ]
 }
 
