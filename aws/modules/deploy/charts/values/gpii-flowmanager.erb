@@ -1,8 +1,8 @@
 replicaCount: <%= replicaCount = ENV["TF_VAR_cluster_name"].start_with?("stg.","prd.") ? '6' : '2' %>
 
 image:
-  repository: <%= @versions["preferences"].split('@')[0] %>
-  checksum: <%= @versions["preferences"].split('@')[1] %>
+  repository: <%= @versions["gpii-preferences"].split('@')[0] %>
+  checksum: <%= @versions["gpii-preferences"].split('@')[1] %>
 
 rollingUpdate:
   maxSurge: <%= replicaCount.to_i < 4 ? 1 : "25%" %>
