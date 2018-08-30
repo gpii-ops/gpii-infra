@@ -54,6 +54,7 @@ resource "google_project_services" "project" {
   services = [
     "bigquery-json.googleapis.com",
     "cloudbilling.googleapis.com",
+    "cloudkms.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com",
     "container.googleapis.com",
@@ -88,7 +89,7 @@ resource "google_project_iam_binding" "project" {
 
 resource "google_dns_managed_zone" "project" {
   project     = "${google_project.project.project_id}"
-  name        = "${google_project.project.project_id}-zone"
+  name        = "${element(split("-", var.project_name), 0)}-gcp-${replace(var.organization_domain, ".", "-")}"
   dns_name    = "${local.dnsname}"
   description = "${google_project.project.project_id} DNS zone"
   depends_on  = ["google_project_services.project",
@@ -99,7 +100,7 @@ resource "google_dns_managed_zone" "project" {
 # project_name has the pattern ${env}-${user}
 resource "google_dns_record_set" "ns" {
   name         = "${local.dnsname}"
-  managed_zone = "${var.organization_name}-gcp-${element(split("-", var.project_name), 0)}-zone"
+  managed_zone = "${element(split("-", var.project_name), 0)}-gcp-${replace(var.organization_domain, ".", "-")}"
   type         = "NS"
   ttl          = 3600
   project      = "${var.organization_name}-gcp-${element(split("-", var.project_name), 0)}"
