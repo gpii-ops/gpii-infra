@@ -5,6 +5,7 @@ terraform {
 variable "env" {}
 variable "secrets_dir" {}
 variable "charts_dir" {}
+variable "organization_domain" {}
 
 variable "dns_zones" {
   type = "map"
@@ -21,7 +22,7 @@ data "template_file" "preferences_values" {
 
   vars {
     env                    = "${var.env}"
-    dns_name               = "${var.dns_zones["${var.env}-gcp-gpii-net"]}"
+    dns_name               = "${var.dns_zones["${var.env}-gcp-${replace(var.organization_domain, ".", "-")}"]}"
     preferences_repository = "${var.preferences_repository}"
     preferences_checksum   = "${var.preferences_checksum}"
     couchdb_admin_username = "${var.secret_couchdb_admin_username}"
