@@ -77,22 +77,8 @@ gcp-dev:
     - rake clobber
     - rake configure_serviceaccount_ci_restore
     - rake
-    # Run smoke tests for Preferences
-    - rake sh['sh -c "
-        xk down live/dev/locust &&
-        TF_VAR_locust_target_host=http://preferences.$TF_VAR_domain_name
-        TF_VAR_locust_script=preferences.py
-        xk up live/dev/locust"']
-    # Run smoke tests for Flowmanager
-    - rake sh['sh -c "
-        xk down live/dev/locust &&
-        TF_VAR_locust_target_host=http://flowmanager.$TF_VAR_domain_name
-        TF_VAR_locust_script=flowmanager.py
-        TF_VAR_locust_users=30
-        TF_VAR_locust_desired_total_rps=10
-        TF_VAR_locust_desired_median_response_time=200
-        TF_VAR_locust_desired_max_response_time=700
-        xk up live/dev/locust"']
+    - rake test_preferences
+    - rake test_flowmanager
   after_script:
     # Clean up even if something failed.
     - cd gcp/live/dev
