@@ -17,7 +17,7 @@ task :test_flowmanager => [:set_vars] do
     TF_VAR_locust_script=flowmanager.py \
     TF_VAR_locust_users=30 \
     TF_VAR_locust_desired_total_rps=10 \
-    TF_VAR_locust_desired_median_response_time=200 \
+    TF_VAR_locust_desired_median_response_time=300 \
     TF_VAR_locust_desired_max_response_time=700 \
     xk up live/dev/locust',skip_infra,skip_secret_mgmt]"
 end
