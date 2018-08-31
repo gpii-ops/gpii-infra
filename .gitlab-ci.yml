@@ -87,7 +87,8 @@ gcp-dev:
     # managing secrets from scratch.
     - rake destroy_secrets
     # Terraform state encryption key is also gone with secrets, we have to destroy tfstate as well
-    - rake destroy_tfstate
+    - rake destroy_tfstate[k8s]
+    - rake destroy_tfstate[locust]
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys
     - rake clobber
