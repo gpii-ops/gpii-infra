@@ -40,13 +40,15 @@ class Vars
     end
 
     if ["dev"].include?(env)
-      zone = "#{ENV["USER"]}.#{env}.gcp.gpii.net."
+      zone = "#{ENV["USER"]}.#{env}.gcp.gpii.net"
       if ENV["TF_VAR_dns_zones"].nil?
-        ENV["TF_VAR_dns_zones"] = %Q|{ #{env}-gcp-gpii-net = "#{zone}" }|
+        ENV["TF_VAR_dns_zones"] = %Q|{ #{env}-gcp-gpii-net = "#{zone}." }|
       end
       if ENV["TF_VAR_dns_records"].nil?
-        ENV["TF_VAR_dns_records"] = %Q|{ #{env}-gcp-gpii-net = "*.#{zone}" }|
+        ENV["TF_VAR_dns_records"] = %Q|{ #{env}-gcp-gpii-net = "*.#{zone}." }|
       end
+
+      ENV["TF_VAR_domain_name"] = "#{zone}"
     end
 
     ENV["ENV"] = ENV["TF_VAR_env"] = env

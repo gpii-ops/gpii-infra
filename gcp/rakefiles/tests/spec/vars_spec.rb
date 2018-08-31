@@ -79,6 +79,14 @@ describe Vars do
     expect(ENV).not_to have_received(:[]=).with("TF_VAR_dns_records", any_args)
   end
 
+  it "set_vars sets ENV['TF_VAR_domain_name'] when env=dev" do
+    allow(ENV).to receive(:[]).with("USER").and_return("fake-user")
+    env = "dev"
+    project_type = "fake-project-type"
+    Vars.set_vars(env, project_type)
+    expect(ENV).to have_received(:[]=).with("TF_VAR_domain_name", "fake-user.dev.gcp.gpii.net")
+  end
+
   it "set_vars sets default vars" do
     allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
     env = "fake-env"
