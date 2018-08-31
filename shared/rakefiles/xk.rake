@@ -54,6 +54,37 @@ task :xk, [:cmd, :skip_infra, :skip_secret_mgmt] => [@serviceaccount_key_file, @
   sh_filter "#{@exekube_cmd} #{args[:cmd]}" if args[:cmd]
 end
 
+task :refresh_infra, [:project_type] => [@gcp_creds_file] do | taskname, args|
+
+  next if args[:project_type] == "common"
+
+  # The common infrastructure might create the DNS resources, in order to avoid
+  # conflicts at the creation resources we need to import the already created
+  # DNS zone.
+
+  dns_zone = @env + "-" + args[:project_type] + "-" + ENV["TF_VAR_organization_domain"].tr(".", "-")
+  output = `#{@exekube_cmd} sh -c "\
+    terragrunt state show module.gke_network.google_dns_managed_zone.dns_zones \
+    --terragrunt-working-dir /project/live/#{@env}/infra/network \
+    "`
+  id_found = output[/^id *= *([\w-]*$)/,1]
+  if id_found.nil? then
+    # The DNS zone is not in the TF state file, we need to add it
+    puts "DNS zone #{dns_zone} not found in TF state, importing..."
+    sh "#{@exekube_cmd} sh -c '\
+      terragrunt import module.gke_network.google_dns_managed_zone.dns_zones #{dns_zone} \
+      --terragrunt-working-dir /project/live/#{@env}/infra/network \
+      '"
+  else
+    # The DNS zone is in the TF state file, we will refresh it just in case
+    puts "DNS zone #{dns_zone} found in TF state, refreshing..."
+    sh "#{@exekube_cmd} sh -c '\
+      terragrunt refresh \
+      --terragrunt-working-dir /project/live/#{@env}/infra/network \
+      '"
+  end
+end
+
 task :infra_init => [@gcp_creds_file] do
   # Steps to initialize GCP with a minimum set of resources to allow Terraform
   # create the rest of the infrastructure.
