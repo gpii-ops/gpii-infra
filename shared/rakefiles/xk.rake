@@ -120,17 +120,12 @@ task :infra_init => [@gcp_creds_file] do
 
   Rake::Task[:configure_serviceaccount].invoke
 
-  sh "#{@exekube_cmd} gcloud projects add-iam-policy-binding #{ENV["TF_VAR_project_id"]} \
-            --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com \
-            --role roles/viewer"
+  ["roles/viewer", "roles/storage.admin", "roles/dns.admin"].each do |role|
 
   sh "#{@exekube_cmd} gcloud projects add-iam-policy-binding #{ENV["TF_VAR_project_id"]} \
             --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com \
-            --role roles/storage.admin"
-
-  sh "#{@exekube_cmd} gcloud projects add-iam-policy-binding #{ENV["TF_VAR_project_id"]} \
-            --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com \
-            --role roles/dns.admin"
+            --role #{role}"
+  end
 
   output = `#{@exekube_cmd} gcloud services list --format='json'`
   hash = JSON.parse(output)
@@ -143,13 +138,11 @@ task :infra_init => [@gcp_creds_file] do
      sh "#{@exekube_cmd} gcloud services enable #{service}" unless hash.any? { |s| s['serviceName'] == service }
   end
 
-  sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
+  ["roles/resourcemanager.projectCreator", "roles/billing.user"].each do |role|
+    sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
       --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com \
-      --role roles/resourcemanager.projectCreator"
-
-  sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
-      --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com \
-      --role roles/billing.user"
+      --role #{role}"
+  end
 
   `#{@exekube_cmd} gsutil ls gs://#{ENV["TF_VAR_project_id"]}-tfstate`
   if $?.exitstatus != 0
