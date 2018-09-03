@@ -111,6 +111,11 @@ This happens when trying to enable an API that is already enabled. This shouldn'
 rake sh["gcloud services disable container.googleapis.com"]
 ```
 
+### Error (gcloud.iam.service-accounts.keys.create) RESOURCE_EXHAUSTED: Maximum number of keys on account reached
+
+This happens due to limitation of maximum 10 keys per ServiceAccount.
+If you see this error during any `rake` execution, run `rake destroy_sa_keys` and then try again.
+
 ### Restoring CouchDB data
 
 We are considering number of probable failure scenarios for our GCP infrastructure.
@@ -153,3 +158,8 @@ There may be a situation, when we want to roll back entire DB data set to anothe
    * You can check the status of all nodes with `for i in {0..N}; do kubectl exec --namespace gpii -it couchdb-couchdb-$i -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/_up; done`, where N is a number of CouchDB replicas.
 * Once DB state is verified and you sure that everything went as desired, you can scale `preferences` and `flowmanager` deployments back as well. From this point system functionality for the customer is fully restored.
 * Deploy `k8s-snapshots` module to resume regular snapshot process with `rake deploy_module["k8s/kube-system/k8s-snapshots"]`.
+
+## Design principles
+
+* Favor pushing implementation "down the stack". The more we act like a "regular" Exekube project, the more we benefit from upstream improvements. Hence, favor Terraform code over in-line shell scripts over Ruby/Rake wrapper code.
+   * Here is a [notable exception](https://github.com/gpii-ops/gpii-infra/pull/93/commits/5d307a373bd42505f066bb24f6686f107aed2728), where moving a calculation up to Ruby/Rake resulted in much simpler Terraform code.

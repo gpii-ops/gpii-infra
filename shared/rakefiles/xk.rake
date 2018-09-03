@@ -13,17 +13,28 @@ rule @gcp_creds_file do
   sh "gcloud auth login"
 end
 
+# A more rake-ish way to create this file would be:
+#
+#   task :configure_serviceaccount => [@serviceaccount_key_file]
+#   rule @serviceaccount_key_file => [@gcp_creds_file] do ... end
+#
+# However, that logic would force creation of a new @serviceaccount_key_file
+# (and a new Serviceaccount Key) whenever @gcp_creds_file changes. This is not
+# what we want, i.e. don't create a new Key/key file when @gcp_creds_file
+# changes because of :configure_kubectl.
 @serviceaccount_key_file = ENV["TF_VAR_serviceaccount_key"]
-task :configure_serviceaccount => [@serviceaccount_key_file]
-rule @serviceaccount_key_file => [@gcp_creds_file] do
+task :configure_serviceaccount => [@gcp_creds_file] do
   # TODO: This command is duplicated from exekube's gcp-project-init (and
   # hardcodes 'projectowner' instead of $SA_NAME which is only defined in
   # gcp-project-init). If gcp-project-init becomes idempotent (GPII-2989,
   # https://github.com/exekube/exekube/issues/92), or if this 'keys create'
   # step moves somewhere else in exekube, call this command from that place
   # instead.
-  sh "gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
-        --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com"
+  sh "
+    [ -f $TF_VAR_serviceaccount_key ] || \
+    gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
+      --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com
+  "
 end
 
 @kubectl_creds_file = "/root/.kube/config"

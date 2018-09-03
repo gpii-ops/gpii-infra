@@ -10,6 +10,7 @@ variable "organization_domain" {}
 variable "dns_zones" {
   type = "map"
 }
+variable "domain_name" {}
 
 variable "secret_couchdb_admin_username" {}
 variable "secret_couchdb_admin_password" {}
@@ -22,7 +23,9 @@ data "template_file" "preferences_values" {
 
   vars {
     env                    = "${var.env}"
+    # TODO: remove one of the following variables
     dns_name               = "${var.dns_zones["${var.env}-gcp-${replace(var.organization_domain, ".", "-")}"]}"
+    domain_name            = "${var.domain_name}"
     preferences_repository = "${var.preferences_repository}"
     preferences_checksum   = "${var.preferences_checksum}"
     couchdb_admin_username = "${var.secret_couchdb_admin_username}"
