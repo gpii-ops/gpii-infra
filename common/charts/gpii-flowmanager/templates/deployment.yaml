@@ -31,5 +31,3 @@ spec:
           value: '{{ .Values.datasource_listen_port }}'
         - name: GPII_FLOWMANAGER_TO_PREFERENCESSERVER_URL
           value: {{ .Values.preferences_url }}
-        - name: GPII_FLOWMANAGER_MATCHMAKER_URL
-          value: {{ .Values.matchmaker_url }}
