@@ -85,6 +85,7 @@ describe Vars do
 
   it "set_vars sets ENV['TF_VAR_domain_name'] when env=dev" do
     allow(ENV).to receive(:[]).with("USER").and_return("fake-user")
+    allow(ENV).to receive(:[]).with("TF_VAR_organization_domain").and_return("gpii.net")
     env = "dev"
     project_type = "fake-project-type"
     Vars.set_vars(env, project_type)
