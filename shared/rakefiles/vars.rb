@@ -79,14 +79,6 @@ class Vars
       ENV["TF_VAR_#{component}_checksum"] = versions["gpii-#{component}"].split('@')[1]
     end
   end
-  def self.create_directory_if_not_exists(path)
-    recursive = path.split('/')
-    directory = ''
-    recursive.each do |sub_directory|
-      directory += sub_directory + '/'
-      Dir.mkdir(directory) unless (File.directory? directory)
-    end
-  end
 end
 
 # vim: et ts=2 sw=2:
