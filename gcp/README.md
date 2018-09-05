@@ -41,10 +41,6 @@ The environments that run in GCP need some initial resources that must be create
 1. By default you'll use the RtF Organization and Billing Account.
    * You can use a different Organization or Billing Account, e.g. from a GCP Free Trial Account, with `export ORGANIZATION_ID=111111111111` and/or `export BILLING_ID=222222-222222-222222`.
 1. `cd gpii-infra/gcp/live/dev`
-1. `rake project_init`
-   * Follow the instructions to authenticate.
-   * This will create a project called `gpii-dev-$USER` where `$USER` comes from your shell.
-   * This step is not idempotent. It will fail if you've already initialized the project named in `$TF_VAR_project_id` (e.g. `gpii-gcp-dev-$USER` or `gpii-gcp-prd`).
 1. `rake`
 
 ## Tearing down an environment

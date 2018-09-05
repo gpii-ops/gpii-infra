@@ -74,15 +74,6 @@ task :configure_serviceaccount => [:set_vars] do
   sh "#{@exekube_cmd} rake configure_serviceaccount"
 end
 
-desc "Get the credentials needed to create all the resources inside the project"
-task :project_init => [:set_vars, :configure_current_project, :configure_serviceaccount]
-
-
-desc "[ADVANCED] Tell gcloud to use TF_VAR_project_id as the default Project; can be useful after 'rake clobber'"
-task :configure_current_project => [:set_vars] do
-  sh "#{@exekube_cmd} rake configure_current_project"
-end
-
 desc "[ADVANCED] Create or update low-level infrastructure"
 task :apply_infra => [:set_vars, :configure_serviceaccount] do
   sh "#{@exekube_cmd} rake refresh_infra['#{@project_type}']"

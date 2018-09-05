@@ -23,7 +23,7 @@ end
 # what we want, i.e. don't create a new Key/key file when @gcp_creds_file
 # changes because of :configure_kubectl.
 @serviceaccount_key_file = ENV["TF_VAR_serviceaccount_key"]
-task :configure_serviceaccount => [@gcp_creds_file] do
+task :configure_serviceaccount => [@gcp_creds_file, :configure_current_project] do
   # TODO: This command is duplicated from exekube's gcp-project-init (and
   # hardcodes 'projectowner' instead of $SA_NAME which is only defined in
   # gcp-project-init). If gcp-project-init becomes idempotent (GPII-2989,
