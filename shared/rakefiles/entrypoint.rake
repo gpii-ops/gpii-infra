@@ -22,17 +22,18 @@ end
 @serviceaccount_key_file = "secrets/kube-system/owner.json"
 
 task :clean_volumes => :set_vars do
-  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-helm"
-  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-terragrunt"
-  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-kube"
+  ["helm", "terragrunt", "kube"].each do |app|
+    sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-#{app}"
+  end
 end
 Rake::Task["clean"].enhance do
   Rake::Task["clean_volumes"].invoke
 end
 
 task :clobber_volumes => :set_vars do
-  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-secrets"
-  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-gcloud"
+  ["secrets", "gcloud", "aws"].each do |app|
+    sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-#{app}"
+  end
 end
 Rake::Task["clobber"].enhance do
   Rake::Task["clobber_volumes"].invoke
