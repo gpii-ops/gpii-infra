@@ -105,7 +105,7 @@ resource "google_dns_record_set" "ns" {
   ttl          = 3600
   project      = "${var.organization_name}-gcp-${element(split("-", var.project_name), 0)}"
   rrdatas      = ["${google_dns_managed_zone.project.name_servers}"]
-  count        = "${length(split("-", var.project_name)) == 2 ? 1 : 0}"
+  count        = "${length(split("-", var.project_name)) >= 2 ? 1 : 0}"
 }
 
 # Set the NS records in the gcp.$organization_domain zone of the
