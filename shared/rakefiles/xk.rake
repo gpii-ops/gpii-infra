@@ -51,6 +51,10 @@ rule @kubectl_creds_file => [@gcp_creds_file] do
     fi"
 end
 
+task :configure_current_project => [@gcp_creds_file] do
+  sh "gcloud config set project $TF_VAR_project_id"
+end
+
 # This task is being called from entrypoint.rake and runs inside exekube container.
 # It applies infra, secret-mgmt, sets secrets, and then executes arbitrary command from args[:cmd].
 # You should not invoke this task directly!
@@ -114,7 +118,7 @@ task :infra_init => [@gcp_creds_file] do
       --organization #{ENV["ORGANIZATION_ID"]} \
       --set-as-default"
   else
-    sh "#{@exekube_cmd} gcloud config set project #{ENV["TF_VAR_project_id"]}"
+    Rake::Task[:configure_current_project].invoke
   end
 
   sh "

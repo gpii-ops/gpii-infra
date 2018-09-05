@@ -79,7 +79,7 @@ task :project_init => [:set_vars, :configure_current_project, :configure_service
 
 desc "[ADVANCED] Tell gcloud to use TF_VAR_project_id as the default Project; can be useful after 'rake clobber'"
 task :configure_current_project => [:set_vars] do
-  sh "#{@exekube_cmd} gcloud config set project #{ENV["TF_VAR_project_id"]}"
+  sh "#{@exekube_cmd} rake configure_current_project"
 end
 
 desc "[ADVANCED] Create or update low-level infrastructure"
