@@ -77,6 +77,8 @@ gcp-dev:
     - rake clobber
     - rake configure_serviceaccount_ci_restore
     - rake
+    - rake test_preferences
+    - rake test_flowmanager
   after_script:
     # Clean up even if something failed.
     - cd gcp/live/dev
@@ -85,7 +87,8 @@ gcp-dev:
     # managing secrets from scratch.
     - rake destroy_secrets
     # Terraform state encryption key is also gone with secrets, we have to destroy tfstate as well
-    - rake destroy_tfstate
+    - rake destroy_tfstate[k8s]
+    - rake destroy_tfstate[locust]
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys
     - rake clobber
@@ -120,28 +123,32 @@ aws-stg:
   stage: stg
   tags:
     - aws
+  environment:
+    name: stg
   script:
     - cd aws/stg
     - rake clobber
     - rake
-  environment:
-    name: stg
 
 # DISABLED while we sort out the gcp-stg -> gcp-gpii-stg migration.
 .gcp-stg:
   stage: stg
   tags:
     - gcp
+  environment:
+    name: stg
   script:
     - cd gcp/live/stg
     - rake clobber
     - rake configure_serviceaccount_ci_restore
     - rake
-  environment:
-    name: stg
+    - rake test_preferences
+    - rake test_flowmanager
   after_script:
     # Clean up even if something failed.
     - cd gcp/live/stg
+    # Destroy Locust module (used for smoke tests)
+    - rake destroy_module[locust]
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys
 
@@ -182,12 +189,12 @@ aws-prd:
     RAKE_REALLY_RUN_IN_PRD: "true"
   tags:
     - aws
+  environment:
+    name: prd
   script:
     - cd aws/prd
     - rake clobber
     - rake
-  environment:
-    name: prd
 
 # DISABLED while we sort out the gcp-stg -> gcp-gpii-stg migration.
 .gcp-prd:
@@ -196,15 +203,19 @@ aws-prd:
     RAKE_REALLY_RUN_IN_PRD: "true"
   tags:
     - gcp
+  environment:
+    name: prd
   script:
     - cd gcp/live/prd
     - rake clobber
     - rake configure_serviceaccount_ci_restore
     - rake
-  environment:
-    name: prd
+    - rake test_preferences
+    - rake test_flowmanager
   after_script:
     # Clean up even if something failed.
     - cd gcp/live/prd
+    # Destroy Locust module (used for smoke tests)
+    - rake destroy_module[locust]
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys

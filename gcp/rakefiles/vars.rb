@@ -3,8 +3,7 @@ require "yaml"
 
 class Vars
 
-  # Hack to avoid changes in gpii-version-updater
-  VERSION_FILE = "../../../aws/modules/deploy/version.yml"
+  VERSIONS_FILE = "../../../common/versions.yml"
 
   def self.set_vars(env, project_type)
     if ["prd"].include?(env)
@@ -41,13 +40,15 @@ class Vars
     end
 
     if ["dev"].include?(env)
-      zone = "#{ENV["USER"]}.#{env}.gcp.gpii.net."
+      zone = "#{ENV["USER"]}.#{env}.gcp.gpii.net"
       if ENV["TF_VAR_dns_zones"].nil?
-        ENV["TF_VAR_dns_zones"] = %Q|{ #{env}-gcp-gpii-net = "#{zone}" }|
+        ENV["TF_VAR_dns_zones"] = %Q|{ #{env}-gcp-gpii-net = "#{zone}." }|
       end
       if ENV["TF_VAR_dns_records"].nil?
-        ENV["TF_VAR_dns_records"] = %Q|{ #{env}-gcp-gpii-net = "*.#{zone}" }|
+        ENV["TF_VAR_dns_records"] = %Q|{ #{env}-gcp-gpii-net = "*.#{zone}." }|
       end
+
+      ENV["TF_VAR_domain_name"] = "#{zone}"
     end
 
     ENV["ENV"] = ENV["TF_VAR_env"] = env
@@ -65,18 +66,11 @@ class Vars
   end
 
   def self.set_versions()
-    versions = YAML.load(File.read(Vars::VERSION_FILE))
-    if versions['flowmanager']
-      ENV['TF_VAR_flowmanager_repository'] = versions['flowmanager'].split('@')[0]
-      ENV['TF_VAR_flowmanager_checksum'] = versions['flowmanager'].split('@')[1]
-    end
-    if versions['preferences']
-      ENV['TF_VAR_preferences_repository'] = versions['preferences'].split('@')[0]
-      ENV['TF_VAR_preferences_checksum'] = versions['preferences'].split('@')[1]
-    end
-    if versions['gpii-dataloader']
-      ENV['TF_VAR_dataloader_repository'] = versions['gpii-dataloader'].split('@')[0]
-      ENV['TF_VAR_dataloader_checksum'] = versions['gpii-dataloader'].split('@')[1]
+    versions = YAML.load(File.read(Vars::VERSIONS_FILE))
+    ['flowmanager', 'preferences', 'dataloader'].each do |component|
+      next unless versions["gpii-#{component}"]
+      ENV["TF_VAR_#{component}_repository"] = versions["gpii-#{component}"].split('@')[0]
+      ENV["TF_VAR_#{component}_checksum"] = versions["gpii-#{component}"].split('@')[1]
     end
   end
 end
