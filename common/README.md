@@ -87,6 +87,6 @@ rake apply_infra
 
 Once the `rake apply_infra` command has finished the resources for the new user must be created. Go to the `gcp` part of the repository and spin up the environment. Remember to use the same string for the USER environment variable.
 
-## Delete a project
+## Deleting a project
 
 The deletion of a project is not implemented to be performed automatically yet. First be sure that all the resources of such project are deleted. You can use the `rake destroy` command of the `gcp` part to deleted most of them (or at least the most expensive ones). After that, the command `rake destroy_infra` will destroy most of the resources left. But since the `rake destroy_infra` doesn't finish fine, some resources could be left in GCP, so they need to be deleted manually.
