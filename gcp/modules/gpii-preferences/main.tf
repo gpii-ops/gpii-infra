@@ -5,7 +5,6 @@ terraform {
 variable "env" {}
 variable "secrets_dir" {}
 variable "charts_dir" {}
-
 variable "domain_name" {}
 
 variable "secret_couchdb_admin_username" {}
