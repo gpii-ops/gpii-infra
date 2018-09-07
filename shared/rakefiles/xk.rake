@@ -77,22 +77,26 @@ task :refresh_infra, [:project_type] => [@gcp_creds_file] do | taskname, args|
   # conflicts at the creation resources we need to import the already created
   # DNS zone.
 
-  dns_zone = @env + "-" + args[:project_type] + "-" + ENV["TF_VAR_organization_domain"].tr(".", "-")
   output = `#{@exekube_cmd} sh -c "\
-    terragrunt state show module.gke_network.google_dns_managed_zone.dns_zones \
-    --terragrunt-working-dir /project/live/#{@env}/infra/network \
+    terragrunt output -json dns_zones \
+    --terragrunt-working-dir /project/live/#{@env}/infra/network 2>/dev/null
     "`
-  id_found = output[/^id *= *([\w-]*$)/,1]
-  if id_found.nil? then
+  begin
+    id_found = !!JSON.parse(output)
+  rescue JSON::ParserError
+    id_found = false
+  end
+
+  if id_found then
     # The DNS zone is not in the TF state file, we need to add it
-    puts "DNS zone #{dns_zone} not found in TF state, importing..."
+    puts "DNS zone #{ENV["TF_VAR_domain_name"].tr('.','-')} not found in TF state, importing..."
     sh "#{@exekube_cmd} sh -c '\
-      terragrunt import module.gke_network.google_dns_managed_zone.dns_zones #{dns_zone} \
+      terragrunt import module.gke_network.google_dns_managed_zone.dns_zones #{ENV["TF_VAR_domain_name"].tr('.','-')} \
       --terragrunt-working-dir /project/live/#{@env}/infra/network \
       '"
   else
     # The DNS zone is in the TF state file, we will refresh it just in case
-    puts "DNS zone #{dns_zone} found in TF state, refreshing..."
+    puts "DNS zone #{ENV["TF_VAR_domain_name"].tr('.','-')} found in TF state, refreshing..."
     sh "#{@exekube_cmd} sh -c '\
       terragrunt refresh \
       --terragrunt-working-dir /project/live/#{@env}/infra/network \

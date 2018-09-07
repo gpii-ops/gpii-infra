@@ -30,13 +30,14 @@ provider "google" {
   region      = "us-central1"
 }
 
-
-locals  {
+# The dnsname and the dns domain must be computed for each new project created.
+# The organization name may not match the organization domain.
+locals {
   dnsname = "${replace(
               replace(
                 google_project.project.name,
                 "/([\\w]+)-([\\w]+)-([\\w]+)-?([\\w]+)?/",
-                "$4.$3.$2.${var.organization_domain}."),
+                "$4.$3.$2.${var.organization_domain}"),
               "/^\\./",
               "")
             }"
@@ -89,8 +90,8 @@ resource "google_project_iam_binding" "project" {
 
 resource "google_dns_managed_zone" "project" {
   project     = "${google_project.project.project_id}"
-  name        = "${element(split("-", var.project_name), 0)}-gcp-${replace(var.organization_domain, ".", "-")}"
-  dns_name    = "${local.dnsname}"
+  name        = "${replace(local.dnsname, ".", "-")}"
+  dns_name    = "${local.dnsname}."
   description = "${google_project.project.project_id} DNS zone"
   depends_on  = ["google_project_services.project",
                  "google_project_iam_binding.project"]
@@ -99,7 +100,7 @@ resource "google_dns_managed_zone" "project" {
 # Set the NS records in the parent zone of the parent project if the
 # project_name has the pattern ${env}-${user}
 resource "google_dns_record_set" "ns" {
-  name         = "${local.dnsname}"
+  name         = "${local.dnsname}."
   managed_zone = "${element(split("-", var.project_name), 0)}-gcp-${replace(var.organization_domain, ".", "-")}"
   type         = "NS"
   ttl          = 3600
@@ -111,7 +112,7 @@ resource "google_dns_record_set" "ns" {
 # Set the NS records in the gcp.$organization_domain zone of the
 # $organization_name-gcp-common-$env if the project name doesn't have a hyphen.
 resource "google_dns_record_set" "ns-root" {
-  name         = "${local.dnsname}"
+  name         = "${local.dnsname}."
   managed_zone = "gcp-${replace(var.organization_domain, ".", "-")}"
   type         = "NS"
   ttl          = 3600
@@ -127,4 +128,3 @@ resource "google_storage_bucket" "project-tfstate" {
     enabled = "true"
   }
 }
-

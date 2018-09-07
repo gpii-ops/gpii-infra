@@ -68,8 +68,8 @@ describe Vars do
     env = "dev"
     project_type = "fake-project-type"
     Vars.set_vars(env, project_type)
-    expect(ENV).to have_received(:[]=).with("TF_VAR_dns_zones", %Q|{ dev-gcp-corp-es = "fake-user.dev.gcp.corp.es." }|)
-    expect(ENV).to have_received(:[]=).with("TF_VAR_dns_records", %Q|{ dev-gcp-corp-es = "*.fake-user.dev.gcp.corp.es." }|)
+    expect(ENV).to have_received(:[]=).with("TF_VAR_dns_zones", %Q|{ fake-user-dev-gcp-corp-es = "fake-user.dev.gcp.corp.es." }|)
+    expect(ENV).to have_received(:[]=).with("TF_VAR_dns_records", %Q|{ fake-user-dev-gcp-corp-es = "*.fake-user.dev.gcp.corp.es." }|)
   end
 
   it "set_vars doesn't clobber ENV['dns_(zones|records)'] when already set and env=dev" do
@@ -85,11 +85,11 @@ describe Vars do
 
   it "set_vars sets ENV['TF_VAR_domain_name'] when env=dev" do
     allow(ENV).to receive(:[]).with("USER").and_return("fake-user")
-    allow(ENV).to receive(:[]).with("TF_VAR_organization_domain").and_return("gpii.net")
+    allow(ENV).to receive(:[]).with("TF_VAR_organization_domain").and_return("corp.es")
     env = "dev"
     project_type = "fake-project-type"
     Vars.set_vars(env, project_type)
-    expect(ENV).to have_received(:[]=).with("TF_VAR_domain_name", "fake-user.dev.gcp.gpii.net")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_domain_name", "fake-user.dev.gcp.corp.es")
   end
 
   it "set_vars sets default vars" do
