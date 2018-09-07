@@ -61,7 +61,7 @@ class Secrets
           raise "ERROR: Can not use secret with name '#{secret_name}' for module '#{module_name}'!\n \
             Secret '#{secret_name}' is already in use by module '#{secrets_to_modules[secret_name]}'!"
         end
-        ENV["TF_VAR_#{secret_name}"] = ""
+        ENV["TF_VAR_#{secret_name}"] = "" unless ENV["TF_VAR_#{secret_name}"]
         secrets_to_modules[secret_name] = module_name
       end
     end
@@ -76,7 +76,7 @@ class Secrets
   # This method is setting secret ENV variables collected from modules
   #
   # When encrypted secret file for current env is not present it GS bucket,
-  # for every secret it first looks for ENV[secret_name.upcase] and, if it is not set,
+  # for every secret it first looks for ENV["TF_VAR_#{secret_name}"] and, if it is not set,
   # populates secret with random nonse, and then uploads to corresponding GS bucket.
   #
   # When encrypted secret file is present, it always uses its decrypted data as a source for secrets.
@@ -92,17 +92,17 @@ class Secrets
       else
         populated_secrets = {}
         secrets.each do |secret_name|
-          if ENV[secret_name.upcase].to_s.empty?
+          if ENV["TF_VAR_#{secret_name}"].to_s.empty?
             if secret_name.start_with?("key_")
-              key = OpenSSL::Cipher.new("aes-256-cfb").encrypt.random_key
-              secret_value = Base64.encode64(key).chomp
+              key = OpenSSL::Cipher::AES256.new.encrypt.random_key
+              secret_value = Base64.strict_encode64(key)
             else
               secret_value = SecureRandom.hex
             end
+            ENV["TF_VAR_#{secret_name}"] = secret_value
           else
-            secret_value = ENV[secret_name.upcase]
+            secret_value = ENV["TF_VAR_#{secret_name}"]
           end
-          ENV["TF_VAR_#{secret_name}"] = secret_value
           populated_secrets[secret_name] = secret_value
         end
 
