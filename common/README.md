@@ -9,6 +9,7 @@ Initial instructions based on [exekube's Getting Started](https://exekube.github
 The project structure is like following:
 
 - gpii-common-prd (only for creating the rest of the infrastructure)
+- gpii-common-stg (see [Testing the gpii-infra common](#testing-the-gpii-infra-common))
 - gpii-gcp-prd
 - gpii-gcp-stg
 - gpii-gcp-dev
@@ -38,9 +39,9 @@ The DNS zones are:
    * You can use a different Organization or Billing Account, e.g. from a GCP Free Trial Account, with `export ORGANIZATION_ID=111111111111` and/or `export BILLING_ID=222222-222222-222222`.
 1. Check that [you have the AWS credentials](../aws#configure-cloud-provider-credentials).
    * Be sure that your AWS credentials are in your $HOME/.aws directory.
-1. `cd gpii-infra/common/live/prd`
+1. `cd gpii-infra/common/live/prd` or `cd gpii-infra/common/live/stg`
 1. `rake infra_init`
-   * This will create a project called `gpii-common-prd`, with all the resources needed to run Terraform and create all the organization projects.
+   * This will create a project called `gpii-common-prd` or `gpii-common-prd` if it's the case, with all the resources needed to run Terraform and create all the organization projects.
    * This step must be executed by an user with admin privileges in the organization, because it needs to create IAMs that are able to create projects and associate the billing account to them.
 1. `rake apply_infra`
    * This will create all the projects in the organization. Each project is defined by the content of a directory in `common/live/(stg|prd)/infra`
@@ -50,3 +51,42 @@ WARNING: The command `rake destroy_infra` of the GCP part of this project can di
 ## Testing the gpii-infra common
 
 The only way that we have to test this code is using another dedicated GCP organization dedicated. The environment variables needed to do so are hardcoded in the `live/stg/Rakefile` in order to avoid possible overwriting of the production resources.
+
+The code used by the `live/stg` environment is the same as used in `live/prd` but all the changes will be preformed in the testing organization.
+
+Once the testing organization has all the resources (DNS zones and projects), it is possible to spin up the clusters defined in the `gcp` part of the repository. To do so some environment variables must be set first.
+
+i.e to spin up the a dev cluster:
+
+From the root of the repository:
+```
+ export ORGANIZATION_ID=327626828918
+ export TF_VAR_organization_name=gpii2test
+ export TF_VAR_organization_domain=test1.gpii.net
+ export USER=doe
+ cd gcp/live/dev
+ rake
+ # (wait until all the resources are created)
+ curl -k https://preferences.doe.dev.gcp.test1.gpii.net/preferences/carla
+ rake destroy
+```
+
+## Adding a dev project
+
+The projects are defined in the directory tree `common/live/stg/infra/`. To add a new user make a copy of the user `john`, edit the file john/terraform.tfvars and change the `project_name` variable. Example:
+
+```
+cd common/live/stg/infra/
+cp -r john $USER
+#(edit $USER/terraform.tfvars) 
+  project_name = "dev-$USER"
+#(save)
+cd common/live/stg/
+rake apply_infra
+```
+
+Once the `rake apply_infra` command has finished the resources for the new user must be created. Go to the `gcp` part of the repository and spin up the environment. Remember to use the same string for the USER environment variable.
+
+## Delete a project
+
+The deletion of a project is not implemented to be performed automatically yet. First be sure that all the resources of such project are deleted. You can use the `rake destroy` command of the `gcp` part to deleted most of them (or at least the most expensive ones). After that, the command `rake destroy_infra` will destroy most of the resources left. But since the `rake destroy_infra` doesn't finish fine, some resources could be left in GCP, so they need to be deleted manually.

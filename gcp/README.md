@@ -35,6 +35,8 @@ The environments that run in GCP need some initial resources that must be create
 
 ## Creating an environment
 
+An environment needs some resources created in the organization before the following actions are done. Ask an operator of the organization to create a new project for such environment. In the case of a `dev` project the $USER environment variable is used to name the project. Provide such value to the operator. After the common part is created the following steps will spin up the cluster:
+
 1. Clone this repo.
 1. (Optional) Clone [the gpii-ops fork of exekube](https://github.com/gpii-ops/exekube).
    * The `gpii-infra` clone and the `exekube` clone should be siblings in the same directory (there are some references to `../exekube`).
