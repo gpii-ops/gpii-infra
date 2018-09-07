@@ -46,7 +46,7 @@ The DNS zones are:
 1. `rake apply_infra`
    * This will create all the projects in the organization. Each project is defined by the content of a directory in `common/live/(stg|prd)/infra`
 
-WARNING: The command `rake destroy_infra` of the GCP part of this project can disable the DNS API driving to an issue where Terraform is unable to refresh the state at the next executions. Avoid the use of `rake destroy_infra`, and only remove the most expensive resources using `rake destroy`.
+WARNING: The command `rake destroy_infra` of the GCP part of this project can disable the DNS API driving to an issue where Terraform is unable to refresh the state at the next executions. Avoid the use of `rake destroy_infra`, and only remove the most expensive resources using `rake destroy`. A Jira ticket has been created to fix this behavior: https://issues.gpii.net/browse/GPII-3332
 
 ## Testing the gpii-infra common
 
