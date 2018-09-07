@@ -104,7 +104,7 @@ task :refresh_common_infra, [:project_type] => [@gcp_creds_file] do | taskname, 
   end
 end
 
-task :infra_init => [@gcp_creds_file] do
+task :apply_common_infra => [@gcp_creds_file] do
   # Steps to initialize GCP with a minimum set of resources to allow Terraform
   # create the rest of the infrastructure.
   # These steps are the same found in this tutorial:

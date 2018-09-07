@@ -40,7 +40,7 @@ The DNS zones are:
 1. Check that [you have the AWS credentials](../aws#configure-cloud-provider-credentials).
    * Be sure that your AWS credentials are in your $HOME/.aws directory.
 1. `cd gpii-infra/common/live/prd` or `cd gpii-infra/common/live/stg`
-1. `rake infra_init`
+1. `rake apply_common_infra`
    * This will create a project called `gpii-common-prd` or `gpii-common-prd` if it's the case, with all the resources needed to run Terraform and create all the organization projects.
    * This step must be executed by an user with admin privileges in the organization, because it needs to create IAMs that are able to create projects and associate the billing account to them.
 1. `rake apply_infra`
