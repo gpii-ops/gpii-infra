@@ -76,7 +76,7 @@ end
 
 desc "[ADVANCED] Create or update low-level infrastructure"
 task :apply_infra => [:set_vars, :configure_serviceaccount] do
-  sh "#{@exekube_cmd} rake refresh_infra['#{@project_type}']"
+  sh "#{@exekube_cmd} rake refresh_common_infra['#{@project_type}']"
   sh "#{@exekube_cmd} up live/#{@env}/infra"
 end
 

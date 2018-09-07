@@ -69,7 +69,7 @@ task :xk, [:cmd, :skip_infra, :skip_secret_mgmt] => [@serviceaccount_key_file, @
   sh_filter "#{@exekube_cmd} #{args[:cmd]}" if args[:cmd]
 end
 
-task :refresh_infra, [:project_type] => [@gcp_creds_file] do | taskname, args|
+task :refresh_common_infra, [:project_type] => [@gcp_creds_file] do | taskname, args|
 
   next if args[:project_type] == "common"
 
