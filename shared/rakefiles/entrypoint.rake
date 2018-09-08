@@ -55,7 +55,7 @@ CLEAN << @compose_env_file
 task :set_compose_env do
   tf_vars = []
   ENV.each do |key, val|
-   tf_vars << key if key.start_with?("TF_VAR_")
+    tf_vars << key if key.start_with?("TF_VAR_")
   end
   File.open(@compose_env_file, 'w') do |file|
     file.write(tf_vars.sort.join("\n"))
@@ -111,7 +111,7 @@ end
 desc '[ADVANCED] Run arbitrary exekube command -- rake sh["kubectl --namespace gpii get pods"]'
 task :sh, [:cmd] => [:set_vars] do |taskname, args|
   if args[:cmd]
-    sh "#{@exekube_cmd} rake xk['#{args[:cmd]}',skip_infra,skip_secret_mgmt]"
+    sh "#{@exekube_cmd} rake xk['#{args[:cmd]}',skip_secret_mgmt]"
   else
     puts "Argument :cmd -- the command to run inside the exekube container -- not present, defaulting to bash"
     sh "#{@exekube_cmd} sh"
@@ -170,7 +170,7 @@ task :deploy_module, [:module] => [:set_vars] do |taskname, args|
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
     raise
   end
-  sh "#{@exekube_cmd} rake xk['up live/#{@env}/#{args[:module]}',skip_infra,skip_secret_mgmt]"
+  sh "#{@exekube_cmd} rake xk['up live/#{@env}/#{args[:module]}',skip_secret_mgmt]"
 end
 
 desc '[ADVANCED] Destroy provided module in the cluster -- rake destroy_module"[k8s/kube-system/cert-manager]"'
@@ -182,7 +182,7 @@ task :destroy_module, [:module] => [:set_vars] do |taskname, args|
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
     raise
   end
-  sh "#{@exekube_cmd} rake xk['down live/#{@env}/#{args[:module]}',skip_infra,skip_secret_mgmt]"
+  sh "#{@exekube_cmd} rake xk['down live/#{@env}/#{args[:module]}',skip_secret_mgmt]"
 end
 
 # vim: et ts=2 sw=2:

@@ -24,11 +24,4 @@ ingress:
   disable_ssl_redirect: true
 <% end %>
 
-
-<% if ENV["TF_VAR_cluster_name"].start_with?("stg.", "prd.") %>
-matchmaker_url: "https://flowmanager.<%= ENV["TF_VAR_cluster_name"] %>"
-<% else %>
-matchmaker_url: "http://flowmanager.<%= ENV["TF_VAR_cluster_name"] %>"
-<% end %>
-
 datasource_hostname: "http://<%= @secrets["couchdb_user"] %>:<%= @secrets["couchdb_password"] %>@couchdb-lb.gpii.svc.cluster.local"
