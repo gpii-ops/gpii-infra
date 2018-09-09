@@ -5,7 +5,7 @@ import "../../rakefiles/entrypoint.rake"
 
 begin
   require 'rspec/core/rake_task'
-  RSpec::Core::RakeTask.new(:securityTest) do |t|
+  RSpec::Core::RakeTask.new(:test_security) do |t|
     t.rspec_opts = '--format documentation'
   end
 rescue LoadError
