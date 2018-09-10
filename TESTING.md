@@ -142,13 +142,39 @@ In addition, the flowmanager calls the preferences server and similar logs entri
 }
 ```
 
-The above functionality is a limited test suite that needs to be expanded to be more complete. Work is being tracked in (GPII-3333)[https://issues.gpii.net/browse/GPII-3333] for that.
+The above functionality is a limited test suite that needs to be expanded to be more complete. Work is being tracked in [GPII-3333](https://issues.gpii.net/browse/GPII-3333) for that.
 
 ## Testing login/logout and basic settings
 
-1. Obtain a copy of the gpii/windows repository:
+1. Obtain a copy of the gpii/gpii-app repository:
 
 ```bash
+$ git clone https://github.com/GPII/gpii-app.git
+
+```
+
+2. Spin up the vagrant box:
+
+```bash
+$ cd gpii-app
+
+$ vagrant up
+```
+
+3. When the machine is up and running, open a command prompt and run the application:
+
+```
+$ cd c:\vagrant
+
+$ set GPII_CLOUD_URL=http://flowmanager.<CLUSTER_NAME>
+
+$ npm start
+
+...
+
+```
+
+4. You can open morphic now on the taskbar. The icon will of a gear. Update of the preferences should now register against the specified cluster.
 
 
 # Security Testing
