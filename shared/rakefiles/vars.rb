@@ -15,9 +15,9 @@ class Vars
 
     ENV["ENV"] = ENV["TF_VAR_env"] = env
 
-    ENV["TF_VAR_organization_name"] = "gpii" if ENV["TF_VAR_organization_name"].nil? #i.e. gpii
+    ENV["TF_VAR_organization_name"] = "gpii" if ENV["TF_VAR_organization_name"].nil?
 
-    ENV["TF_VAR_organization_domain"] = "gpii.net" if ENV["TF_VAR_organization_domain"].nil? #i.e gpii.net
+    ENV["TF_VAR_organization_domain"] = "gpii.net" if ENV["TF_VAR_organization_domain"].nil?
 
     ENV["ORGANIZATION_ID"] = "247149361674" if ENV["ORGANIZATION_ID"].nil? # RtF Organization
     ENV["TF_VAR_organization_id"] = ENV["ORGANIZATION_ID"]
