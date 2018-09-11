@@ -1,7 +1,5 @@
 desc '[TEST] Run Locust swarm against Preferences service in current cluster'
 task :test_preferences => [:set_vars] do
-  # TODO: Once GPII-3250 is resolved, TF_VAR_locust_desired_max_response_time
-  # should be changed back to it's default value of 500
   sh "#{@exekube_cmd} rake xk[' \
     xk down live/dev/locust && \
     echo \"Waiting for K8s to fully terminate Locust resources...\" && \
@@ -9,7 +7,6 @@ task :test_preferences => [:set_vars] do
     TF_VAR_locust_target_host=http://preferences.$TF_VAR_domain_name \
     TF_VAR_locust_script=preferences.py \
     TF_VAR_locust_desired_median_response_time=150 \
-    TF_VAR_locust_desired_max_response_time=4000 \
     xk up live/dev/locust',skip_infra,skip_secret_mgmt]"
 end
 
