@@ -54,7 +54,7 @@ end
 # This task is being called from entrypoint.rake and runs inside exekube container.
 # It applies secret-mgmt, sets secrets, and then executes arbitrary command from args[:cmd].
 # You should not invoke this task directly!
-task :xk, [:cmd, :skip_secret_mgmt] => [@serviceaccount_key_file, @kubectl_creds_file] do |taskname, args|
+task :xk, [:cmd, :skip_secret_mgmt] => [:configure_serviceaccount, @kubectl_creds_file] do |taskname, args|
   @secrets = Secrets.collect_secrets()
 
   sh "#{@exekube_cmd} up live/#{@env}/secret-mgmt" unless args[:skip_secret_mgmt]
