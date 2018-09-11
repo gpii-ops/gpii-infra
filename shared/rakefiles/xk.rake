@@ -81,12 +81,14 @@ task :refresh_common_infra, [:project_type] => [@gcp_creds_file] do | taskname, 
     --terragrunt-working-dir /project/live/#{@env}/infra/network 2>/dev/null
     "`
   begin
-    id_found = !!JSON.parse(output)
+    # What does !! mean?
+    # https://stackoverflow.com/questions/524658/what-does-mean-in-ruby
+    dns_zone_found = !!JSON.parse(output)
   rescue JSON::ParserError
-    id_found = false
+    dns_zone_found = false
   end
 
-  if not id_found then
+  if not dns_zone_found then
     # The DNS zone is not in the TF state file, we need to add it
     puts "DNS zone #{ENV["TF_VAR_domain_name"].tr('.','-')} not found in TF state, importing..."
     sh "#{@exekube_cmd} sh -c '\
