@@ -157,6 +157,9 @@ common-stg:
     - rake clobber
     - rake configure_serviceaccount_ci_restore
     - rake
+  after_script:
+    # Clean up dev environment even if one of the previous steps fails
+    - cd gcp/live/dev
     - rake destroy
   environment:
     name: stg
