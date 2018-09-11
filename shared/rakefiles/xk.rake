@@ -78,7 +78,7 @@ task :refresh_common_infra, [:project_type] => [@gcp_creds_file] do | taskname, 
 
   output = `#{@exekube_cmd} sh -c "\
     terragrunt output -json dns_zones \
-    --terragrunt-working-dir /project/live/#{@env}/infra/network 2>/dev/null
+    --terragrunt-working-dir /project/live/#{@env}/infra/network 2>/dev/null \
     "`
   begin
     # What does !! mean?
