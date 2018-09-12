@@ -96,44 +96,44 @@ The deletion of a project is not implemented to be performed automatically yet. 
 In the case that we need to import existing resources to the TF state file, we need to perform the following steps:
 
 1. Get in to the Docker container and project path.
-```
-cd common/live/prd
-rake sh
-cd /project/live/prd/infra/$PROJECT/zone
-# or
-cd /project/live/prd/infra/dev/$USER
-```
+   ```
+   cd common/live/prd
+   rake sh
+   cd /project/live/prd/infra/$PROJECT/zone
+   # or
+   cd /project/live/prd/infra/dev/$USER
+   ```
 1. Execute a `terragrunt plan`
 1. You will see which resources are going to be created. If any of those already exists they need to be imported:
 
-```
-# Project
-terragrunt import google_project.project gpii-gcp-dev-$USER
-# API Services
-terragrunt import google_project_services.project gpii-gcp-dev-$USER
-# Storage Buckets
-terragrunt import google_storage_bucket.project-tfstate gpii-gcp-dev-$USER-tfstate
-# Service Accounts
-terragrunt import google_service_account.project projects/gpii-gcp-dev-$USER/serviceAccounts/projectowner@gpii-gcp-dev-$USER.iam.gserviceaccount.com
-```
+   ```
+   # Project
+   terragrunt import google_project.project gpii-gcp-dev-$USER
+   # API Services
+   terragrunt import google_project_services.project gpii-gcp-dev-$USER
+   # Storage Buckets
+   terragrunt import google_storage_bucket.project-tfstate gpii-gcp-dev-$USER-tfstate
+   # Service Accounts
+   terragrunt import google_service_account.project projects/gpii-gcp-dev-$USER/serviceAccounts/projectowner@gpii-gcp-dev-$USER.iam.gserviceaccount.com
+   ```
 
 In the case of the DNS-root, the resources are spread AWS and Google DNS:
 
 1. Get in to the Docker container and project path.
-```
-cd common/live/prd
-rake sh
-cd /project/live/prd/infra/dns-root
-```
+   ```
+   cd common/live/prd
+   rake sh
+   cd /project/live/prd/infra/dns-root
+   ```
 1. Execute a `terragrunt plan`
 1. You will see which resources are going to be created. If any of those already exists they need to be imported:
 
-```
-# Project
-terragrunt import module.aws_zone.aws_route53_record.main_ns Z26C1YEN96KOGI_aws.gpii.net_NS
-terragrunt import module.aws_zone.aws_route53_zone.main Z26VOXVJXXG9QQ
-terragrunt import module.gcp_zone_in_aws.aws_route53_record.main_ns Z26C1YEN96KOGI_gcp.gpii.net_NS
-terragrunt import module.gcp_zone_in_aws.aws_route53_zone.main Z29SXC5CAHOH1D
-```
+   ```
+   # DNS zones
+   terragrunt import module.aws_zone.aws_route53_record.main_ns Z26C1YEN96KOGI_aws.gpii.net_NS
+   terragrunt import module.aws_zone.aws_route53_zone.main Z26VOXVJXXG9QQ
+   terragrunt import module.gcp_zone_in_aws.aws_route53_record.main_ns  Z26C1YEN96KOGI_gcp.gpii.net_NS
+   terragrunt import module.gcp_zone_in_aws.aws_route53_zone.main Z29SXC5CAHOH1D
+   ```
 
 NOTE: the above sample lines have been used in our last import. Perhaps other resources need to be imported, following the same patterns. It was not possible to cover all the resources as they were not created at that time.
