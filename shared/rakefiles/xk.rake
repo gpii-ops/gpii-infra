@@ -88,7 +88,7 @@ task :refresh_common_infra, [:project_type] => [@gcp_creds_file] do | taskname, 
     dns_zone_found = false
   end
 
-  if not dns_zone_found then
+  unless dns_zone_found
     # The DNS zone is not in the TF state file, we need to add it
     puts "DNS zone #{ENV["TF_VAR_domain_name"].tr('.','-')} not found in TF state, importing..."
     sh "#{@exekube_cmd} sh -c '\
