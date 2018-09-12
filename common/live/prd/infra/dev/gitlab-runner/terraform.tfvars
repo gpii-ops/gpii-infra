@@ -15,5 +15,5 @@ terragrunt = {
 # ↓ Module configuration (empty means all default)
 
 project_name    = "dev-gitlab-runner"
-project_owner   = "alfredo@raisingthefloor.org"
+project_owner   = "gpii-bot@raisingthefloor.org"
 
