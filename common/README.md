@@ -78,7 +78,7 @@ The projects are defined in the directory tree `common/live/stg/infra/`. To add 
 ```
 cd common/live/stg/infra/
 cp -r john $USER
-#(edit $USER/terraform.tfvars) 
+#(edit $USER/terraform.tfvars)
   project_name = "dev-$USER"
 #(save)
 cd common/live/stg/
@@ -90,3 +90,50 @@ Once the `rake apply_infra` command has finished the resources for the new user 
 ## Deleting a project
 
 The deletion of a project is not implemented to be performed automatically yet. First be sure that all the resources of such project are deleted. You can use the `rake destroy` command of the `gcp` part to deleted most of them (or at least the most expensive ones). After that, the command `rake destroy_infra` will destroy most of the resources left. But since the `rake destroy_infra` doesn't finish fine, some resources could be left in GCP, so they need to be deleted manually.
+
+## Importing existing resources
+
+In the case that we need to import existing resources to the TF state file, we need to perform the following steps:
+
+1. Get in to the Docker container and project path.
+```
+cd common/live/prd
+rake sh
+cd /project/live/prd/infra/$PROJECT/zone
+# or
+cd /project/live/prd/infra/dev/$USER
+```
+1. Execute a `terragrunt plan`
+1. You will see which resources are going to be created. If any of those already exists they need to be imported:
+
+```
+# Project
+terragrunt import google_project.project gpii-gcp-dev-$USER
+# API Services
+terragrunt import google_project_services.project gpii-gcp-dev-$USER
+# Storage Buckets
+terragrunt import google_storage_bucket.project-tfstate gpii-gcp-dev-$USER-tfstate
+# Service Accounts
+terragrunt import google_service_account.project projects/gpii-gcp-dev-$USER/serviceAccounts/projectowner@gpii-gcp-dev-$USER.iam.gserviceaccount.com
+```
+
+In the case of the DNS-root, the resources are spread AWS and Google DNS:
+
+1. Get in to the Docker container and project path.
+```
+cd common/live/prd
+rake sh
+cd /project/live/prd/infra/dns-root
+```
+1. Execute a `terragrunt plan`
+1. You will see which resources are going to be created. If any of those already exists they need to be imported:
+
+```
+# Project
+terragrunt import module.aws_zone.aws_route53_record.main_ns Z26C1YEN96KOGI_aws.gpii.net_NS
+terragrunt import module.aws_zone.aws_route53_zone.main Z26VOXVJXXG9QQ
+terragrunt import module.gcp_zone_in_aws.aws_route53_record.main_ns Z26C1YEN96KOGI_gcp.gpii.net_NS
+terragrunt import module.gcp_zone_in_aws.aws_route53_zone.main Z29SXC5CAHOH1D
+```
+
+NOTE: the above sample lines have been used in our last import. Perhaps other resources need to be imported, following the same patterns. It was not possible to cover all the resources as they were not created at that time.
