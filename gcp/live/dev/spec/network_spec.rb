@@ -103,7 +103,6 @@ describe "Security:" do
       end
   
       it "is not accessible directly by any other pod (other than flowmanager)" do
-        pending "implementation of network security policies"
         @preferences_pods.each do |target|
           (@all_pods-[target]-@flowmanager_pods).each do |source|
             kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -w 1 #{target.ip} 8081 </dev/null'")
@@ -126,7 +125,6 @@ describe "Security:" do
       end
 
       it "is not accessible directly by any other pod" do
-        pending "implementation of network security policies"
         @preferences_pods.each do |target|
           (@all_pods-[target]).each do |source|
             kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -w 1 #{target.ip} 8081 </dev/null'")
@@ -172,7 +170,6 @@ describe "Security:" do
         end
   
         it "should not allow non-couchdb pods to reach it" do
-          pending "implementation of network security policies"
           @couchdb_pods.each do |target|
             (@all_pods-@couchdb_pods).each do |source|
               kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -w 1 #{target.ip} 4369 </dev/null'")
@@ -203,7 +200,6 @@ describe "Security:" do
         end
   
         it "should not allow non-couchdb pods reach it" do
-          pending "implementation of network security policies"
           @couchdb_pods.each do |target|
             (@all_pods-@couchdb_pods).each do |source|
               kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -w 1 #{target.ip} 9100 </dev/null'")
