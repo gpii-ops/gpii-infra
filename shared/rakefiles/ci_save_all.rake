@@ -27,6 +27,18 @@ task :default do
       "
     end
   end
+  # We need a extra test user called "doe" which will deploy a cluster in the
+  # testing organization.
+  ENV["ORGANIZATION_ID"] = "327626828918"
+  ENV["TF_VAR_organization_name"] = "gpii2test"
+  ENV["USER"] = "doe"  # User that runs CI in the testing organization
+  env = "../../../shared/gcp/live/dev"
+  sh "cd #{env} && \
+    rake configure_serviceaccount_ci_clobber && \
+    rake configure_serviceaccount && \
+    rake configure_serviceaccount_ci_save && \
+    rake clobber \
+  "
 end
 
 # vim: et ts=2 sw=2:
