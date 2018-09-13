@@ -34,7 +34,7 @@ def get_gpii_pods_labeled(key, value)
     .select{ |item| item.has_label(key, value) }
 end
 
-def kubectl(cmd, debug=false)
+def kubectl(cmd, debug=true)
   if debug
     puts "kubectl #{cmd} 2>/dev/null"
   end
@@ -60,11 +60,11 @@ def setup_busybox_on(pod)
   kubectl("exec -n gpii -it #{pod.name} -- chmod +x /tmp/busybox")
 end
 
-def download_busybox(url='https://busybox.net/downloads/binaries/1.21.1/busybox-x86_64')
+def download_busybox(url='https://busybox.net/downloads/binaries/1.28.1-defconfig-multiarch/busybox-x86_64')
   filename = "/tmp/#{File.basename(url)}"
 
   unless File.exist?(filename)
-    system("curl #{url} > #{file}")
+    system("curl #{url} > #{filename}")
 
     fail "Error: Unable to download busybox" if $? != 0
   end
@@ -96,7 +96,7 @@ describe "Security:" do
     context "Container Port 8081" do
       it "listens on that port" do
         @preferences_pods.each do |pod|
-          kubectl("exec -n gpii -it #{pod.name} -c preferences -- sh -c '/tmp/busybox nc -w 1 #{pod.ip} 8081 </dev/null'")
+          kubectl("exec -n gpii -it #{pod.name} -c preferences -- sh -c '/tmp/busybox nc -z -w 1 #{pod.ip} 8081'")
   
           expect($?.exitstatus).to eq(0)
         end
@@ -106,7 +106,7 @@ describe "Security:" do
         pending "implementation of network security policies"
         @preferences_pods.each do |target|
           (@all_pods-[target]-@flowmanager_pods).each do |source|
-            kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -w 1 #{target.ip} 8081 </dev/null'")
+            kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -z -w 1 #{target.ip} 8081'")
   
              expect($?.exitstatus).to_not eq(0)
           end
@@ -119,7 +119,7 @@ describe "Security:" do
     context "Container Port 8081" do
       it "listens on that port" do
         @preferences_pods.each do |pod|
-          kubectl("exec -n gpii -it #{pod.name} -- sh -c '/tmp/busybox nc -w 1 #{pod.ip} 8081 </dev/null'")
+          kubectl("exec -n gpii -it #{pod.name} -- sh -c '/tmp/busybox nc -z -w 1 #{pod.ip} 8081'")
   
           expect($?.exitstatus).to eq(0)
         end
@@ -129,7 +129,7 @@ describe "Security:" do
         pending "implementation of network security policies"
         @preferences_pods.each do |target|
           (@all_pods-[target]).each do |source|
-            kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -w 1 #{target.ip} 8081 </dev/null'")
+            kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -z -w 1 #{target.ip} 8081'")
   
              expect($?.exitstatus).to_not eq(0)
           end
@@ -143,7 +143,7 @@ describe "Security:" do
       context "Container Port 5984" do
         it "should have couchdb listening" do
           @couchdb_pods.each do |pod|
-            kubectl("exec -n gpii -it #{pod.name} -- sh -c '/tmp/busybox nc -w 1 #{pod.ip} 5984 </dev/null'")
+            kubectl("exec -n gpii -it #{pod.name} -- sh -c '/tmp/busybox nc -z -w 1 #{pod.ip} 5984'")
     
             expect($?.exitstatus).to eq(0)
           end
@@ -166,7 +166,7 @@ describe "Security:" do
       context "Container Port 4369 (EPMD)" do
         it "should have couchdb listening for erlang clustering" do
           @couchdb_pods.each do |pod|
-            kubectl("exec -n gpii -it #{pod.name} -- sh -c '/tmp/busybox nc -w 1 #{pod.ip} 4369 </dev/null'")
+            kubectl("exec -n gpii -it #{pod.name} -- sh -c '/tmp/busybox nc -z -w 1 #{pod.ip} 4369'")
     
             expect($?.exitstatus).to eq(0)
           end
@@ -175,7 +175,7 @@ describe "Security:" do
         it "should be able to reach out to other couchdb pods on port 4369 for erlang clustering" do
           @couchdb_pods.each do |source|
             (@couchdb_pods-[source]).each do |target|
-              kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -w 1 #{target.ip} 4369 </dev/null'")
+              kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -z -w 1 #{target.ip} 4369'")
     
               expect($?.exitstatus).to eq(0)
             end
@@ -186,7 +186,7 @@ describe "Security:" do
           pending "implementation of network security policies"
           @couchdb_pods.each do |target|
             (@all_pods-@couchdb_pods).each do |source|
-              kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -w 1 #{target.ip} 4369 </dev/null'")
+              kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -z -w 1 #{target.ip} 4369'")
   
               expect($?.exitstatus).to_not eq(0)
             end
@@ -197,7 +197,7 @@ describe "Security:" do
       context "Container Port 9100" do
         it "should have couchdb listening for erlang clustering" do
           @couchdb_pods.each do |pod|
-            kubectl("exec -n gpii -it #{pod.name} -- sh -c '/tmp/busybox nc -w 1 #{pod.ip} 9100 </dev/null'")
+            kubectl("exec -n gpii -it #{pod.name} -- sh -c '/tmp/busybox nc -z -w 1 #{pod.ip} 9100'")
     
             expect($?.exitstatus).to eq(0)
           end
@@ -206,7 +206,7 @@ describe "Security:" do
         it "should be able to reach out to other couchdb pods for erlang clustering" do
           @couchdb_pods.each do |source|
             (@couchdb_pods-[source]).each do |target|
-              kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -w 1 #{target.ip} 9100 </dev/null'")
+              kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -z -w 1 #{target.ip} 9100'")
   
               expect($?.exitstatus).to eq(0)
             end
@@ -217,7 +217,7 @@ describe "Security:" do
           pending "implementation of network security policies"
           @couchdb_pods.each do |target|
             (@all_pods-@couchdb_pods).each do |source|
-              kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -w 1 #{target.ip} 9100 </dev/null'")
+              kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -z -w 1 #{target.ip} 9100'")
     
               expect($?.exitstatus).to_not eq(0)
             end
