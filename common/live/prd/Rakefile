@@ -1,14 +1,8 @@
 import "../../../shared/rakefiles/entrypoint.rake"
+import "../../../shared/rakefiles/entrypoint_common.rake"
 
 @env = File.basename(File.dirname(__FILE__))
 @project_type = File.basename(File.expand_path("../../../", __FILE__))
 
-begin
-  require 'rspec/core/rake_task'
-  RSpec::Core::RakeTask.new(:test_security) do |t|
-    t.rspec_opts = '--format documentation'
-  end
-rescue LoadError
-end
 
 # vim: et ts=2 sw=2:

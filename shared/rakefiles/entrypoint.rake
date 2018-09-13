@@ -1,7 +1,7 @@
 require "rake/clean"
 
-import "../../rakefiles/ci.rake"
-import "../../rakefiles/test.rake"
+import "../../../shared/rakefiles/ci.rake"
+import "../../../shared/rakefiles/test.rake"
 require_relative "./vars.rb"
 
 if @env.nil?
@@ -19,18 +19,21 @@ end
 
 @exekube_cmd = "docker-compose run --rm --service-ports xk"
 
+@serviceaccount_key_file = "secrets/kube-system/owner.json"
+
 task :clean_volumes => :set_vars do
-  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-helm"
-  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-terragrunt"
-  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-kube"
+  ["helm", "terragrunt", "kube"].each do |app|
+    sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-#{app}"
+  end
 end
 Rake::Task["clean"].enhance do
   Rake::Task["clean_volumes"].invoke
 end
 
 task :clobber_volumes => :set_vars do
-  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-secrets"
-  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-gcloud"
+  ["secrets", "gcloud", "aws"].each do |app|
+    sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-#{app}"
+  end
 end
 Rake::Task["clobber"].enhance do
   Rake::Task["clobber_volumes"].invoke
@@ -71,23 +74,9 @@ task :configure_serviceaccount => [:set_vars] do
   sh "#{@exekube_cmd} rake configure_serviceaccount"
 end
 
-desc "[ADVANCED] Fetch kubectl credentials (gcloud auth login)"
-task :configure_kubectl => [:set_vars] do
-  sh "#{@exekube_cmd} rake configure_kubectl"
-end
-
-desc "[ADVANCED] Tell gcloud to use TF_VAR_project_id as the default Project; can be useful after 'rake clobber'"
-task :configure_current_project => [:set_vars] do
-  sh "#{@exekube_cmd} gcloud config set project #{ENV["TF_VAR_project_id"]}"
-end
-
-desc "[NOT IDEMPOTENT, RUN ONCE PER ENVIRONMENT] Initialize GCP Project where this environment's resources will live"
-task :project_init => [:set_vars, :configure_serviceaccount] do
-  sh "#{@exekube_cmd} gcp-project-init"
-end
-
 desc "[ADVANCED] Create or update low-level infrastructure"
 task :apply_infra => [:set_vars, :configure_serviceaccount] do
+  sh "#{@exekube_cmd} rake refresh_common_infra['#{@project_type}']"
   sh "#{@exekube_cmd} up live/#{@env}/infra"
 end
 
@@ -120,7 +109,7 @@ task :unlock => [:set_vars] do
 end
 
 desc '[ADVANCED] Run arbitrary exekube command -- rake sh["kubectl --namespace gpii get pods"]'
-task :sh, [:cmd] => [:set_vars] do |taskname, args|
+task :rake_shell, [:cmd] => [:set_vars] do |taskname, args|
   if args[:cmd]
     cmd = args[:cmd]
   else
@@ -128,6 +117,11 @@ task :sh, [:cmd] => [:set_vars] do |taskname, args|
     cmd = "bash"
   end
   sh "#{@exekube_cmd} rake xk['#{cmd}',skip_secret_mgmt]"
+end
+
+desc '[ADVANCED] Get a plain clean shell inside the Docker container without executing any additional rake task'
+task :plain_shell => [:set_vars] do
+  sh "#{@exekube_cmd} sh"
 end
 
 desc '[ADVANCED] Destroy all SA keys except current one'

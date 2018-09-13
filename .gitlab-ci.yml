@@ -1,11 +1,31 @@
 stages:
   - setup
   - unit-tests
+  - common-stg
+  - common-stg-test
+  - promote-common-to-prd
+  - common-prd
   - dev
   - promote-to-stg
   - stg
   - promote-to-prd
   - prd
+
+common-setup:
+  stage: setup
+  tags:
+    - common
+  script:
+    - terraform -version
+    - terragrunt -version
+    - aws --version
+    - docker version
+    - docker-compose version
+    - docker pull gpii/exekube:0.4.0-google
+    - docker images | grep exekube
+    - ruby --version
+    - bundle version
+    - rake --version
 
 aws-setup:
   stage: setup
@@ -52,6 +72,81 @@ gcp-unit-tests:
     - cd gcp/rakefiles/tests
     - bundle install --path "vendor/bundle"
     - rake
+
+common-stg:
+  stage: common-stg
+  tags:
+    - common
+  script:
+    - cd common/live/stg
+    - rake clobber
+    - rake configure_serviceaccount_ci_restore
+    - rake apply_common_infra
+    - rake apply_infra
+  environment:
+    name: stg
+
+common-stg-test-gcp-dev:
+  stage: common-stg-test
+  tags:
+    - common
+  variables:
+    # These variables are duplicated in common/live/stg/Rakefile
+    ORGANIZATION_ID: "327626828918"
+    TF_VAR_organization_name: "gpii2test"
+    TF_VAR_organization_domain: "test1.gpii.net"
+    TF_VAR_aws_zone_id: "Z1T3NF8J9WVBSP"
+    USER: "doe"
+  script:
+    - cd gcp/live/dev
+    - rake clobber
+    - rake configure_serviceaccount_ci_restore
+    - rake
+    - rake test_preferences
+    - rake test_flowmanager
+  after_script:
+    # Clean up dev environment even if one of the previous steps fails
+    - cd gcp/live/dev
+    - rake destroy
+    # Destroy secrets, so they can be repopulated on the next run to exercise
+    # managing secrets from scratch.
+    - rake destroy_secrets
+    # Terraform state encryption key is also gone with secrets, we have to destroy tfstate as well
+    - rake destroy_tfstate[k8s]
+    - rake destroy_tfstate[locust]
+    # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
+    - rake destroy_sa_keys
+    - rake clobber
+
+common-promote-common-to-prd:
+  stage: promote-common-to-prd
+  tags:
+    - common
+  script:
+    - export DATESTAMP="$(date -u '+%Y%m%d%H%M%S')"  # e.g. 20170603220542. Uses UTC.
+    - echo "DATESTAMP is $DATESTAMP"  # So it's visible in the log
+    - git tag "deploy-common-stg-$DATESTAMP"
+    # gitlab is not clever enough to clean up an added remote and git complains
+    # if we add a remote that already exists.
+    - git remote | grep -q "^origin-rw" || git remote add origin-rw git@github.com:gpii-ops/gpii-infra
+    - git push --tags origin-rw
+  when: manual
+  allow_failure: false
+
+common-prd:
+  stage: common-prd
+  tags:
+    - common
+  variables:
+    RAKE_REALLY_RUN_IN_PRD: "true"
+  script:
+    - cd common/live/prd
+    - rake clobber
+    - rake configure_serviceaccount_ci_restore
+    - rake apply_common_infra
+    - rake apply_infra
+  environment:
+    name: prd
 
 aws-dev:
   stage: dev
@@ -130,8 +225,7 @@ aws-stg:
     - rake clobber
     - rake
 
-# DISABLED while we sort out the gcp-stg -> gcp-gpii-stg migration.
-.gcp-stg:
+gcp-stg:
   stage: stg
   tags:
     - gcp
@@ -167,8 +261,7 @@ aws-promote-to-prd:
   when: manual
   allow_failure: false
 
-# DISABLED while we sort out the gcp-stg -> gcp-gpii-stg migration.
-.gcp-promote-to-prd:
+gcp-promote-to-prd:
   stage: promote-to-prd
   tags:
     - gcp
@@ -196,8 +289,7 @@ aws-prd:
     - rake clobber
     - rake
 
-# DISABLED while we sort out the gcp-stg -> gcp-gpii-stg migration.
-.gcp-prd:
+gcp-prd:
   stage: prd
   variables:
     RAKE_REALLY_RUN_IN_PRD: "true"

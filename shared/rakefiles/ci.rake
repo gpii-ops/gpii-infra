@@ -5,6 +5,10 @@ task :set_vars_ci => [:set_vars] do
     " run ",
     " run --volume #{@secrets_backup_volume}:/secrets-backup ",
   )
+  @exekube_cmd_with_aws_volume = @exekube_cmd.sub(
+    " run ",
+    " run --volume #{ENV["HOME"]}/.aws:/aws-backup ",
+  )
   # This duplicates information in docker-compose.yaml,
   # TF_VAR_serviceaccount_key.
   @serviceaccount_key_file = "/project/live/#{@env}/secrets/kube-system/owner.json"
@@ -31,6 +35,13 @@ task :configure_serviceaccount_ci_restore => [:set_vars_ci] do
     gcloud auth activate-service-account \
       --key-file $TF_VAR_serviceaccount_key \
       --project $TF_VAR_project_id \
+  '"
+end
+
+task :configure_aws_restore => [:set_vars_ci] do
+  # Puts the AWS credentials a Docker volume to be consumed by the apps inside the container
+  sh "#{@exekube_cmd_with_aws_volume} sh -c '\
+    cp -av /aws-backup/* /root/.aws/ \
   '"
 end
 

@@ -13,6 +13,19 @@ class Vars
       end
     end
 
+    ENV["ENV"] = ENV["TF_VAR_env"] = env
+
+    ENV["TF_VAR_organization_name"] = "gpii" if ENV["TF_VAR_organization_name"].nil?
+
+    ENV["TF_VAR_organization_domain"] = "gpii.net" if ENV["TF_VAR_organization_domain"].nil?
+
+    ENV["ORGANIZATION_ID"] = "247149361674" if ENV["ORGANIZATION_ID"].nil? # RtF Organization
+    ENV["TF_VAR_organization_id"] = ENV["ORGANIZATION_ID"]
+
+    ENV["BILLING_ID"] = "01A0E1-B0B31F-349F4F" if ENV["BILLING_ID"].nil? # RtF Billing Account
+    ENV["TF_VAR_billing_id"] = ENV["BILLING_ID"]
+
+    @domain_name = "#{env}.gcp.#{ENV["TF_VAR_organization_domain"]}"
     if ["dev"].include?(env)
       if ENV["USER"].nil?
         puts "  ERROR: USER must be set!"
@@ -20,13 +33,23 @@ class Vars
         puts "  and try again."
         raise ArgumentError, "USER must be set"
       end
+      @domain_name = "#{ENV["USER"]}.#{@domain_name}"
     end
+
+    ENV["TF_VAR_dns_zones"] = %Q|{ #{@domain_name.tr('.','-')} = "#{@domain_name}." }| if ENV["TF_VAR_dns_zones"].nil?
+
+    ENV["TF_VAR_dns_records"] = %Q|{ #{@domain_name.tr('.','-')} = "*.#{@domain_name}." }| if ENV["TF_VAR_dns_records"].nil?
+
+    ENV["TF_VAR_domain_name"] = @domain_name #i.e doe.dev.gcp.gpii.net
+
+    # Hack to force Terraform to reapply some resources on every run
+    ENV["TF_VAR_nonce"] = SecureRandom.hex
 
     if ENV["TF_VAR_project_id"].nil?
       if ["dev"].include?(env)
-        ENV["TF_VAR_project_id"] = "gpii-#{project_type}-#{env}-#{ENV["USER"]}"
+        ENV["TF_VAR_project_id"] = "#{ENV["TF_VAR_organization_name"]}-#{project_type}-#{env}-#{ENV["USER"]}"
       elsif ["stg", "prd"].include?(env)
-        ENV["TF_VAR_project_id"] = "gpii-#{project_type}-#{env}"
+        ENV["TF_VAR_project_id"] = "#{ENV["TF_VAR_organization_name"]}-#{project_type}-#{env}"
       else
         puts "  ERROR: TF_VAR_project_id must be set!"
         puts "  Usually, this value will be calculated for you, but you are"
@@ -38,31 +61,6 @@ class Vars
         raise ArgumentError, "TF_VAR_project_id must be set"
       end
     end
-
-    if ["dev"].include?(env)
-      zone = "#{ENV["USER"]}.#{env}.gcp.gpii.net"
-      if ENV["TF_VAR_dns_zones"].nil?
-        ENV["TF_VAR_dns_zones"] = %Q|{ #{env}-gcp-gpii-net = "#{zone}." }|
-      end
-      if ENV["TF_VAR_dns_records"].nil?
-        ENV["TF_VAR_dns_records"] = %Q|{ #{env}-gcp-gpii-net = "*.#{zone}." }|
-      end
-
-      ENV["TF_VAR_domain_name"] = "#{zone}"
-    end
-
-    ENV["ENV"] = ENV["TF_VAR_env"] = env
-
-    if ENV["ORGANIZATION_ID"].nil?
-      ENV["ORGANIZATION_ID"] = "247149361674"  # RtF Organization
-    end
-
-    if ENV["BILLING_ID"].nil?
-      ENV["BILLING_ID"] = "01A0E1-B0B31F-349F4F"  # RtF Billing Account
-    end
-
-    # Hack to force Terraform to reapply some resources on every run
-    ENV["TF_VAR_nonce"] = SecureRandom.hex
   end
 
   def self.set_versions()

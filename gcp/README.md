@@ -4,7 +4,38 @@ This directory manages GPII infrastructure in [Google Cloud Project (GCP)](https
 
 Initial instructions based on [exekube's Getting Started](https://exekube.github.io/exekube/in-practice/getting-started/) (version 0.3.0).
 
+## Project structure
+
+The project structure is like following:
+
+- gpii-common-prd (only for creating the rest of the infrastructure)
+- gpii-gcp-prd
+- gpii-gcp-stg
+- gpii-gcp-dev
+- gpii-gcp-dev-${user}
+
+Each project will have the IAMs needed to create the GPII infrastructure inside as an Exekube individual project.
+
+Also each project is meant to be managed by its own Terraform code, and also it will have its own tfstate file.
+
+The DNS is the trickiest part, because each subdomain needs a NS record in the parent domain.
+
+The DNS zones are:
+
+- gpii.net
+- gcp.gpii.net
+- prd.gcp.gpii.net
+- stg.gcp.gpii.net
+- dev.gcp.gpii.net
+- ${user}.dev.gcp.gpii.net
+
+## Creating the infrastructure
+
+The environments that run in GCP need some initial resources that must be created by an administrator first. The [common part of this repository](../common) has the code and the instructions to do so.
+
 ## Creating an environment
+
+An environment needs some resources created in the organization before the following actions are done. Ask an operator of the organization to create a new project for such environment. In the case of a `dev` project the $USER environment variable is used to name the project. Provide such value to the operator. After the common part is created the following steps will spin up the cluster:
 
 1. Clone this repo.
 1. (Optional) Clone [the gpii-ops fork of exekube](https://github.com/gpii-ops/exekube).
@@ -12,10 +43,6 @@ Initial instructions based on [exekube's Getting Started](https://exekube.github
 1. By default you'll use the RtF Organization and Billing Account.
    * You can use a different Organization or Billing Account, e.g. from a GCP Free Trial Account, with `export ORGANIZATION_ID=111111111111` and/or `export BILLING_ID=222222-222222-222222`.
 1. `cd gpii-infra/gcp/live/dev`
-1. `rake project_init`
-   * Follow the instructions to authenticate.
-   * This will create a project called `gpii-dev-$USER` where `$USER` comes from your shell.
-   * This step is not idempotent. It will fail if you've already initialized the project named in `$TF_VAR_project_id` (e.g. `gpii-gcp-dev-$USER` or `gpii-gcp-prd`).
 1. `rake`
 
 ## Tearing down an environment
