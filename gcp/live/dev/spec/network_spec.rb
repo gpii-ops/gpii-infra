@@ -66,7 +66,7 @@ def download_busybox(url='https://busybox.net/downloads/binaries/1.28.1-defconfi
   unless File.exist?(filename)
     system("curl #{url} > #{filename}")
 
-    fail "Error: Unable to download busybox" if $? != 0
+    fail "Error: Unable to download busybox" unless $?.success?
   end
 
   return filename
