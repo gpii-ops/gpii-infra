@@ -1,7 +1,7 @@
 # ↓ Module metadata
 terragrunt = {
   terraform {
-    source = "/project/modules//couchdb"
+    source = "/project/modules//nginx-ingress"
   }
 
   dependencies {
@@ -17,7 +17,3 @@ terragrunt = {
 }
 
 # ↓ Module configuration (empty means all default)
-
-couchdb_replicas = 3
-backup_deltas = "PT15M PT60M PT4H PT24H P7D"
-release_namespace = "gpii"
