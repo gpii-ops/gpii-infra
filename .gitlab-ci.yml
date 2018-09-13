@@ -96,7 +96,6 @@ common-stg-test-gcp-dev:
     TF_VAR_organization_name: "gpii2test"
     TF_VAR_organization_domain: "test1.gpii.net"
     TF_VAR_aws_zone_id: "Z1T3NF8J9WVBSP"
-    USER: "doe"
   script:
     - cd gcp/live/dev
     - rake clobber
