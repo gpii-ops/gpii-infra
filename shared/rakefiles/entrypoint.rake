@@ -109,13 +109,19 @@ task :unlock => [:set_vars] do
 end
 
 desc '[ADVANCED] Run arbitrary exekube command -- rake sh["kubectl --namespace gpii get pods"]'
-task :sh, [:cmd] => [:set_vars] do |taskname, args|
+task :rake_shell, [:cmd] => [:set_vars] do |taskname, args|
   if args[:cmd]
-    sh "#{@exekube_cmd} rake xk['#{args[:cmd]}',skip_secret_mgmt]"
+    cmd = args[:cmd]
   else
     puts "Argument :cmd -- the command to run inside the exekube container -- not present, defaulting to bash"
-    sh "#{@exekube_cmd} sh"
+    cmd = "bash"
   end
+  sh "#{@exekube_cmd} rake xk['#{cmd}',skip_secret_mgmt]"
+end
+
+desc '[ADVANCED] Get a plain clean shell inside the Docker container without executing any additional rake task'
+task :plain_shell => [:set_vars] do
+  sh "#{@exekube_cmd} sh"
 end
 
 desc '[ADVANCED] Destroy all SA keys except current one'
