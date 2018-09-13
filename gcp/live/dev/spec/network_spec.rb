@@ -105,7 +105,7 @@ describe "Security:" do
       it "is not accessible directly by any other pod (other than flowmanager)" do
         pending "implementation of network security policies"
         @preferences_pods.each do |target|
-          (@all_pods-[target]-@flowmanager_pods).each do |source|
+          (@all_pods - [target] - @flowmanager_pods).each do |source|
             kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -z -w 1 #{target.ip} 8081'")
   
              expect($?.exitstatus).to_not eq(0)
@@ -128,7 +128,7 @@ describe "Security:" do
       it "is not accessible directly by any other pod" do
         pending "implementation of network security policies"
         @preferences_pods.each do |target|
-          (@all_pods-[target]).each do |source|
+          (@all_pods - [target]).each do |source|
             kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -z -w 1 #{target.ip} 8081'")
   
              expect($?.exitstatus).to_not eq(0)
@@ -152,7 +152,7 @@ describe "Security:" do
         it "is not accessible directly by any other pod on port 5984" do
           pending "implementation of network security policies"
           @couchdb_pods.each do |target|
-            (@all_pods-@couchdb_pods).each do |source|
+            (@all_pods - @couchdb_pods).each do |source|
               kubectl("exec -n gpii -it #{source.name} -- nc -z #{target.ip} 5984")
 
               expect($?.exitstatus).to_not eq(0)
@@ -174,7 +174,7 @@ describe "Security:" do
 
         it "should be able to reach out to other couchdb pods on port 4369 for erlang clustering" do
           @couchdb_pods.each do |source|
-            (@couchdb_pods-[source]).each do |target|
+            (@couchdb_pods - [source]).each do |target|
               kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -z -w 1 #{target.ip} 4369'")
     
               expect($?.exitstatus).to eq(0)
@@ -185,7 +185,7 @@ describe "Security:" do
         it "should not allow non-couchdb pods to reach it" do
           pending "implementation of network security policies"
           @couchdb_pods.each do |target|
-            (@all_pods-@couchdb_pods).each do |source|
+            (@all_pods - @couchdb_pods).each do |source|
               kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -z -w 1 #{target.ip} 4369'")
   
               expect($?.exitstatus).to_not eq(0)
@@ -205,7 +205,7 @@ describe "Security:" do
 
         it "should be able to reach out to other couchdb pods for erlang clustering" do
           @couchdb_pods.each do |source|
-            (@couchdb_pods-[source]).each do |target|
+            (@couchdb_pods - [source]).each do |target|
               kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -z -w 1 #{target.ip} 9100'")
   
               expect($?.exitstatus).to eq(0)
@@ -216,7 +216,7 @@ describe "Security:" do
         it "should not allow non-couchdb pods reach it" do
           pending "implementation of network security policies"
           @couchdb_pods.each do |target|
-            (@all_pods-@couchdb_pods).each do |source|
+            (@all_pods - @couchdb_pods).each do |source|
               kubectl("exec -n gpii -it #{source.name} -- sh -c '/tmp/busybox nc -z -w 1 #{target.ip} 9100'")
     
               expect($?.exitstatus).to_not eq(0)
