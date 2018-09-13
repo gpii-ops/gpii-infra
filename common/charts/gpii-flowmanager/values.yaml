@@ -11,12 +11,15 @@ datasource_hostname: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster
 
 node_env: gpii.config.cloudBased.flowManager.production
 preferences_url: http://preferences.gpii.svc.cluster.local/preferences/%gpiiKey?merge=%merge
-matchmaker_url: https://flowmanager.test.local
 
 image:
   repository: gpii/universal
   checksum: sha256:8547f22ae8e86d7b4b09e10d9ec87b1605b47dc37904171c84555a55462f161e
   pullPolicy: IfNotPresent
+
+rollingUpdate:
+  maxSurge: 25%
+  maxUnavailable: 0
 
 issuerRef:
   name: letsencrypt-production

@@ -1,11 +1,11 @@
-version: "3"
+version: "3.4"
 
 services:
   xk:
     image: gpii/exekube:0.4.0-google
     working_dir: /project
     environment:
-      USER: root
+      USER: ${USER:?err}
       ENV: ${ENV:?err}
       ORGANIZATION_ID:
       BILLING_ID:
@@ -30,27 +30,44 @@ services:
       # TF_VAR_secrets_dir is used by multiple modules to source secrets from
       TF_VAR_secrets_dir: /project/live/${ENV}/secrets
 
-       # TF_VAR_values_dir is used by templater to put rendered files into
-      TF_VAR_values_dir: /tmp/${ENV}/values
-
       # TF_VAR_charts_dir is the place where common charts live, relative to modules
       TF_VAR_charts_dir: ../../../../../charts
 
     # File with other environment variables will be populated by rake
     env_file:
-      - ./.config/${ENV}/compose.env
+      - live/${ENV}/compose.env
 
     ports:
       - 8001:8001
     volumes:
       - .:/project
       - ../common/charts:/charts
-      - ./.config/${ENV}/helm:/root/.helm
-      - ./.config/${ENV}/terragrunt:/root/.terragrunt
-      - ./.config/${ENV}/gcloud:/root/.config/gcloud
-      - ./.config/${ENV}/kube:/root/.kube
+      - ../shared/rakefiles:/rakefiles
+      - secrets:/project/live/${ENV}/secrets
+      - helm:/root/.helm
+      - terragrunt:/root/.terragrunt
+      - gcloud:/root/.config/gcloud
+      - kube:/root/.kube
 
       # EXEKUBE DEVELOPMENT
-      - ../../exekube/modules:/exekube-modules
+      # - ../../exekube/modules:/exekube-modules
       # ---
     command: kubectl proxy --address="0.0.0.0" --accept-hosts ".*"
+
+volumes:
+  secrets:
+    # We add USER -- potentially a second time as TF_VAR_project_id may contain
+    # USER already, e.g.  gcp-gpii-dev-mrtyler -- to prevent conflicts when two
+    # users (e.g. mrtyler and gitlab-runner) are working on the same
+    # environment on the same machine (e.g. the CI worker).
+    name: ${TF_VAR_project_id}-${USER}-secrets
+  helm:
+    name: ${TF_VAR_project_id}-${USER}-helm
+  terragrunt:
+    name: ${TF_VAR_project_id}-${USER}-terragrunt
+  gcloud:
+    name: ${TF_VAR_project_id}-${USER}-gcloud
+  kube:
+    name: ${TF_VAR_project_id}-${USER}-kube
+
+# vim: et ts=2 sw=2:

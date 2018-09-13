@@ -1,8 +1,12 @@
-replicaCount: <%= ENV["TF_VAR_cluster_name"].start_with?("stg.","prd.") ? '6' : '2' %>
+replicaCount: <%= replicaCount = ENV["TF_VAR_cluster_name"].start_with?("stg.","prd.") ? '6' : '2' %>
 
 image:
-  repository: <%= @versions["preferences"].split('@')[0] %>
-  checksum: <%= @versions["preferences"].split('@')[1] %>
+  repository: <%= @versions["gpii-preferences"].split('@')[0] %>
+  checksum: <%= @versions["gpii-preferences"].split('@')[1] %>
+
+rollingUpdate:
+  maxSurge: <%= replicaCount.to_i < 4 ? 1 : "25%" %>
+  maxUnavailable: 0
 
 issuerRef:
   <% if ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.") %>
@@ -18,13 +22,6 @@ dnsNames:
 <% if !ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.") %>
 ingress:
   disable_ssl_redirect: true
-<% end %>
-
-
-<% if ENV["TF_VAR_cluster_name"].start_with?("stg.", "prd.") %>
-matchmaker_url: "https://flowmanager.<%= ENV["TF_VAR_cluster_name"] %>"
-<% else %>
-matchmaker_url: "http://flowmanager.<%= ENV["TF_VAR_cluster_name"] %>"
 <% end %>
 
 datasource_hostname: "http://<%= @secrets["couchdb_user"] %>:<%= @secrets["couchdb_password"] %>@couchdb-lb.gpii.svc.cluster.local"

@@ -1,0 +1,12 @@
+import "/rakefiles/xk.rake"
+
+unless ENV['ENV']
+  puts "  ERROR: Wrong entry point!"
+  puts "  You should run rake from live/ENV folder,"
+  puts "  where ENV is target environment (i.e. dev/stg/prd)!"
+  raise
+else
+  @env = ENV['ENV']
+end
+
+# vim: et ts=2 sw=2:

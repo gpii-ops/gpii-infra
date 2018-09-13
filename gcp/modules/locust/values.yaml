@@ -1,0 +1,8 @@
+master:
+  config:
+    target-host: ${target_host}
+
+worker:
+  replicaCount: ${locust_workers}
+  config:
+    locust-script: /locust-tasks/${locust_script}

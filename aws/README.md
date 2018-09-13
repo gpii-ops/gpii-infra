@@ -12,6 +12,8 @@ Ask the Ops team to set up an account and train you. (The training doc is [here]
 
 I like [Duo](https://duo.com/product/trusted-users/two-factor-authentication/duo-mobile), but any tool from [Amazon's list](https://aws.amazon.com/iam/details/mfa/) should be fine.
 
+(If you don't have access to a separate device for MFA (smartphone, tablet, hardware device such as a Yubikey), it is acceptable (though not recommended -- especially for administrators) to run an MFA tool on your development machine. A few of us like [Authy](https://authy.com/download/).
+
 * From the AWS Dashboard, navigate to IAM controls (under Services or use the search box)
    * Users
    * Select your IAM
@@ -91,6 +93,15 @@ I generally download and install these tools by hand (verifying checksums when a
 1. Select a namespace in the in the "Namespace" dropdown in the left column (*not* the "Cluster `->` Namespaces" link). Product developers likely want the `gpii` Namespace; infrastructure developers often want `All namespaces`.
 1. Click "Workloads" for a good overview of what's happening in the cluster.
 
+#### Viewing logs
+
+1. `cd aws/dev`
+1. `rake configure_kubectl`
+1. `kubectl -n gpii logs -l app=flowmanager | less`
+   * To see what else the `logs` subcommand can do: `kubectl logs --help`
+   * To see what Labels are available for filtering (the `-l` argument above): `kubectl -n gpii get pods --show-labels`
+      * More on [working with Labels and Selectors](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
+
 #### On the local machine
 
 1. `KOPS_STATE_STORE=s3://gpii-kubernetes-state kops validate cluster`
@@ -138,19 +149,28 @@ Deploying to `prd` requires a [manual action](https://docs.gitlab.com/ce/ci/yaml
 
 See [CI-CD.md](../CI-CD.md)
 
-## Production is broken, there's been a security breach, or there is some other operational emergency
+## Contacting the Ops team
+
+The steps below for finding an Ops person escalate in urgency and disruptiveness. Favor earlier steps and waiting for a response, but use your best judgement.
+
+If there is an emergency -- production is down right before a big demo, an attack is in progress -- then it's more important to get an engineer's attention than it is to avoid sending notifications to a few extra people.
+
+1. Note that we do not currently have a formal on-call rotation. 24x7 support is Best Effort.
+1. If you don't have an account on the RtF Slack, skip the next few steps.
+1. Go to #ops in Slack. Ask for help using `@here`. [More on Slack announcements](https://get.slack.help/hc/en-us/articles/202009646-Make-an-announcement).
+1. Go to #ops in Slack. Ask for help using `@channel`.
+1. Email `ops at raisingthefloor dot org`.
+
+### There is an operational emergency (production is broken, there's been a security breach, etc.)
 
 First of all, DON'T PANIC! Everything is going to be fine. :)
 
 Your next task is to find a human on the Ops team. Ops engineers are trained to handle emergencies (including asking other experts for help).
 
-The steps below for finding an Ops person escalate in urgency and disruptiveness. Favor earlier steps and waiting for a response, but use your best judgement. If production is down right before a big demo or an attack is in progress, it's more important to get an engineer's attention than it is to avoid sending notifications to a few extra people.
+Start with the procedure above -- it is the quickest way to notify as many Ops team members as possible -- but bias toward action rather than waiting. For example, for an ordinary question or non-urgent problem, I would post in Slack and wait a while before trying again or moving to the next contact step. If production were down, I would post in Slack but wait only a minute or two before moving to the next contact step.
 
-1. Note that we do not currently have a formal on-call rotation. 24x7 support is Best Effort.
-1. Go to #ops in Slack. Ask for help using `@here`. [More on Slack announcements](https://get.slack.help/hc/en-us/articles/202009646-Make-an-announcement).
-1. Go to #ops in Slack. Ask for help using `@channel`.
-1. Email `infrastructure at lists.gpii.net`.
-   * This is a public mailing list, so provide a brief description of the affected system but avoid discussing details. (We believe in transparency but it can be dangerous in certain kinds of emergencies.)
+If you have exhausted the contact steps above, move on to these steps only for emergencies:
+
 1. Call or text specific Ops engineers. [Contact info](https://docs.google.com/document/d/1EDYhWYipUluzG6K8S-W4clsAGInm2RdjkpKq9Lw_dhE/edit).
    * If possible, pick an engineer who is in the middle of their work day over an engineer who is likely asleep. Timezone information is in [Contact info](https://docs.google.com/document/d/1EDYhWYipUluzG6K8S-W4clsAGInm2RdjkpKq9Lw_dhE/edit)
    * Repeat until you've reached an Ops engineer, or exhausted the list of Ops engineers (likely-awake or otherwise).
@@ -182,6 +202,9 @@ Lock Info:
 To delete the lock:
 1. **Make sure the lock is really orphaned!** This is especially important in shared environments like `stg` where CI or other developers could be making changes. The `Who` value in the error message gives you a clue about this.
 1. Find the ID and Path from the error message (see above)
+1. `cd aws/<environment>`
+1. `rake generate_modules`
+   * This may fail (especially if the orphaned lock is in `prereqs`), but regardless it should generate some configuration the next step will need.
 1. `rake "force_unlock[c785778e-0b67-0bcf-88fd-8c03045a045b, gpii-terraform-state/dev-mrtyler/k8s/terraform.tfstate]"`
 1. You can also use the AWS web dashboard -- do this if you're recovering from a [messed up cluster](#my-cluster-is-messed-up-and-i-just-want-to-get-rid-of-it-so-i-can-start-over). Go to `DynamoDB -> Tables -> gpii-terraform-lock-table -> Items`. Select the lock(s) for your environment `-> Actions -> Delete`.
 
@@ -241,7 +264,7 @@ See [CI-CD.md#running-in-non-dev-environments](../CI-CD.md#running-manually-in-n
 1. Edit `components.conf`. Find your component and edit the `image` field to point to your Docker Hub user account.
    * E.g., `gpii/universal -> mrtyler/universal`
 1. Run `update-version`. It will generate a `version.yml` in the current directory.
-1. `cp version.yml ../gpii-infra/modules/deploy`
+1. `cp version.yml ../gpii-infra/aws/modules/deploy`
 1. `cd ../gpii-infra/aws/dev && rake deploy`
 
 #### Can't I just edit `version.yml` by hand?
@@ -260,7 +283,7 @@ If you don't want to deal with gpii-version-updater, you can instead:
 1. Note that the dataloader **deletes all data in CouchDB** when it runs.
 1. Because of how Kubernetes Jobs work, the dataloader will not re-run when a new Docker image becomes available (this is different from Deployments like `flowmanager`, which are updated when the Docker image changes).
 1. Thus, to make changes to the dataloader:
-   * Delete the Job: `kubectl -n gpii delete job gpii-dataloader`
+   * Delete the Job: `helm delete --purge dataloader`
    * Re-deploy the Job: `cd aws/dev && rake deploy`
 1. We abuse the fact that Kubernetes doesn't allow a Job's Docker image to be changed to prevent the dataloader Job from running (and deleting all data from CouchDB) every time. See [The Job "gpii-dataloder" is invalid](#the-job-gpii-dataloader-is-invalid) and [this architecture@ thread](https://lists.gpii.net/pipermail/infrastructure/2017-September/000070.html).
 
@@ -339,6 +362,109 @@ data='
 1. Add the record: `curl -f -H 'Content-Type: application/json' -X POST http://couchdb.default.svc.cluster.local:5984/gpii -d "$data"`
 1. Before the restore: verify that the new record is present.
 1. After the restore: verify that the new record is no longer present.
+
+### Manual process: Generating db data of user preferences and load it into a cluster's preferences server
+
+#### Generate the data
+
+1. `git clone git://github.com/gpii/universal.git && cd universal && npm install`
+1. Put the preferences set you want to load into a folder, i.e.: _testData/myPrefsSets_.
+1. Create a folder to store the db data, i.e.: _testData/myDbData_.
+1. `node ./scripts/convertPrefs.js testData/myPrefsSets testData/myDbData`
+
+Now there are two new files inside _testData/myDbData_, _gpiiKeys.json_ and _prefsSafes.json_.
+Both files contain an array of JSON objects, i.e.:
+
+```
+[
+    {
+        "_id": "GPII-270-rbmm-demo",
+        "type": "gpiiKey",
+        "schemaVersion": "0.1",
+        "prefsSafeId": "prefsSafe-GPII-270-rbmm-demo",
+        "prefsSetId": "gpii-default",
+        "revoked": false,
+        "revokedReason": null,
+        "timestampCreated": "2018-08-12T16:34:04.656Z",
+        "timestampUpdated": null
+    },
+    {
+        "_id": "MikelVargas",
+        "type": "gpiiKey",
+        "schemaVersion": "0.1",
+        "prefsSafeId": "prefsSafe-MikelVargas",
+        "prefsSetId": "gpii-default",
+        "revoked": false,
+        "revokedReason": null,
+        "timestampCreated": "2018-08-12T16:34:04.661Z",
+        "timestampUpdated": null
+    }
+]
+```
+
+And we want to edit these files to look like the following:
+
+```
+{ "docs":
+    [
+        {
+            "_id": "GPII-270-rbmm-demo",
+            "type": "gpiiKey",
+            "schemaVersion": "0.1",
+            "prefsSafeId": "prefsSafe-GPII-270-rbmm-demo",
+            "prefsSetId": "gpii-default",
+            "revoked": false,
+            "revokedReason": null,
+            "timestampCreated": "2018-08-12T16:34:04.656Z",
+            "timestampUpdated": null
+        },
+        {
+            "_id": "MikelVargas",
+            "type": "gpiiKey",
+            "schemaVersion": "0.1",
+            "prefsSafeId": "prefsSafe-MikelVargas",
+            "prefsSetId": "gpii-default",
+            "revoked": false,
+            "revokedReason": null,
+            "timestampCreated": "2018-08-12T16:34:04.661Z",
+            "timestampUpdated": null
+        }
+    ]
+}
+
+```
+
+For the lazy:
+* `cd testData/myDbData`
+* `sed -i '1i { "docs": ' prefsSafes.json gpiiKeys.json`
+* `sed -i '$ a }' prefsSafes.json gpiiKeys.json`
+
+Congratulations, half of the work is done, now on to the load step.
+
+#### Load the data into a cluster
+
+Requirements:
+* You are either an Op or you have been trained by one of them in using gpii-infra.
+* Your computer is already set up to work with gpii-infra.
+* And the most important thing, you know what you are doing. If not, ask the Ops team ;)
+
+Note that we assume that you are going to perform these steps into an already up & running cluster. Also, remember that you always need to test the changes in your "dev" cluster first. In case that everything worked in your "dev" cluster, then proceed with "stg". If everything worked in "stg" too, then, proceed with "prd". In order for you to understand the differences beetween the different environments, check [this section](https://github.com/gpii-ops/gpii-infra/blob/master/aws/README.md#what-are-all-these-environments) from our documentation.
+
+The process:
+
+1. Go into the corresponding folder with the cluster name where you want to perform the process, "stg", "prd" or "dev". In this case We are going to perform the process in "dev": `cd gpii-infra/aws/dev`.
+1. Set up the env you are going to deal with: rake configure_kubectl
+1. Optional, re-run the current dataloader to be sure that it's using the original dbData, run `helm delete --purge dataloader && rake deploy` as described [here](https://github.com/gpii-ops/gpii-infra/blob/master/aws/README.md#a-note-about-local-changes-and-gpii-dataloader). Note that if you are going to perform this step in either "prd" or "stg" environments, take into account that the same CouchDB credentials usded in "stg"/"prd" must be set in the _secrets.yml_ to avoid authentication failures. For that, you will need to ask an Op for such credentials which are set in the CI configuration.
+1. Open a port forwarding between the cluster's couchdb host:port and your local machine: `kubectl --namespace gpii port-forward couchdb-0 5984`
+
+The port forwarding will be there until you hit _Ctrl-C_, so leave it running until we are done loading the preferences sets.
+__Note__ that if you are going to perform this in production (prd) you should do it from the _prd_ folder and remember to use the _RAKE_REALLY_RUN_IN_PRD=true_ variable when issuing the commands against the production cluster.
+
+Let's load the data, go back to the folder _testData/myDbData_ and run:
+1. `curl -d @gpiiKeys.json -H "Content-type: application/json" -X POST http://localhost:5984/gpii/_bulk_docs`
+1. `curl -d @.json -H "Content-type: application/json" -X POST http://localhost:5984/gpii/_bulk_docs`
+
+Unless you get errors, that's all. Now you can close the port forwarding as mentioned earlier.
 
 ### Increasing the size of a volume
 

@@ -4,27 +4,40 @@ terraform {
 
 variable "env" {}
 variable "secrets_dir" {}
-variable "values_dir" {}
 variable "charts_dir" {}
 variable "nonce" {}
 
 # Terragrunt variables
 variable "couchdb_replicas" {}
+
 variable "backup_deltas" {}
 variable "release_namespace" {}
 
 # Secret variables
 variable "secret_couchdb_admin_username" {}
 variable "secret_couchdb_admin_password" {}
+variable "secret_couchdb_auth_cookie" {}
+
+data "template_file" "couchdb_values" {
+  template = "${file("values.yaml")}"
+
+  vars {
+    env                    = "${var.env}"
+    couchdb_admin_username = "${var.secret_couchdb_admin_username}"
+    couchdb_admin_password = "${var.secret_couchdb_admin_password}"
+    couchdb_auth_cookie    = "${var.secret_couchdb_auth_cookie}"
+  }
+}
 
 module "couchdb" {
   source           = "/exekube-modules/helm-release"
   tiller_namespace = "kube-system"
   client_auth      = "${var.secrets_dir}/kube-system/helm-tls"
 
-  release_name      = "couchdb"
-  release_namespace = "${var.release_namespace}"
-  release_values    = "${var.values_dir}/couchdb.yaml"
+  release_name            = "couchdb"
+  release_namespace       = "${var.release_namespace}"
+  release_values          = ""
+  release_values_rendered = "${data.template_file.couchdb_values.rendered}"
 
   chart_name = "${var.charts_dir}/couchdb"
 }

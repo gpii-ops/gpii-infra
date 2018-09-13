@@ -65,7 +65,7 @@ end
 
 desc "Wait until production config tests have been completed"
 task :wait_for_productionConfigTests_complete => :configure_kubectl do
-  Rake::Task["setup_versions"].invoke("../modules/deploy/version.yml")
+  Rake::Task["setup_versions"].invoke("../../common/versions.yml")
   puts "Waiting for production config tests to complete..."
   puts "(You can Ctrl-C out of this safely. You may need to re-run :deploy_only afterward.)"
 
@@ -78,7 +78,7 @@ task :wait_for_productionConfigTests_complete => :configure_kubectl do
     flowmanager_hostname = "http://#{flowmanager_hostname}"
   end
 
-  wait_for("docker run --name productionConfigTests -e GPII_CLOUD_URL='#{flowmanager_hostname}' '#{@versions["flowmanager"]}' node tests/ProductionConfigTests.js")
+  wait_for("docker run --name productionConfigTests -e GPII_CLOUD_URL='#{flowmanager_hostname}' '#{@versions["gpii-flowmanager"]}' node tests/ProductionConfigTests.js")
 end
 
 desc "Display some handy info about the cluster"
@@ -170,7 +170,7 @@ task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_co
       if allow_upgrade
         begin
           wait_for(
-            "helm upgrade --namespace #{chart_namespace} --recreate-pods -f #{@tmpdir}-modules/deploy/charts/values/#{chart}.yaml #{chart_name} #{@chartdir}/#{chart}",
+            "helm upgrade --namespace #{chart_namespace} -f #{@tmpdir}-modules/deploy/charts/values/#{chart}.yaml #{chart_name} #{@chartdir}/#{chart}",
             sleep_secs: 5,
             max_wait_secs: 60,
           )

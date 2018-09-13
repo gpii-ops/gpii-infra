@@ -50,7 +50,7 @@ Examples of things that get credentials this way include: CouchDB, Alertmanager.
 
 ## gpii-version-updater
 
-   * There is a standalone system for managing the versions of GPII components running on this infrastructure, via [version.yml](https://github.com/gpii-ops/gpii-infra/blob/master/modules/deploy/version.yml). See the [gpii-version-updater repo](https://github.com/gpii-ops/gpii-version-updater).
+   * There is a standalone system for managing the versions of GPII components running on this infrastructure, via [common/versions.yml](common/versions.yml). See the [gpii-version-updater repo](https://github.com/gpii-ops/gpii-version-updater).
 
 ## Running manually in non-dev environments (stg, prd)
 
@@ -60,7 +60,7 @@ Examples of things that get credentials this way include: CouchDB, Alertmanager.
 
 `dev-*` environments are built with code from `master`, but other environments (e.g. `stg`, `prd`) are controlled with version tags. The CD process handles versioning automatically, but in case manual intervention is required:
    * Make sure any local changes are committed or stashed (`git status`).
-   * `git checkout $(git tag | grep ^deploy-stg- | sort | tail -1)`
+   * `git checkout $(git tag | grep ^deploy-aws-stg- | sort | tail -1)`
    * `cd stg`
    * If you will `rake deploy` (or just `rake`, as `rake deploy` is the default operation) or otherwise make changes to anything that uses credentials, you will need to manually configure your local environment. See [Configure Gitlab Secret Variables](#configure-gitlab-secret-variables).
    * `rake ...`
@@ -70,6 +70,6 @@ Examples of things that get credentials this way include: CouchDB, Alertmanager.
 
 The best and simplest way is to make `master` correct (e.g. by reverting a commit that didn't work as expected) and let the CD system work it out. However, if exceptional circumstances occur:
    * Note that git tags are [effectively immutable](https://git-scm.com/docs/git-tag#_on_re_tagging), so forget about re-pointing the last deploy tag.
-   * Make a new tag: `git tag deploy-stg-$(date -u '+%Y%m%d%H%M%S') <commit env should use>`
+   * Make a new tag: `git tag deploy-gcp-stg-$(date -u '+%Y%m%d%H%M%S') <commit that should be running in env>`
    * `git push --tags origin`
    * `git checkout` the new tag and `rake`, as above.
