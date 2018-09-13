@@ -38,3 +38,17 @@ module "gpii-flowmanager" {
 
   chart_name = "${var.charts_dir}/gpii-flowmanager"
 }
+
+
+resource "null_resource" "flowmanager_resources" {
+  depends_on = ["module.gpii-flowmanager"]
+
+  provisioner "local-exec" {
+    command = "kubectl apply -f ${path.module}/resources/"
+  }
+
+  provisioner "local-exec" {
+    when    = "destroy"
+    command = "kubectl delete --ignore-not-found -f ${path.module}/resources/"
+  }
+}

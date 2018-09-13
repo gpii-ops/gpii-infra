@@ -121,3 +121,17 @@ resource "null_resource" "couchdb_destroy_pvcs" {
     EOF
   }
 }
+
+
+resource "null_resource" "couchdb_resources" {
+  depends_on = ["module.couchdb"]
+
+  provisioner "local-exec" {
+    command = "kubectl apply -f ${path.module}/resources/"
+  }
+
+  provisioner "local-exec" {
+    when    = "destroy"
+    command = "kubectl delete --ignore-not-found -f ${path.module}/resources/"
+  }
+}

@@ -1,0 +1,32 @@
+piVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: preferences-network-policy
+  namespace: gpii
+spec:
+  podSelector:
+    matchLabels:
+      app: preferences
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+    ports:
+    - protocol: TCP
+      port: 8081
+  - from:
+    - ipBlock:
+        cidr: 10.0.0.0/24
+    - podSelector:
+        matchLabels:
+          app: flowManager
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 10.0.0.0/24
+    - podSelector:
+        matchLabels:
+          app: couchdb
+    ports:
+    - protocol: TCP
+      port: 5984

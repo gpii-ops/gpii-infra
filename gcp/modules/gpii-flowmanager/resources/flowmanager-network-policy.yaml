@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: flowmanager-network-policy
+  namespace: gpii
+spec:
+  podSelector:
+    matchLabels:
+      app: flowmanager
+  policyTypes:
+  - Egress
+  - Ingress
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 10.0.0.0/24
+    - podSelector:
+        matchLabels:
+          app: couchdb
+    ports:
+    - protocol: TCP
+      port: 5984

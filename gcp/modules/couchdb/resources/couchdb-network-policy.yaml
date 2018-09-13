@@ -1,0 +1,36 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: couchdb-network-policy
+  namespace: gpii
+spec:
+  podSelector:
+    matchLabels:
+      app: couchdb
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - ipBlock:
+        cidr: 10.0.0.0/24
+    - podSelector:
+        matchLabels:
+          app: couchdb
+    ports:
+    - protocol: TCP
+      port: 4369
+    - protocol: TCP
+      port: 9100
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 10.0.0.0/24
+    - podSelector:
+        matchLabels:
+          app: couchdb
+    ports:
+    - protocol: TCP
+      port: 4369
+    - protocol: TCP
+      port: 9100
