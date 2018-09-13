@@ -34,7 +34,7 @@ def get_gpii_pods_labeled(key, value)
     .select{ |item| item.has_label(key, value) }
 end
 
-def kubectl(cmd, debug=true)
+def kubectl(cmd, debug=false)
   if debug
     puts "kubectl #{cmd} 2>/dev/null"
   end
