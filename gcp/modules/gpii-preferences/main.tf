@@ -38,3 +38,16 @@ module "gpii-preferences" {
 
   chart_name = "${var.charts_dir}/gpii-preferences"
 }
+
+resource "null_resource" "preferences_resources" {
+  depends_on = ["module.gpii-preferences"]
+
+  provisioner "local-exec" {
+    command = "kubectl apply -f ${path.module}/resources/"
+  }
+
+  provisioner "local-exec" {
+    when    = "destroy"
+    command = "kubectl delete --ignore-not-found -f ${path.module}/resources/"
+  }
+}
