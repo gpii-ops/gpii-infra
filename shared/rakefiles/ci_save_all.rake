@@ -6,7 +6,7 @@ desc "[CI ONLY] Fetch and save GCP credentials for all environments in live/"
 task :default do
   ENV["USER"] = "gitlab-runner"  # User that runs CI
   ["common", "gcp"].each do |project_type|
-    environments_dir = File.expand_path("../../../shared/#{project_type}/live", __FILE__)
+    environments_dir = File.expand_path("../../../#{project_type}/live", __FILE__)
     environments = Dir.glob(environments_dir + "/*").select { |f| File.directory? f }
     puts "WARNING! This script will delete ALL secrets-backups volumes and replace them"
     puts "WARNING! with new backups! It will run 'rake clobber' at the end, clearing state"
@@ -32,7 +32,7 @@ task :default do
   ENV["ORGANIZATION_ID"] = "327626828918"
   ENV["TF_VAR_organization_name"] = "gpii2test"
   ENV["USER"] = "doe"  # User that runs CI in the testing organization
-  env = "../../../shared/gcp/live/dev"
+  env = "../../gcp/live/dev"
   sh "cd #{env} && \
     rake configure_serviceaccount_ci_clobber && \
     rake configure_serviceaccount && \
