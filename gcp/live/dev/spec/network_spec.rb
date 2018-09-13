@@ -148,17 +148,6 @@ describe "Security:" do
             expect($?.exitstatus).to eq(0)
           end
         end
-
-        it "is not accessible directly by any other pod on port 5984" do
-          pending "implementation of network security policies"
-          @couchdb_pods.each do |target|
-            (@all_pods-@couchdb_pods).each do |source|
-              kubectl("exec -n gpii -it #{source.name} -- nc -z #{target.ip} 5984")
-
-              expect($?.exitstatus).to_not eq(0)
-            end
-          end
-        end
       end
     end
 
