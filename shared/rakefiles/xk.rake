@@ -76,17 +76,10 @@ task :refresh_common_infra, [:project_type] => [@gcp_creds_file] do | taskname, 
   # conflicts at the creation resources we need to import the already created
   # DNS zone.
 
-  output = `#{@exekube_cmd} sh -c "\
-    terragrunt output -json dns_zones \
+  dns_zone_found = `#{@exekube_cmd} sh -c "\
+    terragrunt state show module.gke_network.google_dns_managed_zone.dns_zones \
     --terragrunt-working-dir /project/live/#{@env}/infra/network 2>/dev/null \
     "`
-  begin
-    # What does !! mean?
-    # https://stackoverflow.com/questions/524658/what-does-mean-in-ruby
-    dns_zone_found = !!JSON.parse(output)
-  rescue JSON::ParserError
-    dns_zone_found = false
-  end
 
   unless dns_zone_found
     # The DNS zone is not in the TF state file, we need to add it
