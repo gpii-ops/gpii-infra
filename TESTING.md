@@ -174,7 +174,7 @@ $ npm start
 
 ```
 
-4. You can open morphic now on the taskbar. The icon will of a gear. Update of the preferences should now register against the specified cluster.
+4. You can open morphic now on the taskbar. Find the icon in your taskbar that looks like a gear. Update of the preferences should now register against the specified cluster.
 
 
 ## Security Testing
