@@ -17,7 +17,7 @@ if @project_type.nil?
   raise ArgumentError, "@project_type must be set"
 end
 
-@exekube_cmd = "docker-compose run --rm --service-ports xk"
+@exekube_cmd = "docker-compose run --rm xk"
 
 @serviceaccount_key_file = "secrets/kube-system/owner.json"
 
