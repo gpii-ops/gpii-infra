@@ -66,7 +66,7 @@ The second call here was made to obtain the settings for the device.
 
 ## Production Config Tests
 
-Another way to exercise the frontend nodejs code against a cloud based backend is to run the productionConfigTests. As of September 10, 2018, these productionConfigTests only exercise login and logout. To execute them, run the following test script from the universal container. Make sure to use an appropriate version.
+Another way to exercise the frontend nodejs code against a cloud based backend is to run the productionConfigTests. As of September 10, 2018, these productionConfigTests only exercise login and logout. To execute them, run the following test script from the universal container. Make sure to use an appropriate version. Generally, the latest version can be found in `common/versions.yml`, which is automatically kept up to date.
 
 ```
 $ docker run --rm --name productionConfigTests -e GPII_CLOUD_URL=https://flowmanager.<CLUSTER_NAME> gpii/universal@sha256:bc92279591c0ab60d11ecf55e43f783cd7cb92a0bc2fea6661054a065bbb2e49 node tests/ProductionConfigTests.js
