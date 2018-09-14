@@ -42,6 +42,7 @@ services:
     volumes:
       - .:/project
       - ../common/charts:/charts
+      - ../shared/rakefiles:/rakefiles
       - secrets:/project/live/${ENV}/secrets
       - helm:/root/.helm
       - terragrunt:/root/.terragrunt
