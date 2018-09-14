@@ -2,11 +2,11 @@
 
 This document describes pointers and notes for testing the GPII infrastructure in different contexts.
 
-# End-to-End Manual Testing Tutorial
+## End-to-End Manual Testing Tutorial
 
 This section contains a tutorial to test the frontend GPII application against the backend. Relevant calls against the backend are noted after each action.
 
-## Testing key-in/key-out and basic settings
+### Testing key-in/key-out and basic settings
 
 1. Obtain a copy of the gpii/windows repository:
 
@@ -64,7 +64,7 @@ $ kubectl logs -n gpii -l app=flowmanager
 
 The second call here was made to obtain the settings for the device.
 
-## Production Config Tests
+### Production Config Tests
 
 Another way to exercise the frontend nodejs code against a cloud based backend is to run the productionConfigTests. As of September 10, 2018, these productionConfigTests only exercise login and logout. To execute them, run the following test script from the universal container. Make sure to use an appropriate version. Generally, the latest version can be found in `common/versions.yml`, which is automatically kept up to date.
 
@@ -144,7 +144,7 @@ In addition, the flowmanager calls the preferences server and similar logs entri
 
 The above functionality is a limited test suite that needs to be expanded to be more complete. Work is being tracked in [GPII-3333](https://issues.gpii.net/browse/GPII-3333) for that.
 
-## Testing login/logout and basic settings
+### Testing login/logout and basic settings
 
 1. Obtain a copy of the gpii/gpii-app repository:
 
@@ -177,6 +177,6 @@ $ npm start
 4. You can open morphic now on the taskbar. The icon will of a gear. Update of the preferences should now register against the specified cluster.
 
 
-# Security Testing
+## Security Testing
 
 _TODO_
