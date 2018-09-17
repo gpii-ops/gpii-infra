@@ -26,6 +26,8 @@ common-setup:
     - ruby --version
     - bundle version
     - rake --version
+  only:
+    - master@gpii-ops/gpii-infra
 
 aws-setup:
   stage: setup
@@ -42,6 +44,8 @@ aws-setup:
     - ruby --version
     - bundle version
     - rake --version
+  only:
+    - master@gpii-ops/gpii-infra
 
 gcp-setup:
   stage: setup
@@ -55,6 +59,8 @@ gcp-setup:
     - ruby --version
     - bundle version
     - rake --version
+  only:
+    - master@gpii-ops/gpii-infra
 
 aws-unit-tests:
   stage: unit-tests
@@ -63,6 +69,8 @@ aws-unit-tests:
   script:
     - cd aws/rakefiles/tests
     - rake
+  only:
+    - master@gpii-ops/gpii-infra
 
 gcp-unit-tests:
   stage: unit-tests
@@ -72,6 +80,8 @@ gcp-unit-tests:
     - cd shared/rakefiles/tests
     - bundle install --path "vendor/bundle"
     - rake
+  only:
+    - master@gpii-ops/gpii-infra
 
 common-stg:
   stage: common-stg
@@ -85,6 +95,8 @@ common-stg:
     - rake apply_infra
   environment:
     name: stg
+  only:
+    - master@gpii-ops/gpii-infra
 
 common-stg-test-gcp-dev:
   stage: common-stg-test
@@ -117,6 +129,8 @@ common-stg-test-gcp-dev:
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys
     - rake clobber
+  only:
+    - master@gpii-ops/gpii-infra
 
 common-promote-common-to-prd:
   stage: promote-common-to-prd
@@ -132,6 +146,8 @@ common-promote-common-to-prd:
     - git push --tags origin-rw
   when: manual
   allow_failure: false
+  only:
+    - master@gpii-ops/gpii-infra
 
 common-prd:
   stage: common-prd
@@ -147,6 +163,8 @@ common-prd:
     - rake apply_infra
   environment:
     name: prd
+  only:
+    - master@gpii-ops/gpii-infra
 
 aws-dev:
   stage: dev
@@ -162,6 +180,8 @@ aws-dev:
     - cd aws/dev
     - rake destroy
     - rake clobber
+  only:
+    - master@gpii-ops/gpii-infra
 
 gcp-dev:
   stage: dev
@@ -187,6 +207,8 @@ gcp-dev:
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys
     - rake clobber
+  only:
+    - master@gpii-ops/gpii-infra
 
 aws-promote-to-stg:
   stage: promote-to-stg
@@ -200,6 +222,8 @@ aws-promote-to-stg:
     # if we add a remote that already exists.
     - git remote | grep -q "^origin-rw" || git remote add origin-rw git@github.com:gpii-ops/gpii-infra
     - git push --tags origin-rw
+  only:
+    - master@gpii-ops/gpii-infra
 
 gcp-promote-to-stg:
   stage: promote-to-stg
@@ -213,6 +237,8 @@ gcp-promote-to-stg:
     # if we add a remote that already exists.
     - git remote | grep -q "^origin-rw" || git remote add origin-rw git@github.com:gpii-ops/gpii-infra
     - git push --tags origin-rw
+  only:
+    - master@gpii-ops/gpii-infra
 
 aws-stg:
   stage: stg
@@ -224,6 +250,8 @@ aws-stg:
     - cd aws/stg
     - rake clobber
     - rake
+  only:
+    - master@gpii-ops/gpii-infra
 
 gcp-stg:
   stage: stg
@@ -245,6 +273,8 @@ gcp-stg:
     - rake destroy_module[locust]
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys
+  only:
+    - master@gpii-ops/gpii-infra
 
 aws-promote-to-prd:
   stage: promote-to-prd
@@ -260,6 +290,8 @@ aws-promote-to-prd:
     - git push --tags origin-rw
   when: manual
   allow_failure: false
+  only:
+    - master@gpii-ops/gpii-infra
 
 gcp-promote-to-prd:
   stage: promote-to-prd
@@ -275,6 +307,8 @@ gcp-promote-to-prd:
     - git push --tags origin-rw
   when: manual
   allow_failure: false
+  only:
+    - master@gpii-ops/gpii-infra
 
 aws-prd:
   stage: prd
@@ -288,6 +322,8 @@ aws-prd:
     - cd aws/prd
     - rake clobber
     - rake
+  only:
+    - master@gpii-ops/gpii-infra
 
 gcp-prd:
   stage: prd
@@ -311,3 +347,5 @@ gcp-prd:
     - rake destroy_module[locust]
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys
+  only:
+    - master@gpii-ops/gpii-infra
