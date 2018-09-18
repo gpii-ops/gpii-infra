@@ -93,7 +93,6 @@ resource "google_dns_managed_zone" "project" {
   project     = "${google_project.project.project_id}"
   name        = "${replace(local.dnsname, ".", "-")}"
   dns_name    = "${local.dnsname}."
-  description = "${google_project.project.project_id} DNS zone"
   depends_on  = ["google_project_services.project",
                  "google_project_iam_binding.project"]
 }
