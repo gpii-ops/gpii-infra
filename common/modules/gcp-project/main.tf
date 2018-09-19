@@ -63,6 +63,7 @@ resource "google_project_services" "project" {
     "deploymentmanager.googleapis.com",
     "dns.googleapis.com",
     "iam.googleapis.com",
+    "logging.googleapis.com",
     "monitoring.googleapis.com",
     "oslogin.googleapis.com",
     "pubsub.googleapis.com",
@@ -70,6 +71,7 @@ resource "google_project_services" "project" {
     "replicapoolupdater.googleapis.com",
     "resourceviews.googleapis.com",
     "serviceusage.googleapis.com",
+    "stackdriver.googleapis.com",
     "storage-api.googleapis.com",
   ]
 }
