@@ -25,7 +25,7 @@ task :test_flowmanager => [:set_vars, :set_test_protocol] do
     TF_VAR_locust_users=15 \
     TF_VAR_locust_desired_total_rps=5 \
     TF_VAR_locust_desired_median_response_time=300 \
-    TF_VAR_locust_desired_max_response_time=700 \
+    TF_VAR_locust_desired_max_response_time=3000 \
     xk up live/#{@env}/locust',skip_infra,skip_secret_mgmt]"
 end
 
