@@ -95,9 +95,13 @@ The second call here was made to obtain the settings for the device.
 7. You can open morphic now on the taskbar and modify settings:
 
     a. Find the icon in your taskbar that looks like a gear. Left click on it and the QSS application will now appear. 
+
     b. Click on "Screen Zoom"
+
     c. Click the "+ Larger" button
+
     d. Click on "Save"
+
     e. Morphic should report "Your settings were saved to the Moprhic Cloud"
 
 8. You should be able to verify that additional requests were made to the backend to store these preferences using the same kubectl commands from above.
