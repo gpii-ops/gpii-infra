@@ -1,4 +1,4 @@
-import "../../../shared/rakefiles/entrypoint.rake"
+import "../../../common/rakefiles/entrypoint.rake"
 
 @env = File.basename(File.dirname(__FILE__))
 @project_type = File.basename(File.expand_path("../../../", __FILE__))

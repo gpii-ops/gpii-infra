@@ -1,7 +1,9 @@
 require "rake/clean"
 
-import "../../../shared/rakefiles/ci.rake"
-import "../../../shared/rakefiles/test.rake"
+@rakefiles_dir = File.dirname(__FILE__)
+
+import "#{@rakefiles_dir}/ci.rake"
+import "#{@rakefiles_dir}/test.rake"
 require_relative "./vars.rb"
 
 if @env.nil?

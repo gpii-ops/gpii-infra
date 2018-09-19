@@ -1,5 +1,5 @@
-import "../../../shared/rakefiles/entrypoint.rake"
-import "../../../shared/rakefiles/entrypoint_common.rake"
+import "../../../common/rakefiles/entrypoint.rake"
+import "../../../common/rakefiles/entrypoint_common.rake"
 
 ENV["ORGANIZATION_ID"] = "327626828918"
 ENV["TF_VAR_organization_name"] = "gpii2test"
