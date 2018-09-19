@@ -153,7 +153,29 @@ $ git clone https://github.com/GPII/gpii-app.git
 
 ```
 
-2. Spin up the vagrant box:
+Note that as of 9/19/2018, the full functionality that works against the cloud only exists on the `feds-audit` branch. Because of this, you should checkout that branch instead of working on master:
+
+```
+$ git checkout feds-audit
+```
+
+2. Create a new configuration in `configs/app.cloud.json`, containing the following contents:
+
+```
+{
+    "type": "gpii.appWithTaskTray",
+    "options": {
+        "gradeNames": ["fluid.component"],
+        "distributeOptions": {}
+    },
+    "mergeConfigs": [
+        "%gpii-app/configs/app.base.json",
+        "%gpii-universal/gpii/configs/gpii.config.untrusted.development"
+     ]
+}
+```
+
+3. Spin up the vagrant box:
 
 ```bash
 $ cd gpii-app
@@ -161,20 +183,40 @@ $ cd gpii-app
 $ vagrant up
 ```
 
-3. When the machine is up and running, open a command prompt and run the application:
+4. When the machine is up and running, open a command prompt and run the application:
 
 ```
 $ cd c:\vagrant
 
-$ set GPII_CLOUD_URL=http://flowmanager.<CLUSTER_DNS>
+$ SET GPII_CLOUD_URL=http://flowmanager.<CLUSTER_DNS>
 
-$ npm start
+$ ./node_modules/.bin/electron . ./configs app.cloud
 
 ...
 
 ```
 
-4. You can open morphic now on the taskbar. Find the icon in your taskbar that looks like a gear. Update of the preferences should now register against the specified cluster.
+5. If you are using the `feds-audit` branch, first logout the `noUser` account. This is a hack that exists specifically on that branch:
+
+```
+$ curl http://localhost:8081/user/noUser/logout
+```
+
+6. Login using a user:
+
+```
+$ curl http://localhost:8081/user/carla/login
+```
+
+On the kubernetes side, you should be able to register requests against flowmanager and preferences as in the first section of this document.
+
+7. You can open morphic now on the taskbar. 
+
+    a. Find the icon in your taskbar that looks like a gear. Left click on it and the QSS application will now appear. 
+    b. Update any of the fields that appear.
+    c. Click on "Save"
+
+8. You should be able to verify that additional requests were made to save these settings
 
 
 ## Security Testing
