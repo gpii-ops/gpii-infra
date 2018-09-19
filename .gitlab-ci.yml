@@ -1,11 +1,33 @@
 stages:
   - setup
   - unit-tests
+  - common-stg
+  - common-stg-test
+  - promote-common-to-prd
+  - common-prd
   - dev
   - promote-to-stg
   - stg
   - promote-to-prd
   - prd
+
+common-setup:
+  stage: setup
+  tags:
+    - common
+  script:
+    - terraform -version
+    - terragrunt -version
+    - aws --version
+    - docker version
+    - docker-compose version
+    - docker pull gpii/exekube:0.4.0-google
+    - docker images | grep exekube
+    - ruby --version
+    - bundle version
+    - rake --version
+  only:
+    - master@gpii-ops/gpii-infra
 
 aws-setup:
   stage: setup
@@ -22,6 +44,8 @@ aws-setup:
     - ruby --version
     - bundle version
     - rake --version
+  only:
+    - master@gpii-ops/gpii-infra
 
 gcp-setup:
   stage: setup
@@ -35,6 +59,8 @@ gcp-setup:
     - ruby --version
     - bundle version
     - rake --version
+  only:
+    - master@gpii-ops/gpii-infra
 
 aws-unit-tests:
   stage: unit-tests
@@ -43,15 +69,102 @@ aws-unit-tests:
   script:
     - cd aws/rakefiles/tests
     - rake
+  only:
+    - master@gpii-ops/gpii-infra
 
 gcp-unit-tests:
   stage: unit-tests
   tags:
     - gcp
   script:
-    - cd gcp/rakefiles/tests
+    - cd shared/rakefiles/tests
     - bundle install --path "vendor/bundle"
     - rake
+  only:
+    - master@gpii-ops/gpii-infra
+
+common-stg:
+  stage: common-stg
+  tags:
+    - common
+  script:
+    - cd common/live/stg
+    - rake clobber
+    - rake configure_serviceaccount_ci_restore
+    - rake apply_common_infra
+    - rake apply_infra
+  environment:
+    name: stg
+  only:
+    - master@gpii-ops/gpii-infra
+
+common-stg-test-gcp-dev:
+  stage: common-stg-test
+  tags:
+    - common
+  variables:
+    # These variables are duplicated in common/live/stg/Rakefile
+    ORGANIZATION_ID: "327626828918"
+    TF_VAR_organization_name: "gpii2test"
+    TF_VAR_organization_domain: "test1.gpii.net"
+    TF_VAR_aws_zone_id: "Z1T3NF8J9WVBSP"
+    USER: "doe"
+  script:
+    - cd gcp/live/dev
+    - rake clobber
+    - rake configure_serviceaccount_ci_restore
+    - rake
+    - rake test_preferences
+    - rake test_flowmanager
+  after_script:
+    # Clean up dev environment even if one of the previous steps fails
+    - cd gcp/live/dev
+    - rake destroy
+    # Destroy secrets, so they can be repopulated on the next run to exercise
+    # managing secrets from scratch.
+    - rake destroy_secrets
+    # Terraform state encryption key is also gone with secrets, we have to destroy tfstate as well
+    - rake destroy_tfstate[k8s]
+    - rake destroy_tfstate[locust]
+    # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
+    - rake destroy_sa_keys
+    - rake clobber
+  only:
+    - master@gpii-ops/gpii-infra
+
+common-promote-common-to-prd:
+  stage: promote-common-to-prd
+  tags:
+    - common
+  script:
+    - export DATESTAMP="$(date -u '+%Y%m%d%H%M%S')"  # e.g. 20170603220542. Uses UTC.
+    - echo "DATESTAMP is $DATESTAMP"  # So it's visible in the log
+    - git tag "deploy-common-stg-$DATESTAMP"
+    # gitlab is not clever enough to clean up an added remote and git complains
+    # if we add a remote that already exists.
+    - git remote | grep -q "^origin-rw" || git remote add origin-rw git@github.com:gpii-ops/gpii-infra
+    - git push --tags origin-rw
+  when: manual
+  allow_failure: false
+  only:
+    - master@gpii-ops/gpii-infra
+
+common-prd:
+  stage: common-prd
+  tags:
+    - common
+  variables:
+    RAKE_REALLY_RUN_IN_PRD: "true"
+  script:
+    - cd common/live/prd
+    - rake clobber
+    - rake configure_serviceaccount_ci_restore
+    - rake apply_common_infra
+    - rake apply_infra
+  environment:
+    name: prd
+  only:
+    - master@gpii-ops/gpii-infra
 
 aws-dev:
   stage: dev
@@ -67,6 +180,8 @@ aws-dev:
     - cd aws/dev
     - rake destroy
     - rake clobber
+  only:
+    - master@gpii-ops/gpii-infra
 
 gcp-dev:
   stage: dev
@@ -92,6 +207,8 @@ gcp-dev:
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys
     - rake clobber
+  only:
+    - master@gpii-ops/gpii-infra
 
 aws-promote-to-stg:
   stage: promote-to-stg
@@ -105,6 +222,8 @@ aws-promote-to-stg:
     # if we add a remote that already exists.
     - git remote | grep -q "^origin-rw" || git remote add origin-rw git@github.com:gpii-ops/gpii-infra
     - git push --tags origin-rw
+  only:
+    - master@gpii-ops/gpii-infra
 
 gcp-promote-to-stg:
   stage: promote-to-stg
@@ -118,6 +237,8 @@ gcp-promote-to-stg:
     # if we add a remote that already exists.
     - git remote | grep -q "^origin-rw" || git remote add origin-rw git@github.com:gpii-ops/gpii-infra
     - git push --tags origin-rw
+  only:
+    - master@gpii-ops/gpii-infra
 
 aws-stg:
   stage: stg
@@ -129,9 +250,10 @@ aws-stg:
     - cd aws/stg
     - rake clobber
     - rake
+  only:
+    - master@gpii-ops/gpii-infra
 
-# DISABLED while we sort out the gcp-stg -> gcp-gpii-stg migration.
-.gcp-stg:
+gcp-stg:
   stage: stg
   tags:
     - gcp
@@ -151,6 +273,8 @@ aws-stg:
     - rake destroy_module[locust]
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys
+  only:
+    - master@gpii-ops/gpii-infra
 
 aws-promote-to-prd:
   stage: promote-to-prd
@@ -166,9 +290,10 @@ aws-promote-to-prd:
     - git push --tags origin-rw
   when: manual
   allow_failure: false
+  only:
+    - master@gpii-ops/gpii-infra
 
-# DISABLED while we sort out the gcp-stg -> gcp-gpii-stg migration.
-.gcp-promote-to-prd:
+gcp-promote-to-prd:
   stage: promote-to-prd
   tags:
     - gcp
@@ -182,6 +307,8 @@ aws-promote-to-prd:
     - git push --tags origin-rw
   when: manual
   allow_failure: false
+  only:
+    - master@gpii-ops/gpii-infra
 
 aws-prd:
   stage: prd
@@ -195,9 +322,10 @@ aws-prd:
     - cd aws/prd
     - rake clobber
     - rake
+  only:
+    - master@gpii-ops/gpii-infra
 
-# DISABLED while we sort out the gcp-stg -> gcp-gpii-stg migration.
-.gcp-prd:
+gcp-prd:
   stage: prd
   variables:
     RAKE_REALLY_RUN_IN_PRD: "true"
@@ -219,3 +347,5 @@ aws-prd:
     - rake destroy_module[locust]
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys
+  only:
+    - master@gpii-ops/gpii-infra
