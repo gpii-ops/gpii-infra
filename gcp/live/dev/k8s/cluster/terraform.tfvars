@@ -5,6 +5,12 @@ terragrunt = {
     source = "/project/modules//gke-cluster"
   }
 
+  dependencies {
+    paths = [
+      "../../stackdriver-exclusion",
+    ]
+  }
+
   include = {
     path = "${find_in_parent_folders()}"
   }
