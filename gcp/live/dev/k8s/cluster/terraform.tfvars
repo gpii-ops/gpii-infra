@@ -7,7 +7,7 @@ terragrunt = {
 
   dependencies {
     paths = [
-      "../../stackdriver-exclusion",
+      "../stackdriver-exclusion",
     ]
   }
 
