@@ -10,7 +10,7 @@ def sh_filter(cmd, exit_on_nonzero_status = true)
       # Secrets are grouped by encryption key, i.e. {'key1' => ['secret1', 'secret2']}
       @secrets.each do |encryption_key, secrets_array|
         secrets_array.each do |secret|
-          out.gsub!(Regexp.escape(ENV["TF_VAR_#{secret}"]), "<SENSITIVE>") if ENV["TF_VAR_#{secret}"].size > 0
+          out.gsub!(/#{Regexp.escape(ENV["TF_VAR_#{secret}"])}/, "<SENSITIVE>") if ENV["TF_VAR_#{secret}"].size > 0
         end
       end
     end
