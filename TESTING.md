@@ -52,22 +52,16 @@ $ cd c:\vagrant
 
 $ SET GPII_CLOUD_URL=http://flowmanager.<CLUSTER_DNS>
 
-$ ./node_modules/.bin/electron . ./configs app.cloud
+$ node_modules\.bin\electron . configs app.cloud
 
 ...
 
 ```
 
-5. If you are using the `feds-audit` branch, first logout the `noUser` account. This is a hack that exists specifically on that branch:
+5. Login using a user:
 
 ```
-$ curl http://localhost:8081/user/noUser/logout
-```
-
-6. Login using a user:
-
-```
-$ curl http://localhost:8081/user/carla/login
+$ curl http://localhost:8081/user/carla/proximityTriggered
 ```
 
 On the backend, two calls should be registered against the cloud based flow manager. Use kubectl to view the logs on either the ingress controller or the flowmanager pods:
@@ -92,7 +86,7 @@ $ kubectl logs -n gpii -l app=flowmanager
 The second call here was made to obtain the settings for the device.
 
 
-7. You can open morphic now on the taskbar and modify settings:
+6. You can open morphic now on the taskbar and modify settings:
 
     a. Find the icon in your taskbar that looks like a gear. Left click on it and the QSS application will now appear. 
 
@@ -104,7 +98,7 @@ The second call here was made to obtain the settings for the device.
 
     e. Morphic should report "Your settings were saved to the Moprhic Cloud"
 
-8. You should be able to verify that additional requests were made to the backend to store these preferences using the same kubectl commands from above.
+7. You should be able to verify that additional requests were made to the backend to store these preferences using the same kubectl commands from above.
 
 
 ### Production Config Tests
