@@ -23,4 +23,6 @@ module "gke_cluster" {
     "https://www.googleapis.com/auth/logging.write",
     "https://www.googleapis.com/auth/monitoring",
   ]
+
+  dashboard_disabled = true
 }
