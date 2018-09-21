@@ -3,7 +3,7 @@ require "yaml"
 
 class Vars
 
-  VERSIONS_FILE = "../../../common/versions.yml"
+  VERSIONS_FILE = "../../../shared/versions.yml"
 
   def self.set_vars(env, project_type)
     if ["prd"].include?(env)
