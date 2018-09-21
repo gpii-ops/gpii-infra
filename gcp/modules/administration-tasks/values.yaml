@@ -9,14 +9,3 @@ namespaces:
 clusterAdmins:
   create: false
   users: []
-
-# List roles to limit things you can view / modify with the dashboard
-# By default, you only get the "view" role
-# TODO We should move dashboard deployment from GKE to Helm chart
-dashboardPermissions:
-  create: true
-  clusterRoles:
-    - view
-    # - secret-lister
-    # - cluster-object-viewer
-    - cluster-admin
