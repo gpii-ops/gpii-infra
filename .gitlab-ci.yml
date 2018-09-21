@@ -77,7 +77,7 @@ gcp-unit-tests:
   tags:
     - gcp
   script:
-    - cd common/rakefiles/tests
+    - cd shared/rakefiles/tests
     - bundle install --path "vendor/bundle"
     - rake
   only:
