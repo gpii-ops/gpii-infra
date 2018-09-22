@@ -117,7 +117,7 @@ task :sh, [:cmd, :plain_shell] => [:set_vars] do |taskname, args|
     cmd = "bash"
   end
   if args[:plain_shell]
-    sh "#{@exekube_cmd} sh"
+    sh "#{@exekube_cmd} #{cmd}"
   else
     sh "#{@exekube_cmd} rake xk['#{cmd}',skip_secret_mgmt,preserve_stderr]"
   end
