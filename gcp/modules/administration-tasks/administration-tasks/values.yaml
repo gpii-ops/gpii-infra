@@ -17,12 +17,3 @@ clusterAdmins:
   create: false
   users: []
     # - user@example.com
-
-# List roles to limit things you can view / modify with the dashboard
-# By default, you only get the "view" role
-dashboardPermissions:
-  create: true
-  clusterRoles:
-    - view
-    # - secret-lister
-    # - cluster-object-viewer
