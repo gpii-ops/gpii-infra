@@ -65,10 +65,6 @@ task :xk, [:cmd, :skip_secret_mgmt] => [:configure_serviceaccount, @kubectl_cred
 
   Secrets.set_secrets(@secrets)
 
-  # TODO: Next line should be removed once Terraform issue with GCS backend encryption is fixed
-  # https://issues.gpii.net/browse/GPII-3329
-  ENV['GOOGLE_ENCRYPTION_KEY'] = ENV['TF_VAR_key_tfstate_encryption_key']
-
   sh_filter "#{@exekube_cmd} #{args[:cmd]}" if args[:cmd]
 end
 
