@@ -126,7 +126,7 @@ task :plain_sh, [:cmd] => [:set_vars] do |taskname, args|
     cmd = args[:cmd]
   else
     puts "Argument :cmd -- the command to run inside the exekube container -- not present, defaulting to bash"
-    cmd = "vash"
+    cmd = "bash"
   end
   sh "#{@exekube_cmd} #{cmd}"
 end
