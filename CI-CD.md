@@ -50,7 +50,7 @@ Examples of things that get credentials this way include: CouchDB, Alertmanager.
 
 ## gpii-version-updater
 
-   * There is a standalone system for managing the versions of GPII components running on this infrastructure, via [common/versions.yml](common/versions.yml). See the [gpii-version-updater repo](https://github.com/gpii-ops/gpii-version-updater).
+   * There is a standalone system for managing the versions of GPII components running on this infrastructure, via [shared/versions.yml](shared/versions.yml). See the [gpii-version-updater repo](https://github.com/gpii-ops/gpii-version-updater).
 
 ## Running manually in non-dev environments (stg, prd)
 
