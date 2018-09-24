@@ -41,7 +41,7 @@ services:
       - 8001:8001
     volumes:
       - .:/project
-      - ../common/charts:/charts
+      - ../shared/charts:/charts
       - ../shared/rakefiles:/rakefiles
       - secrets:/project/live/${ENV}/secrets
       - helm:/root/.helm
@@ -50,7 +50,7 @@ services:
       - kube:/root/.kube
 
       # EXEKUBE DEVELOPMENT
-      - ../../exekube/modules:/exekube-modules
+      # - ../../exekube/modules:/exekube-modules
       # ---
     command: kubectl proxy --address="0.0.0.0" --accept-hosts ".*"
 

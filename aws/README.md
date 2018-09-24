@@ -263,16 +263,16 @@ See [CI-CD.md#running-in-non-dev-environments](../CI-CD.md#running-manually-in-n
 1. Clone https://github.com/gpii-ops/gpii-version-updater/.
 1. Edit `components.conf`. Find your component and edit the `image` field to point to your Docker Hub user account.
    * E.g., `gpii/universal -> mrtyler/universal`
-1. Run `update-version`. It will generate a `version.yml` in the current directory.
-1. `cp version.yml ../gpii-infra/aws/modules/deploy`
+1. Run `update-version`. It will generate a `versions.yml` in the current directory.
+1. `cp versions.yml ../gpii-infra/shared`
 1. `cd ../gpii-infra/aws/dev && rake deploy`
 
-#### Can't I just edit `version.yml` by hand?
+#### Can't I just edit `versions.yml` by hand?
 
 gpii-infra uses explicit SHAs to refer to specific Docker images for GPII components. This has a number of advantages (repeatability, auditability) but the main thing you care about is that changing the SHA forces Kubernetes to re-deploy a component (but see below for a note about gpii-dataloader).
 
 If you don't want to deal with gpii-version-updater, you can instead:
-1. Edit `modules/deploy/version.yml`. Find your component and replace the entire image value (path and SHA) with your Docker Hub user account.
+1. Edit `shared/versions.yml`. Find your component and replace the entire image value (path and SHA) with your Docker Hub user account.
    * E.g., `flowmanager: "gpii/universal@sha256:4b3...64f" -> flowmanager: "mrtyler/universal"`
 1. Manually delete the component via Kubernetes Dashboard or with `kubectl delete`.
 1. `cd aws/dev && rake deploy`

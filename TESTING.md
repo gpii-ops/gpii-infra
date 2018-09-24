@@ -6,41 +6,62 @@ This document describes pointers and notes for testing the GPII infrastructure i
 
 This section contains a tutorial to test the frontend GPII application against the backend. Relevant calls against the backend are noted after each action.
 
-### Testing key-in/key-out and basic settings
+### Testing login/logout and basic settings
 
-1. Obtain a copy of the gpii/windows repository:
+1. Obtain a copy of the gpii/gpii-app repository:
 
 ```bash
-$ git clone git@github.com:GPII/windows.git
+$ git clone https://github.com/GPII/gpii-app.git
+
 ```
 
-2. Use vagrant to spin up the instance.
+Note that as of 9/19/2018, the full functionality that works against the cloud only exists on the `feds-audit` branch. Because of this, you should checkout that branch instead of working on master:
+
+```
+$ git checkout feds-audit
+```
+
+2. Create a new configuration in `configs/app.cloud.json`, containing the following contents:
+
+```
+{
+    "type": "gpii.appWithTaskTray",
+    "options": {
+        "gradeNames": ["fluid.component"],
+        "distributeOptions": {}
+    },
+    "mergeConfigs": [
+        "%gpii-app/configs/app.base.json",
+        "%gpii-universal/gpii/configs/gpii.config.untrusted.development"
+     ]
+}
+```
+
+3. Spin up the vagrant box:
 
 ```bash
-$ cd windows
+$ cd gpii-app
 
 $ vagrant up
 ```
 
-3. Once the windows image is spun up, open a command prompt within the virtual machine and spin up the components locally.
+4. When the machine is up and running, open a command prompt and run the application:
 
-```shell
-$ cd C:\Vagrant
+```
+$ cd c:\vagrant
 
 $ SET GPII_CLOUD_URL=http://flowmanager.<CLUSTER_DNS>
 
-$ SET NODE_ENV=gpii.config.untrusted.development
+$ node_modules\.bin\electron . configs app.cloud
 
-$ node gpii
+...
 
 ```
 
-The above will bring up a local flowmanager and point it to the specified cloud based flowmanager.
+5. Login using a user:
 
-4. Once the node process is started, create a new command prompt and login:
-
-```shell
-$ curl http://localhost:8081/users/carla/login
+```
+$ curl http://localhost:8081/user/carla/proximityTriggered
 ```
 
 On the backend, two calls should be registered against the cloud based flow manager. Use kubectl to view the logs on either the ingress controller or the flowmanager pods:
@@ -64,9 +85,25 @@ $ kubectl logs -n gpii -l app=flowmanager
 
 The second call here was made to obtain the settings for the device.
 
+
+6. You can open morphic now on the taskbar and modify settings:
+
+    a. Find the icon in your taskbar that looks like a gear. Left click on it and the QSS application will now appear. 
+
+    b. Click on "Screen Zoom"
+
+    c. Click the "+ Larger" button
+
+    d. Click on "Save"
+
+    e. Morphic should report "Your settings were saved to the Moprhic Cloud"
+
+7. You should be able to verify that additional requests were made to the backend to store these preferences using the same kubectl commands from above.
+
+
 ### Production Config Tests
 
-Another way to exercise the frontend nodejs code against a cloud based backend is to run the productionConfigTests. As of September 10, 2018, these productionConfigTests only exercise login and logout. To execute them, run the following test script from the universal container. Make sure to use an appropriate version. Generally, the latest version can be found in `common/versions.yml`, which is automatically kept up to date.
+Another way to exercise the frontend nodejs code against a cloud based backend is to run the productionConfigTests. As of September 10, 2018, these productionConfigTests only exercise login and logout. To execute them, run the following test script from the universal container. Make sure to use an appropriate version. Generally, the latest version can be found in `shared/versions.yml`, which is automatically kept up to date.
 
 ```
 $ docker run --rm --name productionConfigTests -e GPII_CLOUD_URL=https://flowmanager.<CLUSTER_DNS> gpii/universal@sha256:bc92279591c0ab60d11ecf55e43f783cd7cb92a0bc2fea6661054a065bbb2e49 node tests/ProductionConfigTests.js
@@ -143,39 +180,6 @@ In addition, the flowmanager calls the preferences server and similar logs entri
 ```
 
 The above functionality is a limited test suite that needs to be expanded to be more complete. Work is being tracked in [GPII-3333](https://issues.gpii.net/browse/GPII-3333) for that.
-
-### Testing login/logout and basic settings
-
-1. Obtain a copy of the gpii/gpii-app repository:
-
-```bash
-$ git clone https://github.com/GPII/gpii-app.git
-
-```
-
-2. Spin up the vagrant box:
-
-```bash
-$ cd gpii-app
-
-$ vagrant up
-```
-
-3. When the machine is up and running, open a command prompt and run the application:
-
-```
-$ cd c:\vagrant
-
-$ set GPII_CLOUD_URL=http://flowmanager.<CLUSTER_DNS>
-
-$ npm start
-
-...
-
-```
-
-4. You can open morphic now on the taskbar. Find the icon in your taskbar that looks like a gear. Update of the preferences should now register against the specified cluster.
-
 
 ## Security Testing
 
