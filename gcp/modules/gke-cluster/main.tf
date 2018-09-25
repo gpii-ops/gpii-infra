@@ -25,4 +25,6 @@ module "gke_cluster" {
   ]
 
   dashboard_disabled = true
+
+  update_timeout = "30m"
 }
