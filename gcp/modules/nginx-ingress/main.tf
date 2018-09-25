@@ -15,6 +15,10 @@ data "terraform_remote_state" "network" {
     credentials = "${var.serviceaccount_key}"
     bucket      = "${var.project_id}-tfstate"
     prefix      = "${var.env}/infra/network"
+
+    # TODO: Next line should be removed once Terraform issue with GCS backend encryption is fixed
+    # https://issues.gpii.net/browse/GPII-3329
+    encryption_key = "/dev/null"
   }
 }
 

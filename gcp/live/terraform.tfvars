@@ -7,7 +7,9 @@ terragrunt = {
       credentials    = "${get_env("TF_VAR_serviceaccount_key", "")}"
       bucket         = "${get_env("TF_VAR_project_id", "")}-tfstate"
       prefix         = "${path_relative_to_include()}"
-      encryption_key = "${get_env("TF_VAR_key_tfstate_encryption_key", "")}"
+      # TODO: Next line needs to be uncommented back once Terraform issue with GCS backend encryption is fixed
+      # https://issues.gpii.net/browse/GPII-3329
+      # encryption_key = "${get_env("TF_VAR_key_tfstate_encryption_key", "")}"
     }
   }
 

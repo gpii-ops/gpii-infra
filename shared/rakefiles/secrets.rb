@@ -109,6 +109,10 @@ class Secrets
         push_secrets(populated_secrets, encryption_key)
       end
     end
+
+    # TODO: Next line should be removed once Terraform issue with GCS backend encryption is fixed
+    # https://issues.gpii.net/browse/GPII-3329
+    ENV['GOOGLE_ENCRYPTION_KEY'] = ENV['TF_VAR_key_tfstate_encryption_key']
   end
 
   def self.push_secrets(secrets, encryption_key)
