@@ -65,5 +65,5 @@ def setup_vars(env_short)
   ENV["RAKE_TMPDIR_ALREADY_SET"] = "true"
 
   # Directory where Helm charts live
-  @chartdir = '../../common/charts'
+  @chartdir = '../../shared/charts'
 end

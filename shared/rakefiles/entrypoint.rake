@@ -108,23 +108,30 @@ task :unlock => [:set_vars] do
     done'"
 end
 
-desc '[ADVANCED] Run arbitrary exekube command -- rake sh["kubectl --namespace gpii get pods"]'
-task :rake_shell, [:cmd] => [:set_vars] do |taskname, args|
+desc "[ADVANCED] Run arbitrary command in exekube container via rake wrapper (with secrets set) -- rake sh['kubectl exec --n gpii couchdb-couchdb-0 -c \
+couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/gpii/_all_docs']"
+task :sh, [:cmd] => [:set_vars] do |taskname, args|
   if args[:cmd]
     cmd = args[:cmd]
   else
     puts "Argument :cmd -- the command to run inside the exekube container -- not present, defaulting to bash"
     cmd = "bash"
   end
-  sh "#{@exekube_cmd} rake xk['#{cmd}',skip_secret_mgmt]"
+  sh "#{@exekube_cmd} rake xk['#{cmd}',skip_secret_mgmt,preserve_stderr]"
 end
 
-desc '[ADVANCED] Get a plain clean shell inside the Docker container without executing any additional rake task'
-task :plain_shell => [:set_vars] do
-  sh "#{@exekube_cmd} sh"
+desc "[ADVANCED] Run arbitrary command in exekube container via plain shell -- rake plain_sh['kubectl --namespace gpii get pods']"
+task :plain_sh, [:cmd] => [:set_vars] do |taskname, args|
+  if args[:cmd]
+    cmd = args[:cmd]
+  else
+    puts "Argument :cmd -- the command to run inside the exekube container -- not present, defaulting to bash"
+    cmd = "bash"
+  end
+  sh "#{@exekube_cmd} #{cmd}"
 end
 
-desc '[ADVANCED] Destroy all SA keys except current one'
+desc "[ADVANCED] Destroy all SA keys except current one"
 task :destroy_sa_keys => [:set_vars] do
   sh "#{@exekube_cmd} sh -c ' \
     existing_keys=$(gcloud iam service-accounts keys list \
@@ -139,7 +146,7 @@ task :destroy_sa_keys => [:set_vars] do
     done'"
 end
 
-desc '[ADVANCED] Destroy secrets file stored in GS bucket for encryption key, passed as argument -- rake destroy_secrets"[default]"'
+desc "[ADVANCED] Destroy secrets file stored in GS bucket for encryption key, passed as argument -- rake destroy_secrets['default']"
 task :destroy_secrets, [:encryption_key] => [:set_vars] do |taskname, args|
   sh "#{@exekube_cmd} sh -c ' \
     for secret_bucket in $(gsutil ls -p #{ENV["TF_VAR_project_id"]} | grep #{args[:encryption_key]}-secrets/); do \
@@ -149,7 +156,7 @@ task :destroy_secrets, [:encryption_key] => [:set_vars] do |taskname, args|
     done'"
 end
 
-desc '[ADVANCED] Destroy Terraform state stored in GS bucket for prefix, passed as argument -- rake destroy_tfstate"[k8s]"'
+desc "[ADVANCED] Destroy Terraform state stored in GS bucket for prefix, passed as argument -- rake destroy_tfstate['k8s']"
 task :destroy_tfstate, [:prefix] => [:set_vars] do |taskname, args|
   if args[:prefix].nil? || args[:prefix].size == 0
     puts "Argument :prefix not present, defaulting to k8s"
@@ -161,13 +168,13 @@ task :destroy_tfstate, [:prefix] => [:set_vars] do |taskname, args|
   sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-terragrunt"
 end
 
-desc '[ADVANCED] Destroy provided module in the cluster, and then deploy it -- rake redeploy_module"[k8s/kube-system/cert-manager]"'
+desc "[ADVANCED] Destroy provided module in the cluster, and then deploy it -- rake redeploy_module['k8s/kube-system/cert-manager']"
 task :redeploy_module, [:module] => [:set_vars] do |taskname, args|
   Rake::Task[:destroy_module].invoke(args[:module])
   Rake::Task[:deploy_module].invoke(args[:module])
 end
 
-desc '[ADVANCED] Deploy provided module into the cluster -- rake deploy_module"[k8s/kube-system/cert-manager]"'
+desc "[ADVANCED] Deploy provided module into the cluster -- rake deploy_module['k8s/kube-system/cert-manager']"
 task :deploy_module, [:module] => [:set_vars] do |taskname, args|
   if args[:module].nil?
     puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
@@ -179,7 +186,7 @@ task :deploy_module, [:module] => [:set_vars] do |taskname, args|
   sh "#{@exekube_cmd} rake xk['up live/#{@env}/#{args[:module]}',skip_secret_mgmt]"
 end
 
-desc '[ADVANCED] Destroy provided module in the cluster -- rake destroy_module"[k8s/kube-system/cert-manager]"'
+desc "[ADVANCED] Destroy provided module in the cluster -- rake destroy_module['k8s/kube-system/cert-manager']"
 task :destroy_module, [:module] => [:set_vars] do |taskname, args|
   if args[:module].nil?
     puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
