@@ -8,6 +8,7 @@ terragrunt = {
   dependencies {
     paths = [
       "../stackdriver/exclusion",
+      "../stackdriver/export",
     ]
   }
 
