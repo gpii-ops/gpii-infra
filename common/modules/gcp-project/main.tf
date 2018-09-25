@@ -36,7 +36,7 @@ locals {
   dnsname = "${replace(
               replace(
                 google_project.project.name,
-                "/([\\w]+)-([\\w]+)-([\\w]+)-?([\\w]+)?/",
+                "/([\\w]+)-([\\w]+)-([\\w]+)-?([-\\w]+)?/",
                 "$4.$3.$2.${var.organization_domain}"),
               "/^\\./",
               "")
@@ -63,6 +63,7 @@ resource "google_project_services" "project" {
     "deploymentmanager.googleapis.com",
     "dns.googleapis.com",
     "iam.googleapis.com",
+    "logging.googleapis.com",
     "monitoring.googleapis.com",
     "oslogin.googleapis.com",
     "pubsub.googleapis.com",
@@ -70,6 +71,7 @@ resource "google_project_services" "project" {
     "replicapoolupdater.googleapis.com",
     "resourceviews.googleapis.com",
     "serviceusage.googleapis.com",
+    "stackdriver.googleapis.com",
     "storage-api.googleapis.com",
   ]
 }
@@ -93,7 +95,6 @@ resource "google_dns_managed_zone" "project" {
   project     = "${google_project.project.project_id}"
   name        = "${replace(local.dnsname, ".", "-")}"
   dns_name    = "${local.dnsname}."
-  description = "${google_project.project.project_id} DNS zone"
   depends_on  = ["google_project_services.project",
                  "google_project_iam_binding.project"]
 }

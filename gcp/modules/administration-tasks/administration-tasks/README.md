@@ -38,14 +38,3 @@ clusterAdmins:
   users:
     - user@example.com
 ```
-
-## Assign roles to the Kubernetes Dashboard
-
-```yaml
-dashboardPermissions:
-  create: true
-  clusterRoles:
-    - view
-    - secret-lister
-    - cluster-object-viewer
-```

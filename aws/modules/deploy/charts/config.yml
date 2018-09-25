@@ -1,7 +1,7 @@
 # This is the config file for GPII Helm Charts.
 #
 # It contain a list of chart names with respect to install/uninstall order.
-# All charts are being installed from /common/charts directory, which
+# All charts are being installed from /shared/charts directory, which
 # is shared between AWS and GCP parts of the project.
 #
 # Child directory named "values" may contain ERB template with custom values

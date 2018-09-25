@@ -58,14 +58,14 @@ end
 # This task is being called from entrypoint.rake and runs inside exekube container.
 # It applies secret-mgmt, sets secrets, and then executes arbitrary command from args[:cmd].
 # You should not invoke this task directly!
-task :xk, [:cmd, :skip_secret_mgmt] => [:configure_serviceaccount, @kubectl_creds_file] do |taskname, args|
+task :xk, [:cmd, :skip_secret_mgmt, :preserve_stderr] => [:configure_serviceaccount, @kubectl_creds_file] do |taskname, args|
   @secrets = Secrets.collect_secrets()
 
   sh "#{@exekube_cmd} up live/#{@env}/secret-mgmt" unless args[:skip_secret_mgmt]
 
   Secrets.set_secrets(@secrets)
 
-  sh_filter "#{@exekube_cmd} #{args[:cmd]}" if args[:cmd]
+  sh_filter "#{@exekube_cmd} #{args[:cmd]}", !args[:preserve_stderr].nil? if args[:cmd]
 end
 
 task :refresh_common_infra, [:project_type] => [@gcp_creds_file] do | taskname, args|
@@ -76,19 +76,12 @@ task :refresh_common_infra, [:project_type] => [@gcp_creds_file] do | taskname, 
   # conflicts at the creation resources we need to import the already created
   # DNS zone.
 
-  output = `#{@exekube_cmd} sh -c "\
-    terragrunt output -json dns_zones \
+  dns_zone_found = %x|#{@exekube_cmd} sh -c "\
+    terragrunt state show module.gke_network.google_dns_managed_zone.dns_zones \
     --terragrunt-working-dir /project/live/#{@env}/infra/network 2>/dev/null \
-    "`
-  begin
-    # What does !! mean?
-    # https://stackoverflow.com/questions/524658/what-does-mean-in-ruby
-    dns_zone_found = !!JSON.parse(output)
-  rescue JSON::ParserError
-    dns_zone_found = false
-  end
+    "|
 
-  unless dns_zone_found
+  if dns_zone_found.empty?
     # The DNS zone is not in the TF state file, we need to add it
     puts "DNS zone #{ENV["TF_VAR_domain_name"].tr('.','-')} not found in TF state, importing..."
     sh "#{@exekube_cmd} sh -c '\
