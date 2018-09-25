@@ -61,3 +61,4 @@ Parameter | Description | Default
 `image.repository` | container image repository | `gpii/universal`
 `image.checksum` | container image checksum | `sha256:8547f22ae8e86d7b4b09e10d9ec87b1605b47dc37904171c84555a55462f161e`
 `image.pullPolicy` | container image pullPolicy | `IfNotPresent`
+`resources` | optional resource requests and limits for deployment |
