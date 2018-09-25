@@ -10,10 +10,12 @@ terragrunt = {
 }
 
 # ↓ Module configuration (empty means all default)
-# TODO: How to get project name into logName? Use ":/logs/kubelet" instead of exact match? Old version: 'logName=projects/gpii-gcp-dev-tyler/logs/kubelet'
 exclusions = {
-  "calico-typha-health-summary-ok" = "resource.type=container AND logName:/logs/calico-typha AND textPayload:\"Overall health summary=&health.HealthReport{Live:true, Ready:true}\""
-  "kubelet-discovered-runtime-cgroups" = "resource.type=gce_instance AND logName:/logs/kubelet AND jsonPayload.MESSAGE:\"Discovered runtime cgroups name: /system.slice/docker.service\""
-  "kubelet-healthz-200" = "resource.type=gce_instance AND logName:/logs/kubelet AND jsonPayload.MESSAGE:GET /healthz AND jsonPayload.MESSAGE:\" 200 \""
-  "kubelet-stats-summary-200" = "resource.type=gce_instance AND logName:/logs/kubelet AND jsonPayload.MESSAGE:GET /stats/summary AND jsonPayload.MESSAGE:\" 200 \""
+  "calico-typha-health-summary-ok" = "resource.type=container AND logName=projects/__var.project_id__/logs/calico-typha AND textPayload:\"Overall health summary=&health.HealthReport{Live:true, Ready:true}\""
+  "kubelet-discovered-runtime-cgroups" = "resource.type=gce_instance AND logName=projects/__var.project_id__/logs/kubelet AND jsonPayload.MESSAGE:\"Discovered runtime cgroups name: /system.slice/docker.service\""
+  "kubelet-healthz-200" = "resource.type=gce_instance AND logName=projects/__var.project_id__/logs/kubelet AND jsonPayload.MESSAGE:GET /healthz AND jsonPayload.MESSAGE:\" 200 \""
+  # The trailing space is to differentiate status code 200 ("GET /_up 200 ok
+  # 0") from a string that happens to start with 200 ("Setting calico-typha
+  # requests["cpu"] = 200m").
+  "kubelet-stats-summary-200" = "resource.type=gce_instance AND logName=projects/__var.project_id__/logs/kubelet AND jsonPayload.MESSAGE:GET /stats/summary AND jsonPayload.MESSAGE:\" 200 \""
 }
