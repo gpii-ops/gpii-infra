@@ -263,7 +263,7 @@ See [CI-CD.md#running-in-non-dev-environments](../CI-CD.md#running-manually-in-n
 1. Clone https://github.com/gpii-ops/gpii-version-updater/.
 1. Edit `components.conf`. Find your component and edit the `image` field to point to your Docker Hub user account.
    * E.g., `gpii/universal -> mrtyler/universal`
-1. Run `update-version`. It will generate a `versions.yml` in the current directory.
+1. Run `./update-version versions.yml`. It will generate a `versions.yml` in the current directory.
 1. `cp versions.yml ../gpii-infra/shared`
 1. `cd ../gpii-infra/aws/dev && rake deploy`
 
