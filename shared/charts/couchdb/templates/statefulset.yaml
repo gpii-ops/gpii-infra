@@ -37,6 +37,7 @@ spec:
           ports:
             - name: couchdb
               containerPort: 5984
+              containerPort: 5986
             - name: epmd
               containerPort: 4369
             - containerPort: 9100
@@ -63,11 +64,11 @@ spec:
           livenessProbe:
             httpGet:
               path: /
-              port: 5984
+              port: 5986
           readinessProbe:
             httpGet:
               path: /_up
-              port: 5984
+              port: 5986
           resources:
 {{ toYaml .Values.resources | indent 12 }}
           volumeMounts:
