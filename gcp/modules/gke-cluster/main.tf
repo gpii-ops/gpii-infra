@@ -12,10 +12,13 @@ module "gke_cluster" {
 
   initial_node_count = 1
   node_type          = "n1-standard-2"
-  kubernetes_version = "1.9.7-gke.6"
+  kubernetes_version = "1.10.7-gke.2"
 
-  main_compute_zone = "us-central1-a"
-  additional_zones  = ["us-central1-b", "us-central1-c"]
+  main_compute_zone  = "us-central1-a"
+  additional_zones   = ["us-central1-b", "us-central1-c"]
+
+  monitoring_service = "monitoring.googleapis.com/kubernetes"
+  logging_service    = "logging.googleapis.com/kubernetes"
 
   oauth_scopes = [
     "https://www.googleapis.com/auth/compute",

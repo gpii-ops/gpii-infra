@@ -21,3 +21,11 @@ affinity:
               values:
               - couchdb
         topologyKey: "kubernetes.io/hostname"
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

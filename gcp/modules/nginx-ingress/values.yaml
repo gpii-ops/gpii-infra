@@ -9,9 +9,23 @@ controller:
     maxReplicas: 4
     targetCPUUtilizationPercentage: 50
     targetMemoryUtilizationPercentage: 50
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 50m
+      memory: 128Mi
 
 defaultBackend:
   replicaCount: 2
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 10m
+      memory: 32Mi
 
 rbac:
   create: true
