@@ -338,8 +338,8 @@ gcp-prd:
     - rake clobber
     - rake configure_serviceaccount_ci_restore
     - rake
-    - rake test_preferences
-    - rake test_flowmanager
+    - export RAKE_REALLY_DESTROY_IN_PRD=true ; rake test_preferences ; unset RAKE_REALLY_DESTROY_IN_PRD
+    - export RAKE_REALLY_DESTROY_IN_PRD=true ; rake test_flowmanager ; unset RAKE_REALLY_DESTROY_IN_PRD
   after_script:
     # Clean up even if something failed.
     - cd gcp/live/prd
