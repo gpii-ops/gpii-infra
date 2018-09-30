@@ -344,8 +344,8 @@ gcp-prd:
     # Clean up even if something failed.
     - cd gcp/live/prd
     # Destroy Locust module (used for smoke tests)
-    - rake destroy_module[locust]
+    - export RAKE_REALLY_DESTROY_IN_PRD=true ; rake destroy_module[locust] ; unset RAKE_REALLY_DESTROY_IN_PRD
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
-    - rake destroy_sa_keys
+    - export RAKE_REALLY_DESTROY_IN_PRD=true ; rake destroy_sa_keys ; unset RAKE_REALLY_DESTROY_IN_PRD=true
   only:
     - master@gpii-ops/gpii-infra
