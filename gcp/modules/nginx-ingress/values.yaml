@@ -11,10 +11,10 @@ controller:
     targetMemoryUtilizationPercentage: 50
   resources:
     requests:
-      cpu: 50m
+      cpu: 100m
       memory: 128Mi
     limits:
-      cpu: 50m
+      cpu: 100m
       memory: 128Mi
 
 defaultBackend:
