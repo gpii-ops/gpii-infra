@@ -90,13 +90,22 @@ task :deploy => [:set_vars, :apply_infra] do
   sh "#{@exekube_cmd} rake xk[up]"
 end
 
+task :check_destroy_allowed do
+  if ["prd"].include?(@env)
+    if ENV["RAKE_REALLY_DESTROY_IN_PRD"].nil?
+      puts "  ERROR: Tried to destroy something in env 'prd' but RAKE_REALLY_DESTROY_IN_PRD is not set"
+      raise ArgumentError, "Tried to destroy something in env 'prd' but RAKE_REALLY_DESTROY_IN_PRD is not set"
+    end
+  end
+end
+
 desc "Undeploy GPII compoments and destroy cluster"
-task :destroy => [:set_vars] do
+task :destroy => [:set_vars, :check_destroy_allowed] do
   sh "#{@exekube_cmd} rake xk[down]"
 end
 
 desc "Destroy cluster and low-level infrastructure"
-task :destroy_infra => [:set_vars, :configure_serviceaccount, :destroy] do
+task :destroy_infra => [:set_vars, :check_destroy_allowed, :configure_serviceaccount, :destroy] do
   sh "#{@exekube_cmd} down live/#{@env}/infra"
 end
 
@@ -132,7 +141,7 @@ task :plain_sh, [:cmd] => [:set_vars] do |taskname, args|
 end
 
 desc "[ADVANCED] Destroy all SA keys except current one"
-task :destroy_sa_keys => [:set_vars] do
+task :destroy_sa_keys => [:set_vars, :check_destroy_allowed] do
   sh "#{@exekube_cmd} sh -c ' \
     existing_keys=$(gcloud iam service-accounts keys list \
       --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com \
@@ -147,7 +156,7 @@ task :destroy_sa_keys => [:set_vars] do
 end
 
 desc "[ADVANCED] Destroy secrets file stored in GS bucket for encryption key, passed as argument -- rake destroy_secrets['default']"
-task :destroy_secrets, [:encryption_key] => [:set_vars] do |taskname, args|
+task :destroy_secrets, [:encryption_key] => [:set_vars, :check_destroy_allowed] do |taskname, args|
   sh "#{@exekube_cmd} sh -c ' \
     for secret_bucket in $(gsutil ls -p #{ENV["TF_VAR_project_id"]} | grep #{args[:encryption_key]}-secrets/); do \
       for secret_file in $(gsutil ls -R $secret_bucket | grep yaml); do \
@@ -157,7 +166,7 @@ task :destroy_secrets, [:encryption_key] => [:set_vars] do |taskname, args|
 end
 
 desc "[ADVANCED] Destroy Terraform state stored in GS bucket for prefix, passed as argument -- rake destroy_tfstate['k8s']"
-task :destroy_tfstate, [:prefix] => [:set_vars] do |taskname, args|
+task :destroy_tfstate, [:prefix] => [:set_vars, :check_destroy_allowed] do |taskname, args|
   if args[:prefix].nil? || args[:prefix].size == 0
     puts "Argument :prefix not present, defaulting to k8s"
     prefix = "k8s"
@@ -187,7 +196,7 @@ task :deploy_module, [:module] => [:set_vars] do |taskname, args|
 end
 
 desc "[ADVANCED] Destroy provided module in the cluster -- rake destroy_module['k8s/kube-system/cert-manager']"
-task :destroy_module, [:module] => [:set_vars] do |taskname, args|
+task :destroy_module, [:module] => [:set_vars, :check_destroy_allowed] do |taskname, args|
   if args[:module].nil?
     puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
     raise
