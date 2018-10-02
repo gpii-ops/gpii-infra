@@ -2,6 +2,7 @@ terraform {
   backend "gcs" {}
 }
 
+variable "env" {}
 variable "project_id" {}
 variable "serviceaccount_key" {}
 
@@ -11,7 +12,7 @@ module "gke_cluster" {
   serviceaccount_key = "${var.serviceaccount_key}"
 
   initial_node_count = 1
-  node_type          = "n1-standard-2"
+  node_type          = "${var.env == "dev" ? "n1-standard-2" : "n1-highcpu-4"}"
   kubernetes_version = "1.10.7-gke.2"
 
   main_compute_zone  = "us-central1-a"
