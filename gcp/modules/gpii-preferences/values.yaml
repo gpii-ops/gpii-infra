@@ -1,4 +1,4 @@
-replicaCount: ${env == "dev" ? 2 : 6}
+replicaCount: ${env == "dev" ? 2 : 4}
 
 image:
   repository: ${preferences_repository}
@@ -18,7 +18,7 @@ datasource_hostname: "http://${couchdb_admin_username}:${couchdb_admin_password}
 
 resources:
   requests:
-    cpu: 500m
+    cpu: ${env == "dev" ? 500 : 1000}m
     memory: 256Mi
   limits:
     cpu: 1000m

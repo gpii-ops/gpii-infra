@@ -24,8 +24,8 @@ affinity:
 
 resources:
   requests:
-    cpu: 500m
+    cpu: ${env == "dev" ? 500 : 1000}m
     memory: 512Mi
   limits:
-    cpu: 1500m
+    cpu: 1000m
     memory: 512Mi
