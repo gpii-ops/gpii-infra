@@ -20,7 +20,7 @@ variable "exports" {
     "compute-activity" = "logName=projects/__var.project_id__/logs/compute.googleapis.com%2Factivity_log"
 
     # Events from GPII containers.
-    "gpii-containers" = "resource.type=container AND resource.labels.namespace_id=gpii"
+    "gpii-containers" = "resource.type=k8s_container AND resource.labels.namespace_name=gpii"
   }
 }
 
