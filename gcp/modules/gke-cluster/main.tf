@@ -5,13 +5,16 @@ terraform {
 variable "project_id" {}
 variable "serviceaccount_key" {}
 
+# Terragrunt variables
+variable "node_type" {}
+
 module "gke_cluster" {
   source             = "/exekube-modules/gke-cluster"
   project_id         = "${var.project_id}"
   serviceaccount_key = "${var.serviceaccount_key}"
 
   initial_node_count = 1
-  node_type          = "n1-standard-2"
+  node_type          = "${var.node_type}"
   kubernetes_version = "1.10.7-gke.2"
 
   main_compute_zone  = "us-central1-a"

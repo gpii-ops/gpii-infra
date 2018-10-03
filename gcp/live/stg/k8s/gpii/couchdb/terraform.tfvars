@@ -18,6 +18,11 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
-couchdb_replicas = 3
-backup_deltas = "PT15M PT60M PT4H PT24H P7D"
+backup_deltas     = "PT15M PT60M PT4H PT24H P7D"
 release_namespace = "gpii"
+
+replica_count     = 3
+requests_cpu      = "1000m"
+requests_memory   = "512Mi"
+limits_cpu        = "1000m"
+limits_memory     = "512Mi"
