@@ -14,7 +14,7 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
-project_name    = "dev-tyler"
+project_name    = "dev-jhernandez"
 
 # This variable set an owner account in addition to the service accounts needed
 # to manage the project
@@ -22,4 +22,4 @@ project_name    = "dev-tyler"
 # of the role:
 # https://www.terraform.io/docs/providers/google/r/google_project_iam.html#argument-reference
 
-project_owner   = "user:tyler@raisingthefloor.org"
+project_owner   = "user:javi@raisingthefloor.org"

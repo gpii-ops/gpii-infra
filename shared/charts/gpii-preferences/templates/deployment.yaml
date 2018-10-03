@@ -30,3 +30,5 @@ spec:
           value:  '{{ .Values.datasource_hostname }}'
         - name: GPII_DATASOURCE_PORT
           value: '{{ .Values.datasource_listen_port }}'
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
