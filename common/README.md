@@ -87,9 +87,18 @@ rake apply_infra
 
 Once the `rake apply_infra` command has finished the resources for the new user must be created. Go to the `gcp` part of the repository and spin up the environment. Remember to use the same string for the USER environment variable.
 
-## Deleting a project
+## Shutting down a project
 
 The deletion of a project is not implemented to be performed automatically yet. First be sure that all the resources of such project are deleted. You can use the `rake destroy` command of the `gcp` part to deleted most of them (or at least the most expensive ones). After that, the command `rake destroy_infra` will destroy most of the resources left. But since the `rake destroy_infra` doesn't finish fine, some resources could be left in GCP, so they need to be deleted manually.
+
+## Removing a dev project
+
+To remove a dev environment entirely (e.g. due to offboarding a developer):
+
+1. Delete the Project (IAM & Admin `->` Settings `->` Shut Down).
+1. Delete Project's associated DNS zone (Network services `->` Cloud DNS `->` `dev-gcp-gpii-net` `->` Select zone `->` Delete zone).
+   * Alternately, `cd common/live/prd && RAKE_REALLY_RUN_IN_PRD=1 RAKE_REALLY_DESTROY_IN_PRD=1 rake destroy_module"[infra/dev/offboarded-developer]" -- it will delete some things but will not finish successfully.
+1. Delete the developer's entry in `common/live/prd/infra/dev/offboarded-developer`.
 
 ## Importing existing resources
 
