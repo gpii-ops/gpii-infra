@@ -2,27 +2,42 @@ terraform {
   backend "gcs" {}
 }
 
-variable "env" {}
 variable "secrets_dir" {}
 variable "charts_dir" {}
 variable "domain_name" {}
 
-variable "secret_couchdb_admin_username" {}
-variable "secret_couchdb_admin_password" {}
-
 variable "preferences_repository" {}
 variable "preferences_checksum" {}
+
+# Terragrunt variables
+variable "cert_issuer_name" {}
+variable "disable_ssl_redirect" {}
+variable "replica_count" {}
+variable "requests_cpu" {}
+variable "requests_memory" {}
+variable "limits_cpu" {}
+variable "limits_memory" {}
+
+# Secret variables
+variable "secret_couchdb_admin_username" {}
+variable "secret_couchdb_admin_password" {}
 
 data "template_file" "preferences_values" {
   template = "${file("values.yaml")}"
 
   vars {
-    env                    = "${var.env}"
     domain_name            = "${var.domain_name}"
     preferences_repository = "${var.preferences_repository}"
     preferences_checksum   = "${var.preferences_checksum}"
     couchdb_admin_username = "${var.secret_couchdb_admin_username}"
     couchdb_admin_password = "${var.secret_couchdb_admin_password}"
+    cert_issuer_name       = "${var.cert_issuer_name}"
+    disable_ssl_redirect   = "${var.disable_ssl_redirect}"
+    replica_count          = "${var.replica_count}"
+    requests_cpu           = "${var.requests_cpu}"
+    requests_memory        = "${var.requests_memory}"
+    limits_cpu             = "${var.limits_cpu}"
+    limits_memory          = "${var.limits_memory}"
   }
 }
 

@@ -1,4 +1,4 @@
-clusterSize: ${env == "dev" ? 2 : 3}
+clusterSize: ${replica_count}
 
 adminUsername: ${couchdb_admin_username}
 adminPassword: ${couchdb_admin_password}
@@ -24,8 +24,8 @@ affinity:
 
 resources:
   requests:
-    cpu: ${env == "dev" ? 500 : 1000}m
-    memory: 512Mi
+    cpu: ${requests_cpu}
+    memory: ${requests_memory}
   limits:
-    cpu: 1000m
-    memory: 512Mi
+    cpu: ${limits_cpu}
+    memory: ${limits_memory}
