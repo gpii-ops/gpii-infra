@@ -29,5 +29,11 @@ module "gke_cluster" {
 
   dashboard_disabled = true
 
+  # empty password and username disables legacy basic authentication
+  master_auth_username = ""
+  master_auth_password = ""
+
+  issue_client_certificate = false
+
   update_timeout = "30m"
 }
