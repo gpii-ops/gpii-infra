@@ -2,6 +2,7 @@ terraform {
   backend "gcs" {}
 }
 
+variable "nonce" {}
 variable "secrets_dir" {}
 variable "charts_dir" {}
 
@@ -18,6 +19,10 @@ module "cert-manager" {
 
 resource "null_resource" "cert_manager_resources" {
   depends_on = ["module.cert-manager"]
+
+  triggers = {
+    nonce = "${var.nonce}"
+  }
 
   provisioner "local-exec" {
     command = "kubectl apply -f ${path.module}/resources/"
