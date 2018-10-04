@@ -62,13 +62,17 @@ spec:
             - name: ERL_FLAGS
               value: "{{ range $k, $v := .Values.erlangFlags }} -{{ $k }} {{ $v }} {{ end }}"
           livenessProbe:
-            httpGet:
-              path: /
-              port: 5986
+            exec:
+              command:
+                - sh
+                - -c
+                - curl -G --silent --fail -u ${COUCHDB_USER}:${COUCHDB_PASSWORD} http://localhost:${COUCHDB_SVC_COUCHDB_SERVICE_PORT}
           readinessProbe:
-            httpGet:
-              path: /_up
-              port: 5986
+            exec:
+              command:
+                - sh
+                - -c
+                - curl -G --silent --fail -u ${COUCHDB_USER}:${COUCHDB_PASSWORD} http://localhost:${COUCHDB_SVC_COUCHDB_SERVICE_PORT}/_up
           resources:
 {{ toYaml .Values.resources | indent 12 }}
           volumeMounts:
