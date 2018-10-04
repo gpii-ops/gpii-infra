@@ -22,7 +22,7 @@ terragrunt = {
 cert_issuer_name     = "letsencrypt-production"
 disable_ssl_redirect = "false"
 
-replica_count     = 4
+replica_count     = 3
 requests_cpu      = "500m"
 requests_memory   = "256Mi"
 limits_cpu        = "500m"
