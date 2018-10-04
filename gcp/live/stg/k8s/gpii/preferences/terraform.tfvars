@@ -19,3 +19,11 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
+cert_issuer_name     = "letsencrypt-production"
+disable_ssl_redirect = "false"
+
+replica_count     = 3
+requests_cpu      = "1000m"
+requests_memory   = "256Mi"
+limits_cpu        = "1000m"
+limits_memory     = "256Mi"

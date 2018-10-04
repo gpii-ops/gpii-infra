@@ -15,6 +15,8 @@ variable "organization_domain" {
 
 variable "project_name" {} # name of the project to create
 
+variable "project_owner" {}
+
 variable "billing_id" {}
 
 variable "organization_id" {}
@@ -86,6 +88,7 @@ resource "google_project_iam_binding" "project" {
   project = "${google_project.project.project_id}"
   role    = "roles/owner"
   members = [
+    "${var.project_owner}",
     "serviceAccount:${google_service_account.project.email}",
     "serviceAccount:projectowner@${var.project_id}.iam.gserviceaccount.com",
   ]

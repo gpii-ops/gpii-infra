@@ -1,25 +1,25 @@
-replicaCount: ${env == "dev" ? 2 : 6}
+replicaCount: ${replica_count}
 
 image:
   repository: ${preferences_repository}
   checksum: ${preferences_checksum}
 
 issuerRef:
-  name: ${env == "dev" ? "letsencrypt-staging" : "letsencrypt-production"}
+  name: ${cert_issuer_name}
   kind: ClusterIssuer
 
 dnsNames:
 - preferences.${domain_name}
 
 ingress:
-  disable_ssl_redirect: ${env == "dev" ? "true" : "false"}
+  disable_ssl_redirect: ${disable_ssl_redirect}
 
 datasource_hostname: "http://${couchdb_admin_username}:${couchdb_admin_password}@couchdb-svc-couchdb.gpii.svc.cluster.local"
 
 resources:
   requests:
-    cpu: 500m
-    memory: 256Mi
+    cpu: ${requests_cpu}
+    memory: ${requests_memory}
   limits:
-    cpu: 1000m
-    memory: 256Mi
+    cpu: ${limits_cpu}
+    memory: ${limits_memory}
