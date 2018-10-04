@@ -51,6 +51,10 @@ module "couchdb" {
 resource "null_resource" "couchdb_finish_cluster" {
   depends_on = ["module.couchdb"]
 
+  triggers = {
+    nonce = "${var.nonce}"
+  }
+
   provisioner "local-exec" {
     command = <<EOF
       RETRIES=10
