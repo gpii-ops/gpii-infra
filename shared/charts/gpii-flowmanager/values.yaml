@@ -36,3 +36,13 @@ ingress:
   disable_ssl_redirect: false
 
 nameOverride: flowmanager
+
+## Optional resource requests and limits for deployment
+## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+resources: {}
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # limits:
+  #  cpu: 56
+  #  memory: 256Gi

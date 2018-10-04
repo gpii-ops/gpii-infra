@@ -1,14 +1,7 @@
 # ↓ Module metadata
-
 terragrunt = {
   terraform {
-    source = "/project/modules//gke-cluster"
-  }
-
-  dependencies {
-    paths = [
-      "../stackdriver/exclusion",
-    ]
+    source = "/project/modules//gcp-stackdriver-exclusion"
   }
 
   include = {
@@ -17,5 +10,3 @@ terragrunt = {
 }
 
 # ↓ Module configuration (empty means all default)
-
-node_type = "n1-standard-2"

@@ -60,3 +60,6 @@ Parameter | Description | Default
 `image.repository` | container image repository | `gpii/universal`
 `image.checksum` | container image checksum | `sha256:f279c6ab7fa1c19e5f358a6a3d87a970eaf8d615c8b6181851fa086b6229b3a1`
 `image.pullPolicy` | container image pullPolicy | `IfNotPresent`
+`rollingUpdate.maxSurge` | maximum number of pods that can be created over the desired number during rolling update | `25%`
+`rollingUpdate.maxUnavailable` | maximum number of pods that can become unavailable during rolling update | `0`
+`resources` | optional resource requests and limits for deployment | `{}`

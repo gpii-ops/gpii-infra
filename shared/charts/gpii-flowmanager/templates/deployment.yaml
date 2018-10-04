@@ -8,7 +8,7 @@ spec:
   strategy:
     rollingUpdate:
       maxSurge: {{ .Values.rollingUpdate.maxSurge }}
-      maxUnavailable: {{ .Values.maxUnavailable }}
+      maxUnavailable: {{ .Values.rollingUpdate.maxUnavailable }}
   template:
     metadata:
       labels:
@@ -31,3 +31,5 @@ spec:
           value: '{{ .Values.datasource_listen_port }}'
         - name: GPII_FLOWMANAGER_TO_PREFERENCESSERVER_URL
           value: {{ .Values.preferences_url }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}

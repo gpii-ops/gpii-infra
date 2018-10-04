@@ -1,4 +1,4 @@
-clusterSize: ${env == "dev" ? 2 : 3}
+clusterSize: ${replica_count}
 
 adminUsername: ${couchdb_admin_username}
 adminPassword: ${couchdb_admin_password}
@@ -27,3 +27,11 @@ couchdbConfig:
     bind_address: any
     # http://docs.couchdb.org/en/stable/config/auth.html#authentication-configuration
     require_valid_user: true
+
+resources:
+  requests:
+    cpu: ${requests_cpu}
+    memory: ${requests_memory}
+  limits:
+    cpu: ${limits_cpu}
+    memory: ${limits_memory}

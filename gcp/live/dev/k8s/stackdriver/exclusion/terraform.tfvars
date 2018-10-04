@@ -1,19 +1,12 @@
 # ↓ Module metadata
-
 terragrunt = {
   terraform {
-    source = "/project/modules//gcp-project"
+    source = "/project/modules//gcp-stackdriver-exclusion"
   }
-  dependencies {
-    paths = ["../zone"]
-  }
+
   include = {
     path = "${find_in_parent_folders()}"
   }
 }
 
 # ↓ Module configuration (empty means all default)
-
-project_name    = "dev-seg10"
-project_owner   = "sergio@raisingthefloor.org"
-
