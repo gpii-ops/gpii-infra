@@ -37,7 +37,6 @@ spec:
           ports:
             - name: couchdb
               containerPort: 5984
-              containerPort: 5986
             - name: epmd
               containerPort: 4369
             - containerPort: 9100
