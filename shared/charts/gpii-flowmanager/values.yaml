@@ -19,7 +19,7 @@ image:
 
 rollingUpdate:
   maxSurge: 25%
-  maxUnavailable: 0
+  maxUnavailable: 25%
 
 issuerRef:
   name: letsencrypt-production
