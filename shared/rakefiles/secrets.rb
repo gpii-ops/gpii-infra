@@ -92,6 +92,7 @@ class Secrets
           ENV["TF_VAR_#{secret_name}"] = secret_value
         end
       else
+        puts "[secret-mgmt] Populating secrets for key '#{encryption_key}'..."
         populated_secrets = {}
         secrets.each do |secret_name|
           if ENV["TF_VAR_#{secret_name}"].to_s.empty?
