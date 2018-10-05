@@ -2,6 +2,7 @@ terraform {
   backend "gcs" {}
 }
 
+variable "env" {}
 variable "project_id" {}
 variable "serviceaccount_key" {}
 variable "exports" {
@@ -33,6 +34,20 @@ variable "exported_logs_expire_after" {
   default = "14"
 }
 
+data "terraform_remote_state" "secret-mgmt" {
+  backend = "gcs"
+
+  config {
+    credentials = "${var.serviceaccount_key}"
+    bucket      = "${var.project_id}-tfstate"
+    prefix      = "${var.env}/secret-mgmt"
+
+    # TODO: Next line should be removed once Terraform issue with GCS backend encryption is fixed
+    # https://issues.gpii.net/browse/GPII-3329
+    encryption_key = "/dev/null"
+  }
+}
+
 module "gcp_stackdriver_export" {
   source             = "/exekube-modules/gcp-stackdriver-export"
   project_id         = "${var.project_id}"
@@ -40,4 +55,5 @@ module "gcp_stackdriver_export" {
   exports            = "${var.exports}"
   exported_logs_storage_class = "${var.exported_logs_storage_class}"
   exported_logs_storage_region = "${var.exported_logs_storage_region}"
+  exported_logs_encryption_key = "${lookup(data.terraform_remote_state.secret-mgmt.encryption_keys, "gcp-stackdriver-export")}"
 }
