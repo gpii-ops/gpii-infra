@@ -62,6 +62,13 @@ gcp-setup:
   only:
     - master@gpii-ops/gpii-infra
 
+shared-unit-tests:
+  stage: unit-tests
+  script:
+    - docker run --rm -v "$(pwd):/data" -w /data gpii/exekube:0.4.0-google -- terraform fmt --check=true
+  only:
+    - master@gpii-ops/gpii-infra
+
 aws-unit-tests:
   stage: unit-tests
   tags:
