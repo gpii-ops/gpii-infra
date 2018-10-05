@@ -32,5 +32,6 @@ module "gpii-dataloader" {
   release_values          = ""
   release_values_rendered = "${data.template_file.dataloader_values.rendered}"
 
-  chart_name = "${var.charts_dir}/gpii-dataloader"
+  chart_name   = "${var.charts_dir}/gpii-dataloader"
+  force_update = true
 }
