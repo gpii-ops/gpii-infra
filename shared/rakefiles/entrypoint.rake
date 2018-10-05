@@ -2,6 +2,7 @@ require "rake/clean"
 
 import "../../../shared/rakefiles/ci.rake"
 import "../../../shared/rakefiles/test.rake"
+
 require_relative "./vars.rb"
 
 if @env.nil?
@@ -174,6 +175,21 @@ task :destroy_tfstate, [:prefix] => [:set_vars, :check_destroy_allowed] do |task
     prefix = args[:prefix]
   end
   sh "#{@exekube_cmd} sh -c 'gsutil rm -r gs://#{ENV["TF_VAR_project_id"]}-tfstate/#{@env}/#{prefix}'"
+  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-terragrunt"
+end
+
+desc "[ADVANCED] Rotate Terraform state key for prefix, passed as argument -- rake rotate_tfstate_key['k8s']"
+task :rotate_tfstate_key, [:prefix] => [:set_vars] do |taskname, args|
+  if args[:prefix].nil? || args[:prefix].size == 0
+    puts "Argument :prefix not present, defaulting to k8s"
+    prefix = "k8s"
+  else
+    prefix = args[:prefix]
+  end
+  sh "#{@exekube_cmd} rake rotate_secret['key_tfstate_encryption_key','default','sh -c \"gsutil \
+       -o GSUtil:decryption_key1=$TF_VAR_key_tfstate_encryption_key_rotated \
+       -o GSUtil:encryption_key=$TF_VAR_key_tfstate_encryption_key \
+       rewrite -k -r gs://#{ENV["TF_VAR_project_id"]}-tfstate/#{@env}/#{prefix}\"',skip_secret_mgmt,preserve_stderr]"
   sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-terragrunt"
 end
 
