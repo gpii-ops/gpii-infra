@@ -80,10 +80,12 @@ class Secrets
   # populates secret with random nonse, and then uploads to corresponding GS bucket.
   #
   # When encrypted secret file is present, it always uses its decrypted data as a source for secrets.
-  # Use `rake destroy_secrets[KEY_NAME]` to forcefully repopulate secrets for target encryption key
-  def self.set_secrets(collected_secrets)
+  # When `rotate` is set to true, secrets will be set from env vars, encrypted secret file will be
+  # re-generated and re-uploaded into GS bucket.
+  # Use `rake destroy_secrets[KEY_NAME]` to forcefully repopulate secrets for target encryption key.
+  def self.set_secrets(collected_secrets, rotate = false)
     collected_secrets.each do |encryption_key, secrets|
-      decrypted_secrets = fetch_secrets(encryption_key)
+      decrypted_secrets = fetch_secrets(encryption_key) unless rotate
 
       if decrypted_secrets
         decrypted_secrets.each do |secret_name, secret_value|
