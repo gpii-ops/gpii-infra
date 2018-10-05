@@ -179,7 +179,7 @@ task :destroy_tfstate, [:prefix] => [:set_vars, :check_destroy_allowed] do |task
 end
 
 desc "[ADVANCED] Rotate Terraform state key for prefix, passed as argument -- rake rotate_tfstate_key['k8s']"
-task :rotate_tfstate_key, [:prefix] => [:set_vars] do |taskname, args|
+task :rotate_tfstate_key, [:prefix] => [:set_vars, :check_destroy_allowed] do |taskname, args|
   if args[:prefix].nil? || args[:prefix].size == 0
     puts "Argument :prefix not present, defaulting to k8s"
     prefix = "k8s"
@@ -194,7 +194,7 @@ task :rotate_tfstate_key, [:prefix] => [:set_vars] do |taskname, args|
 end
 
 desc "[ADVANCED] Destroy provided module in the cluster, and then deploy it -- rake redeploy_module['k8s/kube-system/cert-manager']"
-task :redeploy_module, [:module] => [:set_vars] do |taskname, args|
+task :redeploy_module, [:module] => [:set_vars, :check_destroy_allowed] do |taskname, args|
   Rake::Task[:destroy_module].invoke(args[:module])
   Rake::Task[:deploy_module].invoke(args[:module])
 end
