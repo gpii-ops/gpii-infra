@@ -18,7 +18,7 @@ module "gke_cluster" {
   kubernetes_version = "1.10.7-gke.2"
 
   main_compute_zone  = "us-central1-a"
-  additional_zones   = ["us-central1-b", "us-central1-c"]
+  additional_zones   = ["us-central1-b", "us-central1-c", "us-central1-f"]
 
   monitoring_service = "monitoring.googleapis.com/kubernetes"
   logging_service    = "logging.googleapis.com/kubernetes"
