@@ -6,13 +6,14 @@ require "yaml"
 
 class Secrets
 
-  KMS_KEYRING = "keyring"
+  KMS_KEYRING  = "keyring"
+  KMS_LOCATION = "global"
 
-  SECRETS_DIR = "secrets"
+  SECRETS_DIR  = "secrets"
   SECRETS_FILE = "secrets.yaml"
 
   GOOGLE_CLOUD_API = "https://www.googleapis.com"
-  GOOGLE_KMS_API = "https://cloudkms.googleapis.com"
+  GOOGLE_KMS_API   = "https://cloudkms.googleapis.com"
 
   # This method is looking for SECRETS_FILE files in module directories (modules/*), which should have the following structure:
   #
@@ -80,12 +81,12 @@ class Secrets
   # populates secret with random nonse, and then uploads to corresponding GS bucket.
   #
   # When encrypted secret file is present, it always uses its decrypted data as a source for secrets.
-  # When `rotate` is set to true, secrets will be set from env vars, encrypted secret file will be
+  # When `rotate_secrets` is set to true, secrets will be set from env vars, encrypted secret file will be
   # re-generated and re-uploaded into GS bucket.
   # Use `rake destroy_secrets[KEY_NAME]` to forcefully repopulate secrets for target encryption key.
-  def self.set_secrets(collected_secrets, rotate = false)
+  def self.set_secrets(collected_secrets, rotate_secrets = false)
     collected_secrets.each do |encryption_key, secrets|
-      decrypted_secrets = fetch_secrets(encryption_key) unless rotate
+      decrypted_secrets = fetch_secrets(encryption_key) unless rotate_secrets
 
       if decrypted_secrets
         decrypted_secrets.each do |secret_name, secret_value|
@@ -122,12 +123,28 @@ class Secrets
     gs_bucket = "#{ENV['TF_VAR_project_id']}-#{encryption_key}-secrets"
     encoded_secrets = Base64.encode64(secrets.to_json).delete!("\n")
 
+    puts "[secret-mgmt] Retrieving primary key version for key '#{encryption_key}'..."
+    encryption_key_version = %x{
+      curl -s \
+      -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
+      -H \"Content-Type:application/json\" \
+      -X GET \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{ENV['TF_VAR_project_id']}/locations/#{Secrets::KMS_LOCATION}/keyRings/#{Secrets::KMS_KEYRING}/cryptoKeys/#{encryption_key}\"
+    }
+
+    begin
+      encryption_key_version = JSON.parse(encryption_key_version)
+      encryption_key_version = encryption_key_version['primary']['name'].match(/\/([0-9]+)$/)[1]
+    rescue
+      puts "ERROR: Unable to get primary encryption key version for key '#{encryption_key}', terminating!"
+      raise
+    end
+
     puts "[secret-mgmt] Encrypting secrets for key '#{encryption_key}'..."
     encrypted_secrets = %x{
       curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
       -H \"Content-Type:application/json\" \
-      -X POST \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{ENV['TF_VAR_project_id']}/locations/global/keyRings/#{Secrets::KMS_KEYRING}/cryptoKeys/#{encryption_key}:encrypt\" \
+      -X POST \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{ENV['TF_VAR_project_id']}/locations/#{Secrets::KMS_LOCATION}/keyRings/#{Secrets::KMS_KEYRING}/cryptoKeys/#{encryption_key}/cryptoKeyVersions/#{encryption_key_version}:encrypt\" \
       -d \"{\\\"plaintext\\\":\\\"#{encoded_secrets}\\\"}\"
     }
 
@@ -196,7 +213,7 @@ class Secrets
       curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
       -H \"Content-Type:application/json\" \
-      -X POST \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{ENV['TF_VAR_project_id']}/locations/global/keyRings/#{Secrets::KMS_KEYRING}/cryptoKeys/#{encryption_key}:decrypt\" \
+      -X POST \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{ENV['TF_VAR_project_id']}/locations/#{Secrets::KMS_LOCATION}/keyRings/#{Secrets::KMS_KEYRING}/cryptoKeys/#{encryption_key}:decrypt\" \
       -d \"{\\\"ciphertext\\\":\\\"#{gs_secrets['ciphertext']}\\\"}\"
     }
 
@@ -209,6 +226,65 @@ class Secrets
     end
 
     return decrypted_secrets
+  end
+
+  # This method creates new primary version for target encryption_key, and
+  # then disables all its previous versions.
+  def self.rotate_key(encryption_key)
+    puts "[secret-mgmt] Creating new primary version for key '#{encryption_key}'..."
+    new_version = %x{
+      gcloud kms keys versions create \
+      --location #{Secrets::KMS_LOCATION} \
+      --keyring #{Secrets::KMS_KEYRING} \
+      --key #{encryption_key} \
+      --primary --format json
+    }
+
+    begin
+      new_version = JSON.parse(new_version)
+      new_version_id = new_version["name"].match(/\/([0-9]+)$/)[1]
+    rescue
+      puts "ERROR: Unable to create new version for key '#{encryption_key}', terminating!"
+      raise
+    end
+
+    puts "[secret-mgmt] Retrieving versions for key '#{encryption_key}'..."
+    key_versions = %x{
+      gcloud kms keys versions list \
+      --location #{Secrets::KMS_LOCATION} \
+      --keyring #{Secrets::KMS_KEYRING} \
+      --key #{encryption_key} \
+      --format json
+    }
+
+    begin
+      key_versions = JSON.parse(key_versions)
+    rescue
+      puts "ERROR: Unable to retrieve versions for key '#{encryption_key}', terminating!"
+      raise
+    end
+
+    key_versions.each do |version|
+      version_id = version["name"].match(/\/([0-9]+)$/)[1]
+      next if version["state"] != "ENABLED" or version_id == new_version_id
+
+      puts "[secret-mgmt] Disabling version #{version_id} for key '#{encryption_key}'..."
+      version_disabled = %x{
+        gcloud kms keys versions disable #{version_id} \
+        --location #{Secrets::KMS_LOCATION} \
+        --keyring #{Secrets::KMS_KEYRING} \
+        --key #{encryption_key} \
+        --format json
+      }
+
+      begin
+        version_disabled = JSON.parse(version_disabled)
+        raise unless version_disabled['state'] == "DISABLED"
+      rescue
+        puts "ERROR: Unable to disable version #{version_id} for key '#{encryption_key}', terminating!"
+        raise
+      end
+    end
   end
 end
 
