@@ -82,11 +82,6 @@ end
 
 desc "Create cluster and deploy GPII components to it"
 task :deploy => [:set_vars, :apply_infra] do
-  # Workaround for 'context deadline exceeded' issue:
-  # https://github.com/exekube/exekube/issues/62
-  # https://github.com/docker/for-mac/issues/2076
-  # Remove this when docker for mac 18.05 becomes stable
-  sh "docker run --rm --privileged alpine hwclock -s"
   sh "#{@exekube_cmd} rake xk[up]"
 end
 
