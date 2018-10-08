@@ -25,7 +25,6 @@ variable "serviceaccount_key" {}
 
 variable "project_id" {} # id of the project which owns the credentials used by the provider
 
-
 provider "google" {
   credentials = "${var.serviceaccount_key}"
   project     = "${var.project_id}"
@@ -54,6 +53,7 @@ resource "google_project" "project" {
 
 resource "google_project_services" "project" {
   project = "${google_project.project.project_id}"
+
   services = [
     "bigquery-json.googleapis.com",
     "cloudbilling.googleapis.com",
@@ -87,6 +87,7 @@ resource "google_service_account" "project" {
 resource "google_project_iam_binding" "project" {
   project = "${google_project.project.project_id}"
   role    = "roles/owner"
+
   members = [
     "${var.project_owner}",
     "serviceAccount:${google_service_account.project.email}",
@@ -95,11 +96,13 @@ resource "google_project_iam_binding" "project" {
 }
 
 resource "google_dns_managed_zone" "project" {
-  project     = "${google_project.project.project_id}"
-  name        = "${replace(local.dnsname, ".", "-")}"
-  dns_name    = "${local.dnsname}."
-  depends_on  = ["google_project_services.project",
-                 "google_project_iam_binding.project"]
+  project  = "${google_project.project.project_id}"
+  name     = "${replace(local.dnsname, ".", "-")}"
+  dns_name = "${local.dnsname}."
+
+  depends_on = ["google_project_services.project",
+    "google_project_iam_binding.project",
+  ]
 }
 
 # Set the NS records in the parent zone of the parent project if the
@@ -127,9 +130,10 @@ resource "google_dns_record_set" "ns-root" {
 }
 
 resource "google_storage_bucket" "project-tfstate" {
-  project     = "${google_project.project.project_id}"
-  name        = "${var.organization_name}-gcp-${var.project_name}-tfstate"
-  versioning  = {
+  project = "${google_project.project.project_id}"
+  name    = "${var.organization_name}-gcp-${var.project_name}-tfstate"
+
+  versioning = {
     enabled = "true"
   }
 }

@@ -120,3 +120,5 @@ couchdbConfig:
   #   q: 8 # Create 8 shards for each database
   chttpd:
     bind_address: any
+    # Uncomment the following line to disable anonymous requests
+    # require_valid_user: true

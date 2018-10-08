@@ -4,6 +4,7 @@ terraform {
 
 variable "project_id" {}
 variable "serviceaccount_key" {}
+
 variable "exclusions" {
   default = {
     # Calico logs don't always set 'severity' correctly, so instead we match on
