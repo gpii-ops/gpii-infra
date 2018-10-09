@@ -133,13 +133,14 @@ class Secrets
 
     begin
       encryption_key_version = JSON.parse(encryption_key_version)
-      encryption_key_version = encryption_key_version['primary']['name'].match(/\/([0-9]+)$/)[1]
+      encryption_key_version = get_crypto_key_version(encryption_key_version['primary']['name'])
     rescue
+      puts encryption_key_version
       puts "ERROR: Unable to get primary encryption key version for key '#{encryption_key}', terminating!"
       raise
     end
 
-    puts "[secret-mgmt] Encrypting secrets for key '#{encryption_key}'..."
+    puts "[secret-mgmt] Encrypting secrets with key '#{encryption_key}' version #{encryption_key_version}..."
     encrypted_secrets = %x{
       curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
@@ -208,7 +209,7 @@ class Secrets
       raise
     end
 
-    puts "[secret-mgmt] Decrypting secrets for key '#{encryption_key}' with KMS cert..."
+    puts "[secret-mgmt] Decrypting secrets for key '#{encryption_key}' with KMS key version #{get_crypto_key_version(gs_secrets['name'])}..."
     decrypted_secrets = %x{
       curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
@@ -228,9 +229,8 @@ class Secrets
     return decrypted_secrets
   end
 
-  # This method creates new primary version for target encryption_key, and
-  # then disables all its previous versions.
-  def self.rotate_key(encryption_key)
+  # This method creates new primary version for target encryption_key
+  def self.create_key_version(encryption_key)
     puts "[secret-mgmt] Creating new primary version for key '#{encryption_key}'..."
     new_version = %x{
       gcloud kms keys versions create \
@@ -242,12 +242,18 @@ class Secrets
 
     begin
       new_version = JSON.parse(new_version)
-      new_version_id = new_version["name"].match(/\/([0-9]+)$/)[1]
+      new_version_id = get_crypto_key_version(new_version["name"])
     rescue
+      puts new_version
       puts "ERROR: Unable to create new version for key '#{encryption_key}', terminating!"
       raise
     end
 
+    return new_version_id
+  end
+
+  # This method disables all versions except primary for target encryption_key
+  def self.disable_key_versions(encryption_key, primary_version_id = 0)
     puts "[secret-mgmt] Retrieving versions for key '#{encryption_key}'..."
     key_versions = %x{
       gcloud kms keys versions list \
@@ -260,13 +266,14 @@ class Secrets
     begin
       key_versions = JSON.parse(key_versions)
     rescue
+      puts key_versions
       puts "ERROR: Unable to retrieve versions for key '#{encryption_key}', terminating!"
       raise
     end
 
     key_versions.each do |version|
-      version_id = version["name"].match(/\/([0-9]+)$/)[1]
-      next if version["state"] != "ENABLED" or version_id == new_version_id
+      version_id = get_crypto_key_version(version["name"])
+      next if version["state"] != "ENABLED" or version_id == primary_version_id
 
       puts "[secret-mgmt] Disabling version #{version_id} for key '#{encryption_key}'..."
       version_disabled = %x{
@@ -281,10 +288,17 @@ class Secrets
         version_disabled = JSON.parse(version_disabled)
         raise unless version_disabled['state'] == "DISABLED"
       rescue
+        puts version_disabled
         puts "ERROR: Unable to disable version #{version_id} for key '#{encryption_key}', terminating!"
         raise
       end
     end
+  end
+
+  # This method returns KMS key version number from path:
+  # PATH: `projects/gpii-gcp-dev-tyler/locations/global/keyRings/keyring/cryptoKeys/default/cryptoKeyVersions/1`
+  def self.get_crypto_key_version(path)
+    return path.match(/\/([0-9]+)$/)[1]
   end
 end
 
