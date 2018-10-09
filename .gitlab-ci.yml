@@ -127,16 +127,16 @@ common-stg-test-gcp-dev:
   after_script:
     # Clean up dev environment even if one of the previous steps fails
     - cd gcp/live/dev
-    - rake destroy
+    - rake destroy || true
     # Destroy secrets, so they can be repopulated on the next run to exercise
     # managing secrets from scratch.
-    - rake destroy_secrets
+    - rake destroy_secrets || true
     # Terraform state encryption key is also gone with secrets, we have to destroy tfstate as well
-    - rake destroy_tfstate[k8s]
-    - rake destroy_tfstate[locust]
+    - rake destroy_tfstate[k8s] || true
+    - rake destroy_tfstate[locust] || true
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
-    - rake destroy_sa_keys
-    - rake clobber
+    - rake destroy_sa_keys || true
+    - rake clobber || true
   only:
     - master@gpii-ops/gpii-infra
 
@@ -186,8 +186,8 @@ aws-dev:
   after_script:
     # Clean up even if something failed.
     - cd aws/dev
-    - rake destroy
-    - rake clobber
+    - rake destroy || true
+    - rake clobber || true
   only:
     - master@gpii-ops/gpii-infra
 
@@ -205,16 +205,16 @@ gcp-dev:
   after_script:
     # Clean up even if something failed.
     - cd gcp/live/dev
-    - rake destroy
+    - rake destroy || true
     # Destroy secrets, so they can be repopulated on the next run to exercise
     # managing secrets from scratch.
-    - rake destroy_secrets
+    - rake destroy_secrets || true
     # Terraform state encryption key is also gone with secrets, we have to destroy tfstate as well
-    - rake destroy_tfstate[k8s]
-    - rake destroy_tfstate[locust]
+    - rake destroy_tfstate[k8s] || true
+    - rake destroy_tfstate[locust] || true
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
-    - rake destroy_sa_keys
-    - rake clobber
+    - rake destroy_sa_keys || true
+    - rake clobber || true
   only:
     - master@gpii-ops/gpii-infra
 
@@ -278,9 +278,9 @@ gcp-stg:
     # Clean up even if something failed.
     - cd gcp/live/stg
     # Destroy Locust module (used for smoke tests)
-    - rake destroy_module[locust]
+    - rake destroy_module[locust] || true
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
-    - rake destroy_sa_keys
+    - rake destroy_sa_keys || true
   only:
     - master@gpii-ops/gpii-infra
 
@@ -352,8 +352,8 @@ gcp-prd:
     # Clean up even if something failed.
     - cd gcp/live/prd
     # Destroy Locust module (used for smoke tests)
-    - export RAKE_REALLY_DESTROY_IN_PRD=true ; rake destroy_module[locust] ; unset RAKE_REALLY_DESTROY_IN_PRD
+    - export RAKE_REALLY_DESTROY_IN_PRD=true ; rake destroy_module[locust] || true ; unset RAKE_REALLY_DESTROY_IN_PRD
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
-    - export RAKE_REALLY_DESTROY_IN_PRD=true ; rake destroy_sa_keys ; unset RAKE_REALLY_DESTROY_IN_PRD=true
+    - export RAKE_REALLY_DESTROY_IN_PRD=true ; rake destroy_sa_keys || true ; unset RAKE_REALLY_DESTROY_IN_PRD=true
   only:
     - master@gpii-ops/gpii-infra
