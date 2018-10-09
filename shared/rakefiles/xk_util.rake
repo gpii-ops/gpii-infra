@@ -47,6 +47,7 @@ task :rotate_secrets_key, [:encryption_key] => [:configure_serviceaccount] do |t
   end
 
   Secrets.set_secrets(@secrets)
-  Secrets.rotate_key(args[:encryption_key])
+  new_version_id = Secrets.create_key_version(args[:encryption_key])
   Secrets.set_secrets(@secrets, rotate_secrets = true)
+  Secrets.disable_key_versions(args[:encryption_key], new_version_id)
 end
