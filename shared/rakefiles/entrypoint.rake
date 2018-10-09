@@ -22,7 +22,7 @@ end
 @serviceaccount_key_file = "secrets/kube-system/owner.json"
 
 task :clean_volumes => :set_vars do
-  ["helm", "terragrunt", "kube"].each do |app|
+  ["helm", "kube"].each do |app|
     sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-#{app}"
   end
 end
@@ -174,7 +174,6 @@ task :destroy_tfstate, [:prefix] => [:set_vars, :check_destroy_allowed] do |task
     prefix = args[:prefix]
   end
   sh "#{@exekube_cmd} sh -c 'gsutil rm -r gs://#{ENV["TF_VAR_project_id"]}-tfstate/#{@env}/#{prefix}'"
-  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-terragrunt"
 end
 
 desc "[ADVANCED] Destroy provided module in the cluster, and then deploy it -- rake redeploy_module['k8s/kube-system/cert-manager']"
