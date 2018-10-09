@@ -190,10 +190,9 @@ task :rotate_tfstate_key, [:prefix] => [:set_vars, :check_destroy_allowed] do |t
        -o GSUtil:decryption_key1=$TF_VAR_key_tfstate_encryption_key_rotated \
        -o GSUtil:encryption_key=$TF_VAR_key_tfstate_encryption_key \
        rewrite -k -r gs://#{ENV["TF_VAR_project_id"]}-tfstate/#{@env}/#{prefix}\"',skip_secret_mgmt,preserve_stderr]"
-  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-terragrunt"
 end
 
-desc "[ADVANCED] Rotate KMS key, passed as argument, re-encrypt associated secrets file in GS bucket -- rake rotate_secrets_key['default']"
+desc "[ADVANCED] Rotate provided KMS key and re-encrypt its associated secrets file in GS bucket -- rake rotate_secrets_key['default']"
 task :rotate_secrets_key, [:kms_key] => [:set_vars, :check_destroy_allowed] do |taskname, args|
   if args[:kms_key].nil? || args[:kms_key].size == 0
     puts "Argument :kms_key not present, defaulting to 'default'"
@@ -205,7 +204,7 @@ task :rotate_secrets_key, [:kms_key] => [:set_vars, :check_destroy_allowed] do |
 end
 
 desc "[ADVANCED] Destroy provided module in the cluster, and then deploy it -- rake redeploy_module['k8s/kube-system/cert-manager']"
-task :redeploy_module, [:module] => [:set_vars, :check_destroy_allowed] do |taskname, args|
+task :redeploy_module, [:module] => [:set_vars] do |taskname, args|
   Rake::Task[:destroy_module].invoke(args[:module])
   Rake::Task[:deploy_module].invoke(args[:module])
 end
