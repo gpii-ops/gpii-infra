@@ -1,0 +1,4 @@
+steps:
+- name: 'hashicorp/terraform:light'
+  args: ['fmt', '--check=true', '/workspace']
+  timeout: 120s
