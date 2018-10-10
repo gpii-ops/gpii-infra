@@ -1,4 +1,4 @@
 steps:
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['run', '-v', '"$(pwd):/data"', '-w', '/data', 'gpii/exekube:0.4.0-google', '--', 'terraform', 'fmt', '--check=true']
+  args: ['run', '-v', '"/workspace:/data"', '-w', '/data', 'gpii/exekube:0.4.0-google', '--', 'terraform', 'fmt', '--check=true']
   timeout: 120s
