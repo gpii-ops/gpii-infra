@@ -251,7 +251,7 @@ class Secrets
   end
 
   # This method disables all versions except primary for target encryption_key
-  def self.disable_key_versions(encryption_key)
+  def self.disable_non_primary_key_versions(encryption_key)
     puts "[secret-mgmt] Retrieving versions for key '#{encryption_key}'..."
     key_versions = %x{
       gcloud kms keys versions list \
