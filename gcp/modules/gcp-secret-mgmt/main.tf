@@ -17,7 +17,7 @@ variable "storage_location" {
 module "gcp-secret-mgmt" {
   source = "/exekube-modules/gcp-secret-mgmt"
 
-  project_id       = "${var.project_id}"
+  project_id         = "${var.project_id}"
   serviceaccount_key = "${var.serviceaccount_key}"
   encryption_keys    = "${var.encryption_keys}"
   storage_location   = "${var.storage_location}"
