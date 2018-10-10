@@ -86,13 +86,14 @@ class Secrets
   # Use `rake destroy_secrets[KEY_NAME]` to forcefully repopulate secrets for target encryption key.
   def self.set_secrets(collected_secrets, rotate_secrets = false)
     collected_secrets.each do |encryption_key, secrets|
-      decrypted_secrets = fetch_secrets(encryption_key) unless rotate_secrets
+      decrypted_secrets = fetch_secrets(encryption_key) unless secrets.empty? or rotate_secrets
 
       if decrypted_secrets
         decrypted_secrets.each do |secret_name, secret_value|
           ENV["TF_VAR_#{secret_name}"] = secret_value
         end
       else
+        next if secrets.empty?
         puts "[secret-mgmt] Populating secrets for key '#{encryption_key}'..."
         populated_secrets = {}
         secrets.each do |secret_name|
