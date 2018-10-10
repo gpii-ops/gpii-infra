@@ -5,6 +5,7 @@ terraform {
 variable "env" {}
 variable "project_id" {}
 variable "serviceaccount_key" {}
+
 variable "exports" {
   default = {
     # Captures interactions with many Google products, including GCE, GS, IAM,
@@ -24,12 +25,15 @@ variable "exports" {
     "gpii-containers" = "resource.type=k8s_container AND resource.labels.namespace_name=gpii"
   }
 }
+
 variable "exported_logs_storage_class" {
   default = "REGIONAL"
 }
+
 variable "exported_logs_storage_region" {
   default = "us-central1"
 }
+
 variable "exported_logs_expire_after" {
   default = "14"
 }
@@ -49,11 +53,11 @@ data "terraform_remote_state" "secret-mgmt" {
 }
 
 module "gcp_stackdriver_export" {
-  source             = "/exekube-modules/gcp-stackdriver-export"
-  project_id         = "${var.project_id}"
-  serviceaccount_key = "${var.serviceaccount_key}"
-  exports            = "${var.exports}"
-  exported_logs_storage_class = "${var.exported_logs_storage_class}"
+  source                       = "/exekube-modules/gcp-stackdriver-export"
+  project_id                   = "${var.project_id}"
+  serviceaccount_key           = "${var.serviceaccount_key}"
+  exports                      = "${var.exports}"
+  exported_logs_storage_class  = "${var.exported_logs_storage_class}"
   exported_logs_storage_region = "${var.exported_logs_storage_region}"
   exported_logs_encryption_key = "${lookup(data.terraform_remote_state.secret-mgmt.encryption_keys, "gcp-stackdriver-export")}"
 }
