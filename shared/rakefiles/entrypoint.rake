@@ -23,7 +23,7 @@ end
 @serviceaccount_key_file = "secrets/kube-system/owner.json"
 
 task :clean_volumes => :set_vars do
-  ["helm", "terragrunt", "kube"].each do |app|
+  ["helm", "kube"].each do |app|
     sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-#{app}"
   end
 end
@@ -83,11 +83,6 @@ end
 
 desc "Create cluster and deploy GPII components to it"
 task :deploy => [:set_vars, :apply_infra] do
-  # Workaround for 'context deadline exceeded' issue:
-  # https://github.com/exekube/exekube/issues/62
-  # https://github.com/docker/for-mac/issues/2076
-  # Remove this when docker for mac 18.05 becomes stable
-  sh "docker run --rm --privileged alpine hwclock -s"
   sh "#{@exekube_cmd} rake xk[up]"
 end
 
@@ -175,7 +170,6 @@ task :destroy_tfstate, [:prefix] => [:set_vars, :check_destroy_allowed] do |task
     prefix = args[:prefix]
   end
   sh "#{@exekube_cmd} sh -c 'gsutil rm -r gs://#{ENV["TF_VAR_project_id"]}-tfstate/#{@env}/#{prefix}'"
-  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-terragrunt"
 end
 
 desc "[ADVANCED] Rotate Terraform state key for prefix, passed as argument -- rake rotate_tfstate_key['k8s']"

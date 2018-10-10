@@ -23,3 +23,8 @@ module "gcp-secret-mgmt" {
   storage_location   = "${var.storage_location}"
   keyring_name       = "${var.keyring_name}"
 }
+
+# Re-export variable. See https://www.terraform.io/docs/providers/terraform/d/remote_state.html#root-outputs-only
+output "encryption_keys" {
+  value = "${module.gcp-secret-mgmt.encryption_keys}"
+}
