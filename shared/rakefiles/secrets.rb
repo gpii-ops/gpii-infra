@@ -135,8 +135,7 @@ class Secrets
       encryption_key_version = JSON.parse(encryption_key_version)
       encryption_key_version = get_crypto_key_version(encryption_key_version['primary']['name'])
     rescue
-      puts encryption_key_version
-      puts "ERROR: Unable to get primary encryption key version for key '#{encryption_key}', terminating!"
+      debug_output "ERROR: Unable to get primary encryption key version for key '#{encryption_key}', terminating!", encryption_key_version
       raise
     end
 
@@ -152,7 +151,7 @@ class Secrets
     begin
       response_check = JSON.parse(encrypted_secrets)
     rescue
-      puts "ERROR: Unable to parse encrypted secrets data for key '#{encryption_key}', terminating!"
+      debug_output "ERROR: Unable to parse encrypted secrets data for key '#{encryption_key}', terminating!"
       raise
     end
 
@@ -168,7 +167,7 @@ class Secrets
     begin
       response_check = JSON.parse(api_call_data)
     rescue
-      puts "ERROR: Unable to upload encrypted secrets for key '#{encryption_key}' into GS bucket, terminating!"
+      debug_output "ERROR: Unable to upload encrypted secrets for key '#{encryption_key}' into GS bucket, terminating!"
       raise
     end
   end
@@ -187,7 +186,7 @@ class Secrets
     begin
       gs_secrets = JSON.parse(api_call_data)
     rescue
-      puts "ERROR: Unable to parse GS secrets file data for key '#{encryption_key}', terminating!"
+      debug_output "ERROR: Unable to parse GS secrets file data for key '#{encryption_key}', terminating!"
       raise
     end
 
@@ -205,7 +204,7 @@ class Secrets
 
     gs_secrets = JSON.parse(Base64.decode64(api_call_data))
     if !gs_secrets['ciphertext']
-      puts "ERROR: Unable to extract ciphertext from YAML data for key '#{encryption_key}', terminating!"
+      debug_output "ERROR: Unable to extract ciphertext from YAML data for key '#{encryption_key}', terminating!"
       raise
     end
 
@@ -222,7 +221,7 @@ class Secrets
       decrypted_secrets = JSON.parse(decrypted_secrets)
       decrypted_secrets = JSON.parse(Base64.decode64(decrypted_secrets['plaintext']))
     rescue
-      puts "ERROR: Unable to parse secrets data for key '#{encryption_key}', terminating!"
+      debug_output "ERROR: Unable to parse secrets data for key '#{encryption_key}', terminating!"
       raise
     end
 
@@ -244,8 +243,7 @@ class Secrets
       new_version = JSON.parse(new_version)
       new_version_id = get_crypto_key_version(new_version["name"])
     rescue
-      puts new_version
-      puts "ERROR: Unable to create new version for key '#{encryption_key}', terminating!"
+      debug_output "ERROR: Unable to create new version for key '#{encryption_key}', terminating!", new_version
       raise
     end
 
@@ -253,7 +251,7 @@ class Secrets
   end
 
   # This method disables all versions except primary for target encryption_key
-  def self.disable_key_versions(encryption_key, primary_version_id = 0)
+  def self.disable_key_versions(encryption_key)
     puts "[secret-mgmt] Retrieving versions for key '#{encryption_key}'..."
     key_versions = %x{
       gcloud kms keys versions list \
@@ -266,8 +264,7 @@ class Secrets
     begin
       key_versions = JSON.parse(key_versions)
     rescue
-      puts key_versions
-      puts "ERROR: Unable to retrieve versions for key '#{encryption_key}', terminating!"
+      debug_output "ERROR: Unable to retrieve versions for key '#{encryption_key}', terminating!", key_versions
       raise
     end
 
@@ -288,8 +285,7 @@ class Secrets
         version_disabled = JSON.parse(version_disabled)
         raise unless version_disabled['state'] == "DISABLED"
       rescue
-        puts version_disabled
-        puts "ERROR: Unable to disable version #{version_id} for key '#{encryption_key}', terminating!"
+        debug_output "ERROR: Unable to disable version #{version_id} for key '#{encryption_key}', terminating!", version_disabled
         raise
       end
     end
@@ -299,6 +295,18 @@ class Secrets
   # PATH: `projects/gpii-gcp-dev-tyler/locations/global/keyRings/keyring/cryptoKeys/default/cryptoKeyVersions/1`
   def self.get_crypto_key_version(path)
     return path.match(/\/([0-9]+)$/)[1]
+  end
+
+  # This method outputs error message and api response
+  def self.debug_output(message, api_response = '')
+    puts
+    puts message
+    puts
+    if api_response
+      puts "Response from API was:"
+      puts api_response
+      puts
+    end
   end
 end
 
