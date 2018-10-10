@@ -105,6 +105,9 @@ task :display_cluster_info do
   puts "StackDriver log console:"
   puts "  https://console.cloud.google.com/logs/viewer?project=#{ ENV["TF_VAR_project_id"] }&organizationId=#{ ENV["TF_VAR_organization_id"] }"
   puts
+  puts "Preferences endpoint:"
+  puts "  curl -k https://preferences.#{ENV["TF_VAR_domain_name"] }/preferences/carla"
+  puts
   puts "Run `rake destroy` to delete all the expensive resources created by the deployment"
   puts
 end
