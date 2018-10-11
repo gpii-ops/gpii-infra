@@ -141,9 +141,19 @@ resource "google_storage_bucket" "project-tfstate" {
 
 resource "google_storage_bucket" "project-build-logs" {
   project = "${google_project.project.project_id}"
-  name    = "${var.organization_name}-gcp-${var.project_name}-build-logs"
+  name    = "${var.organization_name}-gcp-${var.project_name}-cloudbuild-logs"
 
   versioning = {
     enabled = "false"
+  }
+
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+
+    condition {
+      age = "90"
+    }
   }
 }
