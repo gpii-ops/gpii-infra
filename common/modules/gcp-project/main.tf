@@ -139,7 +139,9 @@ resource "google_storage_bucket" "project-tfstate" {
   }
 }
 
-resource "google_storage_bucket" "project-build-logs" {
+# This storage bucket is needed for cloudbuild to put logs into
+# It is being created in all projects, but used only in stg
+resource "google_storage_bucket" "project-cloudbuild-logs" {
   project = "${google_project.project.project_id}"
   name    = "${var.organization_name}-gcp-${var.project_name}-cloudbuild-logs"
 
