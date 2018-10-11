@@ -97,7 +97,7 @@ To remove a dev environment entirely (e.g. due to offboarding a developer):
 
 1. Delete the Project (IAM & Admin `->` Settings `->` Shut Down).
 1. Delete Project's associated DNS zone (Network services `->` Cloud DNS `->` `dev-gcp-gpii-net` `->` Select zone `->` Delete zone).
-   * Alternately, `cd common/live/prd && RAKE_REALLY_RUN_IN_PRD=1 RAKE_REALLY_DESTROY_IN_PRD=1 rake destroy_module"[infra/dev/offboarded-developer]" -- it will delete some things but will not finish successfully.
+   * Alternately, `cd common/live/prd && rake destroy_module"[infra/dev/offboarded-developer] RAKE_REALLY_RUN_IN_PRD=true RAKE_REALLY_DESTROY_IN_PRD=true" -- it will delete some things but will not finish successfully.
 1. Delete the developer's entry in `common/live/prd/infra/dev/offboarded-developer`.
 
 ## Importing existing resources
