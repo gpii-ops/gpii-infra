@@ -273,6 +273,9 @@ gcp-stg:
     - cd gcp/live/stg
     - rake clobber
     - rake configure_serviceaccount_ci_restore
+    # Rotate Terraform state key and secrets KMS key to excercise secrets management
+    - rake rotate_tfstate_key
+    - rake rotate_secrets_key
     - rake
     - rake test_preferences
     - rake test_flowmanager
@@ -283,9 +286,6 @@ gcp-stg:
     - rake destroy_module[locust] || true
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys || true
-    # Rotate Terraform state key and secrets KMS key
-    - rake rotate_tfstate_key # We want CI to stop in case any of these after scripts fail
-    - rake rotate_secrets_key # to prevent possible issues with secrets
   only:
     - master@gpii-ops/gpii-infra
 
@@ -350,6 +350,9 @@ gcp-prd:
     - cd gcp/live/prd
     - rake clobber
     - rake configure_serviceaccount_ci_restore
+    # Rotate Terraform state key and secrets KMS key to excercise secrets management
+    - rake rotate_tfstate_key RAKE_REALLY_RUN_IN_PRD=true
+    - rake rotate_secrets_key RAKE_REALLY_RUN_IN_PRD=true
     - rake
     - rake test_preferences RAKE_REALLY_RUN_IN_PRD=true
     - rake test_flowmanager RAKE_REALLY_RUN_IN_PRD=true
@@ -360,8 +363,5 @@ gcp-prd:
     - rake destroy_module[locust] RAKE_REALLY_RUN_IN_PRD=true || true
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys RAKE_REALLY_RUN_IN_PRD=true || true
-    # Rotate Terraform state key and secrets KMS key
-    - rake rotate_tfstate_key RAKE_REALLY_RUN_IN_PRD=true # We want CI to stop in case any of these after scripts fail
-    - rake rotate_secrets_key RAKE_REALLY_RUN_IN_PRD=true # to prevent possible issues with secrets
   only:
     - master@gpii-ops/gpii-infra
