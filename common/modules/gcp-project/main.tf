@@ -75,6 +75,7 @@ resource "google_project_services" "project" {
     "serviceusage.googleapis.com",
     "stackdriver.googleapis.com",
     "storage-api.googleapis.com",
+    "cloudbuild.googleapis.com",
   ]
 }
 
@@ -135,5 +136,26 @@ resource "google_storage_bucket" "project-tfstate" {
 
   versioning = {
     enabled = "true"
+  }
+}
+
+# This storage bucket is needed for cloudbuild to put logs into
+# It is being created in all projects, but used only in stg
+resource "google_storage_bucket" "project-cloudbuild-logs" {
+  project = "${google_project.project.project_id}"
+  name    = "${var.organization_name}-gcp-${var.project_name}-cloudbuild-logs"
+
+  versioning = {
+    enabled = "false"
+  }
+
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+
+    condition {
+      age = "90"
+    }
   }
 }
