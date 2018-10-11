@@ -75,6 +75,7 @@ resource "google_project_services" "project" {
     "serviceusage.googleapis.com",
     "stackdriver.googleapis.com",
     "storage-api.googleapis.com",
+    "cloudbuild.googleapis.com",
   ]
 }
 
@@ -135,5 +136,14 @@ resource "google_storage_bucket" "project-tfstate" {
 
   versioning = {
     enabled = "true"
+  }
+}
+
+resource "google_storage_bucket" "project-build-logs" {
+  project = "${google_project.project.project_id}"
+  name    = "${var.organization_name}-gcp-${var.project_name}-build-logs"
+
+  versioning = {
+    enabled = "false"
   }
 }

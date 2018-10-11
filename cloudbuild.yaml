@@ -1,0 +1,38 @@
+steps:
+- name: 'gpii/exekube:0.4.0-google'
+  id: 'terraform-fmt-check'
+  entrypoint: 'sh'
+  waitFor: ['-']
+  args:
+    - '-c'
+    - |
+      echo "Running Terraform format check..."
+      terraform fmt --check=true /workspace
+- name: 'gpii/exekube:0.4.0-google'
+  id: 'gcp-unit-tests'
+  entrypoint: 'sh'
+  waitFor: ['-']
+  args:
+    - '-c'
+    - |
+      echo "Running GCP unit tests..."
+      cd /workspace/shared/rakefiles/tests
+      gem install bundler --no-ri --no-rdoc
+      bundle install --path "vendor/bundle"
+      rake
+- name: 'gpii/exekube:0.4.0-google'
+  id: 'aws-unit-tests'
+  entrypoint: 'sh'
+  waitFor: ['-']
+  args:
+    - '-c'
+    - |
+      echo "Running AWS unit tests..."
+      cd /workspace/aws/rakefiles/tests
+      gem install test-unit --no-ri --no-rdoc
+      rake
+timeout: 120s
+logsBucket: gs://gpii-gcp-stg-build-logs
+options:
+  logging: GCS_ONLY
+  logStreamingOption: STREAM_ON
