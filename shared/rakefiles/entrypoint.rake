@@ -22,6 +22,11 @@ end
 
 @serviceaccount_key_file = "secrets/kube-system/owner.json"
 
+desc "Pull the current exekube container from the Docker hub"
+task :update_exekube => :set_vars do
+  sh "docker-compose pull"
+end
+
 task :clean_volumes => :set_vars do
   ["helm", "kube"].each do |app|
     sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-#{app}"
@@ -84,6 +89,34 @@ end
 desc "Create cluster and deploy GPII components to it"
 task :deploy => [:set_vars, :apply_infra] do
   sh "#{@exekube_cmd} rake xk[up]"
+  Rake::Task["display_cluster_info"].invoke
+end
+
+desc "Display some handy info about the cluster"
+task :display_cluster_info do
+  puts
+  puts
+  puts "*************************************************"
+  puts "Congratulations! Your GPII Cloud in GCP is ready!"
+  puts "*************************************************"
+  puts
+  puts "GCP Dashboard:"
+  puts "  https://console.cloud.google.com/home/dashboard?organizationId=#{ ENV["TF_VAR_organization_id"] }&project=#{ ENV["TF_VAR_project_id"] }"
+  puts
+  puts "Stackdriver Logging Dashboard:"
+  puts "  https://console.cloud.google.com/logs/viewer?project=#{ ENV["TF_VAR_project_id"] }&organizationId=#{ ENV["TF_VAR_organization_id"] }"
+  puts
+  puts "Stackdriver Monitoring Dashboard:"
+  puts "  https://app.google.stackdriver.com/?project=#{ ENV["TF_VAR_project_id"] }"
+  puts
+  puts "Preferences endpoint:"
+  puts "  curl -k https://preferences.#{ENV["TF_VAR_domain_name"] }/preferences/carla"
+  puts
+  puts "Flowmanager endpoint:"
+  puts "  curl -k https://flowmanager.#{ENV["TF_VAR_domain_name"] }"
+  puts
+  puts "Run `rake destroy` to delete all the expensive resources created by the deployment"
+  puts
 end
 
 task :check_destroy_allowed do

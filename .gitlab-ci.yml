@@ -22,7 +22,7 @@ common-setup:
     - aws --version
     - docker version
     - docker-compose version
-    - docker pull gpii/exekube:0.4.0-google
+    - pushd gcp/live/dev/ && rake update_exekube && popd
     - docker images | grep exekube
     - ruby --version
     - bundle version
