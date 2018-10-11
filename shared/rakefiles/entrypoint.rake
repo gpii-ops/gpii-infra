@@ -102,8 +102,11 @@ task :display_cluster_info do
   puts "GCP Dashboard:"
   puts "  https://console.cloud.google.com/home/dashboard?organizationId=#{ ENV["TF_VAR_organization_id"] }&project=#{ ENV["TF_VAR_project_id"] }"
   puts
-  puts "Stackdriver log console:"
+  puts "Stackdriver Logging Dashboard:"
   puts "  https://console.cloud.google.com/logs/viewer?project=#{ ENV["TF_VAR_project_id"] }&organizationId=#{ ENV["TF_VAR_organization_id"] }"
+  puts
+  puts "Stackdriver Monitoring Dashboard:"
+  puts "  https://app.google.stackdriver.com/?project=#{ ENV["TF_VAR_project_id"] }"
   puts
   puts "Preferences endpoint:"
   puts "  curl -k https://preferences.#{ENV["TF_VAR_domain_name"] }/preferences/carla"
