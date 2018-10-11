@@ -3,7 +3,7 @@ task :set_test_protocol do
 end
 
 desc '[TEST] Run Locust swarm against Preferences service in current cluster'
-task :test_preferences => [:set_vars, :check_run_allowed, :set_test_protocol,] do
+task :test_preferences => [:set_vars, :check_destroy_allowed, :set_test_protocol,] do
   sh "#{@exekube_cmd} rake xk[' \
     xk down live/#{@env}/locust && \
     echo \"Waiting for K8s to fully terminate Locust resources...\" && \
@@ -16,7 +16,7 @@ task :test_preferences => [:set_vars, :check_run_allowed, :set_test_protocol,] d
 end
 
 desc '[TEST] Run Locust swarm against Flowmanager service in current cluster'
-task :test_flowmanager => [:set_vars, :check_run_allowed, :set_test_protocol] do
+task :test_flowmanager => [:set_vars, :check_destroy_allowed, :set_test_protocol] do
   sh "#{@exekube_cmd} rake xk[' \
     xk down live/#{@env}/locust && \
     echo \"Waiting for K8s to fully terminate Locust resources...\" && \
