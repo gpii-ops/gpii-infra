@@ -4,7 +4,7 @@
   "conditions": [
     {
       "condition_threshold": {
-        "filter": "metric.type=`monitoring.googleapis.com/uptime_check/check_passed` AND resource.label.host=`preferences.${domain_name}` AND resource.type=`uptime_url`",
+        "filter": "metric.type=\"monitoring.googleapis.com/uptime_check/check_passed\" AND resource.label.host=\"preferences.${domain_name}\" AND resource.type=\"uptime_url\"",
         "comparison": "COMPARISON_GT",
         "threshold_value": 1,
         "duration": {

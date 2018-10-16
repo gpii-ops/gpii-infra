@@ -7,23 +7,38 @@ variable "project_id" {}
 variable "nonce" {}
 variable "serviceaccount_key" {}
 
-module "stackdriver_resources" {
-  source = "resources"
+resource "template_dir" "resources" {
+  source_dir      = "${path.cwd}/resources"
+  destination_dir = "${path.cwd}/resources_rendered"
 
-  project_id         = "${var.project_id}"
-  domain_name        = "${var.domain_name}"
-  serviceaccount_key = "${var.serviceaccount_key}"
+  vars {
+    project_id  = "${var.project_id}"
+    domain_name = "${var.domain_name}"
+  }
 }
 
 resource "null_resource" "stackdriver_alerting" {
-  depends_on = ["module.stackdriver_resources"]
+  depends_on = ["template_dir.resources"]
 
   triggers = {
     nonce = "${var.nonce}"
   }
 
   provisioner "local-exec" {
-    interpreter = ["ruby"]
-    command     = "${path.cwd}/resources_rendered/client.rb"
+    command = <<EOF
+      export PROJECT_ID=${var.project_id}
+      export GOOGLE_CLOUD_KEYFILE=${var.serviceaccount_key}
+      ruby ${path.module}/client.rb
+    EOF
+  }
+
+  provisioner "local-exec" {
+    when    = "destroy"
+    command = <<EOF
+      export PROJECT_ID=${var.project_id}
+      export GOOGLE_CLOUD_KEYFILE=${var.serviceaccount_key}
+      export DESTROY=1
+      ruby ${path.module}/client.rb
+    EOF
   }
 }
