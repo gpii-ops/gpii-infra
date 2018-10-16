@@ -17,7 +17,7 @@ resource "template_dir" "resources" {
   }
 }
 
-resource "null_resource" "stackdriver_alerting" {
+resource "null_resource" "apply_stackdriver_alerting" {
   depends_on = ["template_dir.resources"]
 
   triggers = {
@@ -31,6 +31,10 @@ resource "null_resource" "stackdriver_alerting" {
       ruby ${path.module}/client.rb
     EOF
   }
+}
+
+resource "null_resource" "destroy_stackdriver_alerting" {
+  depends_on = ["template_dir.resources"]
 
   provisioner "local-exec" {
     when    = "destroy"
