@@ -1,0 +1,10 @@
+{
+  "type": "email",
+  "labels": {
+    "email_address": "sergey@raisingthefloor.org"
+  },
+  "user_labels": {},
+  "enabled": {
+    "value": true
+  }
+}
