@@ -27,7 +27,7 @@ variable "exports" {
 }
 
 variable "exported_logs_force_destroy" {
-  default = "true"
+  default = "false"
 }
 
 variable "exported_logs_storage_class" {
