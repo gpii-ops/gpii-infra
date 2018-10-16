@@ -10,6 +10,5 @@ terragrunt = {
 }
 
 # ↓ Module configuration (empty means all default)
-exported_logs_force_destroy = "false"
 exported_logs_storage_class = "NEARLINE"
 exported_logs_expire_after = "60"
