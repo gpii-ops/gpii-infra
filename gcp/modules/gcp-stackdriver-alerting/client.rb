@@ -108,7 +108,7 @@ def process_uptime_checks(uptime_checks = [])
   return processed_uptime_checks
 end
 
-def process_alert_policies(alert_policies = [])
+def process_alert_policies(alert_policies = [], notification_channels = {})
   alert_policy_service_client = Google::Cloud::Monitoring::AlertPolicy.new(version: :v3)
   formatted_parent = Google::Cloud::Monitoring::V3::AlertPolicyServiceClient.project_path(@project_id)
 
@@ -123,7 +123,7 @@ def process_alert_policies(alert_policies = [])
   alert_policies.each do |alert_policy|
     alert_policy = JSON.parse(alert_policy)
     alert_policy_attribute = get_alert_policy_attribute(alert_policy)
-    alert_policy["notification_channels"] = @processed_notification_channels.values
+    alert_policy["notification_channels"] = notification_channels.values
 
     if stackdriver_alert_policies[alert_policy_attribute]
       alert_policy["name"] = stackdriver_alert_policies[alert_policy_attribute]["name"]
@@ -162,9 +162,9 @@ unless @destroy_triggered
     end
   end
 
-  @processed_notification_channels = process_notification_channels(resources["notification_channels"])
+  processed_notification_channels = process_notification_channels(resources["notification_channels"])
   process_uptime_checks(resources["uptime_checks"])
-  process_alert_policies(resources["alert_policies"])
+  process_alert_policies(resources["alert_policies"], processed_notification_channels)
 else
   process_alert_policies
   process_uptime_checks
