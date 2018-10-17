@@ -41,7 +41,6 @@ def process_notification_channels(notification_channels = [])
   end
 
   notification_channels.each do |notification_channel|
-    notification_channel = JSON.parse(notification_channel)
     notification_channel_attribute = get_notification_channel_attribute(notification_channel)
 
     if stackdriver_notification_channels[notification_channel_attribute]
@@ -80,7 +79,6 @@ def process_uptime_checks(uptime_checks = [])
   end
 
   uptime_checks.each do |uptime_check|
-    uptime_check = JSON.parse(uptime_check)
     uptime_check_attribute = get_uptime_check_attribute(uptime_check)
 
     if stackdriver_uptime_checks[uptime_check_attribute]
@@ -121,7 +119,6 @@ def process_alert_policies(alert_policies = [], notification_channels = {})
 
 
   alert_policies.each do |alert_policy|
-    alert_policy = JSON.parse(alert_policy)
     alert_policy_attribute = get_alert_policy_attribute(alert_policy)
     alert_policy["notification_channels"] = notification_channels.values
 
@@ -158,7 +155,7 @@ unless @destroy_triggered
   resource_types.each do |resource_type|
     resources[resource_type] = []
     Dir.glob("#{resource_type}/*").each do |resource|
-      resources[resource_type] << File.read("#{@resource_dir}/#{resource}")
+      resources[resource_type] << JSON.parse(File.read("#{@resource_dir}/#{resource}"))
     end
   end
 
