@@ -75,13 +75,13 @@ class Secrets
       encryption_keys[encryption_key] = %Q|"#{encryption_key}"|
     end
 
-    unless collected_secrets.keys == encryption_keys.keys
+    unless (collected_secrets.keys - encryption_keys.keys).empty?
       puts "ERROR: Secret keys: #{(collected_secrets.keys - encryption_keys.keys).join(", ")} not present in"
       puts "ERROR: /modules/gcp-secret-mgmt/config.yaml"
       raise
     end
 
-    ENV["TF_VAR_encryption_keys"] = %Q|[ #{encryption_keys.keys.join(", ")} ]|
+    ENV["TF_VAR_encryption_keys"] = %Q|[ #{encryption_keys.values.join(", ")} ]|
 
     return collected_secrets
   end
