@@ -3,6 +3,7 @@ require "google/cloud/monitoring"
 
 @project_id = ENV['PROJECT_ID']
 @destroy_triggered = ENV['DESTROY']
+@debug_mode = ENV['DEBUG']
 @resource_dir="#{File.expand_path(File.dirname(__FILE__))}/resources_rendered"
 
 def get_notification_channel_attribute(notification_channel)
@@ -37,6 +38,7 @@ def process_notification_channels(notification_channels = [])
   processed_notification_channels = {}
 
   notification_channel_service_client.list_notification_channels(formatted_parent).each do |notification_channel|
+    puts notification_channel.to_json if @debug_mode
     stackdriver_notification_channels[get_notification_channel_attribute(notification_channel)] = notification_channel
   end
 
@@ -58,7 +60,7 @@ def process_notification_channels(notification_channels = [])
   stackdriver_notification_channels.each do |name, notification_channel|
     notification_channel_attribute = get_notification_channel_attribute(notification_channel)
 
-    unless processed_notification_channels.include? notification_channel_attribute
+    unless processed_notification_channels.include? notification_channel_attribute or @debug_mode
       puts "Deleting notification channel \"#{notification_channel_attribute}\"..."
       notification_channel_service_client.delete_notification_channel(notification_channel["name"])
     end
@@ -75,6 +77,7 @@ def process_uptime_checks(uptime_checks = [])
   processed_uptime_checks = {}
 
   uptime_check_service_client.list_uptime_check_configs(formatted_parent).each do |uptime_check|
+    puts uptime_check.to_json if @debug_mode
     stackdriver_uptime_checks[get_uptime_check_attribute(uptime_check)] = uptime_check
   end
 
@@ -97,7 +100,7 @@ def process_uptime_checks(uptime_checks = [])
   stackdriver_uptime_checks.each do |name, uptime_check|
     uptime_check_attribute = get_uptime_check_attribute(uptime_check)
 
-    unless processed_uptime_checks.include? uptime_check_attribute
+    unless processed_uptime_checks.include? uptime_check_attribute or @debug_mode
       puts "Deleting uptime check \"#{uptime_check_attribute}\"..."
       uptime_check_service_client.delete_uptime_check_config(uptime_check["name"])
     end
@@ -114,9 +117,9 @@ def process_alert_policies(alert_policies = [], notification_channels = {})
   processed_alert_policies = {}
 
   alert_policy_service_client.list_alert_policies(formatted_parent).each do |alert_policy|
+    puts alert_policy.to_json if @debug_mode
     stackdriver_alert_policies[get_alert_policy_attribute(alert_policy)] = alert_policy
   end
-
 
   alert_policies.each do |alert_policy|
     alert_policy_attribute = get_alert_policy_attribute(alert_policy)
@@ -138,7 +141,7 @@ def process_alert_policies(alert_policies = [], notification_channels = {})
   stackdriver_alert_policies.each do |name, alert_policy|
     alert_policy_attribute = get_alert_policy_attribute(alert_policy)
 
-    unless processed_alert_policies.include? alert_policy_attribute
+    unless processed_alert_policies.include? alert_policy_attribute or @debug_mode
       puts "Deleting alert policy \"#{alert_policy_attribute}\"..."
       alert_policy_service_client.delete_alert_policy(alert_policy["name"])
     end
