@@ -1,0 +1,3 @@
+encryption_keys:
+  - default
+  - gcp-stackdriver-export

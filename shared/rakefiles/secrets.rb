@@ -23,6 +23,10 @@ class Secrets
   #  - secret_module_and_one_more_secret
   # encryption_key: default
   #
+  # Config file /modules/gcp-secret-mgmt/config.yaml
+  # is needed to preserve the order of encryption keys.
+  # All used encryption keys must be present in that config, otherwise exception is raised
+  #
   # Attribute "encryption_key" is optional – if not present, module name will be used as Key name
   # After collecting, method returns the Hash with collected secrets, where the keys are KMS Encryption Keys and the values are
   # lists of individual credentials (e.g. couchdb_password) managed with that KMS Encryption Key
@@ -38,7 +42,6 @@ class Secrets
   def self.collect_secrets()
     ENV['TF_VAR_keyring_name'] = Secrets::KMS_KEYRING
 
-    encryption_keys = []
     collected_secrets = {}
     secrets_to_modules = {}
 
@@ -47,7 +50,6 @@ class Secrets
       module_secrets = YAML.load(File.read(module_secrets_file))
 
       encryption_key = module_secrets['encryption_key'] ? module_secrets['encryption_key'] : module_name
-      encryption_keys << %Q|"#{encryption_key}"|
 
       if collected_secrets[encryption_key]
         collected_secrets[encryption_key].concat(module_secrets['secrets'])
@@ -67,8 +69,19 @@ class Secrets
       end
     end
 
-    encryption_keys.uniq!
-    ENV["TF_VAR_encryption_keys"] = %Q|[ #{encryption_keys.join(", ")} ]|
+    encryption_keys = {}
+    secrets_config = YAML.load(File.read("./modules/gcp-secret-mgmt/config.yaml"))
+    secrets_config["encryption_keys"].each do |encryption_key|
+      encryption_keys[encryption_key] = %Q|"#{encryption_key}"|
+    end
+
+    unless collected_secrets.keys == encryption_keys.keys
+      puts "ERROR: Secret keys: #{(collected_secrets.keys - encryption_keys.keys).join(", ")} not present in"
+      puts "ERROR: /modules/gcp-secret-mgmt/config.yaml"
+      raise
+    end
+
+    ENV["TF_VAR_encryption_keys"] = %Q|[ #{encryption_keys.keys.join(", ")} ]|
 
     return collected_secrets
   end
