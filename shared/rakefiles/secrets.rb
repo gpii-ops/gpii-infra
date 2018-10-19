@@ -23,9 +23,10 @@ class Secrets
   #  - secret_module_and_one_more_secret
   # encryption_key: default
   #
-  # Config file /modules/gcp-secret-mgmt/config.yaml
+  # Config file gcp/modules/gcp-secret-mgmt/config.yaml
   # is needed to preserve the order of encryption keys.
   # All used encryption keys must be present in that config, otherwise exception is raised
+  # More info: https://issues.gpii.net/browse/GPII-3456
   #
   # Attribute "encryption_key" is optional – if not present, module name will be used as Key name
   # After collecting, method returns the Hash with collected secrets, where the keys are KMS Encryption Keys and the values are
@@ -75,9 +76,10 @@ class Secrets
       encryption_keys[encryption_key] = %Q|"#{encryption_key}"|
     end
 
-    unless (collected_secrets.keys - encryption_keys.keys).empty?
-      puts "ERROR: Secret keys: #{(collected_secrets.keys - encryption_keys.keys).join(", ")} not present in"
-      puts "ERROR: /modules/gcp-secret-mgmt/config.yaml"
+    leftover_keys = collected_secrets.keys - encryption_keys.keys
+    unless leftover_keys.empty?
+      puts "ERROR: Secret keys: \"#{leftover_keys.join(", ")}\" not present in"
+      puts "ERROR: gcp/modules/gcp-secret-mgmt/config.yaml"
       raise
     end
 
