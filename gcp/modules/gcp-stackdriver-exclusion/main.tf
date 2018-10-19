@@ -22,7 +22,7 @@ variable "exclusions" {
 
     "couchdb-liveness-check-200" = "resource.type=k8s_container AND resource.labels.container_name=couchdb AND textPayload:\" GET / 200 ok \""
 
-    "couchdb-readyness-check-200" = "resource.type=k8s_container AND resource.labels.container_name=couchdb AND textPayload:\" GET /_up 200 ok \""
+    "couchdb-readiness-check-200" = "resource.type=k8s_container AND resource.labels.container_name=couchdb AND textPayload:\" GET /_up 200 ok \""
   }
 }
 
