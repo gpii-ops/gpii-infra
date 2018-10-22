@@ -6,5 +6,5 @@
 # data stanza that would fill in these values?
 provider "aws" {
   version = "~> 1.8"
-  region = "us-east-2"
+  region  = "us-east-2"
 }

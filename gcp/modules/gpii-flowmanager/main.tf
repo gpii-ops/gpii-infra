@@ -11,6 +11,7 @@ variable "flowmanager_checksum" {}
 
 # Terragrunt variables
 variable "cert_issuer_name" {}
+
 variable "disable_ssl_redirect" {}
 variable "replica_count" {}
 variable "requests_cpu" {}
@@ -20,6 +21,7 @@ variable "limits_memory" {}
 
 # Secret variables
 variable "secret_couchdb_admin_username" {}
+
 variable "secret_couchdb_admin_password" {}
 
 data "template_file" "flowmanager_values" {

@@ -1,5 +1,6 @@
 stages:
   - setup
+  - lint
   - unit-tests
   - common-stg
   - common-stg-test
@@ -21,7 +22,7 @@ common-setup:
     - aws --version
     - docker version
     - docker-compose version
-    - docker pull gpii/exekube:0.4.0-google
+    - pushd gcp/live/dev/ && rake update_exekube && popd
     - docker images | grep exekube
     - ruby --version
     - bundle version
@@ -59,6 +60,15 @@ gcp-setup:
     - ruby --version
     - bundle version
     - rake --version
+  only:
+    - master@gpii-ops/gpii-infra
+
+terraform-fmt-check:
+  stage: lint
+  tags:
+    - common
+  script:
+    - docker run --rm -v "$(pwd):/data" -w /data gpii/exekube:0.4.0-google -- terraform fmt --check=true
   only:
     - master@gpii-ops/gpii-infra
 
@@ -119,16 +129,16 @@ common-stg-test-gcp-dev:
   after_script:
     # Clean up dev environment even if one of the previous steps fails
     - cd gcp/live/dev
-    - rake destroy
+    - rake destroy || true
     # Destroy secrets, so they can be repopulated on the next run to exercise
     # managing secrets from scratch.
-    - rake destroy_secrets
+    - rake destroy_secrets || true
     # Terraform state encryption key is also gone with secrets, we have to destroy tfstate as well
-    - rake destroy_tfstate[k8s]
-    - rake destroy_tfstate[locust]
+    - rake destroy_tfstate[k8s] || true
+    - rake destroy_tfstate[locust] || true
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
-    - rake destroy_sa_keys
-    - rake clobber
+    - rake destroy_sa_keys || true
+    - rake clobber || true
   only:
     - master@gpii-ops/gpii-infra
 
@@ -178,8 +188,8 @@ aws-dev:
   after_script:
     # Clean up even if something failed.
     - cd aws/dev
-    - rake destroy
-    - rake clobber
+    - rake destroy || true
+    - rake clobber || true
   only:
     - master@gpii-ops/gpii-infra
 
@@ -197,16 +207,16 @@ gcp-dev:
   after_script:
     # Clean up even if something failed.
     - cd gcp/live/dev
-    - rake destroy
+    - rake destroy || true
     # Destroy secrets, so they can be repopulated on the next run to exercise
     # managing secrets from scratch.
-    - rake destroy_secrets
+    - rake destroy_secrets || true
     # Terraform state encryption key is also gone with secrets, we have to destroy tfstate as well
-    - rake destroy_tfstate[k8s]
-    - rake destroy_tfstate[locust]
+    - rake destroy_tfstate[k8s] || true
+    - rake destroy_tfstate[locust] || true
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
-    - rake destroy_sa_keys
-    - rake clobber
+    - rake destroy_sa_keys || true
+    - rake clobber || true
   only:
     - master@gpii-ops/gpii-infra
 
@@ -263,16 +273,20 @@ gcp-stg:
     - cd gcp/live/stg
     - rake clobber
     - rake configure_serviceaccount_ci_restore
+    # Rotate Terraform state key and secrets KMS key to excercise secrets management
+    - rake rotate_tfstate_key
+    - rake rotate_secrets_key
     - rake
     - rake test_preferences
     - rake test_flowmanager
   after_script:
     # Clean up even if something failed.
     - cd gcp/live/stg
-    # Destroy Locust module (used for smoke tests)
-    - rake destroy_module[locust]
+    # Destroy Locust module (used for smoke tests) and its TF state
+    - rake destroy_module[locust] || true
+    - rake destroy_tfstate[locust] || true
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
-    - rake destroy_sa_keys
+    - rake destroy_sa_keys || true
   only:
     - master@gpii-ops/gpii-infra
 
@@ -337,15 +351,19 @@ gcp-prd:
     - cd gcp/live/prd
     - rake clobber
     - rake configure_serviceaccount_ci_restore
+    # Rotate Terraform state key and secrets KMS key to exercise secrets management
+    - rake rotate_tfstate_key RAKE_REALLY_DESTROY_IN_PRD=true
+    - rake rotate_secrets_key RAKE_REALLY_DESTROY_IN_PRD=true
     - rake
-    - export RAKE_REALLY_DESTROY_IN_PRD=true ; rake test_preferences ; unset RAKE_REALLY_DESTROY_IN_PRD
-    - export RAKE_REALLY_DESTROY_IN_PRD=true ; rake test_flowmanager ; unset RAKE_REALLY_DESTROY_IN_PRD
+    - rake test_preferences RAKE_REALLY_DESTROY_IN_PRD=true
+    - rake test_flowmanager RAKE_REALLY_DESTROY_IN_PRD=true
   after_script:
     # Clean up even if something failed.
     - cd gcp/live/prd
-    # Destroy Locust module (used for smoke tests)
-    - export RAKE_REALLY_DESTROY_IN_PRD=true ; rake destroy_module[locust] ; unset RAKE_REALLY_DESTROY_IN_PRD
+    # Destroy Locust module (used for smoke tests) and its TF state
+    - rake destroy_module[locust] RAKE_REALLY_DESTROY_IN_PRD=true || true
+    - rake destroy_tfstate[locust] RAKE_REALLY_DESTROY_IN_PRD=true || true
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
-    - export RAKE_REALLY_DESTROY_IN_PRD=true ; rake destroy_sa_keys ; unset RAKE_REALLY_DESTROY_IN_PRD=true
+    - rake destroy_sa_keys RAKE_REALLY_DESTROY_IN_PRD=true || true
   only:
     - master@gpii-ops/gpii-infra

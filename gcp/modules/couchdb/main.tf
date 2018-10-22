@@ -8,6 +8,7 @@ variable "nonce" {}
 
 # Terragrunt variables
 variable "replica_count" {}
+
 variable "backup_deltas" {}
 variable "release_namespace" {}
 variable "requests_cpu" {}
@@ -17,6 +18,7 @@ variable "limits_memory" {}
 
 # Secret variables
 variable "secret_couchdb_admin_username" {}
+
 variable "secret_couchdb_admin_password" {}
 variable "secret_couchdb_auth_cookie" {}
 
@@ -45,7 +47,8 @@ module "couchdb" {
   release_values          = ""
   release_values_rendered = "${data.template_file.couchdb_values.rendered}"
 
-  chart_name = "${var.charts_dir}/couchdb"
+  chart_name   = "${var.charts_dir}/couchdb"
+  force_update = true
 }
 
 resource "null_resource" "couchdb_finish_cluster" {

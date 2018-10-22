@@ -2,6 +2,7 @@ require "rake/clean"
 
 import "../../../shared/rakefiles/ci.rake"
 import "../../../shared/rakefiles/test.rake"
+
 require_relative "./vars.rb"
 
 if @env.nil?
@@ -21,8 +22,13 @@ end
 
 @serviceaccount_key_file = "secrets/kube-system/owner.json"
 
+desc "Pull the current exekube container from the Docker hub"
+task :update_exekube => :set_vars do
+  sh "docker-compose pull"
+end
+
 task :clean_volumes => :set_vars do
-  ["helm", "terragrunt", "kube"].each do |app|
+  ["helm", "kube"].each do |app|
     sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-#{app}"
   end
 end
@@ -82,12 +88,35 @@ end
 
 desc "Create cluster and deploy GPII components to it"
 task :deploy => [:set_vars, :apply_infra] do
-  # Workaround for 'context deadline exceeded' issue:
-  # https://github.com/exekube/exekube/issues/62
-  # https://github.com/docker/for-mac/issues/2076
-  # Remove this when docker for mac 18.05 becomes stable
-  sh "docker run --rm --privileged alpine hwclock -s"
   sh "#{@exekube_cmd} rake xk[up]"
+  Rake::Task["display_cluster_info"].invoke
+end
+
+desc "Display some handy info about the cluster"
+task :display_cluster_info do
+  puts
+  puts
+  puts "*************************************************"
+  puts "Congratulations! Your GPII Cloud in GCP is ready!"
+  puts "*************************************************"
+  puts
+  puts "GCP Dashboard:"
+  puts "  https://console.cloud.google.com/home/dashboard?organizationId=#{ ENV["TF_VAR_organization_id"] }&project=#{ ENV["TF_VAR_project_id"] }"
+  puts
+  puts "Stackdriver Logging Dashboard:"
+  puts "  https://console.cloud.google.com/logs/viewer?project=#{ ENV["TF_VAR_project_id"] }&organizationId=#{ ENV["TF_VAR_organization_id"] }"
+  puts
+  puts "Stackdriver Monitoring Dashboard:"
+  puts "  https://app.google.stackdriver.com/?project=#{ ENV["TF_VAR_project_id"] }"
+  puts
+  puts "Preferences endpoint:"
+  puts "  curl -k https://preferences.#{ENV["TF_VAR_domain_name"] }/preferences/carla"
+  puts
+  puts "Flowmanager endpoint:"
+  puts "  curl -k https://flowmanager.#{ENV["TF_VAR_domain_name"] }"
+  puts
+  puts "Run `rake destroy` to delete all the expensive resources created by the deployment"
+  puts
 end
 
 task :check_destroy_allowed do
@@ -123,7 +152,7 @@ task :sh, [:cmd] => [:set_vars] do |taskname, args|
   if args[:cmd]
     cmd = args[:cmd]
   else
-    puts "Argument :cmd -- the command to run inside the exekube container -- not present, defaulting to bash"
+    puts "Argument :cmd -- the command to run inside the exekube container -- not present, defaulting to 'bash'"
     cmd = "bash"
   end
   sh "#{@exekube_cmd} rake xk['#{cmd}',skip_secret_mgmt,preserve_stderr]"
@@ -134,7 +163,7 @@ task :plain_sh, [:cmd] => [:set_vars] do |taskname, args|
   if args[:cmd]
     cmd = args[:cmd]
   else
-    puts "Argument :cmd -- the command to run inside the exekube container -- not present, defaulting to bash"
+    puts "Argument :cmd -- the command to run inside the exekube container -- not present, defaulting to 'bash'"
     cmd = "bash"
   end
   sh "#{@exekube_cmd} #{cmd}"
@@ -168,13 +197,37 @@ end
 desc "[ADVANCED] Destroy Terraform state stored in GS bucket for prefix, passed as argument -- rake destroy_tfstate['k8s']"
 task :destroy_tfstate, [:prefix] => [:set_vars, :check_destroy_allowed] do |taskname, args|
   if args[:prefix].nil? || args[:prefix].size == 0
-    puts "Argument :prefix not present, defaulting to k8s"
+    puts "Argument :prefix not present, defaulting to 'k8s'"
     prefix = "k8s"
   else
     prefix = args[:prefix]
   end
   sh "#{@exekube_cmd} sh -c 'gsutil rm -r gs://#{ENV["TF_VAR_project_id"]}-tfstate/#{@env}/#{prefix}'"
-  sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-terragrunt"
+end
+
+desc "[ADVANCED] Rotate Terraform state key for prefix, passed as argument -- rake rotate_tfstate_key['k8s']"
+task :rotate_tfstate_key, [:prefix] => [:set_vars, :check_destroy_allowed] do |taskname, args|
+  if args[:prefix].nil? || args[:prefix].size == 0
+    puts "Argument :prefix not present, defaulting to 'k8s'"
+    prefix = "k8s"
+  else
+    prefix = args[:prefix]
+  end
+  sh "#{@exekube_cmd} rake rotate_secret['default','key_tfstate_encryption_key','sh -c \"gsutil \
+       -o GSUtil:decryption_key1=$TF_VAR_key_tfstate_encryption_key_rotated \
+       -o GSUtil:encryption_key=$TF_VAR_key_tfstate_encryption_key \
+       rewrite -k -r gs://#{ENV["TF_VAR_project_id"]}-tfstate/#{@env}/#{prefix}\"',skip_secret_mgmt,preserve_stderr]"
+end
+
+desc "[ADVANCED] Rotate provided KMS key and re-encrypt its associated secrets file in GS bucket -- rake rotate_secrets_key['default']"
+task :rotate_secrets_key, [:kms_key] => [:set_vars, :check_destroy_allowed] do |taskname, args|
+  if args[:kms_key].nil? || args[:kms_key].size == 0
+    puts "Argument :kms_key not present, defaulting to 'default'"
+    kms_key = "default"
+  else
+    kms_key = args[:kms_key]
+  end
+  sh "#{@exekube_cmd} rake rotate_secrets_key['#{kms_key}']"
 end
 
 desc "[ADVANCED] Destroy provided module in the cluster, and then deploy it -- rake redeploy_module['k8s/kube-system/cert-manager']"
