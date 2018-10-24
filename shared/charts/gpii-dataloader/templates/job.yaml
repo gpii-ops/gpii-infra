@@ -14,6 +14,6 @@ spec:
         image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
         command: '/app/scripts/deleteAndLoadSnapsets.sh'
         env:
-        - name: COUCHDB_URL
+        - name: GPII_COUCHDB_URL
           value: '{{ .Values.couchdb_url }}'
       restartPolicy: OnFailure
