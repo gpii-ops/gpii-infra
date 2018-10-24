@@ -10,7 +10,7 @@ datasource_listen_port: 5984
 datasource_hostname: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local"
 
 node_env: gpii.config.cloudBased.flowManager.production
-preferences_url: http://preferences.gpii.svc.cluster.local/preferences/%gpiiKey?merge=%merge
+preferences_url: http://preferences.gpii.svc.cluster.local
 
 image:
   repository: gpii/universal
