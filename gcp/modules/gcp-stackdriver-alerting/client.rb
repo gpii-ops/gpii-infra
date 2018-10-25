@@ -58,6 +58,10 @@ def get_alert_policy_identifier(alert_policy)
   return result
 end
 
+def debug_output(resource)
+  return resource.to_hash.to_json
+end
+
 def process_notification_channels(notification_channels = [])
   notification_channel_service_client = Google::Cloud::Monitoring::NotificationChannel.new(version: :v3)
   formatted_parent = Google::Cloud::Monitoring::V3::NotificationChannelServiceClient.project_path(@project_id)
@@ -66,7 +70,7 @@ def process_notification_channels(notification_channels = [])
   processed_notification_channels = {}
 
   notification_channel_service_client.list_notification_channels(formatted_parent).each do |notification_channel|
-    puts "[DEBUG] notification_channel: " + notification_channel.to_json if @debug_mode
+    puts "[DEBUG] notification_channel: " + debug_output(notification_channel) if @debug_mode
     stackdriver_notification_channels[get_notification_channel_identifier(notification_channel)] = notification_channel
   end
 
@@ -109,7 +113,7 @@ def process_uptime_checks(uptime_checks = [])
   processed_uptime_checks = {}
 
   uptime_check_service_client.list_uptime_check_configs(formatted_parent).each do |uptime_check|
-    puts "[DEBUG] uptime_check: " + uptime_check.to_json if @debug_mode
+    puts "[DEBUG] uptime_check: " + debug_output(uptime_check) if @debug_mode
     stackdriver_uptime_checks[get_uptime_check_identifier(uptime_check)] = uptime_check
   end
 
@@ -153,7 +157,7 @@ def process_alert_policies(alert_policies = [], notification_channels = {})
   processed_alert_policies = {}
 
   alert_policy_service_client.list_alert_policies(formatted_parent).each do |alert_policy|
-    puts "[DEBUG] alert_policy: " + alert_policy.to_json if @debug_mode
+    puts "[DEBUG] alert_policy: " + debug_output(alert_policy) if @debug_mode
     stackdriver_alert_policies[get_alert_policy_identifier(alert_policy)] = alert_policy
   end
 
