@@ -45,7 +45,8 @@ resource "null_resource" "destroy_stackdriver_alerting" {
   depends_on = ["template_dir.resources"]
 
   provisioner "local-exec" {
-    when    = "destroy"
+    when = "destroy"
+
     command = <<EOF
       export PROJECT_ID=${var.project_id}
       export GOOGLE_CLOUD_KEYFILE=${var.serviceaccount_key}
