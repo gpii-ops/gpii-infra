@@ -23,6 +23,30 @@ variable "organization_id" {}
 
 variable "serviceaccount_key" {}
 
+variable "common_serviceaccount_roles" {
+  default = [
+    "roles/resourcemanager.projectIamAdmin",
+    "roles/serviceusage.serviceUsageAdmin",
+    "roles/dns.admin",
+    "roles/storage.admin",
+  ]
+}
+
+variable "user_serviceaccount_roles" {
+  default = [
+    "roles/iam.serviceAccountUser",
+    "roles/serviceusage.serviceUsageAdmin",
+    "roles/cloudkms.admin",
+    "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+    "roles/compute.admin",
+    "roles/container.clusterAdmin",
+    "roles/container.admin",
+    "roles/dns.admin",
+    "roles/logging.configWriter",
+    "roles/storage.admin",
+  ]
+}
+
 variable "project_id" {} # id of the project which owns the credentials used by the provider
 
 provider "google" {
@@ -90,8 +114,26 @@ resource "google_project_iam_binding" "project" {
 
   members = [
     "${var.project_owner}",
-    "serviceAccount:${google_service_account.project.email}",
+  ]
+}
+
+resource "google_project_iam_binding" "project_common_serviceaccount" {
+  count   = "${length(var.common_serviceaccount_roles)}"
+  project = "${google_project.project.project_id}"
+  role    = "${element(var.common_serviceaccount_roles, count.index)}"
+
+  members = [
     "serviceAccount:projectowner@${var.project_id}.iam.gserviceaccount.com",
+  ]
+}
+
+resource "google_project_iam_binding" "project_user_serviceaccount" {
+  count   = "${length(var.user_serviceaccount_roles)}"
+  project = "${google_project.project.project_id}"
+  role    = "${element(var.user_serviceaccount_roles, count.index)}"
+
+  members = [
+    "serviceAccount:${google_service_account.project.email}",
   ]
 }
 
