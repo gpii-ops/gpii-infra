@@ -7,6 +7,10 @@ variable "domain_name" {}
 variable "project_id" {}
 variable "serviceaccount_key" {}
 
+variable "stackdriver_debug" {
+  default = false
+}
+
 resource "template_dir" "resources" {
   source_dir      = "${path.cwd}/resources"
   destination_dir = "${path.cwd}/resources_rendered"
@@ -28,7 +32,6 @@ resource "null_resource" "apply_stackdriver_alerting" {
     command = <<EOF
       export PROJECT_ID=${var.project_id}
       export GOOGLE_CLOUD_KEYFILE=${var.serviceaccount_key}
-      # export STACKDRIVER_DEBUG=1
       ruby -e '
         require "${path.module}/client.rb"
         apply_resources
