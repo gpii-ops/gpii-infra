@@ -1,0 +1,24 @@
+{
+  "display_name": "Flowmanager",
+  "monitored_resource": {
+    "type": "uptime_url",
+    "labels": {
+      "host": "flowmanager.${domain_name}",
+      "project_id": "${project_id}"
+    }
+  },
+  "tcp_check": {
+    "port": 80
+  },
+  "period": {
+    "seconds": 60
+  },
+  "timeout": {
+    "seconds": 10
+  },
+  "content_matchers": [
+    {}
+  ],
+  "selected_regions": [],
+  "internal_checkers": []
+}

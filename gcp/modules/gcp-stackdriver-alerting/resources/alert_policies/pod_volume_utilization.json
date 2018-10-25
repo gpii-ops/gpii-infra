@@ -1,0 +1,35 @@
+{
+  "display_name": "Pod Volume Utilization",
+  "combiner": "OR",
+  "conditions": [
+    {
+      "condition_threshold": {
+        "filter": "metric.type=\"kubernetes.io/pod/volume/utilization\" resource.type=\"k8s_pod\"",
+        "comparison": "COMPARISON_GT",
+        "threshold_value": 0.85,
+        "duration": {
+          "seconds": 180
+        },
+        "trigger": {
+          "count": 1
+        },
+        "aggregations": [
+          {
+            "alignment_period": {
+              "seconds": 60
+            },
+            "per_series_aligner": "ALIGN_MEAN",
+            "group_by_fields": []
+          }
+        ],
+        "denominator_aggregations": []
+      },
+      "display_name": "Pod Volume Utilization"
+    }
+  ],
+  "notification_channels": [],
+  "user_labels": {},
+  "enabled": {
+    "value": true
+  }
+}

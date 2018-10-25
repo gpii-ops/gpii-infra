@@ -1,0 +1,59 @@
+{
+  "display_name": "Node Resource Allocatable Utilization",
+  "combiner": "OR",
+  "conditions": [
+    {
+      "condition_threshold": {
+        "filter": "metric.type=\"kubernetes.io/node/cpu/allocatable_utilization\" resource.type=\"k8s_node\"",
+        "comparison": "COMPARISON_GT",
+        "threshold_value": 0.85,
+        "duration": {
+          "seconds": 180
+        },
+        "trigger": {
+          "count": 1
+        },
+        "aggregations": [
+          {
+            "alignment_period": {
+              "seconds": 60
+            },
+            "per_series_aligner": "ALIGN_MEAN",
+            "group_by_fields": []
+          }
+        ],
+        "denominator_aggregations": []
+      },
+      "display_name": "Node CPU Allocatable Utilization"
+    },
+    {
+      "condition_threshold": {
+        "filter": "metric.type=\"kubernetes.io/node/memory/allocatable_utilization\" resource.type=\"k8s_node\"",
+        "comparison": "COMPARISON_GT",
+        "threshold_value": 0.85,
+        "duration": {
+          "seconds": 180
+        },
+        "trigger": {
+          "count": 1
+        },
+               "aggregations": [
+          {
+            "alignment_period": {
+              "seconds": 60
+            },
+            "per_series_aligner": "ALIGN_MEAN",
+            "group_by_fields": []
+          }
+        ],
+        "denominator_aggregations": []
+      },
+      "display_name": "Node RAM Allocatable Utilization"
+    }
+  ],
+  "notification_channels": [],
+  "user_labels": {},
+  "enabled": {
+    "value": true
+  }
+}

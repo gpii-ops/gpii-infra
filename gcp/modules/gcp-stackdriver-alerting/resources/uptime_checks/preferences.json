@@ -1,0 +1,27 @@
+{
+  "display_name": "Preferences",
+  "monitored_resource": {
+    "type": "uptime_url",
+    "labels": {
+      "host": "preferences.${domain_name}",
+      "project_id": "${project_id}"
+    }
+  },
+  "http_check": {
+    "path": "/preferences/carla",
+    "port": 80,
+    "auth_info": {},
+    "headers": {}
+  },
+  "period": {
+    "seconds": 60
+  },
+  "timeout": {
+    "seconds": 10
+  },
+  "content_matchers": [
+    {}
+  ],
+  "selected_regions": [],
+  "internal_checkers": []
+}

@@ -153,6 +153,25 @@ rake sh["gcloud services disable container.googleapis.com"]
 This happens due to limitation of maximum 10 keys per ServiceAccount.
 If you see this error during any `rake` execution, run `rake destroy_sa_keys` and then try again.
 
+### Monitoring and alerting
+
+We use [Stackdriver Beta Monitoring](https://cloud.google.com/monitoring/kubernetes-engine/) to collect various system metrics, navigate through them with [Kubernetes Dashboard](https://app.google.stackdriver.com/kubernetes), and send alerts when they violate thresholds that are being set by [Stackdriver Alerting Policies](https://app.google.stackdriver.com/policies).
+
+Due to the lack of Terraform integration we use [Ruby client](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/modules/gcp-stackdriver-alerting/client.rb) to apply / update / destroy Stackdriver's resource primitives from their [json configs](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/modules/gcp-stackdriver-alerting/resources).
+
+#### To add new resource / debug existing resources:
+1. Add new resource / modify existing resource using corresponding Stackdriver Dashboard. **Supported resources are:**
+   * [Notification channels](https://app.google.stackdriver.com/settings/accounts/notifications/email) (only email notification channel type is currently supported, all notification channels are being applied to every alert policy).
+   * [Uptime checks](https://app.google.stackdriver.com/uptime).
+   * [Alert policies](https://app.google.stackdriver.com/policies).
+1. Run `TF_VAR_stackdriver_debug=1 rake deploy_module['k8s/stackdriver/alerting']`.
+1. You will find json blobs for all supported Stackdriver resources in the output.
+1. To add new resource config into `gcp-stackdriver-alerting` module:
+   * Copy json blob that you obtained on previous step into proper [resource directory](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/modules/gcp-stackdriver-alerting/resources). Give a meaningful name to a new resource file. You can use `jq` to help with formatting.
+   * Remove all `name` attributes.
+   * Repeat from **step 2.** All newly configured resources will be synced with Stackriver.
+1. In case you added new email notification channel, you may want to authorize new sender to post to [Alerts Group](https://groups.google.com/a/raisingthefloor.org/forum/#!pendingmsg/alerts). Follow the link, select new message and click "Post and always allow future messages from author(s)" button.
+
 ### Restoring CouchDB data
 
 We are considering number of probable failure scenarios for our GCP infrastructure.

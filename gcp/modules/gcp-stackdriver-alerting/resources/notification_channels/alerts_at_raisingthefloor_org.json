@@ -1,0 +1,10 @@
+{
+  "type": "email",
+  "labels": {
+    "email_address": "alerts+${domain_name}@raisingthefloor.org"
+  },
+  "user_labels": {},
+  "enabled": {
+    "value": true
+  }
+}
