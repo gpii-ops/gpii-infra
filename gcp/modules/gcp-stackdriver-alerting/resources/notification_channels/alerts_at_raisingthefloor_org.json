@@ -1,7 +1,7 @@
 {
   "type": "email",
   "labels": {
-    "email_address": "alerts+${env}@raisingthefloor.org"
+    "email_address": "alerts+${domain_name}@raisingthefloor.org"
   },
   "user_labels": {},
   "enabled": {
