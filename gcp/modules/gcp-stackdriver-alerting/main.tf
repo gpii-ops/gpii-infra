@@ -32,6 +32,7 @@ resource "null_resource" "apply_stackdriver_alerting" {
     command = <<EOF
       export PROJECT_ID=${var.project_id}
       export GOOGLE_CLOUD_KEYFILE=${var.serviceaccount_key}
+      export STACKDRIVER_DEBUG=${var.stackdriver_debug}
       ruby -e '
         require "${path.module}/client.rb"
         apply_resources
