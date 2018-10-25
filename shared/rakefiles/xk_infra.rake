@@ -84,10 +84,36 @@ task :apply_common_infra => [@gcp_creds_file] do
      sh "#{@exekube_cmd} gcloud services enable #{service}" unless services_list.any? { |s| s['serviceName'] == service }
   end
 
-  ["roles/resourcemanager.projectCreator", "roles/billing.user"].each do |role|
-    sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
-      --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com --role #{role}"
+  # The following piece of code is needed by the SA to set its own permissions.
+  # But since it already has the permissions set we are going to comment it, and
+  # with this action we can reduce the permissions for the SA at the
+  # organization level.
+  #
+  # ["roles/resourcemanager.projectCreator", "roles/billing.user"].each do |role|
+  #   sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
+  #     --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com --role #{role}"
+  # end
+  #
+  # In order to reduce the permissions we are delegating the setting of the
+  # permssions to an operator. The following code checks that the SA has the
+  # correct permissions at the organization level to create the resources at
+  # a project level.
+
+  permissions_list_json = %x{
+    #{@exekube_cmd} gcloud organizations get-iam-policy #{ENV["ORGANIZATION_ID"]} --format=json
+  }
+
+  permissions_list = JSON.parse(permissions_list_json)["bindings"]
+
+  organizations_permissions = ["roles/resourcemanager.projectCreator", "roles/billing.user"]
+
+  serviceAccount = "serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com"
+
+  permissions_list.each do |permission|
+    organizations_permissions.delete(permission["role"]) if organizations_permissions.include?(permission["role"]) and permission["members"].include?(serviceAccount)
   end
+
+  raise "The common Service Account #{serviceAccount} doesn't have the proper permissions #{organizations_permissions}" unless organizations_permissions.empty?
 
   tfstate_bucket = %x{
     #{@exekube_cmd} gsutil ls | grep 'gs://#{ENV["TF_VAR_project_id"]}-tfstate'
