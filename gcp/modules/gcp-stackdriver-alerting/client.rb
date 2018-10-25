@@ -4,17 +4,30 @@ require "google/cloud/monitoring"
 @project_id = ENV['PROJECT_ID']
 @debug_mode = ENV['STACKDRIVER_DEBUG']
 
+def apply_resources
+  resources = read_resources
+  processed_notification_channels = process_notification_channels(resources["notification_channels"])
+  process_uptime_checks(resources["uptime_checks"])
+  process_alert_policies(resources["alert_policies"], processed_notification_channels)
+end
+
+def destroy_resources
+  process_alert_policies
+  process_uptime_checks
+  process_notification_channels
+end
+
 def read_resources(resource_dir = "")
   resource_dir = "#{File.expand_path(File.dirname(__FILE__))}/resources_rendered" if resource_dir.empty?
-
-  Dir.chdir(resource_dir)
-  resource_types = Dir.glob("*").select {|r| File.directory? r}
   resources = {}
 
-  resource_types.each do |resource_type|
-    resources[resource_type] = []
-    Dir.glob("#{resource_type}/*").each do |resource|
-      resources[resource_type] << JSON.parse(File.read("#{resource_dir}/#{resource}"))
+  Dir.chdir(resource_dir) do
+    resource_types = Dir.glob("*").select {|r| File.directory? r}
+    resource_types.each do |resource_type|
+      resources[resource_type] = []
+      Dir.glob("#{resource_type}/*").each do |resource|
+        resources[resource_type] << JSON.parse(File.read("#{resource_dir}/#{resource}"))
+      end
     end
   end
 
@@ -75,9 +88,13 @@ def process_notification_channels(notification_channels = [])
   stackdriver_notification_channels.each do |name, notification_channel|
     notification_channel_identifier = get_notification_channel_identifier(notification_channel)
 
-    unless processed_notification_channels.include? notification_channel_identifier or @debug_mode
-      puts "Deleting notification channel \"#{notification_channel_identifier}\"..."
-      notification_channel_service_client.delete_notification_channel(notification_channel["name"])
+    unless processed_notification_channels.include? notification_channel_identifier
+      if @debug_mode
+        puts "[DEBUG] Skipping deletion of notification channel \"#{notification_channel_identifier}\"..."
+      else
+        puts "Deleting notification channel \"#{notification_channel_identifier}\"..."
+        notification_channel_service_client.delete_notification_channel(notification_channel["name"])
+      end
     end
   end
 
@@ -115,9 +132,13 @@ def process_uptime_checks(uptime_checks = [])
   stackdriver_uptime_checks.each do |name, uptime_check|
     uptime_check_identifier = get_uptime_check_identifier(uptime_check)
 
-    unless processed_uptime_checks.include? uptime_check_identifier or @debug_mode
-      puts "Deleting uptime check \"#{uptime_check_identifier}\"..."
-      uptime_check_service_client.delete_uptime_check_config(uptime_check["name"])
+    unless processed_uptime_checks.include? uptime_check_identifier
+      if @debug_mode
+        puts "[DEBUG] Skipping deletion of uptime check \"#{uptime_check_identifier}\"..."
+      else
+        puts "Deleting uptime check \"#{uptime_check_identifier}\"..."
+        uptime_check_service_client.delete_uptime_check_config(uptime_check["name"])
+      end
     end
   end
 
@@ -156,9 +177,13 @@ def process_alert_policies(alert_policies = [], notification_channels = {})
   stackdriver_alert_policies.each do |name, alert_policy|
     alert_policy_identifier = get_alert_policy_identifier(alert_policy)
 
-    unless processed_alert_policies.include? alert_policy_identifier or @debug_mode
-      puts "Deleting alert policy \"#{alert_policy_identifier}\"..."
-      alert_policy_service_client.delete_alert_policy(alert_policy["name"])
+    unless processed_alert_policies.include? alert_policy_identifier
+      if @debug_mode
+        puts "[DEBUG] Skipping deletion of alert policy \"#{alert_policy_identifier}\"..."
+      else
+        puts "Deleting alert policy \"#{alert_policy_identifier}\"..."
+        alert_policy_service_client.delete_alert_policy(alert_policy["name"])
+      end
     end
   end
 

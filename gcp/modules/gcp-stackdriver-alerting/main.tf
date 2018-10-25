@@ -2,7 +2,6 @@ terraform {
   backend "gcs" {}
 }
 
-variable "env" {}
 variable "nonce" {}
 variable "domain_name" {}
 variable "project_id" {}
@@ -15,7 +14,6 @@ resource "template_dir" "resources" {
   vars {
     project_id  = "${var.project_id}"
     domain_name = "${var.domain_name}"
-    env         = "${var.env}"
   }
 }
 
@@ -33,10 +31,7 @@ resource "null_resource" "apply_stackdriver_alerting" {
       # export STACKDRIVER_DEBUG=1
       ruby -e '
         require "${path.module}/client.rb"
-        resources = read_resources
-        processed_notification_channels = process_notification_channels(resources["notification_channels"])
-        process_uptime_checks(resources["uptime_checks"])
-        process_alert_policies(resources["alert_policies"], processed_notification_channels)
+        apply_resources
       '
     EOF
   }
@@ -52,9 +47,7 @@ resource "null_resource" "destroy_stackdriver_alerting" {
       export GOOGLE_CLOUD_KEYFILE=${var.serviceaccount_key}
       ruby -e '
         require "${path.module}/client.rb"
-        process_alert_policies
-        process_uptime_checks
-        process_notification_channels
+        destroy_resources
       '
     EOF
   }
