@@ -159,18 +159,18 @@ We use [Stackdriver Beta Monitoring](https://cloud.google.com/monitoring/kuberne
 
 Due to the lack of Terraform integration we use [Ruby client](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/modules/gcp-stackdriver-alerting/client.rb) to apply / update / destroy Stackdriver's resource primitives from their [json configs](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/modules/gcp-stackdriver-alerting/resources).
 
-**To add new resource / debug existing resources:**
+#### To add new resource / debug existing resources:
 1. Enable [debug mode](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/modules/gcp-stackdriver-alerting/main.tf#L31) for Stackdriver client.
 1. Add new resource / modify existing resource using corresponding Stackdriver Dashboard. **Supported resources are:**
    * [Notification channels](https://app.google.stackdriver.com/settings/accounts/notifications/email) (only email notification channel type is currently supported, all notification channels are being applied to every alert policy).
    * [Uptime checks](https://app.google.stackdriver.com/uptime).
    * [Alert policies](https://app.google.stackdriver.com/policies).
 1. Run `rake deploy_module['k8s/stackdriver/alerting']`.
-1. You will find json blobs for all existing resource primitives in the output.
-1. To add new resource:
-   * Copy its json blob into proper [resource directory](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/modules/gcp-stackdriver-alerting/resources). Give a meaningful name to a new resource file. You can use `jq` to help with formatting.
+1. You will find json blobs for all supported Stackdriver resources in the output.
+1. To add new resource config into `gcp-stackdriver-alerting` module:
+   * Copy json blob that you obtained on previous step into proper [resource directory](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/modules/gcp-stackdriver-alerting/resources). Give a meaningful name to a new resource file. You can use `jq` to help with formatting.
    * Remove all `name` attributes.
-   * Repeat from step 2. All newly configured resources will be synced with Stackriver.
+   * Repeat from **step 2.** All newly configured resources will be synced with Stackriver.
 1. Disable debug mode.
 
 ### Restoring CouchDB data
