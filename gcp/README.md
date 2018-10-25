@@ -170,6 +170,7 @@ Due to the lack of Terraform integration we use [Ruby client](https://github.com
    * Copy json blob that you obtained on previous step into proper [resource directory](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/modules/gcp-stackdriver-alerting/resources). Give a meaningful name to a new resource file. You can use `jq` to help with formatting.
    * Remove all `name` attributes.
    * Repeat from **step 2.** All newly configured resources will be synced with Stackriver.
+1. In case you added new email notification channel, you may want to authorize new sender to post to [Alerts Group](https://groups.google.com/a/raisingthefloor.org/forum/#!pendingmsg/alerts). Follow the link, select new message and click "Post and always allow future messages from author(s)" button.
 
 ### Restoring CouchDB data
 
