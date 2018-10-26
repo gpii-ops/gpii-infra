@@ -63,6 +63,14 @@ resource "null_resource" "locust_swarm_session" {
 
       echo
       echo $SESSION_STATS
+
+      echo $SESSION_STATS > /tmp/${var.locust_target_app}.stats
+      export PROJECT_ID=${var.project_id}
+      export GOOGLE_CLOUD_KEYFILE=${var.serviceaccount_key}
+      ruby -e '
+        require "${path.module}/client.rb"
+        process_locust_result("/tmp/${var.locust_target_app}.stats", "${var.locust_target_app}")
+      '
       EXIT_STATUS=0
 
       if [ $total_rps -lt ${var.locust_desired_total_rps} ]; then
