@@ -6,6 +6,10 @@ variable "locust_target_host" {
   default = ""
 }
 
+variable "locust_target_app" {
+  default = "default"
+}
+
 variable "locust_swarm_duration" {
   default = 30
 }
