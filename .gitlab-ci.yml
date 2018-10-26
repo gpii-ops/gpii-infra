@@ -176,7 +176,7 @@ common-prd:
     - rake apply_infra
   after_script:
     - cd common/live/prd
-    - rake destroy_sa_keys
+    - rake destroy_sa_keys RAKE_REALLY_DESTROY_IN_PRD=true
   environment:
     name: prd
   only:
