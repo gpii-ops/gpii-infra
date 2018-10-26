@@ -103,6 +103,9 @@ common-stg:
     - rake configure_serviceaccount_ci_restore
     - rake apply_common_infra
     - rake apply_infra
+  after_script:
+    - cd common/live/stg
+    - rake destroy_sa_keys
   environment:
     name: stg
   only:
@@ -171,6 +174,9 @@ common-prd:
     - rake configure_serviceaccount_ci_restore
     - rake apply_common_infra
     - rake apply_infra
+  after_script:
+    - cd common/live/prd
+    - rake destroy_sa_keys
   environment:
     name: prd
   only:
