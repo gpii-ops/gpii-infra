@@ -45,7 +45,6 @@ services:
       - ../shared/rakefiles:/rakefiles
       - secrets:/project/live/${ENV}/secrets
       - helm:/root/.helm
-      - terragrunt:/root/.terragrunt
       - gcloud:/root/.config/gcloud
       - kube:/root/.kube
       - aws:/root/.aws
@@ -64,8 +63,6 @@ volumes:
     name: ${TF_VAR_project_id}-${USER}-secrets
   helm:
     name: ${TF_VAR_project_id}-${USER}-helm
-  terragrunt:
-    name: ${TF_VAR_project_id}-${USER}-terragrunt
   gcloud:
     name: ${TF_VAR_project_id}-${USER}-gcloud
   kube:
