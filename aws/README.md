@@ -237,6 +237,7 @@ To delete the lock:
    * Delete the `NS` record for your cluster (e.g. `dev-mrtyler.gpii.net.`).
 1. Other stuff - a few more things to clean if you're still having problems.
    * Check for orphaned IAM Roles using the AWS dashboard (Services `->` search for IAM `->` Roles) and delete them.
+   * Check for orphaned Key Pairs using the AWS dashboard (Services `->` search for EC2 `->` Key pairs) and delete them.
    * Delete `$TMPDIR/rake-tmp` (`rake clobber` should take care of this but just in case).
    * Delete `~/.terraform.d` from your home directory.
    * Delete any directories in your `gpii-infra/aws` directory named `.bundle` or `.terraform` (`find aws/ -name '*.bundle' -o -name '*.terraform'`).
