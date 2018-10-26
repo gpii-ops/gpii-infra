@@ -12,7 +12,7 @@ spec:
       containers:
       - name: gpii-dataloader
         image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
-        command: '/app/scripts/deleteAndLoadSnapsets.sh'
+        command: [ '/app/scripts/deleteAndLoadSnapsets.sh' ]
         env:
         - name: GPII_COUCHDB_URL
           value: '{{ .Values.couchdb_url }}'
