@@ -13,7 +13,7 @@ def process_locust_result(locust_stats_file, locust_distribution_file, app_name)
 
   metrics = {}
 
-  stats = stats.first # distributions second
+  stats = stats.first
   ["median_response_time", "min_response_time", "max_response_time",
    "avg_response_time", "num_failures", "num_requests"].each do |metric|
     metrics[metric] = stats[metric]
