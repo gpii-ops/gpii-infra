@@ -159,6 +159,19 @@ We use [Stackdriver Beta Monitoring](https://cloud.google.com/monitoring/kuberne
 
 Due to the lack of Terraform integration we use [Ruby client](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/modules/gcp-stackdriver-alerting/client.rb) to apply / update / destroy Stackdriver's resource primitives from their [json configs](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/modules/gcp-stackdriver-alerting/resources).
 
+#### One-time Stackdriver Workspace setup
+
+Manual workspace configuration is required in case you never used Stackdriver in your project before.
+
+1. Go to [Stackdriver Monitoring Overview](https://app.google.stackdriver.com), you will be redirected to Project Setup page if needed.
+1. Select "Create a new Workspace". Click "Continue".
+1. Make sure that you see your project id under "Google Cloud Platform project". Click "Create workspace".
+1. Make sure that only your project is selected under "Add Google Cloud Platform projects to monitor". Click "Continue".
+1. Click "Skip AWS Setup".
+1. Click "Continue".
+1. Select desired reports frequency under "Get Reports by Email". Click "Continue".
+1. Finished initial collection! Click "Launch Monitoring".
+
 #### To add new resource / debug existing resources:
 1. Add new resource / modify existing resource using corresponding Stackdriver Dashboard. **Supported resources are:**
    * [Notification channels](https://app.google.stackdriver.com/settings/accounts/notifications/email) (only email notification channel type is currently supported, all notification channels are being applied to every alert policy).
@@ -172,12 +185,18 @@ Due to the lack of Terraform integration we use [Ruby client](https://github.com
    * Repeat from **step 2.** All newly configured resources will be synced with Stackriver.
 1. In case you added new email notification channel, you may want to authorize new sender to post to [Alerts Group](https://groups.google.com/a/raisingthefloor.org/forum/#!pendingmsg/alerts). Follow the link, select new message and click "Post and always allow future messages from author(s)" button.
 
+#### To configure Dashboards for your project:
+1. Go to [Metrics Explorer](https://app.google.stackdriver.com/metrics-explorer).
+1. Select resource type, metric and configure other parameters for the chart that you want to add to your Dashboard.
+1. Click "Save Chart". Select existing one or new Dashboard. Click "Save".
+1. Your Stackdriver Dashboard should be now available in [Dashboard Manager](https://app.google.stackdriver.com/dashboards).
+
 ### Restoring CouchDB data
 
 We are considering number of probable failure scenarios for our GCP infrastructure.
 You can run all `kubectl` commands mentioned below inside of interactive shell started with `rake sh`.
 
-1. **Data corruption on a single CouchDB replica**
+#### Data corruption on a single CouchDB replica**
 
 In this scenario we rely on CouchDB ability to recover from loss of one or more replicas (our current production CouchDB settings allow us to lose up to 2 random nodes and still keep data integrity). The best course of action as follows:
 
@@ -193,7 +212,7 @@ In this scenario we rely on CouchDB ability to recover from loss of one or more 
 * Corrupted node is now recovered.
    * You can check DB status on recovered node with `kubectl exec --namespace gpii -it couchdb-couchdb-N -c couchdb -- curl -s http://$TF_VAR_couchdb_admin_username:$TF_VAR_couchdb_admin_password@127.0.0.1:5984/gpii/`, where N is node index.
 
-2. **Data corruption on all replicas of CouchDB cluster**
+#### Data corruption on all replicas of CouchDB cluster**
 
 There may be a situation, when we want to roll back entire DB data set to another point in the past. Current solution is disruptive, requires bringing entire CouchDB cluster down and some manual actions (we'll most likely automate this in future):
 
