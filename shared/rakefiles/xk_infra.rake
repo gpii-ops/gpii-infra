@@ -98,22 +98,16 @@ task :apply_common_infra => [@gcp_creds_file] do
   # permssions to an operator. The following code checks that the SA has the
   # correct permissions at the organization level to create the resources at
   # a project level.
-
   permissions_list_json = %x{
     #{@exekube_cmd} gcloud organizations get-iam-policy #{ENV["ORGANIZATION_ID"]} --format=json
   }
-
   permissions_list = JSON.parse(permissions_list_json)["bindings"]
-
   organizations_permissions = ["roles/resourcemanager.projectCreator", "roles/billing.user"]
-
   service_account = "serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com"
-
   permissions_list.each do |permission|
     organizations_permissions.delete(permission["role"]) if organizations_permissions.include?(permission["role"]) and permission["members"].include?(service_account)
   end
-
-  raise "The common Service Account #{service_account} doesn't have the proper permissions #{organizations_permissions}" unless organizations_permissions.empty?
+  raise "The common Service Account #{service_account} doesn't have the proper permissions #{organizations_permissions}.\n\nAn operator with admin privileges on the organization must run the following command: rake fix_common_service_account_permissions\n\nCheck the credentials used with the command: rake sh[\"gcloud auth list\"]\n\nThe common Service Account needs these permissions at organization level in order to create the new projects and link the billing account them" unless organizations_permissions.empty?
 
   tfstate_bucket = %x{
     #{@exekube_cmd} gsutil ls | grep 'gs://#{ENV["TF_VAR_project_id"]}-tfstate'
@@ -123,3 +117,11 @@ task :apply_common_infra => [@gcp_creds_file] do
     sh "#{@exekube_cmd} gsutil versioning set on gs://#{ENV["TF_VAR_project_id"]}-tfstate"
   end
 end
+
+task :fix_common_service_account_permissions => [@gcp_creds_file] do
+  ["roles/resourcemanager.projectCreator", "roles/billing.user"].each do |role|
+    sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
+      --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com --role #{role}"
+  end
+end
+
