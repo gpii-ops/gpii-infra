@@ -9,7 +9,8 @@
   },
   "http_check": {
     "path": "/preferences/carla",
-    "port": 80,
+    "use_ssl": ${env == "dev" ? "false" : "true"},
+    "port": ${env == "dev" ? "80" : "443"},
     "auth_info": {},
     "headers": {}
   },
