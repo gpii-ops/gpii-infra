@@ -16,11 +16,7 @@ data "template_file" "dataloader_values" {
 
   vars {
     dataloader_repository = "${var.dataloader_repository}"
-
-    # This is an ugly hack to stop TF/Helm dataloader errors and should be removed
-    # in scope of https://github.com/gpii-ops/gpii-infra/pull/163
-    # dataloader_checksum    = "${var.dataloader_checksum}"
-    dataloader_checksum = "sha256:3876e3526b8b59f94aa25c8b6d1a3166df115d402b51176ef8bd91c899430369"
+    dataloader_checksum   = "${var.dataloader_checksum}"
 
     couchdb_admin_username = "${var.secret_couchdb_admin_username}"
     couchdb_admin_password = "${var.secret_couchdb_admin_password}"
@@ -37,5 +33,6 @@ module "gpii-dataloader" {
   release_values          = ""
   release_values_rendered = "${data.template_file.dataloader_values.rendered}"
 
-  chart_name = "${var.charts_dir}/gpii-dataloader"
+  chart_name   = "${var.charts_dir}/gpii-dataloader"
+  force_update = true
 }

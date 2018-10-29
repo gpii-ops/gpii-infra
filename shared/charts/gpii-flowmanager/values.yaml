@@ -14,7 +14,7 @@ preferences_url: http://preferences.gpii.svc.cluster.local/preferences/%gpiiKey?
 
 image:
   repository: gpii/universal
-  checksum: sha256:8547f22ae8e86d7b4b09e10d9ec87b1605b47dc37904171c84555a55462f161e
+  checksum: sha256:652ed9dc86639d51e806356737567336339c9eb675193ba04b2c5346de3bdee6
   pullPolicy: IfNotPresent
 
 rollingUpdate:
