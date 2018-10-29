@@ -107,13 +107,13 @@ task :apply_common_infra => [@gcp_creds_file] do
 
   organizations_permissions = ["roles/resourcemanager.projectCreator", "roles/billing.user"]
 
-  serviceAccount = "serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com"
+  service_account = "serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com"
 
   permissions_list.each do |permission|
-    organizations_permissions.delete(permission["role"]) if organizations_permissions.include?(permission["role"]) and permission["members"].include?(serviceAccount)
+    organizations_permissions.delete(permission["role"]) if organizations_permissions.include?(permission["role"]) and permission["members"].include?(service_account)
   end
 
-  raise "The common Service Account #{serviceAccount} doesn't have the proper permissions #{organizations_permissions}" unless organizations_permissions.empty?
+  raise "The common Service Account #{service_account} doesn't have the proper permissions #{organizations_permissions}" unless organizations_permissions.empty?
 
   tfstate_bucket = %x{
     #{@exekube_cmd} gsutil ls | grep 'gs://#{ENV["TF_VAR_project_id"]}-tfstate'
