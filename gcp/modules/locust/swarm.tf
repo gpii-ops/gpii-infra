@@ -63,20 +63,20 @@ resource "null_resource" "locust_swarm_session" {
 
       echo
       echo "$SESSION_STATS"
-      echo "$SESSION_STATS" > /${path.cwd}/${var.locust_target_app}.stats
+      echo "$SESSION_STATS" > ${path.cwd}/${var.locust_target_app}.stats
 
       echo
       echo "Stats distribution:"
       SESSION_STATS_DISTRIBUTION=$(curl -s $LOCUST_URL/stats/distribution/csv)
       echo "$SESSION_STATS_DISTRIBUTION"
-      echo "$SESSION_STATS_DISTRIBUTION" > /${path.cwd}/${var.locust_target_app}.dist
+      echo "$SESSION_STATS_DISTRIBUTION" > ${path.cwd}/${var.locust_target_app}.dist
 
       echo
       export PROJECT_ID=${var.project_id}
       export GOOGLE_CLOUD_KEYFILE=${var.serviceaccount_key}
       ruby -e '
         require "${path.module}/client.rb"
-        process_locust_result("/${path.cwd}/${var.locust_target_app}.stats", "/${path.cwd}/${var.locust_target_app}.dist",  "${var.locust_target_app}")
+        process_locust_result("${path.cwd}/${var.locust_target_app}.stats", "${path.cwd}/${var.locust_target_app}.dist",  "${var.locust_target_app}")
       '
 
       EXIT_STATUS=0
