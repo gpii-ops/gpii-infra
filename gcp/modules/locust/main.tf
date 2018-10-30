@@ -3,6 +3,8 @@ terraform {
 }
 
 variable "env" {}
+variable "project_id" {}
+variable "serviceaccount_key" {}
 variable "secrets_dir" {}
 variable "charts_dir" {}
 variable "nonce" {}
