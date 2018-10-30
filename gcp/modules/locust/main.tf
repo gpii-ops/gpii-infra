@@ -9,7 +9,7 @@ variable "secrets_dir" {}
 variable "charts_dir" {}
 variable "nonce" {}
 
-resource "null_resource" "locust_link_tasks" {
+resource "null_resource" "locust_copy_tasks" {
   triggers = {
     nonce = "${var.nonce}"
   }
@@ -21,6 +21,10 @@ resource "null_resource" "locust_link_tasks" {
         echo "Copying $FILE..."
         cp -f $PWD/$FILE ${var.charts_dir}/locust/$FILE
       done
+      # Full write permissions are required so CI worker can remove those
+      # files from shared dir in case Locust module deployment fails
+      # and cleanup resource is never executed.
+      chmod -R a+w ${var.charts_dir}/locust/tasks
     EOF
   }
 }
@@ -48,7 +52,7 @@ module "locust" {
   chart_name = "${var.charts_dir}/locust"
 }
 
-resource "null_resource" "locust_link_cleanup" {
+resource "null_resource" "locust_cleanup" {
   depends_on = ["module.locust"]
 
   triggers = {
