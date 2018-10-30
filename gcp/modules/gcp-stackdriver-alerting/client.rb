@@ -2,7 +2,7 @@ require "json"
 require "google/cloud/monitoring"
 
 @project_id = ENV['PROJECT_ID']
-@debug_mode = ENV['STACKDRIVER_DEBUG']
+@debug_mode = true unless ENV['STACKDRIVER_DEBUG'].empty?
 
 def apply_resources
   resources = read_resources

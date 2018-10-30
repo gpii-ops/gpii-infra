@@ -9,7 +9,8 @@
   },
   "http_check": {
     "path": "/preferences/carla",
-    "port": 80,
+    "use_ssl": ${ssl_enabled_uptime_checks ? "true" : "false"},
+    "port": ${ssl_enabled_uptime_checks ? "443" : "80"},
     "auth_info": {},
     "headers": {}
   },

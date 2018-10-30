@@ -7,8 +7,12 @@ variable "domain_name" {}
 variable "project_id" {}
 variable "serviceaccount_key" {}
 
+# Terragrunt variable
+variable "ssl_enabled_uptime_checks" {}
+
+# Enables debug mode when TF_VAR_stackdriver_debug is not empty
 variable "stackdriver_debug" {
-  default = false
+  default = ""
 }
 
 resource "template_dir" "resources" {
@@ -16,8 +20,9 @@ resource "template_dir" "resources" {
   destination_dir = "${path.cwd}/resources_rendered"
 
   vars {
-    project_id  = "${var.project_id}"
-    domain_name = "${var.domain_name}"
+    project_id                = "${var.project_id}"
+    domain_name               = "${var.domain_name}"
+    ssl_enabled_uptime_checks = "${var.ssl_enabled_uptime_checks}"
   }
 }
 
