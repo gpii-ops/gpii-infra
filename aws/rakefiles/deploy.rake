@@ -166,11 +166,12 @@ task :install_charts => [:configure_kubectl, :generate_modules, :setup_system_co
     chart_name = attrs.fetch('release_name', chart)
     chart_namespace = attrs.fetch('release_namespace', 'default')
     allow_upgrade = attrs.fetch('allow_upgrade', true)
+    force_upgrade = attrs.fetch('force_upgrade', false)
     if installed_charts.include?(chart_name)
       if allow_upgrade
         begin
           wait_for(
-            "helm upgrade --namespace #{chart_namespace} -f #{@tmpdir}-modules/deploy/charts/values/#{chart}.yaml #{chart_name} #{@chartdir}/#{chart}",
+            "helm upgrade --namespace #{chart_namespace} -f #{@tmpdir}-modules/deploy/charts/values/#{chart}.yaml #{force_upgrade ? '--force':''} #{chart_name} #{@chartdir}/#{chart}",
             sleep_secs: 5,
             max_wait_secs: 60,
           )

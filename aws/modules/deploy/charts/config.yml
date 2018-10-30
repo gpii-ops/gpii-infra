@@ -28,7 +28,7 @@ k8s-snapshots:
 gpii-dataloader:
   release_name: dataloader
   release_namespace: gpii
-  allow_upgrade: false
+  force_upgrade: true
 gpii-preferences:
   release_name: preferences
   release_namespace: gpii
