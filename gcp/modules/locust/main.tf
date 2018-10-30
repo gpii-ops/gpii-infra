@@ -18,8 +18,8 @@ resource "null_resource" "locust_link_tasks" {
     command = <<EOF
       mkdir -p ${var.charts_dir}/locust/tasks
       for FILE in tasks/*.py; do
-        echo "Creating link for $FILE"
-        ln -sf -T $PWD/$FILE ${var.charts_dir}/locust/$FILE
+        echo "Copying $FILE..."
+        cp -f $PWD/$FILE ${var.charts_dir}/locust/$FILE
       done
     EOF
   }
@@ -57,6 +57,7 @@ resource "null_resource" "locust_link_cleanup" {
 
   provisioner "local-exec" {
     command = <<EOF
+      echo "Removing tasks dir..."
       rm -rf ${var.charts_dir}/locust/tasks
     EOF
   }
