@@ -7,8 +7,19 @@ resource "null_resource" "locust_swarm_session" {
 
   provisioner "local-exec" {
     command = <<EOF
-      if [ "${var.locust_swarm_duration}" == "" ]; then
-        echo "Looks like TF_VAR_locust_swarm_duration is unset, terminating!"
+      if [ "${var.locust_swarm_duration}" == "" ] ||
+         [ "${var.locust_target_app}" == "" ] ||
+         [ "${var.locust_target_host}" == "" ] ||
+         [ "${var.locust_script}" == "" ]; then
+        echo
+        echo
+        echo "Looks like some mandatory Locust vars are unset, terminating!"
+        echo "Mandatory vars are:"
+        echo "  TF_VAR_locust_swarm_duration"
+        echo "  TF_VAR_locust_target_app"
+        echo "  TF_VAR_locust_target_host"
+        echo "  TF_VAR_locust_script"
+        echo
         exit 1
       fi
 
