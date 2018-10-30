@@ -9,8 +9,8 @@
   },
   "http_check": {
     "path": "/preferences/carla",
-    "use_ssl": ${env == "dev" ? "false" : "true"},
-    "port": ${env == "dev" ? "80" : "443"},
+    "use_ssl": ${ssl_enabled_uptime_checks ? "true" : "false"},
+    "port": ${ssl_enabled_uptime_checks ? "443" : "80"},
     "auth_info": {},
     "headers": {}
   },
