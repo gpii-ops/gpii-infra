@@ -30,5 +30,9 @@ spec:
           value:  '{{ .Values.datasource_hostname }}'
         - name: GPII_DATASOURCE_PORT
           value: '{{ .Values.datasource_listen_port }}'
+        {{- if .Values.enableStackdriverTrace }}
+        - name: GPII_ENABLE_STACKDRIVER_TRACE
+          value: 'true'
+        {{- end}}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
