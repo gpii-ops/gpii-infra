@@ -31,5 +31,9 @@ spec:
           value: '{{ .Values.datasource_listen_port }}'
         - name: GPII_FLOWMANAGER_TO_PREFERENCESSERVER_URL
           value: {{ .Values.preferences_url }}
+        {{- if .Values.enableStackdriverTrace }}
+        - name: GPII_ENABLE_STACKDRIVER_TRACE
+          value: 'true'
+        {{- end}}
         resources:
 {{ toYaml .Values.resources | indent 10 }}

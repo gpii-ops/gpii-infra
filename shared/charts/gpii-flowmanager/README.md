@@ -53,6 +53,7 @@ Parameter | Description | Default
 `datasource_hostname` | data source hostname for preferences service | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`
 `node_env` | flowmanager node env | `gpii.config.cloudBased.flowManager.production`
 `preferences_url` | preferences service url | `http://preferences.gpii.svc.cluster.local/preferences/%gpiiKey?merge=%merge`
+`enableStackdriverTrace` | enable [GCP Stackdriver Trace](https://cloud.google.com/trace/) | `false`
 `issuerRef.name` | name of the cert-manager issuer | `letsencrypt-production`
 `issuerRef.kind` | kind of the cert-manager issuer | `Issuer`
 `dnsNames` | list of host names for nginx-ingress controller | `flowmanager.test.local`
