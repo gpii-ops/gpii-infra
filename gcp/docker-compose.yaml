@@ -47,6 +47,7 @@ services:
       - helm:/root/.helm
       - gcloud:/root/.config/gcloud
       - kube:/root/.kube
+      - locust_tasks:/charts/locust/tasks
 
       # EXEKUBE DEVELOPMENT
       # - ../../exekube/modules:/exekube-modules
@@ -66,5 +67,7 @@ volumes:
     name: ${TF_VAR_project_id}-${USER}-gcloud
   kube:
     name: ${TF_VAR_project_id}-${USER}-kube
+  locust_tasks:
+    name: ${TF_VAR_project_id}-${USER}-locust_tasks
 
 # vim: et ts=2 sw=2:
