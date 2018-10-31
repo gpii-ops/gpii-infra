@@ -132,7 +132,7 @@ common-stg-test-gcp-dev:
   after_script:
     # Clean up dev environment even if one of the previous steps fails
     - cd gcp/live/dev
-    - rake destroy || true
+    - rake destroy
     # Destroy secrets, so they can be repopulated on the next run to exercise
     # managing secrets from scratch.
     - rake destroy_secrets || true
@@ -213,7 +213,7 @@ gcp-dev:
   after_script:
     # Clean up even if something failed.
     - cd gcp/live/dev
-    - rake destroy || true
+    - rake destroy
     # Destroy secrets, so they can be repopulated on the next run to exercise
     # managing secrets from scratch.
     - rake destroy_secrets || true
