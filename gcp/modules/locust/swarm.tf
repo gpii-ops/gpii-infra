@@ -34,7 +34,7 @@ resource "null_resource" "locust_swarm_session" {
         fi
         echo "Number of ready workers: $WORKERS_READY out of ${var.locust_workers}!"
         RETRY_COUNT=$(($RETRY_COUNT+1))
-        if [ "$RETRY_COUNT" -eq "$RETRIES" ] ; then
+        if [ "$RETRY_COUNT" -eq "$RETRIES" ]; then
           echo "Retry limit reached, giving up!"
           exit 1
         fi
@@ -85,12 +85,31 @@ resource "null_resource" "locust_swarm_session" {
       echo
       export PROJECT_ID=${var.project_id}
       export GOOGLE_CLOUD_KEYFILE=${var.serviceaccount_key}
-      ruby -e '
-        require "${path.module}/client.rb"
-        process_locust_result("${path.cwd}/${var.locust_target_app}.stats", "${path.cwd}/${var.locust_target_app}.distribution",  "${var.locust_target_app}")
-      '
 
       EXIT_STATUS=0
+
+      RETRIES=5
+      RETRY_COUNT=1
+      while [ "$STACKDRIVER_DID_NOT_FAIL" != "true" ]; do
+        STACKDRIVER_DID_NOT_FAIL="true"
+        echo "[Try $RETRY_COUNT of $RETRIES] Posting Locust results for \"${var.locust_target_app}\" to Stackdriver..."
+        ruby -e '
+          require "${path.module}/client.rb"
+          process_locust_result("${path.cwd}/${var.locust_target_app}.stats", "${path.cwd}/${var.locust_target_app}.distribution", "${var.locust_target_app}")
+        '
+        if [ "$?" != "0" ]; then
+          STACKDRIVER_DID_NOT_FAIL="false"
+        fi
+
+        RETRY_COUNT=$(($RETRY_COUNT+1))
+        if [ "$RETRY_COUNT" -eq "$RETRIES" ]; then
+          echo "Retry limit reached, giving up!"
+          EXIT_STATUS=1
+        fi
+        if [ "$STACKDRIVER_DID_NOT_FAIL" == "false" ]; then
+          sleep 10
+        fi
+      done
 
       if [ $total_rps -lt ${var.locust_desired_total_rps} ]; then
         echo

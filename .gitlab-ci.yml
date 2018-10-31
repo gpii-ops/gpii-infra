@@ -132,12 +132,11 @@ common-stg-test-gcp-dev:
   after_script:
     # Clean up dev environment even if one of the previous steps fails
     - cd gcp/live/dev
-    - rake destroy || true
-    # Destroy secrets, so they can be repopulated on the next run to exercise
-    # managing secrets from scratch.
-    - rake destroy_secrets || true
+    # We need to chain the following into a single command to prevent various issues
+    # caused by subsequent after script commands when destroy task fails.
+    # More info: https://issues.gpii.net/browse/GPII-3488
+    - (rake destroy && rake destroy_secrets && rake destroy_tfstate[k8s]) || true
     # Terraform state encryption key is also gone with secrets, we have to destroy tfstate as well
-    - rake destroy_tfstate[k8s] || true
     - rake destroy_tfstate[locust] || true
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys || true
@@ -213,12 +212,11 @@ gcp-dev:
   after_script:
     # Clean up even if something failed.
     - cd gcp/live/dev
-    - rake destroy || true
-    # Destroy secrets, so they can be repopulated on the next run to exercise
-    # managing secrets from scratch.
-    - rake destroy_secrets || true
+    # We need to chain the following into a single command to prevent various issues
+    # caused by subsequent after script commands when destroy task fails.
+    # More info: https://issues.gpii.net/browse/GPII-3488
+    - (rake destroy && rake destroy_secrets && rake destroy_tfstate[k8s]) || true
     # Terraform state encryption key is also gone with secrets, we have to destroy tfstate as well
-    - rake destroy_tfstate[k8s] || true
     - rake destroy_tfstate[locust] || true
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys || true

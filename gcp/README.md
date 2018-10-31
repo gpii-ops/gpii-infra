@@ -196,7 +196,7 @@ Manual workspace configuration is required in case you never used Stackdriver in
 We are considering number of probable failure scenarios for our GCP infrastructure.
 You can run all `kubectl` commands mentioned below inside of interactive shell started with `rake sh`.
 
-#### Data corruption on a single CouchDB replica**
+#### Data corruption on a single CouchDB replica
 
 In this scenario we rely on CouchDB ability to recover from loss of one or more replicas (our current production CouchDB settings allow us to lose up to 2 random nodes and still keep data integrity). The best course of action as follows:
 
@@ -212,7 +212,7 @@ In this scenario we rely on CouchDB ability to recover from loss of one or more 
 * Corrupted node is now recovered.
    * You can check DB status on recovered node with `kubectl exec --namespace gpii -it couchdb-couchdb-N -c couchdb -- curl -s http://$TF_VAR_couchdb_admin_username:$TF_VAR_couchdb_admin_password@127.0.0.1:5984/gpii/`, where N is node index.
 
-#### Data corruption on all replicas of CouchDB cluster**
+#### Data corruption on all replicas of CouchDB cluster
 
 There may be a situation, when we want to roll back entire DB data set to another point in the past. Current solution is disruptive, requires bringing entire CouchDB cluster down and some manual actions (we'll most likely automate this in future):
 

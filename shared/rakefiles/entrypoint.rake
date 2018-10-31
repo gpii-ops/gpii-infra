@@ -28,7 +28,7 @@ task :update_exekube => :set_vars do
 end
 
 task :clean_volumes => :set_vars do
-  ["helm", "kube"].each do |app|
+  ["helm", "kube", "locust_tasks"].each do |app|
     sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-#{app}"
   end
 end

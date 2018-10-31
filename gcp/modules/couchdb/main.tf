@@ -71,11 +71,13 @@ resource "null_resource" "couchdb_finish_cluster" {
           fi
         done
         RETRY_COUNT=$(($RETRY_COUNT+1))
-        if [ "$RETRY_COUNT" -eq "$RETRIES" ] ; then
+        if [ "$RETRY_COUNT" -eq "$RETRIES" ]; then
           echo "Retry limit reached, giving up!"
           exit 1
         fi
-        sleep 10
+        if [ "$PODS_READY" == "false" ]; then
+          sleep 10
+        fi
       done
 
       RETRY_COUNT=1
@@ -87,11 +89,13 @@ resource "null_resource" "couchdb_finish_cluster" {
         echo "[Try $RETRY_COUNT of $RETRIES] CouchDB returned: $RESULT"
         STATUS=$(echo $RESULT | jq ".reason")
         RETRY_COUNT=$(($RETRY_COUNT+1))
-        if [ "$RETRY_COUNT" -eq "$RETRIES" ] ; then
+        if [ "$RETRY_COUNT" -eq "$RETRIES" ]; then
           echo "Retry limit reached, giving up!"
           exit 1
         fi
-        sleep 10
+        if [ "$STATUS" != '"Cluster is already finished"' ]; then
+          sleep 10
+        fi
       done
     EOF
   }

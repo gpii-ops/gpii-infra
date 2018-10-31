@@ -9,7 +9,7 @@ variable "secrets_dir" {}
 variable "charts_dir" {}
 variable "nonce" {}
 
-resource "null_resource" "locust_link_tasks" {
+resource "null_resource" "locust_copy_tasks" {
   triggers = {
     nonce = "${var.nonce}"
   }
@@ -18,8 +18,8 @@ resource "null_resource" "locust_link_tasks" {
     command = <<EOF
       mkdir -p ${var.charts_dir}/locust/tasks
       for FILE in tasks/*.py; do
-        echo "Creating link for $FILE"
-        ln -sf -T $PWD/$FILE ${var.charts_dir}/locust/$FILE
+        echo "Copying $FILE..."
+        cp -f $PWD/$FILE ${var.charts_dir}/locust/$FILE
       done
     EOF
   }
@@ -48,7 +48,7 @@ module "locust" {
   chart_name = "${var.charts_dir}/locust"
 }
 
-resource "null_resource" "locust_link_cleanup" {
+resource "null_resource" "locust_cleanup" {
   depends_on = ["module.locust"]
 
   triggers = {
@@ -57,7 +57,8 @@ resource "null_resource" "locust_link_cleanup" {
 
   provisioner "local-exec" {
     command = <<EOF
-      rm -rf ${var.charts_dir}/locust/tasks
+      echo "Removing tasks..."
+      rm -rf ${var.charts_dir}/locust/tasks/*.py
     EOF
   }
 }

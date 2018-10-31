@@ -66,6 +66,5 @@ def process_locust_result(locust_stats_file, locust_distribution_file, app_name)
     }
   end
 
-  puts "Posting Locust results for \"#{app_name}\" to Stackdriver..."
   metric_service_client.create_time_series(formatted_name, time_series)
 end
