@@ -21,10 +21,6 @@ resource "null_resource" "locust_copy_tasks" {
         echo "Copying $FILE..."
         cp -f $PWD/$FILE ${var.charts_dir}/locust/$FILE
       done
-      # Full write permissions are required so CI worker can remove those
-      # files from shared dir in case Locust module deployment fails
-      # and cleanup resource is never executed.
-      chmod -R a+w ${var.charts_dir}/locust/tasks
     EOF
   }
 }
@@ -61,8 +57,8 @@ resource "null_resource" "locust_cleanup" {
 
   provisioner "local-exec" {
     command = <<EOF
-      echo "Removing tasks dir..."
-      rm -rf ${var.charts_dir}/locust/tasks
+      echo "Removing tasks..."
+      rm -rf ${var.charts_dir}/locust/tasks/*.py
     EOF
   }
 }
