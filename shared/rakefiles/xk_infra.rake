@@ -84,20 +84,6 @@ task :apply_common_infra => [@gcp_creds_file] do
      sh "#{@exekube_cmd} gcloud services enable #{service}" unless services_list.any? { |s| s['serviceName'] == service }
   end
 
-  # The following piece of code is needed by the SA to set its own permissions.
-  # But since it already has the permissions set we are going to comment it, and
-  # with this action we can reduce the permissions for the SA at the
-  # organization level.
-  #
-  # ["roles/resourcemanager.projectCreator", "roles/billing.user"].each do |role|
-  #   sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
-  #     --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com --role #{role}"
-  # end
-  #
-  # In order to reduce the permissions we are delegating the setting of the
-  # permssions to an operator. The following code checks that the SA has the
-  # correct permissions at the organization level to create the resources at
-  # a project level.
   permissions_list_json = %x{
     #{@exekube_cmd} gcloud organizations get-iam-policy #{ENV["ORGANIZATION_ID"]} --format=json
   }
@@ -107,7 +93,11 @@ task :apply_common_infra => [@gcp_creds_file] do
   permissions_list.each do |permission|
     organizations_permissions.delete(permission["role"]) if organizations_permissions.include?(permission["role"]) and permission["members"].include?(service_account)
   end
-  raise "The common Service Account #{service_account} doesn't have the proper permissions #{organizations_permissions}.\n\nAn operator with admin privileges on the organization must run the following command: rake fix_common_service_account_permissions\n\nCheck the credentials used with the command: rake sh[\"gcloud auth list\"]\n\nThe common Service Account needs these permissions at organization level in order to create the new projects and link the billing account them" unless organizations_permissions.empty?
+  raise "The common Service Account #{service_account} doesn't have the proper permissions #{organizations_permissions}.
+
+  An operator with admin privileges on the organization must run the following command: rake fix_common_service_account_permissions.
+  The gcloud commands executed by the operator must use the credentials of an admin account, avoiding the use of any Service Account credentials.
+  To check the credentials in use run the command: rake sh[\"gcloud auth list\"]\n\n" unless organizations_permissions.empty?
 
   tfstate_bucket = %x{
     #{@exekube_cmd} gsutil ls | grep 'gs://#{ENV["TF_VAR_project_id"]}-tfstate'
