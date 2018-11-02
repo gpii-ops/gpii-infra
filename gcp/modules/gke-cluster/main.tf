@@ -32,7 +32,10 @@ module "gke_cluster" {
     "https://www.googleapis.com/auth/devstorage.read_only",
     "https://www.googleapis.com/auth/logging.write",
     "https://www.googleapis.com/auth/monitoring",
-    "https://www.googleapis.com/auth/trace.append",
+    # Temporarily disable this oauth_scopes change so that we can add
+    # 'prevent_destroy' to running GKE cluster in prd without forcing cluster
+    # deletion.
+    ###"https://www.googleapis.com/auth/trace.append",
   ]
 
   dashboard_disabled = true
