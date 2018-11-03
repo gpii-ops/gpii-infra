@@ -238,3 +238,7 @@ There may be a situation, when we want to roll back entire DB data set to anothe
 
 * Favor pushing implementation "down the stack". The more we act like a "regular" Exekube project, the more we benefit from upstream improvements. Hence, favor Terraform code over in-line shell scripts over Ruby/Rake wrapper code.
    * Here is a [notable exception](https://github.com/gpii-ops/gpii-infra/pull/93/commits/5d307a373bd42505f066bb24f6686f107aed2728), where moving a calculation up to Ruby/Rake resulted in much simpler Terraform code.
+
+## Operational principles
+
+* Avoid deploying changes near the end of your work day.
