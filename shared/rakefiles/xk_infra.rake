@@ -84,10 +84,20 @@ task :apply_common_infra => [@gcp_creds_file] do
      sh "#{@exekube_cmd} gcloud services enable #{service}" unless services_list.any? { |s| s['serviceName'] == service }
   end
 
-  ["roles/resourcemanager.projectCreator", "roles/billing.user"].each do |role|
-    sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
-      --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com --role #{role}"
+  permissions_list_json = %x{
+    #{@exekube_cmd} gcloud organizations get-iam-policy #{ENV["ORGANIZATION_ID"]} --format=json
+  }
+  permissions_list = JSON.parse(permissions_list_json)["bindings"]
+  organizations_permissions = ["roles/resourcemanager.projectCreator", "roles/billing.user"]
+  service_account = "serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com"
+  permissions_list.each do |permission|
+    organizations_permissions.delete(permission["role"]) if organizations_permissions.include?(permission["role"]) and permission["members"].include?(service_account)
   end
+  raise "The common Service Account #{service_account} doesn't have the proper permissions #{organizations_permissions}.
+
+  An operator with admin privileges on the organization must run the following command: rake fix_common_service_account_permissions.
+  The gcloud commands executed by the operator must use the credentials of an admin account, avoiding the use of any Service Account credentials.
+  To check the credentials in use run the command: rake sh[\"gcloud auth list\"]\n\n" unless organizations_permissions.empty?
 
   tfstate_bucket = %x{
     #{@exekube_cmd} gsutil ls | grep 'gs://#{ENV["TF_VAR_project_id"]}-tfstate'
@@ -97,3 +107,11 @@ task :apply_common_infra => [@gcp_creds_file] do
     sh "#{@exekube_cmd} gsutil versioning set on gs://#{ENV["TF_VAR_project_id"]}-tfstate"
   end
 end
+
+task :fix_common_service_account_permissions => [@gcp_creds_file] do
+  ["roles/resourcemanager.projectCreator", "roles/billing.user"].each do |role|
+    sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
+      --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com --role #{role}"
+  end
+end
+
