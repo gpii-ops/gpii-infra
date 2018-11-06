@@ -92,6 +92,14 @@ data "google_iam_policy" "admin" {
   }
 
   binding {
+    role = "roles/monitoring.editor"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
     role = "roles/serviceusage.serviceUsageAdmin"
 
     members = [
