@@ -92,6 +92,7 @@ task :apply_common_infra => [@gcp_creds_file] do
                                "roles/billing.user",
                                "roles/iam.organizationRoleViewer",
                                "roles/iam.serviceAccountAdmin",
+                               "roles/iam.serviceAccountKeyAdmin",
                                "roles/resourcemanager.projectCreator",
                                "roles/resourcemanager.projectIamAdmin",
                                "roles/serviceusage.serviceUsageAdmin"]
@@ -119,6 +120,7 @@ task :fix_common_service_account_permissions => [@gcp_creds_file] do
    "roles/billing.user",
    "roles/iam.organizationRoleViewer",
    "roles/iam.serviceAccountAdmin",
+   "roles/iam.serviceAccountKeyAdmin",
    "roles/resourcemanager.projectCreator",
    "roles/resourcemanager.projectIamAdmin",
    "roles/serviceusage.serviceUsageAdmin"].each do |role|
