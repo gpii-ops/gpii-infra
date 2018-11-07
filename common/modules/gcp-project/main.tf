@@ -112,7 +112,6 @@ data "google_iam_policy" "admin" {
 
     members = [
       "serviceAccount:${google_service_account.project.email}",
-      "serviceAccount:projectowner@${var.project_id}.iam.gserviceaccount.com",
     ]
   }
 
@@ -125,13 +124,6 @@ data "google_iam_policy" "admin" {
     ]
   }
 
-  binding {
-    role = "roles/resourcemanager.projectIamAdmin"
-
-    members = [
-      "serviceAccount:projectowner@${var.project_id}.iam.gserviceaccount.com",
-    ]
-  }
 }
 
 provider "google" {
