@@ -123,6 +123,14 @@ data "google_iam_policy" "admin" {
       "serviceAccount:projectowner@${var.project_id}.iam.gserviceaccount.com",
     ]
   }
+
+  binding {
+    role = "roles/owner"
+
+    members = [
+      "${var.project_owner}",
+    ]
+  }
 }
 
 provider "google" {
@@ -179,24 +187,15 @@ resource "google_project_services" "project" {
   ]
 }
 
+resource "google_project_iam_policy" "project" {
+  project     = "${google_project.project.project_id}"
+  policy_data = "${data.google_iam_policy.admin.policy_data}"
+}
+
 resource "google_service_account" "project" {
   account_id   = "projectowner"
   display_name = "Project owner service account"
   project      = "${google_project.project.project_id}"
-}
-
-resource "google_project_iam_binding" "project" {
-  project = "${google_project.project.project_id}"
-  role    = "roles/owner"
-
-  members = [
-    "${var.project_owner}",
-  ]
-}
-
-resource "google_project_iam_policy" "project" {
-  project     = "${google_project.project.project_id}"
-  policy_data = "${data.google_iam_policy.admin.policy_data}"
 }
 
 resource "google_dns_managed_zone" "project" {
