@@ -1,5 +1,7 @@
 organizations_permissions = [
   "roles/iam.organizationRoleViewer",
+  "roles/iam.serviceAccountAdmin",
+  "roles/iam.serviceAccountKeyAdmin",
   "roles/resourcemanager.projectIamAdmin",
   "roles/resourcemanager.projectCreator",
   "roles/serviceusage.serviceUsageAdmin"
