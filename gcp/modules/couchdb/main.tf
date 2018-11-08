@@ -139,11 +139,11 @@ resource "null_resource" "couchdb_destroy_pvcs" {
     when = "destroy"
 
     command = <<EOF
-      for PVC in $(kubectl get pvc --namespace ${var.release_namespace} -o json | jq --raw-output '.items[] | select(.metadata.name | startswith("database-storage-couchdb")) | .metadata.name'); do
-        if [ "${var.execute_destroy_pvcs}" == "true" ]; then
+      if [ "${var.execute_destroy_pvcs}" == "true" ]; then
+        for PVC in $(kubectl get pvc --namespace ${var.release_namespace} -o json | jq --raw-output '.items[] | select(.metadata.name | startswith("database-storage-couchdb")) | .metadata.name'); do
           kubectl --namespace ${var.release_namespace} delete --ignore-not-found pvc $PVC
-        fi
-      done
+        done
+      fi
     EOF
   }
 }
