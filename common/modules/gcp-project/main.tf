@@ -196,10 +196,6 @@ resource "google_service_account" "project" {
   account_id   = "projectowner"
   display_name = "Project owner service account"
   project      = "${google_project.project.project_id}"
-
-  depends_on = ["google_project_services.project",
-    "google_project_iam_policy.project",
-  ]
 }
 
 resource "google_dns_managed_zone" "project" {
