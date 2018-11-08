@@ -38,10 +38,29 @@ resource "null_resource" "apply_stackdriver_alerting" {
       export PROJECT_ID=${var.project_id}
       export GOOGLE_CLOUD_KEYFILE=${var.serviceaccount_key}
       export STACKDRIVER_DEBUG=${var.stackdriver_debug}
-      ruby -e '
-        require "${path.module}/client.rb"
-        apply_resources
-      '
+
+      RETRIES=5
+      RETRY_COUNT=1
+      while [ "$STACKDRIVER_DID_NOT_FAIL" != "true" ]; do
+        STACKDRIVER_DID_NOT_FAIL="true"
+        echo "[Try $RETRY_COUNT of $RETRIES] Applying Stackdriver resources..."
+        ruby -e '
+          require "${path.module}/client.rb"
+          apply_resources
+        '
+        if [ "$?" != "0" ]; then
+          STACKDRIVER_DID_NOT_FAIL="false"
+        fi
+
+        RETRY_COUNT=$(($RETRY_COUNT+1))
+        if [ "$RETRY_COUNT" == "$RETRIES" ]; then
+          echo "Retry limit reached, giving up!"
+          exit 1
+        fi
+        if [ "$STACKDRIVER_DID_NOT_FAIL" == "false" ]; then
+          sleep 10
+        fi
+      done
     EOF
   }
 }
@@ -55,10 +74,29 @@ resource "null_resource" "destroy_stackdriver_alerting" {
     command = <<EOF
       export PROJECT_ID=${var.project_id}
       export GOOGLE_CLOUD_KEYFILE=${var.serviceaccount_key}
-      ruby -e '
-        require "${path.module}/client.rb"
-        destroy_resources
-      '
+
+      RETRIES=5
+      RETRY_COUNT=1
+      while [ "$STACKDRIVER_DID_NOT_FAIL" != "true" ]; do
+        STACKDRIVER_DID_NOT_FAIL="true"
+        echo "[Try $RETRY_COUNT of $RETRIES] Destroying Stackdriver resources..."
+        ruby -e '
+          require "${path.module}/client.rb"
+          destroy_resources
+        '
+        if [ "$?" != "0" ]; then
+          STACKDRIVER_DID_NOT_FAIL="false"
+        fi
+
+        RETRY_COUNT=$(($RETRY_COUNT+1))
+        if [ "$RETRY_COUNT" == "$RETRIES" ]; then
+          echo "Retry limit reached, giving up!"
+          exit 1
+        fi
+        if [ "$STACKDRIVER_DID_NOT_FAIL" == "false" ]; then
+          sleep 10
+        fi
+      done
     EOF
   }
 }
