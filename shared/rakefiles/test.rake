@@ -6,8 +6,18 @@ task :test do
   sh "#{@exekube_cmd} rake xk['down live/#{@env}/locust',skip_secret_mgmt] || true"
   Rake::Task[:destroy_tfstate].invoke('locust')
 
-  puts "Waiting for K8s to fully terminate Locust resources..."
-  sleep 45
+  sh "#{@exekube_cmd} sh -c ' \
+      RETRIES=10; \
+      RETRY_COUNT=1; \
+      while [ \"$(kubectl get pods -n locust -o json 2> /dev/null | jq -r .items[] | grep -c .)\" != \"0\" ]; do \
+        echo \"[Try $RETRY_COUNT of $RETRIES] Waiting for K8s to terminate Locust pods...\"; \
+        RETRY_COUNT=$(($RETRY_COUNT+1)); \
+        if [ \"$RETRY_COUNT\" == \"$RETRIES\" ]; then \
+          echo \"Retry limit reached, giving up!\"; \
+          exit 1; \
+        fi; \
+        sleep 10; \
+      done'"
 
   sh "#{@exekube_cmd} rake xk['up live/#{@env}/locust',skip_secret_mgmt]"
 end
