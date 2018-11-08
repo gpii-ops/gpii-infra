@@ -123,7 +123,6 @@ data "google_iam_policy" "admin" {
       "serviceAccount:projectowner@${var.project_id}.iam.gserviceaccount.com",
     ]
   }
-
 }
 
 provider "google" {
