@@ -1,7 +1,8 @@
 organizations_permissions = [
   "roles/iam.organizationRoleViewer",
   "roles/resourcemanager.projectIamAdmin",
-  "roles/resourcemanager.projectCreator"
+  "roles/resourcemanager.projectCreator",
+  "roles/serviceusage.serviceUsageAdmin"
 ]
 
 task :refresh_common_infra, [:project_type] => [@gcp_creds_file] do | taskname, args|
