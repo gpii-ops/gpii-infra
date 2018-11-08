@@ -60,22 +60,22 @@ resource "null_resource" "couchdb_finish_cluster" {
 
   provisioner "local-exec" {
     command = <<EOF
-      RETRIES=10
+      RETRIES=15
       RETRY_COUNT=1
-      while [ "$PODS_READY" != "true" ]; do
-        PODS_READY="true"
-        echo "[Try $RETRY_COUNT of $RETRIES] Waiting for all CouchDB pods to become Running..."
-        for STATUS in $(kubectl get pods --namespace ${var.release_namespace} -l app=couchdb -o jsonpath='{.items[*].status.phase}'); do
-          if [ "$STATUS" != "Running" ]; then
-            PODS_READY="false"
-          fi
-        done
+      while [ "$CLUSTER_READY" != "true" ]; do
+        echo "[Try $RETRY_COUNT of $RETRIES] Waiting for all CouchDB pods to join the cluster..."
+        CLUSTER_READY="true"
+        CLUSTER_MEMBERS_COUNT=$(kubectl exec --namespace gpii couchdb-couchdb-0 -c couchdb -- curl -s http://${var.secret_couchdb_admin_username}:${var.secret_couchdb_admin_password}@127.0.0.1:5984/_membership 2>/dev/null | jq -r .cluster_nodes[] | grep -c .)
+        echo "$CLUSTER_MEMBERS_COUNT of ${var.replica_count} pods have joined the cluster."
+        if [ "$CLUSTER_MEMBERS_COUNT" != "${var.replica_count}" ]; then
+          CLUSTER_READY="false"
+        fi
         RETRY_COUNT=$(($RETRY_COUNT+1))
-        if [ "$RETRY_COUNT" -eq "$RETRIES" ]; then
+        if [ "$RETRY_COUNT" == "$RETRIES" ]; then
           echo "Retry limit reached, giving up!"
           exit 1
         fi
-        if [ "$PODS_READY" == "false" ]; then
+        if [ "$CLUSTER_READY" == "false" ]; then
           sleep 10
         fi
       done
@@ -86,10 +86,10 @@ resource "null_resource" "couchdb_finish_cluster" {
           kubectl exec --namespace ${var.release_namespace} couchdb-couchdb-0 -c couchdb -- \
           curl -s http://${var.secret_couchdb_admin_username}:${var.secret_couchdb_admin_password}@127.0.0.1:5984/_cluster_setup \
           -X POST -H 'Content-Type: application/json' -d '{"action": "finish_cluster"}')
-        echo "[Try $RETRY_COUNT of $RETRIES] CouchDB returned: $RESULT"
+        echo "[Try $RETRY_COUNT of $RETRIES] Posting \"finish_cluster\", CouchDB returned: $RESULT"
         STATUS=$(echo $RESULT | jq ".reason")
         RETRY_COUNT=$(($RETRY_COUNT+1))
-        if [ "$RETRY_COUNT" -eq "$RETRIES" ]; then
+        if [ "$RETRY_COUNT" == "$RETRIES" ]; then
           echo "Retry limit reached, giving up!"
           exit 1
         fi
