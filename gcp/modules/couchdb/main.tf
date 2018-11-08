@@ -63,14 +63,13 @@ resource "null_resource" "couchdb_finish_cluster" {
       RETRIES=15
       RETRY_COUNT=1
       while [ "$CLUSTER_READY" != "true" ]; do
-        CLUSTER_READY="true"
         echo "[Try $RETRY_COUNT of $RETRIES] Waiting for all CouchDB pods to join the cluster..."
-        for CLUSTER_MEMBERS in $(kubectl exec --namespace gpii couchdb-couchdb-0 -c couchdb -- curl -s http://${var.secret_couchdb_admin_username}:${var.secret_couchdb_admin_password}@127.0.0.1:5984/_membership 2>/dev/null | jq -r .cluster_nodes[] | grep -c .); do
-          echo "$CLUSTER_MEMBERS of ${var.replica_count}" pods have joined the cluster.
-          if [ "$CLUSTER_MEMBERS" != "${var.replica_count}" ]; then
-            CLUSTER_READY="false"
-          fi
-        done
+        CLUSTER_READY="true"
+        CLUSTER_MEMBERS_COUNT=$(kubectl exec --namespace gpii couchdb-couchdb-0 -c couchdb -- curl -s http://${var.secret_couchdb_admin_username}:${var.secret_couchdb_admin_password}@127.0.0.1:5984/_membership 2>/dev/null | jq -r .cluster_nodes[] | grep -c .)
+        echo "$CLUSTER_MEMBERS_COUNT of ${var.replica_count} pods have joined the cluster."
+        if [ "$CLUSTER_MEMBERS_COUNT" != "${var.replica_count}" ]; then
+          CLUSTER_READY="false"
+        fi
         RETRY_COUNT=$(($RETRY_COUNT+1))
         if [ "$RETRY_COUNT" -eq "$RETRIES" ]; then
           echo "Retry limit reached, giving up!"
