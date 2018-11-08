@@ -34,7 +34,7 @@ resource "null_resource" "locust_swarm_session" {
         fi
         echo "Number of ready workers: $WORKERS_READY out of ${var.locust_workers}!"
         RETRY_COUNT=$(($RETRY_COUNT+1))
-        if [ "$RETRY_COUNT" -eq "$RETRIES" ]; then
+        if [ "$RETRY_COUNT" == "$RETRIES" ]; then
           echo "Retry limit reached, giving up!"
           exit 1
         fi
@@ -102,7 +102,7 @@ resource "null_resource" "locust_swarm_session" {
         fi
 
         RETRY_COUNT=$(($RETRY_COUNT+1))
-        if [ "$RETRY_COUNT" -eq "$RETRIES" ]; then
+        if [ "$RETRY_COUNT" == "$RETRIES" ]; then
           echo "Retry limit reached, giving up!"
           EXIT_STATUS=1
         fi
