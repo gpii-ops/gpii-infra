@@ -1,3 +1,8 @@
+organizations_permissions = [
+  "roles/iam.organizationRoleViewer",
+  "roles/resourcemanager.projectCreator"
+]
+
 task :refresh_common_infra, [:project_type] => [@gcp_creds_file] do | taskname, args|
 
   next if args[:project_type] == "common"
@@ -88,14 +93,6 @@ task :apply_common_infra => [@gcp_creds_file] do
     #{@exekube_cmd} gcloud organizations get-iam-policy #{ENV["ORGANIZATION_ID"]} --format=json
   }
   permissions_list = JSON.parse(permissions_list_json)["bindings"]
-  organizations_permissions = ["roles/billing.projectManager",
-                               "roles/billing.user",
-                               "roles/iam.organizationRoleViewer",
-                               "roles/iam.serviceAccountAdmin",
-                               "roles/iam.serviceAccountKeyAdmin",
-                               "roles/resourcemanager.projectCreator",
-                               "roles/resourcemanager.projectIamAdmin",
-                               "roles/serviceusage.serviceUsageAdmin"]
   service_account = "serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com"
   permissions_list.each do |permission|
     organizations_permissions.delete(permission["role"]) if organizations_permissions.include?(permission["role"]) and permission["members"].include?(service_account)
@@ -116,16 +113,18 @@ task :apply_common_infra => [@gcp_creds_file] do
 end
 
 task :fix_common_service_account_permissions => [@gcp_creds_file] do
-  ["roles/billing.projectManager",
-   "roles/billing.user",
-   "roles/iam.organizationRoleViewer",
-   "roles/iam.serviceAccountAdmin",
-   "roles/iam.serviceAccountKeyAdmin",
-   "roles/resourcemanager.projectCreator",
-   "roles/resourcemanager.projectIamAdmin",
-   "roles/serviceusage.serviceUsageAdmin"].each do |role|
+  organizations_permissions.each do |role|
     sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
       --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com --role #{role}"
   end
+
+  # The billing account is owned by the organization 247149361674
+  # (raisingthefloor.org), that means that the permissions are inherited from
+  # such organization. All the SA that need a billing permission must be in this
+  # organization IAM settings.
+  # Go to the https://console.cloud.google.com/billing/ to see the permissions
+  # granted to which SA for using billing services.
+  sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding 247149361674 \
+    --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com --role roles/billing.user"
 end
 
