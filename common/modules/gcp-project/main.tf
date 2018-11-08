@@ -108,6 +108,14 @@ data "google_iam_policy" "admin" {
   }
 
   binding {
+    role = "roles/resourcemanager.projectIamAdmin"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
     role = "roles/serviceusage.serviceUsageAdmin"
 
     members = [
