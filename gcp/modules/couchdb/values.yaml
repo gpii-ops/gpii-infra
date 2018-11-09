@@ -8,8 +8,8 @@ persistentVolume:
   enabled: true
   accessModes:
     - ReadWriteOnce
-  size: 10Gi
-  storageClass: "standard"
+  size: ${pv_capacity}
+  storageClass: ${pv_storage_class}
 
 affinity:
   podAntiAffinity:

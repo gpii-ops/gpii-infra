@@ -7,23 +7,28 @@ variable "charts_dir" {}
 variable "nonce" {}
 
 # Terragrunt variables
-variable "replica_count" {}
 
+variable "replica_count" {}
 variable "backup_deltas" {}
 variable "release_namespace" {}
 variable "requests_cpu" {}
 variable "requests_memory" {}
 variable "limits_cpu" {}
 variable "limits_memory" {}
+variable "pv_capacity" {}
+variable "pv_storage_class" {}
+variable "pv_reclaim_policy" {}
+variable "execute_destroy_pvcs" {}
 
 # Secret variables
-variable "secret_couchdb_admin_username" {}
 
 variable "secret_couchdb_admin_password" {}
+variable "secret_couchdb_admin_username" {}
 variable "secret_couchdb_auth_cookie" {}
 
 data "template_file" "couchdb_values" {
-  template = "${file("values.yaml")}"
+  depends_on = ["null_resource.couchdb_recover"]
+  template   = "${file("values.yaml")}"
 
   vars {
     couchdb_admin_username = "${var.secret_couchdb_admin_username}"
@@ -34,6 +39,8 @@ data "template_file" "couchdb_values" {
     requests_memory        = "${var.requests_memory}"
     limits_cpu             = "${var.limits_cpu}"
     limits_memory          = "${var.limits_memory}"
+    pv_capacity            = "${var.pv_capacity}"
+    pv_storage_class       = "${var.pv_storage_class}"
   }
 }
 
@@ -132,9 +139,11 @@ resource "null_resource" "couchdb_destroy_pvcs" {
     when = "destroy"
 
     command = <<EOF
-      for PVC in $(kubectl get pvc --namespace ${var.release_namespace} -o json | jq --raw-output '.items[] | select(.metadata.name | startswith("database-storage-couchdb")) | .metadata.name'); do
-        kubectl --namespace ${var.release_namespace} delete --ignore-not-found pvc $PVC
-      done
+      if [ "${var.execute_destroy_pvcs}" == "true" ]; then
+        for PVC in $(kubectl get pvc --namespace ${var.release_namespace} -o json | jq --raw-output '.items[] | select(.metadata.name | startswith("database-storage-couchdb")) | .metadata.name'); do
+          kubectl --namespace ${var.release_namespace} delete --ignore-not-found pvc $PVC
+        done
+      fi
     EOF
   }
 }

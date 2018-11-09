@@ -30,6 +30,6 @@ resource "null_resource" "cert_manager_resources" {
 
   provisioner "local-exec" {
     when    = "destroy"
-    command = "kubectl delete --ignore-not-found -f ${path.module}/resources/"
+    command = "kubectl delete --ignore-not-found -f ${path.module}/resources/ || true"
   }
 }
