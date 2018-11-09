@@ -108,11 +108,18 @@ data "google_iam_policy" "admin" {
   }
 
   binding {
+    role = "roles/resourcemanager.projectIamAdmin"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
     role = "roles/serviceusage.serviceUsageAdmin"
 
     members = [
       "serviceAccount:${google_service_account.project.email}",
-      "serviceAccount:projectowner@${var.project_id}.iam.gserviceaccount.com",
     ]
   }
 
@@ -126,10 +133,10 @@ data "google_iam_policy" "admin" {
   }
 
   binding {
-    role = "roles/resourcemanager.projectIamAdmin"
+    role = "roles/owner"
 
     members = [
-      "serviceAccount:projectowner@${var.project_id}.iam.gserviceaccount.com",
+      "${var.project_owner}",
     ]
   }
 }
@@ -188,24 +195,15 @@ resource "google_project_services" "project" {
   ]
 }
 
+resource "google_project_iam_policy" "project" {
+  project     = "${google_project.project.project_id}"
+  policy_data = "${data.google_iam_policy.admin.policy_data}"
+}
+
 resource "google_service_account" "project" {
   account_id   = "projectowner"
   display_name = "Project owner service account"
   project      = "${google_project.project.project_id}"
-}
-
-resource "google_project_iam_binding" "project" {
-  project = "${google_project.project.project_id}"
-  role    = "roles/owner"
-
-  members = [
-    "${var.project_owner}",
-  ]
-}
-
-resource "google_project_iam_policy" "project" {
-  project     = "${google_project.project.project_id}"
-  policy_data = "${data.google_iam_policy.admin.policy_data}"
 }
 
 resource "google_dns_managed_zone" "project" {
@@ -214,7 +212,7 @@ resource "google_dns_managed_zone" "project" {
   dns_name = "${local.dnsname}."
 
   depends_on = ["google_project_services.project",
-    "google_project_iam_binding.project",
+    "google_project_iam_policy.project",
   ]
 }
 
