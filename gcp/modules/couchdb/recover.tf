@@ -3,7 +3,6 @@
 # https://issues.gpii.net/browse/GPII-3493
 
 resource "null_resource" "couchdb_recover" {
-
   triggers = {
     nonce = "${var.nonce}"
   }
