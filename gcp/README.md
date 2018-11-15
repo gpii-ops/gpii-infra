@@ -242,3 +242,4 @@ There may be a situation, when we want to roll back entire DB data set to anothe
 ## Operational principles
 
 * Avoid deploying changes near the end of your work day.
+* Avoid deploying on Friday or prior to a holiday.
