@@ -1,3 +1,12 @@
+organizations_permissions = [
+  "roles/iam.organizationRoleViewer",
+  "roles/iam.serviceAccountAdmin",
+  "roles/iam.serviceAccountKeyAdmin",
+  "roles/resourcemanager.projectIamAdmin",
+  "roles/resourcemanager.projectCreator",
+  "roles/serviceusage.serviceUsageAdmin"
+]
+
 task :refresh_common_infra, [:project_type] => [@gcp_creds_file] do | taskname, args|
 
   next if args[:project_type] == "common"
@@ -84,10 +93,19 @@ task :apply_common_infra => [@gcp_creds_file] do
      sh "#{@exekube_cmd} gcloud services enable #{service}" unless services_list.any? { |s| s['serviceName'] == service }
   end
 
-  ["roles/resourcemanager.projectCreator", "roles/billing.user"].each do |role|
-    sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
-      --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com --role #{role}"
+  permissions_list_json = %x{
+    #{@exekube_cmd} gcloud organizations get-iam-policy #{ENV["ORGANIZATION_ID"]} --format=json
+  }
+  permissions_list = JSON.parse(permissions_list_json)["bindings"]
+  service_account = "serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com"
+  permissions_list.each do |permission|
+    organizations_permissions.delete(permission["role"]) if organizations_permissions.include?(permission["role"]) and permission["members"].include?(service_account)
   end
+  raise "The common Service Account #{service_account} doesn't have the proper permissions #{organizations_permissions}.
+
+  An operator with admin privileges on the organization must run the following command: rake fix_common_service_account_permissions.
+  The gcloud commands executed by the operator must use the credentials of an admin account, avoiding the use of any Service Account credentials.
+  To check the credentials in use run the command: rake sh[\"gcloud auth list\"]\n\n" unless organizations_permissions.empty?
 
   tfstate_bucket = %x{
     #{@exekube_cmd} gsutil ls | grep 'gs://#{ENV["TF_VAR_project_id"]}-tfstate'
@@ -97,3 +115,20 @@ task :apply_common_infra => [@gcp_creds_file] do
     sh "#{@exekube_cmd} gsutil versioning set on gs://#{ENV["TF_VAR_project_id"]}-tfstate"
   end
 end
+
+task :fix_common_service_account_permissions => [@gcp_creds_file] do
+  organizations_permissions.each do |role|
+    sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
+      --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com --role #{role}"
+  end
+
+  # The billing account is owned by the organization 247149361674
+  # (raisingthefloor.org), that means that the permissions are inherited from
+  # such organization. All the SA that need a billing permission must be in this
+  # organization IAM settings.
+  # Go to the https://console.cloud.google.com/billing/ to see the permissions
+  # granted to which SA for using billing services.
+  sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding 247149361674 \
+    --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com --role roles/billing.user"
+end
+

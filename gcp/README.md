@@ -116,6 +116,45 @@ An environment needs some resources created in the organization before the follo
 1. Log in to the CI Worker and clone this repo.
 1. `cd gpii-infra/ && rake -f rakefiles/ci_save_all.rake`
 
+
+## Monitoring and alerting
+
+We use [Stackdriver Beta Monitoring](https://cloud.google.com/monitoring/kubernetes-engine/) to collect various system metrics, navigate through them with [Kubernetes Dashboard](https://app.google.stackdriver.com/kubernetes), and send alerts when they violate thresholds that are being set by [Stackdriver Alerting Policies](https://app.google.stackdriver.com/policies).
+
+Due to the lack of Terraform integration we use [Ruby client](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/modules/gcp-stackdriver-alerting/client.rb) to apply / update / destroy Stackdriver's resource primitives from their [json configs](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/modules/gcp-stackdriver-alerting/resources).
+
+### One-time Stackdriver Workspace setup
+
+Manual workspace configuration is required in case you never used Stackdriver in your project before.
+
+1. Go to [Stackdriver Monitoring Overview](https://app.google.stackdriver.com), you will be redirected to Project Setup page if needed.
+1. Select "Create a new Workspace". Click "Continue".
+1. Make sure that you see your project id under "Google Cloud Platform project". Click "Create workspace".
+1. Make sure that only your project is selected under "Add Google Cloud Platform projects to monitor". Click "Continue".
+1. Click "Skip AWS Setup".
+1. Click "Continue".
+1. Select desired reports frequency under "Get Reports by Email". Click "Continue".
+1. Finished initial collection! Click "Launch Monitoring".
+
+### To add new resource / debug existing resources:
+1. Add new resource / modify existing resource using corresponding Stackdriver Dashboard. **Supported resources are:**
+   * [Notification channels](https://app.google.stackdriver.com/settings/accounts/notifications/email) (only email notification channel type is currently supported, all notification channels are being applied to every alert policy).
+   * [Uptime checks](https://app.google.stackdriver.com/uptime).
+   * [Alert policies](https://app.google.stackdriver.com/policies).
+1. Run `TF_VAR_stackdriver_debug=1 rake deploy_module['k8s/stackdriver/alerting']`.
+1. You will find json blobs for all supported Stackdriver resources in the output.
+1. To add new resource config into `gcp-stackdriver-alerting` module:
+   * Copy json blob that you obtained on previous step into proper [resource directory](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/modules/gcp-stackdriver-alerting/resources). Give a meaningful name to a new resource file. You can use `jq` to help with formatting.
+   * Remove all `name` attributes.
+   * Repeat from **step 2.** All newly configured resources will be synced with Stackriver.
+1. In case you added new email notification channel, you may want to authorize new sender to post to [Alerts Group](https://groups.google.com/a/raisingthefloor.org/forum/#!pendingmsg/alerts). Follow the link, select new message and click "Post and always allow future messages from author(s)" button.
+
+### To configure Dashboards for your project:
+1. Go to [Metrics Explorer](https://app.google.stackdriver.com/metrics-explorer).
+1. Select resource type, metric and configure other parameters for the chart that you want to add to your Dashboard.
+1. Click "Save Chart". Select existing one or new Dashboard. Click "Save".
+1. Your Stackdriver Dashboard should be now available in [Dashboard Manager](https://app.google.stackdriver.com/dashboards).
+
 ## FAQ / Troubleshooting
 
 ### Errors trying to enable/disable Google Cloud APIs
@@ -153,12 +192,26 @@ rake sh["gcloud services disable container.googleapis.com"]
 This happens due to limitation of maximum 10 keys per ServiceAccount.
 If you see this error during any `rake` execution, run `rake destroy_sa_keys` and then try again.
 
-### Restoring CouchDB data
+### oauth2: cannot fetch token: 400 Bad Request
+
+This happens when you run some commands in an environment (usually `stg` or `prd`) before, did not run `rake clobber`, CI run after that and destroyed your SA key. Error is basically saying that locally stored SA key is invalid and needs to re-issued.
+Solution is to `rake clobber` and re-authenticate.
+
+### helm_release.release: rpc error: code = Unavailable desc = transport is closing
+
+This caused by locally missing helm certificates (similarly to previous error, it usually happens when working to `stg` or `prd` environment, after `rake clobber`) and can be fixed by running `rake deploy_module['k8s/kube-system/helm-initializer']`.
+
+### helm_release.release: error creating tunnel: "could not find tiller"
+
+This some times happens during forceful cluster re-creation (for example when updating oauth scopes), and caused by Terraform failing to trigger `helm-initializer` module deployment.
+Solution is to run `rake deploy_module['k8s/kube-system/helm-initializer']`.
+
+## Restoring CouchDB data
 
 We are considering number of probable failure scenarios for our GCP infrastructure.
 You can run all `kubectl` commands mentioned below inside of interactive shell started with `rake sh`.
 
-1. **Data corruption on a single CouchDB replica**
+### Data corruption on a single CouchDB replica
 
 In this scenario we rely on CouchDB ability to recover from loss of one or more replicas (our current production CouchDB settings allow us to lose up to 2 random nodes and still keep data integrity). The best course of action as follows:
 
@@ -174,22 +227,22 @@ In this scenario we rely on CouchDB ability to recover from loss of one or more 
 * Corrupted node is now recovered.
    * You can check DB status on recovered node with `kubectl exec --namespace gpii -it couchdb-couchdb-N -c couchdb -- curl -s http://$TF_VAR_couchdb_admin_username:$TF_VAR_couchdb_admin_password@127.0.0.1:5984/gpii/`, where N is node index.
 
-2. **Data corruption on all replicas of CouchDB cluster**
+### Data corruption on all replicas of CouchDB cluster
 
 There may be a situation, when we want to roll back entire DB data set to another point in the past. Current solution is disruptive, requires bringing entire CouchDB cluster down and some manual actions (we'll most likely automate this in future):
 
 * Choose a snapshot set that you want to restore, make sure that snapshots are present for all disks that are currently in use by CouchDB cluster.
-* Collect CouchDB volume names from PVCs with `kubectl --namespace gpii get pvc | grep database-storage-couchdb`.
+* Collect CouchDB disk names from PVCs with `kubectl --namespace gpii get pvc -l app=couchdb -o json | jq -r .items[].spec.volumeName`.
 * Get current number of CouchDB stateful set replicas with `kubectl --namespace gpii get statefulset couchdb-couchdb -o jsonpath="{.status.replicas}"`.
 * Scale CouchDB stateful set to 0 replicas with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=0`. This will cause K8s to terminate all CouchDB pods, all PDs that were mounted into them will be released. **This will prevent flowmanager and preferences services from processing customer requests!**
    * You may also want to scale `flowmanager` and `preferences` deployments to 0 replicas as well with `kubectl --namespace gpii scale deployment preferences --replicas=0` and `kubectl --namespace gpii scale deployment flowmanager --replicas=0`. This will give you time to verify that DB restoration is successful before allowing the DB to receive traffic again.
 * Destroy `k8s-snapshots` module with `rake destroy_module["k8s/kube-system/k8s-snapshots"]` to prevent new snapshots from being created while you working with disks.
 * Open Google Cloud console, go to "Compute Engine" -> "Disks".
-* Now, for every PD you collected:
-   * Remember PD's name, type, size and zone.
+* Now, repeat for every CouchDB disk name you collected:
+   * Save disk name, type, size, zone and description.
    * Pick proper snapshot.
    * Delete PD.
-   * Create new PD from snapshot with the same name, type, size and zone.
+   * Create new PD from snapshot with the same name, type, size, zone and description.
 * Scale CouchDB stateful set back to number of replicas it used to have before with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=N`
 * Database is now restored to the state at the time of target snapshot.
    * You can check the status of all nodes with `for i in {0..N}; do kubectl exec --namespace gpii -it couchdb-couchdb-$i -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/_up; done`, where N is a number of CouchDB replicas.
@@ -200,3 +253,8 @@ There may be a situation, when we want to roll back entire DB data set to anothe
 
 * Favor pushing implementation "down the stack". The more we act like a "regular" Exekube project, the more we benefit from upstream improvements. Hence, favor Terraform code over in-line shell scripts over Ruby/Rake wrapper code.
    * Here is a [notable exception](https://github.com/gpii-ops/gpii-infra/pull/93/commits/5d307a373bd42505f066bb24f6686f107aed2728), where moving a calculation up to Ruby/Rake resulted in much simpler Terraform code.
+
+## Operational principles
+
+* Avoid deploying changes near the end of your work day.
+* Avoid deploying on Friday or prior to a holiday.

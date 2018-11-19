@@ -237,20 +237,12 @@ To delete the lock:
    * Delete the `NS` record for your cluster (e.g. `dev-mrtyler.gpii.net.`).
 1. Other stuff - a few more things to clean if you're still having problems.
    * Check for orphaned IAM Roles using the AWS dashboard (Services `->` search for IAM `->` Roles) and delete them.
+   * Check for orphaned Key Pairs using the AWS dashboard (Services `->` search for EC2 `->` Key pairs) and delete them.
    * Delete `$TMPDIR/rake-tmp` (`rake clobber` should take care of this but just in case).
    * Delete `~/.terraform.d` from your home directory.
    * Delete any directories in your `gpii-infra/aws` directory named `.bundle` or `.terraform` (`find aws/ -name '*.bundle' -o -name '*.terraform'`).
 1. Run `rake _destroy` again to make sure Terraform agrees that all the old resources are gone and to clean up DNS entries.
 1. `rake clobber` - cleans up generated files.
-
-### The Job "gpii-dataloader" is invalid
-
-When re-deploying `gpii-dataloader` (e.g. running `rake` against an already existing cluster), the following error is expected and harmless:
-```
-The Job "gpii-dataloader" is invalid: spec.template: Invalid value: api.PodTemplateSpec{... lots of stuff ...}: field is immutable
-```
-
-See also [A note about local changes and gpii-dataloader](#a-note-about-local-changes-and-gpii-dataloader)
 
 ### Running manually in non-dev environments (stg, prd)
 
@@ -269,23 +261,13 @@ See [CI-CD.md#running-in-non-dev-environments](../CI-CD.md#running-manually-in-n
 
 #### Can't I just edit `versions.yml` by hand?
 
-gpii-infra uses explicit SHAs to refer to specific Docker images for GPII components. This has a number of advantages (repeatability, auditability) but the main thing you care about is that changing the SHA forces Kubernetes to re-deploy a component (but see below for a note about gpii-dataloader).
+gpii-infra uses explicit SHAs to refer to specific Docker images for GPII components. This has a number of advantages (repeatability, auditability) but the main thing you care about is that changing the SHA forces Kubernetes to re-deploy a component.
 
 If you don't want to deal with gpii-version-updater, you can instead:
 1. Edit `shared/versions.yml`. Find your component and replace the entire image value (path and SHA) with your Docker Hub user account.
    * E.g., `flowmanager: "gpii/universal@sha256:4b3...64f" -> flowmanager: "mrtyler/universal"`
 1. Manually delete the component via Kubernetes Dashboard or with `kubectl delete`.
 1. `cd aws/dev && rake deploy`
-
-#### A note about local changes and gpii-dataloader
-
-[gpii-dataloader](https://github.com/gpii-ops/gpii-dataloader) initializes CouchDB with some canned data. It is designed to run once, as a Kubernetes Job. If you want to run it again, e.g. to test changes to the canned data:
-1. Note that the dataloader **deletes all data in CouchDB** when it runs.
-1. Because of how Kubernetes Jobs work, the dataloader will not re-run when a new Docker image becomes available (this is different from Deployments like `flowmanager`, which are updated when the Docker image changes).
-1. Thus, to make changes to the dataloader:
-   * Delete the Job: `helm delete --purge dataloader`
-   * Re-deploy the Job: `cd aws/dev && rake deploy`
-1. We abuse the fact that Kubernetes doesn't allow a Job's Docker image to be changed to prevent the dataloader Job from running (and deleting all data from CouchDB) every time. See [The Job "gpii-dataloder" is invalid](#the-job-gpii-dataloader-is-invalid) and [this architecture@ thread](https://lists.gpii.net/pipermail/infrastructure/2017-September/000070.html).
 
 ### I want to see metrics, graphs, or alerts for my cluster
   * `rake display_cluster_info`
@@ -454,7 +436,7 @@ The process:
 
 1. Go into the corresponding folder with the cluster name where you want to perform the process, "stg", "prd" or "dev". In this case We are going to perform the process in "dev": `cd gpii-infra/aws/dev`.
 1. Set up the env you are going to deal with: rake configure_kubectl
-1. Optional, re-run the current dataloader to be sure that it's using the original dbData, run `helm delete --purge dataloader && rake deploy` as described [here](https://github.com/gpii-ops/gpii-infra/blob/master/aws/README.md#a-note-about-local-changes-and-gpii-dataloader). Note that if you are going to perform this step in either "prd" or "stg" environments, take into account that the same CouchDB credentials usded in "stg"/"prd" must be set in the _secrets.yml_ to avoid authentication failures. For that, you will need to ask an Op for such credentials which are set in the CI configuration.
+1. Optional, re-run the current dataloader to be sure that it's using the original dbData, run `helm delete --purge dataloader && rake deploy`. Note that if you are going to perform this step in either "prd" or "stg" environments, take into account that the same CouchDB credentials usded in "stg"/"prd" must be set in the _secrets.yml_ to avoid authentication failures. For that, you will need to ask an Op for such credentials which are set in the CI configuration.
 1. Open a port forwarding between the cluster's couchdb host:port and your local machine: `kubectl --namespace gpii port-forward couchdb-0 5984`
 
 The port forwarding will be there until you hit _Ctrl-C_, so leave it running until we are done loading the preferences sets.

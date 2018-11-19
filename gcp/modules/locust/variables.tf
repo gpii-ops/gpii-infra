@@ -1,8 +1,12 @@
-variable "locust_script" {
+variable "locust_target_app" {
   default = ""
 }
 
 variable "locust_target_host" {
+  default = ""
+}
+
+variable "locust_script" {
   default = ""
 }
 

@@ -7,7 +7,7 @@ terragrunt = {
   dependencies {
     paths = [
       "../../kube-system/helm-initializer",
-      "../../kube-system/cert-manager",
+      "../../kube-system/cert-manager"
     ]
   }
 
@@ -21,8 +21,12 @@ terragrunt = {
 backup_deltas     = "PT5M PT15M PT45M"
 release_namespace = "gpii"
 
-replica_count     = 2
-requests_cpu      = "500m"
-requests_memory   = "512Mi"
-limits_cpu        = "1000m"
-limits_memory     = "512Mi"
+replica_count        = 2
+requests_cpu         = "500m"
+requests_memory      = "512Mi"
+limits_cpu           = "1000m"
+limits_memory        = "512Mi"
+pv_capacity          = "10Gi"
+pv_reclaim_policy    = "Delete"
+pv_storage_class     = "standard"
+execute_destroy_pvcs = "true"

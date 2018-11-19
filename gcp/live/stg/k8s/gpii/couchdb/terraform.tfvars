@@ -21,8 +21,12 @@ terragrunt = {
 backup_deltas     = "PT15M PT60M PT4H PT24H P7D"
 release_namespace = "gpii"
 
-replica_count     = 3
-requests_cpu      = "1000m"
-requests_memory   = "512Mi"
-limits_cpu        = "1000m"
-limits_memory     = "512Mi"
+replica_count        = 3
+requests_cpu         = "1000m"
+requests_memory      = "512Mi"
+limits_cpu           = "1000m"
+limits_memory        = "512Mi"
+pv_capacity          = "10Gi"
+pv_reclaim_policy    = "Delete"
+pv_storage_class     = "standard"
+execute_destroy_pvcs = "false"

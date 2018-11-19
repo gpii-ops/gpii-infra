@@ -7,23 +7,28 @@ variable "charts_dir" {}
 variable "nonce" {}
 
 # Terragrunt variables
-variable "replica_count" {}
 
+variable "replica_count" {}
 variable "backup_deltas" {}
 variable "release_namespace" {}
 variable "requests_cpu" {}
 variable "requests_memory" {}
 variable "limits_cpu" {}
 variable "limits_memory" {}
+variable "pv_capacity" {}
+variable "pv_storage_class" {}
+variable "pv_reclaim_policy" {}
+variable "execute_destroy_pvcs" {}
 
 # Secret variables
-variable "secret_couchdb_admin_username" {}
 
 variable "secret_couchdb_admin_password" {}
+variable "secret_couchdb_admin_username" {}
 variable "secret_couchdb_auth_cookie" {}
 
 data "template_file" "couchdb_values" {
-  template = "${file("values.yaml")}"
+  depends_on = ["null_resource.couchdb_recover"]
+  template   = "${file("values.yaml")}"
 
   vars {
     couchdb_admin_username = "${var.secret_couchdb_admin_username}"
@@ -34,6 +39,8 @@ data "template_file" "couchdb_values" {
     requests_memory        = "${var.requests_memory}"
     limits_cpu             = "${var.limits_cpu}"
     limits_memory          = "${var.limits_memory}"
+    pv_capacity            = "${var.pv_capacity}"
+    pv_storage_class       = "${var.pv_storage_class}"
   }
 }
 
@@ -60,22 +67,24 @@ resource "null_resource" "couchdb_finish_cluster" {
 
   provisioner "local-exec" {
     command = <<EOF
-      RETRIES=10
+      RETRIES=15
       RETRY_COUNT=1
-      while [ "$PODS_READY" != "true" ]; do
-        PODS_READY="true"
-        echo "[Try $RETRY_COUNT of $RETRIES] Waiting for all CouchDB pods to become Running..."
-        for STATUS in $(kubectl get pods --namespace ${var.release_namespace} -l app=couchdb -o jsonpath='{.items[*].status.phase}'); do
-          if [ "$STATUS" != "Running" ]; then
-            PODS_READY="false"
-          fi
-        done
+      while [ "$CLUSTER_READY" != "true" ]; do
+        echo "[Try $RETRY_COUNT of $RETRIES] Waiting for all CouchDB pods to join the cluster..."
+        CLUSTER_READY="true"
+        CLUSTER_MEMBERS_COUNT=$(kubectl exec --namespace gpii couchdb-couchdb-0 -c couchdb -- curl -s http://${var.secret_couchdb_admin_username}:${var.secret_couchdb_admin_password}@127.0.0.1:5984/_membership 2>/dev/null | jq -r .cluster_nodes[] | grep -c .)
+        echo "$CLUSTER_MEMBERS_COUNT of ${var.replica_count} pods have joined the cluster."
+        if [ "$CLUSTER_MEMBERS_COUNT" != "${var.replica_count}" ]; then
+          CLUSTER_READY="false"
+        fi
         RETRY_COUNT=$(($RETRY_COUNT+1))
-        if [ "$RETRY_COUNT" -eq "$RETRIES" ] ; then
+        if [ "$RETRY_COUNT" == "$RETRIES" ]; then
           echo "Retry limit reached, giving up!"
           exit 1
         fi
-        sleep 10
+        if [ "$CLUSTER_READY" == "false" ]; then
+          sleep 10
+        fi
       done
 
       RETRY_COUNT=1
@@ -84,14 +93,16 @@ resource "null_resource" "couchdb_finish_cluster" {
           kubectl exec --namespace ${var.release_namespace} couchdb-couchdb-0 -c couchdb -- \
           curl -s http://${var.secret_couchdb_admin_username}:${var.secret_couchdb_admin_password}@127.0.0.1:5984/_cluster_setup \
           -X POST -H 'Content-Type: application/json' -d '{"action": "finish_cluster"}')
-        echo "[Try $RETRY_COUNT of $RETRIES] CouchDB returned: $RESULT"
+        echo "[Try $RETRY_COUNT of $RETRIES] Posting \"finish_cluster\", CouchDB returned: $RESULT"
         STATUS=$(echo $RESULT | jq ".reason")
         RETRY_COUNT=$(($RETRY_COUNT+1))
-        if [ "$RETRY_COUNT" -eq "$RETRIES" ] ; then
+        if [ "$RETRY_COUNT" == "$RETRIES" ]; then
           echo "Retry limit reached, giving up!"
           exit 1
         fi
-        sleep 10
+        if [ "$STATUS" != '"Cluster is already finished"' ]; then
+          sleep 10
+        fi
       done
     EOF
   }
@@ -128,9 +139,11 @@ resource "null_resource" "couchdb_destroy_pvcs" {
     when = "destroy"
 
     command = <<EOF
-      for PVC in $(kubectl get pvc --namespace ${var.release_namespace} -o json | jq --raw-output '.items[] | select(.metadata.name | startswith("database-storage-couchdb")) | .metadata.name'); do
-        kubectl --namespace ${var.release_namespace} delete --ignore-not-found pvc $PVC
-      done
+      if [ "${var.execute_destroy_pvcs}" == "true" ]; then
+        for PVC in $(kubectl get pvc --namespace ${var.release_namespace} -o json | jq --raw-output '.items[] | select(.metadata.name | startswith("database-storage-couchdb")) | .metadata.name'); do
+          kubectl --namespace ${var.release_namespace} delete --ignore-not-found pvc $PVC
+        done
+      fi
     EOF
   }
 }

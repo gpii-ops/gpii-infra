@@ -8,6 +8,10 @@ variable "serviceaccount_key" {}
 # Terragrunt variables
 variable "node_type" {}
 
+variable "prevent_destroy_cluster" {
+  default = false
+}
+
 module "gke_cluster" {
   source             = "/exekube-modules/gke-cluster"
   project_id         = "${var.project_id}"
@@ -15,7 +19,7 @@ module "gke_cluster" {
 
   initial_node_count = 1
   node_type          = "${var.node_type}"
-  kubernetes_version = "1.10.7-gke.6"
+  kubernetes_version = "1.10.9-gke.5"
 
   main_compute_zone = "us-central1-a"
   additional_zones  = ["us-central1-b", "us-central1-c", "us-central1-f"]
@@ -28,6 +32,7 @@ module "gke_cluster" {
     "https://www.googleapis.com/auth/devstorage.read_only",
     "https://www.googleapis.com/auth/logging.write",
     "https://www.googleapis.com/auth/monitoring",
+    "https://www.googleapis.com/auth/trace.append",
   ]
 
   dashboard_disabled = true
@@ -39,4 +44,27 @@ module "gke_cluster" {
   issue_client_certificate = false
 
   update_timeout = "30m"
+}
+
+# Workaround from
+# https://github.com/hashicorp/terraform/issues/3116#issuecomment-292038781
+# to allow us to optionally enable 'lifecycle { prevent_destroy = true }'.
+resource "random_id" "cluster_protector" {
+  count       = "${var.prevent_destroy_cluster ? 1 : 0}"
+  byte_length = 8
+
+  keepers = {
+    protected_resources = "${module.gke_cluster.stub_output_for_dependency}"
+  }
+
+  lifecycle {
+    # If you are sure you want to destroy a cluster (e.g. to re-create it from
+    # scratch or to change a parameter like 'oauth_scopes' that requires
+    # cluster re-creation):
+    #
+    # * Change the value below to 'false'
+    # * Destroy the cluster
+    # * Change the value below back to 'true'
+    prevent_destroy = true
+  }
 }

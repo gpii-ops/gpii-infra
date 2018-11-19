@@ -7,8 +7,19 @@ resource "null_resource" "locust_swarm_session" {
 
   provisioner "local-exec" {
     command = <<EOF
-      if [ "${var.locust_swarm_duration}" == "" ]; then
-        echo "Looks like TF_VAR_locust_swarm_duration is unset, terminating!"
+      if [ "${var.locust_swarm_duration}" == "" ] ||
+         [ "${var.locust_target_app}" == "" ] ||
+         [ "${var.locust_target_host}" == "" ] ||
+         [ "${var.locust_script}" == "" ]; then
+        echo
+        echo
+        echo "Looks like some mandatory Locust vars are unset, terminating!"
+        echo "Mandatory vars are:"
+        echo "  TF_VAR_locust_swarm_duration"
+        echo "  TF_VAR_locust_target_app"
+        echo "  TF_VAR_locust_target_host"
+        echo "  TF_VAR_locust_script"
+        echo
         exit 1
       fi
 
@@ -23,7 +34,7 @@ resource "null_resource" "locust_swarm_session" {
         fi
         echo "Number of ready workers: $WORKERS_READY out of ${var.locust_workers}!"
         RETRY_COUNT=$(($RETRY_COUNT+1))
-        if [ "$RETRY_COUNT" -eq "$RETRIES" ] ; then
+        if [ "$RETRY_COUNT" == "$RETRIES" ]; then
           echo "Retry limit reached, giving up!"
           exit 1
         fi
@@ -62,8 +73,43 @@ resource "null_resource" "locust_swarm_session" {
       num_failures=$(echo $SESSION_STATS | jq -r '.stats[] | select(.name == "Total").num_failures')
 
       echo
-      echo $SESSION_STATS
+      echo "$SESSION_STATS"
+      echo "$SESSION_STATS" > ${path.cwd}/${var.locust_target_app}.stats
+
+      echo
+      echo "Stats distribution:"
+      SESSION_STATS_DISTRIBUTION=$(curl -s $LOCUST_URL/stats/distribution/csv)
+      echo "$SESSION_STATS_DISTRIBUTION"
+      echo "$SESSION_STATS_DISTRIBUTION" > ${path.cwd}/${var.locust_target_app}.distribution
+
+      echo
+      export PROJECT_ID=${var.project_id}
+      export GOOGLE_CLOUD_KEYFILE=${var.serviceaccount_key}
+
       EXIT_STATUS=0
+
+      RETRIES=5
+      RETRY_COUNT=1
+      while [ "$STACKDRIVER_DID_NOT_FAIL" != "true" ]; do
+        STACKDRIVER_DID_NOT_FAIL="true"
+        echo "[Try $RETRY_COUNT of $RETRIES] Posting Locust results for \"${var.locust_target_app}\" to Stackdriver..."
+        ruby -e '
+          require "${path.module}/client.rb"
+          process_locust_result("${path.cwd}/${var.locust_target_app}.stats", "${path.cwd}/${var.locust_target_app}.distribution", "${var.locust_target_app}")
+        '
+        if [ "$?" != "0" ]; then
+          STACKDRIVER_DID_NOT_FAIL="false"
+        fi
+
+        RETRY_COUNT=$(($RETRY_COUNT+1))
+        if [ "$RETRY_COUNT" == "$RETRIES" ]; then
+          echo "Retry limit reached, giving up!"
+          EXIT_STATUS=1
+        fi
+        if [ "$STACKDRIVER_DID_NOT_FAIL" == "false" ]; then
+          sleep 10
+        fi
+      done
 
       if [ $total_rps -lt ${var.locust_desired_total_rps} ]; then
         echo
@@ -92,10 +138,6 @@ resource "null_resource" "locust_swarm_session" {
         echo "This is unacceptable!"
         EXIT_STATUS=1
       fi
-
-      echo
-      echo "Stats distribution:"
-      curl -s $LOCUST_URL/stats/distribution/csv
 
       echo
       echo "Resetting stats..."

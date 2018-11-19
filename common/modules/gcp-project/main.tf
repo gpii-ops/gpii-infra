@@ -25,6 +25,122 @@ variable "serviceaccount_key" {}
 
 variable "project_id" {} # id of the project which owns the credentials used by the provider
 
+data "google_iam_policy" "admin" {
+  binding {
+    role = "roles/cloudkms.admin"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/compute.admin"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/container.clusterAdmin"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/container.admin"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/dns.admin"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+      "serviceAccount:projectowner@${var.project_id}.iam.gserviceaccount.com",
+    ]
+  }
+
+  binding {
+    role = "roles/iam.serviceAccountKeyAdmin"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/iam.serviceAccountUser"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/logging.configWriter"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/monitoring.editor"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/resourcemanager.projectIamAdmin"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/serviceusage.serviceUsageAdmin"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/storage.admin"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+      "serviceAccount:projectowner@${var.project_id}.iam.gserviceaccount.com",
+    ]
+  }
+
+  binding {
+    role = "roles/owner"
+
+    members = [
+      "${var.project_owner}",
+    ]
+  }
+}
+
 provider "google" {
   credentials = "${var.serviceaccount_key}"
   project     = "${var.project_id}"
@@ -59,6 +175,7 @@ resource "google_project_services" "project" {
     "cloudbilling.googleapis.com",
     "cloudkms.googleapis.com",
     "cloudresourcemanager.googleapis.com",
+    "cloudtrace.googleapis.com",
     "compute.googleapis.com",
     "container.googleapis.com",
     "containerregistry.googleapis.com",
@@ -78,21 +195,15 @@ resource "google_project_services" "project" {
   ]
 }
 
+resource "google_project_iam_policy" "project" {
+  project     = "${google_project.project.project_id}"
+  policy_data = "${data.google_iam_policy.admin.policy_data}"
+}
+
 resource "google_service_account" "project" {
   account_id   = "projectowner"
   display_name = "Project owner service account"
   project      = "${google_project.project.project_id}"
-}
-
-resource "google_project_iam_binding" "project" {
-  project = "${google_project.project.project_id}"
-  role    = "roles/owner"
-
-  members = [
-    "${var.project_owner}",
-    "serviceAccount:${google_service_account.project.email}",
-    "serviceAccount:projectowner@${var.project_id}.iam.gserviceaccount.com",
-  ]
 }
 
 resource "google_dns_managed_zone" "project" {
@@ -101,7 +212,7 @@ resource "google_dns_managed_zone" "project" {
   dns_name = "${local.dnsname}."
 
   depends_on = ["google_project_services.project",
-    "google_project_iam_binding.project",
+    "google_project_iam_policy.project",
   ]
 }
 
