@@ -6,7 +6,7 @@
       "condition_threshold": {
         "filter": "metric.type=\"logging.googleapis.com/user/k8s_snapshots.couchdb.snapshot_created\" resource.type=\"k8s_container\"",
         "comparison": "COMPARISON_LT",
-        "threshold_value": 1,
+        "threshold_value": 2,
         "duration": {
           "seconds": 300,
           "nanos": 0
