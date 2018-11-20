@@ -1,0 +1,69 @@
+{
+  "display_name": "K8s-snapshots Log-based Check for CouchDB",
+  "combiner": "OR",
+  "conditions": [
+    {
+      "condition_threshold": {
+        "filter": "metric.type=\"logging.googleapis.com/user/k8s_snapshots.couchdb.snapshot_created\" resource.type=\"k8s_container\"",
+        "comparison": "COMPARISON_LT",
+        "threshold_value": 1,
+        "duration": {
+          "seconds": 300,
+          "nanos": 0
+        },
+        "trigger": {
+          "count": 1,
+          "percent": 0
+        },
+        "aggregations": [
+          {
+            "alignment_period": {
+              "seconds": 600,
+              "nanos": 0
+            },
+            "per_series_aligner": "ALIGN_SUM",
+            "cross_series_reducer": "REDUCE_NONE",
+            "group_by_fields": []
+          }
+        ],
+        "denominator_filter": "",
+        "denominator_aggregations": []
+      },
+      "display_name": "Log based \"snapshot_created\" events for CouchDB"
+    },
+    {
+      "condition_threshold": {
+        "filter": "metric.type=\"logging.googleapis.com/user/k8s_snapshots.error\" resource.type=\"k8s_container\"",
+        "comparison": "COMPARISON_GT",
+        "threshold_value": 1,
+        "duration": {
+          "seconds": 300,
+          "nanos": 0
+        },
+        "trigger": {
+          "count": 1,
+          "percent": 0
+        },
+        "aggregations": [
+          {
+            "alignment_period": {
+              "seconds": 600,
+              "nanos": 0
+            },
+            "per_series_aligner": "ALIGN_SUM",
+            "cross_series_reducer": "REDUCE_NONE",
+            "group_by_fields": []
+          }
+        ],
+        "denominator_filter": "",
+        "denominator_aggregations": []
+      },
+      "display_name": "Log based errors for k8s-snapshots"
+    }
+  ],
+  "notification_channels": [],
+  "user_labels": {},
+  "enabled": {
+    "value": true
+  }
+}
