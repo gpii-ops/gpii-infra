@@ -1,5 +1,6 @@
 require "json"
 require "google/cloud/monitoring"
+require "google/cloud/logging"
 
 @project_id = ENV['PROJECT_ID']
 
@@ -9,6 +10,7 @@ end
 
 def apply_resources
   resources = read_resources
+  processed_log_based_metrics = process_log_based_metrics(resources["log_based_metrics"])
   processed_notification_channels = process_notification_channels(resources["notification_channels"])
   process_uptime_checks(resources["uptime_checks"])
   process_alert_policies(resources["alert_policies"], processed_notification_channels)
@@ -18,6 +20,7 @@ def destroy_resources
   process_alert_policies
   process_uptime_checks
   process_notification_channels
+  process_log_based_metrics
 end
 
 def read_resources(resource_dir = "")
@@ -63,6 +66,46 @@ end
 
 def debug_output(resource)
   return resource.to_hash.to_json
+end
+
+def process_log_based_metrics(log_based_metrics = [])
+  stackdriver_logging_client = Google::Cloud::Logging.new(project_id: @project_id)
+
+  stackdriver_log_based_metrics = {}
+  processed_log_based_metrics = {}
+
+  stackdriver_logging_client.metrics.each do |log_based_metric|
+    puts "[DEBUG] log_based_metric: " + log_based_metric.inspect if @debug_mode
+    stackdriver_log_based_metrics[log_based_metric.name] = log_based_metric
+  end
+
+  log_based_metrics.each do |log_based_metric|
+    if stackdriver_log_based_metrics[log_based_metric["name"]]
+      puts "Updating log-based metric \"#{log_based_metric["name"]}\"..."
+      metric = stackdriver_logging_client.metric log_based_metric["name"]
+      metric.filter = log_based_metric["filter"]
+      metric.save
+    else
+      puts "Creating log-based metric \"#{log_based_metric["name"]}\"..."
+      stackdriver_logging_client.create_metric log_based_metric["name"], log_based_metric["filter"]
+    end
+
+    processed_log_based_metrics[log_based_metric["name"]] = log_based_metric
+  end
+
+  stackdriver_log_based_metrics.each do |name, log_based_metric|
+    unless processed_log_based_metrics.include? name
+      if @debug_mode
+        puts "[DEBUG] Skipping deletion of log-based metric \"#{name}\"..."
+      else
+        puts "Deleting log-based metric \"#{name}\"..."
+        metric = stackdriver_logging_client.metric name
+        metric.delete
+      end
+    end
+  end
+
+  return processed_log_based_metrics
 end
 
 def process_notification_channels(notification_channels = [])
