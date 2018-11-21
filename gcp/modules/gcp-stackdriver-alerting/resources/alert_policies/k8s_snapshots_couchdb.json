@@ -3,10 +3,8 @@
   "combiner": "OR",
   "conditions": [
     {
-      "condition_threshold": {
+      "condition_absent": {
         "filter": "metric.type=\"logging.googleapis.com/user/k8s_snapshots.couchdb.snapshot_created\" resource.type=\"k8s_container\"",
-        "comparison": "COMPARISON_LT",
-        "threshold_value": 2,
         "duration": {
           "seconds": 300,
           "nanos": 0
@@ -25,9 +23,7 @@
             "cross_series_reducer": "REDUCE_NONE",
             "group_by_fields": []
           }
-        ],
-        "denominator_filter": "",
-        "denominator_aggregations": []
+        ]
       },
       "display_name": "Log based \"snapshot_created\" events for CouchDB"
     },
