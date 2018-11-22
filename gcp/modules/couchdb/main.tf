@@ -54,8 +54,7 @@ module "couchdb" {
   release_values          = ""
   release_values_rendered = "${data.template_file.couchdb_values.rendered}"
 
-  chart_name   = "${var.charts_dir}/couchdb"
-  force_update = true
+  chart_name = "${var.charts_dir}/couchdb"
 }
 
 resource "null_resource" "couchdb_finish_cluster" {
