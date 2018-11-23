@@ -66,7 +66,7 @@ spec:
               command:
                 - sh
                 - -c
-                - curl -G --silent --fail -u ${COUCHDB_USER}:${COUCHDB_PASSWORD} http://localhost:5984
+                - curl -G --silent --fail -u ${COUCHDB_USER}:${COUCHDB_PASSWORD} http://localhost:5984/
 {{- else }}
             httpGet:
               path: /
