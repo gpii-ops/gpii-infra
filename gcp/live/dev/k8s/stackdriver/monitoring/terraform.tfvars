@@ -1,7 +1,7 @@
 # ↓ Module metadata
 terragrunt = {
   terraform {
-    source = "/project/modules//gcp-stackdriver-alerting"
+    source = "/project/modules//gcp-stackdriver-monitoring"
   }
 
   dependencies {
@@ -18,4 +18,4 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
-ssl_enabled_uptime_checks = true
+ssl_enabled_uptime_checks = false

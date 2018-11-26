@@ -45,8 +45,9 @@ resource "null_resource" "apply_stackdriver_alerting" {
         STACKDRIVER_DID_NOT_FAIL="true"
         echo "[Try $RETRY_COUNT of $RETRIES] Applying Stackdriver resources..."
         ruby -e '
-          require "${path.module}/client.rb"
-          apply_resources
+          require "/rakefiles/stackdriver.rb"
+          resources = read_resources("${path.module}/resources_rendered")
+          apply_resources(resources)
         '
         if [ "$?" != "0" ]; then
           STACKDRIVER_DID_NOT_FAIL="false"
@@ -65,6 +66,9 @@ resource "null_resource" "apply_stackdriver_alerting" {
   }
 }
 
+# This resource will also destroy Stackdriver primitives
+# created by gcp-stackdriver-lbm module
+
 resource "null_resource" "destroy_stackdriver_alerting" {
   depends_on = ["template_dir.resources"]
 
@@ -81,7 +85,7 @@ resource "null_resource" "destroy_stackdriver_alerting" {
         STACKDRIVER_DID_NOT_FAIL="true"
         echo "[Try $RETRY_COUNT of $RETRIES] Destroying Stackdriver resources..."
         ruby -e '
-          require "${path.module}/client.rb"
+          require "/rakefiles/stackdriver.rb"
           destroy_resources
         '
         if [ "$?" != "0" ]; then
