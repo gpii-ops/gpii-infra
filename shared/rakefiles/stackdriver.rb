@@ -18,7 +18,7 @@ def apply_resources(resources)
   process_alert_policies(resources["alert_policies"], processed_notification_channels) if resources["alert_policies"]
 end
 
-def destroy_resources()
+def destroy_resources
   process_alert_policies
   process_uptime_checks
   process_notification_channels
