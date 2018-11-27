@@ -18,11 +18,11 @@ def apply_resources(resources)
   process_alert_policies(resources["alert_policies"], processed_notification_channels) if resources["alert_policies"]
 end
 
-def destroy_resources
-  process_alert_policies
-  process_uptime_checks
-  process_notification_channels
-  process_log_based_metrics
+def destroy_resources(resources)
+  process_alert_policies if resources.include? "alert_policies"
+  process_uptime_checks if resources.include? "uptime_checks"
+  process_notification_channels if resources.include? "notification_channels"
+  process_log_based_metrics if resources.include? "log_based_metrics"
 end
 
 def read_resources(resource_dir = "")
