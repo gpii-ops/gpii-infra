@@ -58,7 +58,8 @@ resource "null_resource" "destroy_stackdriver_lbm" {
       export GOOGLE_CLOUD_KEYFILE=${var.serviceaccount_key}
 
       # To avoid race condition with gcp-stackdriver-monitoring module
-      sleep 30
+      echo "Waiting for gcp-stackdriver-monitoring module to destroy it's resources first..."
+      sleep 15
 
       RETRIES=5
       RETRY_COUNT=1
