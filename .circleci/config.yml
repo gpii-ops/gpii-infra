@@ -1,0 +1,50 @@
+version: 2
+jobs:
+  terraform-fmt-check:
+    docker:
+      - image: gpii/exekube:0.4.0-google
+    working_directory: /workspace
+    steps:
+      - checkout
+      - run:
+          name: Terraform Format Check
+          command: |
+            echo "Running Terraform format check...";
+            terraform fmt --check=true /workspace
+
+  gcp-unit-tests:
+    docker:
+      - image: gpii/exekube:0.4.0-google
+    working_directory: /workspace
+    steps:
+      - checkout
+      - run:
+          name: GCP Unit Tests
+          command: |
+            echo "Running GCP unit tests...";
+            cd /workspace/shared/rakefiles/tests;
+            gem install bundler --no-ri --no-rdoc;
+            bundle install --path "vendor/bundle";
+            rake
+
+  aws-unit-tests:
+    docker:
+      - image: gpii/exekube:0.4.0-google
+    working_directory: /workspace
+    steps:
+      - checkout
+      - run:
+          name: AWS Unit Tests
+          command: |
+            echo "Running AWS unit tests...";
+            cd /workspace/aws/rakefiles/tests;
+            gem install test-unit --no-ri --no-rdoc;
+            rake
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - terraform-fmt-check
+      - gcp-unit-tests
+      - aws-unit-tests
