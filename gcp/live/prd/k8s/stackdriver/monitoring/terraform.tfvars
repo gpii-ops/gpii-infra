@@ -8,6 +8,7 @@ terragrunt = {
     paths = [
       "../../gpii/preferences",
       "../../gpii/flowmanager",
+      "../lbm"
     ]
   }
 
