@@ -39,7 +39,7 @@ resource "null_resource" "apply_stackdriver_monitoring" {
       export GOOGLE_CLOUD_KEYFILE=${var.serviceaccount_key}
       export STACKDRIVER_DEBUG=${var.stackdriver_debug}
 
-      RETRIES=5
+      RETRIES=10
       RETRY_COUNT=1
       while [ "$STACKDRIVER_DID_NOT_FAIL" != "true" ]; do
         STACKDRIVER_DID_NOT_FAIL="true"
