@@ -18,7 +18,7 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
-backup_deltas     = "PT15M PT60M PT4H PT24H P7D"
+backup_deltas     = "PT5M PT60M PT4H PT24H P7D"
 release_namespace = "gpii"
 
 replica_count        = 3

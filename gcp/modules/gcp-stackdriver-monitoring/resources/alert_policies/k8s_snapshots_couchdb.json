@@ -1,0 +1,36 @@
+{
+  "display_name": "K8s-snapshots Check for CouchDB",
+  "combiner": "OR",
+  "conditions": [
+    {
+      "condition_absent": {
+        "filter": "metric.type=\"logging.googleapis.com/user/k8s_snapshots.couchdb.snapshot_created\" resource.type=\"k8s_container\"",
+        "duration": {
+          "seconds": 300,
+          "nanos": 0
+        },
+        "trigger": {
+          "count": 1,
+          "percent": 0
+        },
+        "aggregations": [
+          {
+            "alignment_period": {
+              "seconds": 600,
+              "nanos": 0
+            },
+            "per_series_aligner": "ALIGN_SUM",
+            "cross_series_reducer": "REDUCE_NONE",
+            "group_by_fields": []
+          }
+        ]
+      },
+      "display_name": "Log based \"snapshot_created\" events for CouchDB"
+    }
+  ],
+  "notification_channels": [],
+  "user_labels": {},
+  "enabled": {
+    "value": true
+  }
+}

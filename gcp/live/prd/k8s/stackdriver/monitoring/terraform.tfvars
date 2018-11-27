@@ -1,13 +1,14 @@
 # ↓ Module metadata
 terragrunt = {
   terraform {
-    source = "/project/modules//gcp-stackdriver-alerting"
+    source = "/project/modules//gcp-stackdriver-monitoring"
   }
 
   dependencies {
     paths = [
       "../../gpii/preferences",
       "../../gpii/flowmanager",
+      "../lbm"
     ]
   }
 
@@ -18,4 +19,4 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
-ssl_enabled_uptime_checks = false
+ssl_enabled_uptime_checks = true

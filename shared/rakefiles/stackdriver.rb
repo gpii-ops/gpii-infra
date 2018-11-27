@@ -1,5 +1,9 @@
+# This file contains Stackdriver Ruby client implementation
+# It is used by modules like: gcp-stackdriver-alerting, gcp-stackdriver-lbm
+
 require "json"
 require "google/cloud/monitoring"
+require "google/cloud/logging"
 
 @project_id = ENV['PROJECT_ID']
 
@@ -7,17 +11,18 @@ if ENV['STACKDRIVER_DEBUG']
   @debug_mode = true unless ENV['STACKDRIVER_DEBUG'].empty?
 end
 
-def apply_resources
-  resources = read_resources
-  processed_notification_channels = process_notification_channels(resources["notification_channels"])
-  process_uptime_checks(resources["uptime_checks"])
-  process_alert_policies(resources["alert_policies"], processed_notification_channels)
+def apply_resources(resources)
+  process_log_based_metrics(resources["log_based_metrics"]) if resources["log_based_metrics"]
+  processed_notification_channels = process_notification_channels(resources["notification_channels"]) if resources["notification_channels"]
+  process_uptime_checks(resources["uptime_checks"]) if resources["uptime_checks"]
+  process_alert_policies(resources["alert_policies"], processed_notification_channels) if resources["alert_policies"]
 end
 
-def destroy_resources
-  process_alert_policies
-  process_uptime_checks
-  process_notification_channels
+def destroy_resources(resources)
+  process_alert_policies if resources.include? "alert_policies"
+  process_uptime_checks if resources.include? "uptime_checks"
+  process_notification_channels if resources.include? "notification_channels"
+  process_log_based_metrics if resources.include? "log_based_metrics"
 end
 
 def read_resources(resource_dir = "")
@@ -63,6 +68,50 @@ end
 
 def debug_output(resource)
   return resource.to_hash.to_json
+end
+
+def process_log_based_metrics(log_based_metrics = [])
+  stackdriver_logging_client = Google::Cloud::Logging.new(project_id: @project_id)
+
+  stackdriver_log_based_metrics = {}
+  processed_log_based_metrics = {}
+
+  stackdriver_logging_client.metrics.each do |log_based_metric|
+    puts "[DEBUG] log_based_metric: " + log_based_metric.inspect if @debug_mode
+    stackdriver_log_based_metrics[log_based_metric.name] = log_based_metric
+  end
+
+  log_based_metrics.each do |log_based_metric|
+    if stackdriver_log_based_metrics[log_based_metric["name"]]
+      if stackdriver_log_based_metrics[log_based_metric["name"]].filter != log_based_metric["filter"]
+        puts "Updating log-based metric \"#{log_based_metric["name"]}\"..."
+        metric = stackdriver_logging_client.metric log_based_metric["name"]
+        metric.filter = log_based_metric["filter"]
+        metric.save
+      else
+        puts "Skipping log-based metric \"#{log_based_metric["name"]}\"..."
+      end
+    else
+      puts "Creating log-based metric \"#{log_based_metric["name"]}\"..."
+      stackdriver_logging_client.create_metric log_based_metric["name"], log_based_metric["filter"]
+    end
+
+    processed_log_based_metrics[log_based_metric["name"]] = log_based_metric
+  end
+
+  stackdriver_log_based_metrics.each do |name, log_based_metric|
+    unless processed_log_based_metrics.include? name
+      if @debug_mode
+        puts "[DEBUG] Skipping deletion of log-based metric \"#{name}\"..."
+      else
+        puts "Deleting log-based metric \"#{name}\"..."
+        metric = stackdriver_logging_client.metric name
+        metric.delete
+      end
+    end
+  end
+
+  return processed_log_based_metrics
 end
 
 def process_notification_channels(notification_channels = [])
@@ -166,7 +215,7 @@ def process_alert_policies(alert_policies = [], notification_channels = {})
 
   alert_policies.each do |alert_policy|
     alert_policy_identifier = get_alert_policy_identifier(alert_policy)
-    alert_policy["notification_channels"] = notification_channels.values
+    alert_policy["notification_channels"] = notification_channels.values if notification_channels.values
 
     if stackdriver_alert_policies[alert_policy_identifier]
       alert_policy["name"] = stackdriver_alert_policies[alert_policy_identifier]["name"]
