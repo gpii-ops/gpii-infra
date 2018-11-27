@@ -26,7 +26,7 @@ resource "template_dir" "resources" {
   }
 }
 
-resource "null_resource" "apply_stackdriver_alerting" {
+resource "null_resource" "apply_stackdriver_monitoring" {
   depends_on = ["template_dir.resources"]
 
   triggers = {
@@ -69,7 +69,7 @@ resource "null_resource" "apply_stackdriver_alerting" {
 # This resource will also destroy Stackdriver primitives
 # created by gcp-stackdriver-lbm module
 
-resource "null_resource" "destroy_stackdriver_alerting" {
+resource "null_resource" "destroy_stackdriver_monitoring" {
   depends_on = ["template_dir.resources"]
 
   provisioner "local-exec" {
