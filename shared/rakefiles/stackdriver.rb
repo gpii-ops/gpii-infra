@@ -12,7 +12,7 @@ if ENV['STACKDRIVER_DEBUG']
 end
 
 def apply_resources(resources)
-  processed_log_based_metrics = process_log_based_metrics(resources["log_based_metrics"]) if resources["log_based_metrics"]
+  process_log_based_metrics(resources["log_based_metrics"]) if resources["log_based_metrics"]
   processed_notification_channels = process_notification_channels(resources["notification_channels"]) if resources["notification_channels"]
   process_uptime_checks(resources["uptime_checks"]) if resources["uptime_checks"]
   process_alert_policies(resources["alert_policies"], processed_notification_channels) if resources["alert_policies"]
@@ -215,7 +215,7 @@ def process_alert_policies(alert_policies = [], notification_channels = {})
 
   alert_policies.each do |alert_policy|
     alert_policy_identifier = get_alert_policy_identifier(alert_policy)
-    alert_policy["notification_channels"] = notification_channels.values
+    alert_policy["notification_channels"] = notification_channels.values if notification_channels.values
 
     if stackdriver_alert_policies[alert_policy_identifier]
       alert_policy["name"] = stackdriver_alert_policies[alert_policy_identifier]["name"]
