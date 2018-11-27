@@ -66,9 +66,6 @@ resource "null_resource" "apply_stackdriver_monitoring" {
   }
 }
 
-# This resource will also destroy Stackdriver primitives
-# created by gcp-stackdriver-lbm module
-
 resource "null_resource" "destroy_stackdriver_monitoring" {
   depends_on = ["template_dir.resources"]
 
@@ -86,7 +83,7 @@ resource "null_resource" "destroy_stackdriver_monitoring" {
         echo "[Try $RETRY_COUNT of $RETRIES] Destroying Stackdriver resources..."
         ruby -e '
           require "/rakefiles/stackdriver.rb"
-          destroy_resources
+          destroy_resources(["uptime_checks","alert_policies","notification_channels"])
         '
         if [ "$?" != "0" ]; then
           STACKDRIVER_DID_NOT_FAIL="false"
