@@ -8,6 +8,8 @@ It has GitHub Checks integration [with CircleCI](https://circleci.com/docs/2.0/e
 
 [CircleCI pipeline](https://circleci.com/gh/gpii-ops/gpii-infra) will run for every PR opened into this repository.
 
+Project structure:
+
 * [Amazon Web Services (AWS)](aws/) *(stable but soon to be deprecated)*
 * [Google Cloud Platform (GCP)](gcp/) *(beta but soon to be stable)*
 * [Common plumbing](common/) *(mostly for admins)*
