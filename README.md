@@ -1,5 +1,4 @@
 [![CircleCI](https://circleci.com/gh/gpii-ops/gpii-infra.svg?style=svg)](https://circleci.com/gh/gpii-ops/gpii-infra)
-
 # gpii-infra
 
 This repository manages infrastructure for the [GPII](https://gpii.net/).
