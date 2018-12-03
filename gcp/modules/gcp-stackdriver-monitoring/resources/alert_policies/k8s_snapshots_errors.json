@@ -29,7 +29,7 @@
         "denominator_filter": "",
         "denominator_aggregations": []
       },
-      "display_name": "Log based errors for k8s-snapshots"
+      "display_name": "Log-based errors for k8s-snapshots"
     }
   ],
   "notification_channels": [],

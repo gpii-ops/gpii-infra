@@ -50,7 +50,7 @@
           }
         ]
       },
-      "display_name": "Log based compute.disks.createSnapshot events check"
+      "display_name": "Log-based compute.disks.createSnapshot events check"
     }
   ],
   "notification_channels": [],

@@ -29,7 +29,7 @@
         "denominator_filter": "",
         "denominator_aggregations": []
       },
-      "display_name": "Log based io.k8s.core.v1.pods.exec.create activity check"
+      "display_name": "Log-based io.k8s.core.v1.pods.exec.create activity check"
     }
   ],
   "documentation": {
