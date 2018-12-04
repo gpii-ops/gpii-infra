@@ -1,14 +1,14 @@
 {
-  "display_name": "K8s-snapshots Errors Check",
+  "display_name": "Firewalls Activity Check",
   "combiner": "OR",
   "conditions": [
     {
       "condition_threshold": {
-        "filter": "metric.type=\"logging.googleapis.com/user/k8s_snapshots.error\" resource.type=\"k8s_container\"",
+        "filter": "metric.type=\"logging.googleapis.com/user/compute.firewalls\" resource.type=\"global\"",
         "comparison": "COMPARISON_GT",
-        "threshold_value": 1,
+        "threshold_value": 0,
         "duration": {
-          "seconds": 300,
+          "seconds": 0,
           "nanos": 0
         },
         "trigger": {
@@ -29,9 +29,13 @@
         "denominator_filter": "",
         "denominator_aggregations": []
       },
-      "display_name": "Log-based errors for k8s-snapshots"
+      "display_name": "Log-based compute.firewalls activity check"
     }
   ],
+  "documentation": {
+    "content": "[Use this link to explore policy events in Logs Viewer](https://console.cloud.google.com/logs/viewer?project=${project_id}&minLogLevel=0&expandAll=false&interval=PT1H&advancedFilter=jsonPayload.event_subtype%3D%22compute.firewalls.insert%22%20OR%20jsonPayload.event_subtype%3D%22compute.firewalls.patch%22)",
+    "mime_type": "text/markdown"
+  },
   "notification_channels": [],
   "user_labels": {},
   "enabled": {

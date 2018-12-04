@@ -1,14 +1,14 @@
 {
-  "display_name": "K8s-snapshots Errors Check",
+  "display_name": "Pod Exec Check",
   "combiner": "OR",
   "conditions": [
     {
       "condition_threshold": {
-        "filter": "metric.type=\"logging.googleapis.com/user/k8s_snapshots.error\" resource.type=\"k8s_container\"",
+        "filter": "metric.type=\"logging.googleapis.com/user/io.k8s.core.v1.pods.exec.create\" resource.type=\"k8s_cluster\"",
         "comparison": "COMPARISON_GT",
-        "threshold_value": 1,
+        "threshold_value": 0,
         "duration": {
-          "seconds": 300,
+          "seconds": 0,
           "nanos": 0
         },
         "trigger": {
@@ -18,7 +18,7 @@
         "aggregations": [
           {
             "alignment_period": {
-              "seconds": 600,
+              "seconds": 60,
               "nanos": 0
             },
             "per_series_aligner": "ALIGN_SUM",
@@ -29,9 +29,13 @@
         "denominator_filter": "",
         "denominator_aggregations": []
       },
-      "display_name": "Log-based errors for k8s-snapshots"
+      "display_name": "Log-based io.k8s.core.v1.pods.exec.create activity check"
     }
   ],
+  "documentation": {
+    "content": "[Use this link to explore policy events in Logs Viewer](https://console.cloud.google.com/logs/viewer?project=${project_id}&minLogLevel=0&expandAll=false&interval=PT1H&advancedFilter=resource.type%3D%22k8s_cluster%22%20AND%20protoPayload.methodName%3D%22io.k8s.core.v1.pods.exec.create%22%0A)",
+    "mime_type": "text/markdown"
+  },
   "notification_channels": [],
   "user_labels": {},
   "enabled": {

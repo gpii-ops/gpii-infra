@@ -66,12 +66,18 @@ resource "null_resource" "couchdb_finish_cluster" {
 
   provisioner "local-exec" {
     command = <<EOF
+      COUCHDB_URL="http://${var.secret_couchdb_admin_username}:${var.secret_couchdb_admin_password}@127.0.0.1:5984"
+      PORT_FORWARD_CMD="kubectl -n ${var.release_namespace} port-forward statefulset/couchdb-couchdb 5984:5984"
+
+      $PORT_FORWARD_CMD </dev/null &>/dev/null &
+      sleep 5
+
       RETRIES=15
       RETRY_COUNT=1
       while [ "$CLUSTER_READY" != "true" ]; do
         echo "[Try $RETRY_COUNT of $RETRIES] Waiting for all CouchDB pods to join the cluster..."
         CLUSTER_READY="true"
-        CLUSTER_MEMBERS_COUNT=$(kubectl exec --namespace gpii couchdb-couchdb-0 -c couchdb -- curl -s http://${var.secret_couchdb_admin_username}:${var.secret_couchdb_admin_password}@127.0.0.1:5984/_membership 2>/dev/null | jq -r .cluster_nodes[] | grep -c .)
+        CLUSTER_MEMBERS_COUNT=$(curl -s $COUCHDB_URL/_membership 2>/dev/null | jq -r .cluster_nodes[] | grep -c .)
         echo "$CLUSTER_MEMBERS_COUNT of ${var.replica_count} pods have joined the cluster."
         if [ "$CLUSTER_MEMBERS_COUNT" != "${var.replica_count}" ]; then
           CLUSTER_READY="false"
@@ -79,6 +85,7 @@ resource "null_resource" "couchdb_finish_cluster" {
         RETRY_COUNT=$(($RETRY_COUNT+1))
         if [ "$RETRY_COUNT" == "$RETRIES" ]; then
           echo "Retry limit reached, giving up!"
+          kill $(pgrep -f "^$PORT_FORWARD_CMD")
           exit 1
         fi
         if [ "$CLUSTER_READY" == "false" ]; then
@@ -89,20 +96,22 @@ resource "null_resource" "couchdb_finish_cluster" {
       RETRY_COUNT=1
       while [ "$STATUS" != '"Cluster is already finished"' ]; do
         RESULT=$(
-          kubectl exec --namespace ${var.release_namespace} couchdb-couchdb-0 -c couchdb -- \
-          curl -s http://${var.secret_couchdb_admin_username}:${var.secret_couchdb_admin_password}@127.0.0.1:5984/_cluster_setup \
+          curl -s $COUCHDB_URL/_cluster_setup \
           -X POST -H 'Content-Type: application/json' -d '{"action": "finish_cluster"}')
         echo "[Try $RETRY_COUNT of $RETRIES] Posting \"finish_cluster\", CouchDB returned: $RESULT"
         STATUS=$(echo $RESULT | jq ".reason")
         RETRY_COUNT=$(($RETRY_COUNT+1))
         if [ "$RETRY_COUNT" == "$RETRIES" ]; then
           echo "Retry limit reached, giving up!"
+          kill $(pgrep -f "^$PORT_FORWARD_CMD")
           exit 1
         fi
         if [ "$STATUS" != '"Cluster is already finished"' ]; then
           sleep 10
         fi
       done
+
+      kill $(pgrep -f "^$PORT_FORWARD_CMD")
     EOF
   }
 }
