@@ -155,6 +155,14 @@ Manual workspace configuration is required in case you never used Stackdriver in
 1. Click "Save Chart". Select existing one or new Dashboard. Click "Save".
 1. Your Stackdriver Dashboard should be now available in [Dashboard Manager](https://app.google.stackdriver.com/dashboards).
 
+### To receive notifications in Slack:
+1. Go to [Workspace Notification Settings - Slack](https://app.google.stackdriver.com/settings/accounts/notifications/slack/).
+1. Click "Add Slack Channel".
+1. Click "Authorize Stackdriver" – this will redirect to Slack's authentication page.
+1. Click "Authorize".
+1. Enter channel name including "#". Click "Test Connection" and then "Save".
+1. Now you can use new notification channel in `gcp-stackdriver-monitoring` module. Here is example json: `{"type":"slack","labels":{"channel_name":"#alerts"},"user_labels":{},"enabled":{"value":true},"immutable":{"value":true}}`.
+
 ## FAQ / Troubleshooting
 
 ### Errors trying to enable/disable Google Cloud APIs
