@@ -137,14 +137,14 @@ def process_notification_channels(notification_channels = [])
         puts "Updating notification channel \"#{notification_channel_identifier}\"..."
         notification_channel_service_client.update_notification_channel(notification_channel)
       else
-        puts "Skipping update of notification channel \"#{notification_channel_identifier}\"..."
+        puts "Skipping update of immutable notification channel \"#{notification_channel_identifier}\"..."
       end
     else
       unless notification_channel["immutable"]
         puts "Creating notification channel \"#{notification_channel_identifier}\"..."
         notification_channel = notification_channel_service_client.create_notification_channel(formatted_parent, notification_channel)
       else
-        puts "Skipping creation of notification channel \"#{notification_channel_identifier}\"..."
+        puts "Skipping creation of immutable notification channel \"#{notification_channel_identifier}\"..."
       end
     end
 
