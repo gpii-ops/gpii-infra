@@ -45,6 +45,8 @@ end
 def get_notification_channel_identifier(notification_channel)
   if notification_channel["labels"]["email_address"]
     result = notification_channel["labels"]["email_address"]
+  elsif notification_channel["labels"]["channel_name"]
+    result = notification_channel["labels"]["channel_name"]
   end
 
   return result
@@ -131,14 +133,22 @@ def process_notification_channels(notification_channels = [])
 
     if stackdriver_notification_channels[notification_channel_identifier]
       notification_channel["name"] = stackdriver_notification_channels[notification_channel_identifier]["name"]
-      puts "Updating notification channel \"#{notification_channel_identifier}\"..."
-      notification_channel_service_client.update_notification_channel(notification_channel)
+      unless notification_channel["immutable"]
+        puts "Updating notification channel \"#{notification_channel_identifier}\"..."
+        notification_channel_service_client.update_notification_channel(notification_channel)
+      else
+        puts "Skipping update of immutable notification channel \"#{notification_channel_identifier}\"..."
+      end
     else
-      puts "Creating notification channel \"#{notification_channel_identifier}\"..."
-      notification_channel = notification_channel_service_client.create_notification_channel(formatted_parent, notification_channel)
+      unless notification_channel["immutable"]
+        puts "Creating notification channel \"#{notification_channel_identifier}\"..."
+        notification_channel = notification_channel_service_client.create_notification_channel(formatted_parent, notification_channel)
+      else
+        puts "Skipping creation of immutable notification channel \"#{notification_channel_identifier}\"..."
+      end
     end
 
-    processed_notification_channels[notification_channel_identifier] = notification_channel["name"]
+    processed_notification_channels[notification_channel_identifier] = notification_channel["name"] if notification_channel["name"]
   end
 
   stackdriver_notification_channels.each do |name, notification_channel|
