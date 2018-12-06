@@ -26,7 +26,8 @@ variable "serviceaccount_key" {}
 variable "project_id" {} # id of the project which owns the credentials used by the provider
 
 variable "projectowner_roles" {
-  type    = "list"
+  type = "list"
+
   default = [
     "roles/cloudkms.admin",
     "roles/cloudkms.cryptoKeyEncrypterDecrypter",
@@ -41,15 +42,16 @@ variable "projectowner_roles" {
     "roles/resourcemanager.projectIamAdmin",
     "roles/serviceusage.serviceUsageAdmin",
     "roles/storage.admin",
-    "roles/owner"
+    "roles/owner",
   ]
 }
 
 variable "common_projectowner_roles" {
-  type    = "list"
+  type = "list"
+
   default = [
     "roles/dns.admin",
-    "roles/storage.admin"
+    "roles/storage.admin",
   ]
 }
 
@@ -135,7 +137,7 @@ resource "google_dns_managed_zone" "project" {
   depends_on = [
     "google_project_services.project",
     "google_project_iam_member.common_projectowner",
-    "google_project_iam_member.projectowner"
+    "google_project_iam_member.projectowner",
   ]
 }
 
