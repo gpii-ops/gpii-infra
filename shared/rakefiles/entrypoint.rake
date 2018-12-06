@@ -75,9 +75,18 @@ end
 
 # This duplicates information in docker-compose.yaml,
 # TF_VAR_serviceaccount_key.
-desc "[ADVANCED] Create and download credentials for projectowner service account"
-task :configure_serviceaccount => [:set_vars] do
-  sh "#{@exekube_cmd} rake configure_serviceaccount"
+desc "[ADVANCED] Create service account for authenticated user and download credentials"
+task :configure_serviceaccount, [:use_projectowner_sa] => [:set_vars] do |taskname, args|
+  if args[:use_projectowner_sa]
+    sh "#{@exekube_cmd} rake configure_serviceaccount[use_projectowner_sa]"
+  else
+    sh "#{@exekube_cmd} rake configure_serviceaccount"
+  end
+end
+
+desc "[ADVANCED] Destroy authenticated user's service account and remove stored credentials"
+task :destroy_serviceaccount => [:set_vars, :check_destroy_allowed] do
+  sh "#{@exekube_cmd} rake destroy_serviceaccount"
 end
 
 desc "[ADVANCED] Create or update low-level infrastructure"
@@ -169,7 +178,7 @@ task :plain_sh, [:cmd] => [:set_vars] do |taskname, args|
   sh "#{@exekube_cmd} #{cmd}"
 end
 
-desc "[ADVANCED] Destroy all SA keys except current one"
+desc "[ADVANCED] Destroy all projectowner's SA keys except current one"
 task :destroy_sa_keys => [:set_vars, :check_destroy_allowed] do
   sh "#{@exekube_cmd} sh -c ' \
     existing_keys=$(gcloud iam service-accounts keys list \
