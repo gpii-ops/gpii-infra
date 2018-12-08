@@ -16,7 +16,7 @@ end
 # what we want, i.e. don't create a new Key/key file when @gcp_creds_file
 # changes because of :configure_kubectl.
 @serviceaccount_key_file = ENV["TF_VAR_serviceaccount_key"]
-task :configure_serviceaccount, [:use_projectowner_sa] => [:configure_current_project, :set_auth_user_email] do |taskname, args|
+task :configure_serviceaccount, [:use_projectowner_sa] => [:configure_current_project, :set_auth_user_vars] do |taskname, args|
   # TODO: This command is duplicated from exekube's gcp-project-init (and
   # hardcodes 'projectowner' instead of $SA_NAME which is only defined in
   # gcp-project-init). If gcp-project-init becomes idempotent (GPII-2989,
@@ -28,7 +28,7 @@ task :configure_serviceaccount, [:use_projectowner_sa] => [:configure_current_pr
       if [ \"#{args[:use_projectowner_sa]}\" != \"\" ]; then
         sa_name=projectowner
       else
-        sa_name=$(echo \\\"#{ENV['TF_VAR_auth_user_email']}\\\" | jq -r '. | sub(\"@\"; \"-at-\") | sub(\"\\\\.\"; \"-\") | .[0:30]');
+        sa_name=#{@auth_user_sa_name}
       fi
       gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
         --iam-account $sa_name@$TF_VAR_project_id.iam.gserviceaccount.com
@@ -36,12 +36,12 @@ task :configure_serviceaccount, [:use_projectowner_sa] => [:configure_current_pr
   end
 end
 
-task :destroy_sa_keys, [:use_projectowner_sa] => [:configure_current_project, :set_auth_user_email] do |taskname, args|
+task :destroy_sa_keys, [:use_projectowner_sa] => [:configure_current_project, :set_auth_user_vars] do |taskname, args|
   sh "
     if [ \"#{args[:use_projectowner_sa]}\" != \"\" ]; then
       sa_name=projectowner
     else
-      sa_name=$(echo \\\"#{ENV['TF_VAR_auth_user_email']}\\\" | jq -r '. | sub(\"@\"; \"-at-\") | sub(\"\\\\.\"; \"-\") | .[0:30]');
+      sa_name=#{@auth_user_sa_name}
     fi
     existing_keys=$(gcloud iam service-accounts keys list \
       --iam-account $sa_name@$TF_VAR_project_id.iam.gserviceaccount.com \
@@ -75,10 +75,15 @@ task :configure_current_project => [@gcp_creds_file] do
   sh "gcloud config set project $TF_VAR_project_id"
 end
 
-task :set_auth_user_email => [@gcp_creds_file] do
+task :set_auth_user_vars => [@gcp_creds_file] do
   # Setting authenticated user's email into env variable, so it can be
   # accessible in modules: https://issues.gpii.net/browse/GPII-3516
   ENV['TF_VAR_auth_user_email'] = %x{
     gcloud auth list --filter='account!~gserviceaccount.com' --format json |  jq -r '.[].account'
   }.chomp!
+
+  @auth_user_sa_name = %x{
+    echo \\\"#{ENV['TF_VAR_auth_user_email']}\\\" | jq -r '. | sub(\"@\"; \"-at-\") | sub(\"\\\\.\"; \"-\") | .[0:30]'
+  }.chomp!
 end
+
