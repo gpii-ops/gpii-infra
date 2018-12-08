@@ -173,7 +173,7 @@ task :plain_sh, [:cmd] => [:set_vars] do |taskname, args|
   sh "#{@exekube_cmd} #{cmd}"
 end
 
-desc "[ADVANCED] Destroy all active SA keys except current one and remove stored credentials"
+desc "[ADVANCED] Destroy all active SA keys except current one"
 task :destroy_sa_keys, [:use_projectowner_sa] => [:set_vars, :check_destroy_allowed] do |taskname, args|
   if args[:use_projectowner_sa]
     sh "#{@exekube_cmd} rake destroy_sa_keys[use_projectowner_sa]"

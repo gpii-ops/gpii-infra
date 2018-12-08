@@ -54,7 +54,6 @@ task :destroy_sa_keys, [:use_projectowner_sa] => [:configure_current_project, :s
       fi \
     done
   "
-  File.delete(@serviceaccount_key_file) if File.exist?(@serviceaccount_key_file)
 end
 
 @kubectl_creds_file = "/root/.kube/config"
