@@ -32,11 +32,11 @@ variable "service_accounts" {
   type = "map"
 
   default = {
-    projectowner = "CI service account"
+    projectowner                   = "CI service account"
     alfredo-at-raisingthefloor-org = "Service account for alfredo@raisingthefloor.org"
-    sergey-at-raisingthefloor-org = "Service account for sergey@raisingthefloor.org"
-    stepan-at-raisingthefloor-org = "Service account for stepan@raisingthefloor.org"
-    tyler-at-raisingthefloor-org = "Service account for tyler@raisingthefloor.org"
+    sergey-at-raisingthefloor-org  = "Service account for sergey@raisingthefloor.org"
+    stepan-at-raisingthefloor-org  = "Service account for stepan@raisingthefloor.org"
+    tyler-at-raisingthefloor-org   = "Service account for tyler@raisingthefloor.org"
   }
 }
 
@@ -45,7 +45,7 @@ data "google_iam_policy" "admin" {
     role = "roles/cloudkms.admin"
 
     members = [
-      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}",
     ]
   }
 
@@ -53,7 +53,7 @@ data "google_iam_policy" "admin" {
     role = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
     members = [
-      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}",
     ]
   }
 
@@ -61,7 +61,7 @@ data "google_iam_policy" "admin" {
     role = "roles/compute.admin"
 
     members = [
-      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}",
     ]
   }
 
@@ -69,7 +69,7 @@ data "google_iam_policy" "admin" {
     role = "roles/container.clusterAdmin"
 
     members = [
-      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}",
     ]
   }
 
@@ -77,7 +77,7 @@ data "google_iam_policy" "admin" {
     role = "roles/container.admin"
 
     members = [
-      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}",
     ]
   }
 
@@ -94,7 +94,7 @@ data "google_iam_policy" "admin" {
     role = "roles/iam.serviceAccountKeyAdmin"
 
     members = [
-      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}",
     ]
   }
 
@@ -102,7 +102,7 @@ data "google_iam_policy" "admin" {
     role = "roles/iam.serviceAccountUser"
 
     members = [
-      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}",
     ]
   }
 
@@ -110,7 +110,7 @@ data "google_iam_policy" "admin" {
     role = "roles/logging.configWriter"
 
     members = [
-      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}",
     ]
   }
 
@@ -118,7 +118,7 @@ data "google_iam_policy" "admin" {
     role = "roles/monitoring.editor"
 
     members = [
-      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}",
     ]
   }
 
@@ -126,7 +126,7 @@ data "google_iam_policy" "admin" {
     role = "roles/resourcemanager.projectIamAdmin"
 
     members = [
-      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}",
     ]
   }
 
@@ -134,7 +134,7 @@ data "google_iam_policy" "admin" {
     role = "roles/serviceusage.serviceUsageAdmin"
 
     members = [
-      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}",
     ]
   }
 
