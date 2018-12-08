@@ -84,11 +84,6 @@ task :configure_serviceaccount, [:use_projectowner_sa] => [:set_vars] do |taskna
   end
 end
 
-desc "[ADVANCED] Destroy authenticated user's service account and remove stored credentials"
-task :destroy_serviceaccount => [:set_vars, :check_destroy_allowed] do
-  sh "#{@exekube_cmd} rake destroy_serviceaccount"
-end
-
 desc "[ADVANCED] Create or update low-level infrastructure"
 task :apply_infra => [:set_vars, :configure_serviceaccount] do
   sh "#{@exekube_cmd} rake refresh_common_infra['#{@project_type}']"
@@ -178,19 +173,13 @@ task :plain_sh, [:cmd] => [:set_vars] do |taskname, args|
   sh "#{@exekube_cmd} #{cmd}"
 end
 
-desc "[ADVANCED] Destroy all projectowner's SA keys except current one"
-task :destroy_sa_keys => [:set_vars, :check_destroy_allowed] do
-  sh "#{@exekube_cmd} sh -c ' \
-    existing_keys=$(gcloud iam service-accounts keys list \
-      --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com \
-      --managed-by user | grep -oE \"^[a-z0-9]+\"); \
-    current_key=$(cat $TF_VAR_serviceaccount_key 2>/dev/null | jq -r '.private_key_id'); \
-    for key in $existing_keys; do \
-      if [ \"$key\" != \"$current_key\" ]; then \
-        yes | gcloud iam service-accounts keys delete \
-          --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com $key; \
-      fi \
-    done'"
+desc "[ADVANCED] Destroy all active SA keys except current one and remove stored credentials"
+task :destroy_sa_keys, [:use_projectowner_sa] => [:set_vars, :check_destroy_allowed] do |taskname, args|
+  if args[:use_projectowner_sa]
+    sh "#{@exekube_cmd} rake destroy_sa_keys[use_projectowner_sa]"
+  else
+    sh "#{@exekube_cmd} rake destroy_sa_keys"
+  end
 end
 
 desc "[ADVANCED] Destroy secrets file stored in GS bucket for encryption key, passed as argument -- rake destroy_secrets['default']"
