@@ -25,48 +25,135 @@ variable "serviceaccount_key" {}
 
 variable "project_id" {} # id of the project which owns the credentials used by the provider
 
-variable "projectowner_roles" {
-  type = "list"
+# This variable contains the map of SAs for all users with access to the project.
+# Format:
+#   sa_name = "sa description"
+variable "service_accounts" {
+  type = "map"
 
-  default = [
-    "roles/cloudkms.admin",
-    "roles/cloudkms.cryptoKeyEncrypterDecrypter",
-    "roles/compute.admin",
-    "roles/container.clusterAdmin",
-    "roles/container.admin",
-    "roles/dns.admin",
-    "roles/iam.serviceAccountKeyAdmin",
-    "roles/iam.serviceAccountUser",
-    "roles/logging.configWriter",
-    "roles/monitoring.editor",
-    "roles/resourcemanager.projectIamAdmin",
-    "roles/serviceusage.serviceUsageAdmin",
-    "roles/storage.admin",
-    "roles/owner",
-  ]
+  default = {
+    projectowner = "CI service account"
+    alfredo-at-raisingthefloor-org = "Service account for alfredo@raisingthefloor.org"
+    sergey-at-raisingthefloor-org = "Service account for sergey@raisingthefloor.org"
+    stepan-at-raisingthefloor-org = "Service account for stepan@raisingthefloor.org"
+    tyler-at-raisingthefloor-org = "Service account for tyler@raisingthefloor.org"
+  }
 }
 
-variable "common_projectowner_roles" {
-  type = "list"
+data "google_iam_policy" "admin" {
+  binding {
+    role = "roles/cloudkms.admin"
 
-  default = [
-    "roles/dns.admin",
-    "roles/storage.admin",
-  ]
-}
+    members = [
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+    ]
+  }
 
-resource "google_project_iam_member" "common_projectowner" {
-  count   = "${length(var.common_projectowner_roles)}"
-  project = "${google_project.project.project_id}"
-  role    = "${var.common_projectowner_roles[count.index]}"
-  member  = "serviceAccount:projectowner@${var.project_id}.iam.gserviceaccount.com"
-}
+  binding {
+    role = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
-resource "google_project_iam_member" "projectowner" {
-  count   = "${length(var.projectowner_roles)}"
-  project = "${google_project.project.project_id}"
-  role    = "${var.projectowner_roles[count.index]}"
-  member  = "serviceAccount:${google_service_account.project.email}"
+    members = [
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+    ]
+  }
+
+  binding {
+    role = "roles/compute.admin"
+
+    members = [
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+    ]
+  }
+
+  binding {
+    role = "roles/container.clusterAdmin"
+
+    members = [
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+    ]
+  }
+
+  binding {
+    role = "roles/container.admin"
+
+    members = [
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+    ]
+  }
+
+  binding {
+    role = "roles/dns.admin"
+
+    members = [
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}",
+      "serviceAccount:projectowner@${var.project_id}.iam.gserviceaccount.com",
+    ]
+  }
+
+  binding {
+    role = "roles/iam.serviceAccountKeyAdmin"
+
+    members = [
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+    ]
+  }
+
+  binding {
+    role = "roles/iam.serviceAccountUser"
+
+    members = [
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+    ]
+  }
+
+  binding {
+    role = "roles/logging.configWriter"
+
+    members = [
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+    ]
+  }
+
+  binding {
+    role = "roles/monitoring.editor"
+
+    members = [
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+    ]
+  }
+
+  binding {
+    role = "roles/resourcemanager.projectIamAdmin"
+
+    members = [
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+    ]
+  }
+
+  binding {
+    role = "roles/serviceusage.serviceUsageAdmin"
+
+    members = [
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}"
+    ]
+  }
+
+  binding {
+    role = "roles/storage.admin"
+
+    members = [
+      "${formatlist("serviceAccount:%v",google_service_account.project.*.email)}",
+      "serviceAccount:projectowner@${var.project_id}.iam.gserviceaccount.com",
+    ]
+  }
+
+  binding {
+    role = "roles/owner"
+
+    members = [
+      "${var.project_owner}",
+    ]
+  }
 }
 
 provider "google" {
@@ -123,9 +210,15 @@ resource "google_project_services" "project" {
   ]
 }
 
+resource "google_project_iam_policy" "project" {
+  project     = "${google_project.project.project_id}"
+  policy_data = "${data.google_iam_policy.admin.policy_data}"
+}
+
 resource "google_service_account" "project" {
-  account_id   = "projectowner"
-  display_name = "Project owner service account"
+  count        = "${length(keys(var.service_accounts))}"
+  account_id   = "${element(keys(var.service_accounts), count.index)}"
+  display_name = "${element(values(var.service_accounts), count.index)}"
   project      = "${google_project.project.project_id}"
 }
 
@@ -134,10 +227,8 @@ resource "google_dns_managed_zone" "project" {
   name     = "${replace(local.dnsname, ".", "-")}"
   dns_name = "${local.dnsname}."
 
-  depends_on = [
-    "google_project_services.project",
-    "google_project_iam_member.common_projectowner",
-    "google_project_iam_member.projectowner",
+  depends_on = ["google_project_services.project",
+    "google_project_iam_policy.project",
   ]
 }
 
