@@ -24,33 +24,25 @@ task :configure_serviceaccount, [:use_projectowner_sa] => [:configure_current_pr
   # step moves somewhere else in exekube, call this command from that place
   # instead.
   unless File.file?(@serviceaccount_key_file)
+    sa_name = args[:use_projectowner_sa] ? "projectowner" : @auth_user_sa_name
     sh "
-      if [ \"#{args[:use_projectowner_sa]}\" != \"\" ]; then
-        sa_name=projectowner
-      else
-        sa_name=#{@auth_user_sa_name}
-      fi
       gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
-        --iam-account $sa_name@$TF_VAR_project_id.iam.gserviceaccount.com
+        --iam-account #{sa_name}@$TF_VAR_project_id.iam.gserviceaccount.com
     "
   end
 end
 
 task :destroy_sa_keys, [:use_projectowner_sa] => [:configure_current_project, :set_auth_user_vars] do |taskname, args|
+  sa_name = args[:use_projectowner_sa] ? "projectowner" : @auth_user_sa_name
   sh "
-    if [ \"#{args[:use_projectowner_sa]}\" != \"\" ]; then
-      sa_name=projectowner
-    else
-      sa_name=#{@auth_user_sa_name}
-    fi
     existing_keys=$(gcloud iam service-accounts keys list \
-      --iam-account $sa_name@$TF_VAR_project_id.iam.gserviceaccount.com \
+      --iam-account #{sa_name}@$TF_VAR_project_id.iam.gserviceaccount.com \
       --managed-by user | grep -oE \"^[a-z0-9]+\"); \
     current_key=$(cat $TF_VAR_serviceaccount_key 2>/dev/null | jq -r '.private_key_id'); \
     for key in $existing_keys; do \
       if [ \"$key\" != \"$current_key\" ]; then \
         yes | gcloud iam service-accounts keys delete \
-          --iam-account $sa_name@$TF_VAR_project_id.iam.gserviceaccount.com $key; \
+          --iam-account #{sa_name}@$TF_VAR_project_id.iam.gserviceaccount.com $key; \
       fi \
     done
   "
