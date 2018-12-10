@@ -19,10 +19,11 @@ module "gke_cluster" {
 
   initial_node_count = 1
   node_type          = "${var.node_type}"
-  kubernetes_version = "1.10.9-gke.5"
 
-  main_compute_zone = "us-central1-a"
-  additional_zones  = ["us-central1-b", "us-central1-c", "us-central1-f"]
+  kubernetes_version = "1.11.3-gke.18"
+
+  region           = "us-central1"
+  additional_zones = ["us-central1-a", "us-central1-b", "us-central1-c", "us-central1-f"]
 
   monitoring_service = "monitoring.googleapis.com/kubernetes"
   logging_service    = "logging.googleapis.com/kubernetes"
