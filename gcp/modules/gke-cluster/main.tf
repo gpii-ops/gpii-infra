@@ -66,6 +66,6 @@ resource "random_id" "cluster_protector" {
     # * Change the value below to 'false'
     # * Destroy the cluster
     # * Change the value below back to 'true'
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }
