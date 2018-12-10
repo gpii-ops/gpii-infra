@@ -1,0 +1,38 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: {{ .Release.Namespace | quote }}
+  name: {{ template "preferences.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    rollingUpdate:
+      maxSurge: {{ .Values.rollingUpdate.maxSurge }}
+      maxUnavailable: {{ .Values.rollingUpdate.maxUnavailable }}
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: preferences
+    spec:
+      containers:
+      - name: preferences
+        image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.preferences_listen_port }}
+        env:
+        - name: NODE_ENV
+          value: {{ .Values.node_env }}
+        - name: GPII_PREFERENCESSERVER_LISTEN_PORT
+          value: '{{ .Values.preferences_listen_port }}'
+        - name: GPII_DATASOURCE_HOSTNAME
+          value:  '{{ .Values.datasource_hostname }}'
+        - name: GPII_DATASOURCE_PORT
+          value: '{{ .Values.datasource_listen_port }}'
+        {{- if .Values.enableStackdriverTrace }}
+        - name: GPII_ENABLE_STACKDRIVER_TRACE
+          value: 'true'
+        {{- end}}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
