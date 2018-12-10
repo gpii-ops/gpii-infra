@@ -2,13 +2,13 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "preferences.name" -}}
+{{- define "couchdb_prometheus_exporter.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "preferences.chart" -}}
+{{- define "couchdb_prometheus_exporter.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
