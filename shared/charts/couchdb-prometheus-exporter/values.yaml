@@ -11,10 +11,8 @@ couchdb_password: hunter2
 couchdb_databases: _all_dbs
 
 image:
-  ###repository: gesellix/couchdb-prometheus-exporter
-  ###checksum: sha256:a1f388fa250c2c8f3d0a38028fe81e5a43f9e2af4c44b5dbfb28b5e41f87cbd4
-  repository: mrtyler/couchdb-prometheus-exporter
-  checksum: latest
+  repository: gesellix/couchdb-prometheus-exporter
+  checksum: sha256:77a019a7707f581f70239783d0b76500ba25b9382d9ee0702452b0381d5722c2
   pullPolicy: IfNotPresent
 
 ## Optional resource requests and limits for deployment

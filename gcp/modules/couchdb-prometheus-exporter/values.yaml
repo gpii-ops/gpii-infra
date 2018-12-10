@@ -1,0 +1,13 @@
+replicaCount: ${replica_count}
+
+couchdb_uri: http://couchdb-svc-couchdb.gpii.svc.cluster.local:5984
+couchdb_username: ${couchdb_admin_username}
+couchdb_password: ${couchdb_admin_password}
+
+resources:
+  requests:
+    cpu: ${requests_cpu}
+    memory: ${requests_memory}
+  limits:
+    cpu: ${limits_cpu}
+    memory: ${limits_memory}
