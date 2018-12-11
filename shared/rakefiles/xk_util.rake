@@ -52,6 +52,8 @@ task :rotate_secrets_key, [:encryption_key] => [:configure] do |taskname, args|
   Secrets.disable_non_primary_key_versions(args[:encryption_key], new_version_id)
 end
 
+# This task destroy all keys except current one for projectowner's SA.
+# All operations will be ignored in case local credentials not present or SA usage not configured.
 task :destroy_sa_keys => [:configure] do
   sh "
     if [ \"$TF_VAR_serviceaccount_key\" != \"\" ] && [ -f $TF_VAR_serviceaccount_key ]; then \
