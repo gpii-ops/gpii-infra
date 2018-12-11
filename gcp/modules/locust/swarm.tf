@@ -33,12 +33,12 @@ resource "null_resource" "locust_swarm_session" {
           WORKERS_READY=0
         fi
         echo "Number of ready workers: $WORKERS_READY out of ${var.locust_workers}!"
-        RETRY_COUNT=$(($RETRY_COUNT+1))
         if [ "$RETRY_COUNT" == "$RETRIES" ]; then
           echo "Retry limit reached, giving up!"
           exit 1
         fi
         sleep 10
+        RETRY_COUNT=$(($RETRY_COUNT+1))
       done
 
       LOCUST_URL="http://127.0.0.1:8089"
@@ -101,7 +101,6 @@ resource "null_resource" "locust_swarm_session" {
           STACKDRIVER_DID_NOT_FAIL="false"
         fi
 
-        RETRY_COUNT=$(($RETRY_COUNT+1))
         if [ "$RETRY_COUNT" == "$RETRIES" ]; then
           echo "Retry limit reached, giving up!"
           EXIT_STATUS=1
@@ -109,6 +108,7 @@ resource "null_resource" "locust_swarm_session" {
         if [ "$STACKDRIVER_DID_NOT_FAIL" == "false" ]; then
           sleep 10
         fi
+        RETRY_COUNT=$(($RETRY_COUNT+1))
       done
 
       if [ $total_rps -lt ${var.locust_desired_total_rps} ]; then

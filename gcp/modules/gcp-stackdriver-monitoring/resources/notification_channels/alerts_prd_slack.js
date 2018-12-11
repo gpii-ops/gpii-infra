@@ -1,7 +1,7 @@
 {
   "type": "slack",
   "labels": {
-    "channel_name": "#alerts"
+    "channel_name": "#alerts-prd"
   },
   "user_labels": {},
   "enabled": {
