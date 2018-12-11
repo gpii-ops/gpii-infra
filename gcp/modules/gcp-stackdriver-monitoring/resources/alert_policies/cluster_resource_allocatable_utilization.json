@@ -8,10 +8,12 @@
         "comparison": "COMPARISON_GT",
         "threshold_value": 0.85,
         "duration": {
-          "seconds": 180
+          "seconds": 180,
+          "nanos": 0
         },
         "trigger": {
-          "count": 1
+          "count": 1,
+          "percent": 0.0
         },
         "aggregations": [
           {
@@ -26,8 +28,10 @@
             ]
           }
         ],
+        "denominator_filter": "",
         "denominator_aggregations": []
       },
+      "condition_absent": null,
       "display_name": "Cluster CPU Allocatable Utilization"
     },
     {
@@ -36,10 +40,12 @@
         "comparison": "COMPARISON_GT",
         "threshold_value": 0.85,
         "duration": {
-          "seconds": 180
+          "seconds": 180,
+          "nanos": 0
         },
         "trigger": {
-          "count": 1
+          "count": 1,
+          "percent": 0.0
         },
         "aggregations": [
           {
@@ -54,8 +60,10 @@
             ]
           }
         ],
+        "denominator_filter": "",
         "denominator_aggregations": []
       },
+      "condition_absent": null,
       "display_name": "Cluster RAM Allocatable Utilization"
     }
   ],

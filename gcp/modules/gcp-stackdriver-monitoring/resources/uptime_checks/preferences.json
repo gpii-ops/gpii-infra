@@ -7,22 +7,33 @@
       "project_id": "${project_id}"
     }
   },
+  "resource_group": null,
   "http_check": {
-    "path": "/preferences/carla",
     "use_ssl": ${ssl_enabled_uptime_checks ? "true" : "false"},
+    "path": "/preferences/carla",
     "port": ${ssl_enabled_uptime_checks ? "443" : "80"},
-    "auth_info": {},
+    "auth_info": {
+      "username": "",
+      "password": ""
+    },
+    "mask_headers": false,
     "headers": {}
   },
+  "tcp_check": null,
   "period": {
-    "seconds": 60
+    "seconds": 60,
+    "nanos": 0
   },
   "timeout": {
-    "seconds": 10
+    "seconds": 10,
+    "nanos": 0
   },
   "content_matchers": [
-    {}
+    {
+      "content": ""
+    }
   ],
   "selected_regions": [],
-  "internal_checkers": []
+  "internal_checkers": [],
+  "is_internal": false
 }

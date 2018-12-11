@@ -7,21 +7,29 @@
         "filter": "metric.type=\"kubernetes.io/container/restart_count\" resource.type=\"k8s_container\"",
         "comparison": "COMPARISON_GT",
         "threshold_value": 1.5,
-        "duration": {},
+        "duration": {
+          "seconds": 0,
+          "nanos": 0
+        },
         "trigger": {
-          "count": 1
+          "count": 1,
+          "percent": 0.0
         },
         "aggregations": [
           {
             "alignment_period": {
-              "seconds": 60
+              "seconds": 60,
+              "nanos": 0
             },
             "per_series_aligner": "ALIGN_DELTA",
+            "cross_series_reducer": "REDUCE_NONE",
             "group_by_fields": []
           }
         ],
+        "denominator_filter": "",
         "denominator_aggregations": []
       },
+      "condition_absent": null,
       "display_name": "Container Restart Rate"
     }
   ],

@@ -1,9 +1,12 @@
 {
   "type": "email",
+  "display_name": "",
+  "description": "",
   "labels": {
     "email_address": "alerts+${domain_name}@raisingthefloor.org"
   },
   "user_labels": {},
+  "verification_status": "VERIFICATION_STATUS_UNSPECIFIED",
   "enabled": {
     "value": true
   }
