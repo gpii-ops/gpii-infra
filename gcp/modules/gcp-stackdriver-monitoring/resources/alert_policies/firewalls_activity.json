@@ -29,7 +29,6 @@
         "denominator_filter": "",
         "denominator_aggregations": []
       },
-      "condition_absent": null,
       "display_name": "Log-based compute.firewalls activity check"
     }
   ],

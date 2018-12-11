@@ -12,7 +12,7 @@
           "nanos": 0
         },
         "trigger": {
-          "count": 1,
+          "count": 0,
           "percent": 0.0
         },
         "aggregations": [
@@ -29,7 +29,6 @@
         "denominator_filter": "",
         "denominator_aggregations": []
       },
-      "condition_absent": null,
       "display_name": "Container Restart Rate"
     }
   ],

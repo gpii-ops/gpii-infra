@@ -7,8 +7,6 @@
       "project_id": "${project_id}"
     }
   },
-  "resource_group": null,
-  "http_check": null,
   "tcp_check": {
     "port": 80
   },

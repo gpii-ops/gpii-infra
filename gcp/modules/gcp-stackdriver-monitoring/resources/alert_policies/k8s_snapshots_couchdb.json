@@ -3,7 +3,6 @@
   "combiner": "OR",
   "conditions": [
     {
-      "condition_threshold": null,
       "condition_absent": {
         "filter": "metric.type=\"logging.googleapis.com/user/k8s_snapshots.couchdb.snapshot_created\" resource.type=\"k8s_container\"",
         "duration": {
@@ -29,7 +28,6 @@
       "display_name": "Log-based snapshot_created k8s-snapshots events check for CouchDB"
     },
     {
-      "condition_threshold": null,
       "condition_absent": {
         "filter": "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\"",
         "duration": {

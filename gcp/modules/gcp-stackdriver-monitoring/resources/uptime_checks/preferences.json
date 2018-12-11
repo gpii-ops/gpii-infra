@@ -7,7 +7,6 @@
       "project_id": "${project_id}"
     }
   },
-  "resource_group": null,
   "http_check": {
     "use_ssl": ${ssl_enabled_uptime_checks ? "true" : "false"},
     "path": "/preferences/carla",
@@ -19,7 +18,6 @@
     "mask_headers": false,
     "headers": {}
   },
-  "tcp_check": null,
   "period": {
     "seconds": 60,
     "nanos": 0
