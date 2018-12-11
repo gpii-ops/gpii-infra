@@ -5,7 +5,7 @@
 # Old secret value will be set to TF_VAR_secret_name_rotated until rotation is finished.
 #
 # Arbitrary command to execute after rotation can be set with :cmd argument.
-task :rotate_secret, [:encryption_key, :secret, :cmd] => [:configure_serviceaccount] do |taskname, args|
+task :rotate_secret, [:encryption_key, :secret, :cmd] => [:configure] do |taskname, args|
   if args[:encryption_key].nil? || args[:encryption_key].size == 0
     puts "  ERROR: Argument :encryption_key not present!"
     raise
@@ -33,7 +33,7 @@ task :rotate_secret, [:encryption_key, :secret, :cmd] => [:configure_serviceacco
 end
 
 # This task rotates KMS key and associated secrets file for target args[:encryption_key].
-task :rotate_secrets_key, [:encryption_key] => [:configure_serviceaccount] do |taskname, args|
+task :rotate_secrets_key, [:encryption_key] => [:configure] do |taskname, args|
   if args[:encryption_key].nil? || args[:encryption_key].size == 0
     puts "  ERROR: Argument :encryption_key not present!"
     raise
