@@ -20,8 +20,6 @@ end
 
 @exekube_cmd = "docker-compose run --rm xk"
 
-@serviceaccount_key_file = "secrets/kube-system/owner.json"
-
 desc "Pull the current exekube container from the Docker hub"
 task :update_exekube => :set_vars do
   sh "docker-compose pull"
@@ -68,22 +66,15 @@ task :set_compose_env do
   end
 end
 
-desc "[ADVANCED] Authenticate and generate GCP credentials (gcloud auth login)"
-task :configure_login => [:set_vars] do
-  sh "#{@exekube_cmd} rake configure_login"
-end
-
-# This duplicates information in docker-compose.yaml,
-# TF_VAR_serviceaccount_key.
 desc "[ADVANCED] Create and download credentials for projectowner service account"
 task :configure_serviceaccount => [:set_vars] do
   sh "#{@exekube_cmd} rake configure_serviceaccount"
 end
 
 desc "[ADVANCED] Create or update low-level infrastructure"
-task :apply_infra => [:set_vars, :configure_serviceaccount] do
+task :apply_infra => [:set_vars] do
   sh "#{@exekube_cmd} rake refresh_common_infra['#{@project_type}']"
-  sh "#{@exekube_cmd} up live/#{@env}/infra"
+  sh "#{@exekube_cmd} rake apply_infra"
 end
 
 desc "Create cluster and deploy GPII components to it"
@@ -134,7 +125,7 @@ task :destroy => [:set_vars, :check_destroy_allowed] do
 end
 
 desc "Destroy cluster and low-level infrastructure"
-task :destroy_infra => [:set_vars, :check_destroy_allowed, :configure_serviceaccount, :destroy] do
+task :destroy_infra => [:set_vars, :check_destroy_allowed, :destroy] do
   sh "#{@exekube_cmd} down live/#{@env}/infra"
 end
 
