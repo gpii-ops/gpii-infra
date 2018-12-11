@@ -72,11 +72,14 @@ def compare_alert_policies(stackdriver_alert_policy, alert_policy)
   stackdriver_alert_policy = JSON.parse(stackdriver_alert_policy.to_hash.to_json)
   stackdriver_alert_policy["conditions"].each do |condition|
     condition.delete("name")
+    condition.delete("condition_absent") if condition["condition_absent"] == nil
+    condition.delete("condition_threshold") if condition["condition_threshold"] == nil
   end
   result = false
-  ["display_name", "combiner", "conditions", "user_labels", "enabled"].each do |field|
-    if stackdriver_alert_policy[field] != alert_policy[field]
+  ["display_name", "combiner", "conditions", "user_labels", "enabled"].each do |attribute|
+    if stackdriver_alert_policy[attribute] != alert_policy[attribute]
       result = true
+      break
     end
   end
 
@@ -85,7 +88,9 @@ end
 
 def compare_uptime_checks(stackdriver_uptime_check, uptime_check)
   stackdriver_uptime_check = JSON.parse(stackdriver_uptime_check.to_hash.to_json)
-  stackdriver_uptime_check.delete("name")
+  stackdriver_uptime_check.each do |attribute, value|
+    stackdriver_uptime_check.delete(attribute) if value == nil or attribute == "name"
+  end
 
   return stackdriver_uptime_check != uptime_check
 end
@@ -272,8 +277,6 @@ def process_alert_policies(alert_policies = [], notification_channels = {})
         puts "Alert policy \"#{alert_policy_identifier}\" is up-to-date..."
       end
     else
-puts alert_policy
-
       puts "Creating alert policy \"#{alert_policy_identifier}\"..."
       alert_policy = alert_policy_service_client.create_alert_policy(formatted_parent, alert_policy)
     end
