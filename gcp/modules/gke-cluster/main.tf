@@ -66,6 +66,7 @@ resource "random_id" "cluster_protector" {
     # * Change the value below to 'false'
     # * Destroy the cluster
     # * Change the value below back to 'true'
+    # GPII-3568 - Disabled till all our clusters are regional, should be re-enabled afterwards
     prevent_destroy = false
   }
 }

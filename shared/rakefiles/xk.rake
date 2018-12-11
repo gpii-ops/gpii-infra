@@ -19,8 +19,8 @@ task :xk, [:cmd, :skip_secret_mgmt, :preserve_stderr] => [:configure_serviceacco
 
   Secrets.set_secrets(@secrets)
 
-  # This is a temporary "hack", to be removed once all our clusters are
-  # migrated to the regional ones.
+  # GPII-3568 - This is a temporary "hack", to be removed once all our
+  # clusters are migrated to the regional ones.
   sh_filter "cd live/#{@env}/k8s/cluster; terragrunt state list | grep '\.cluster$' \
     && terragrunt state mv module.gke_cluster.google_container_cluster.cluster module.gke_cluster.google_container_cluster.cluster-regional; true"
 
