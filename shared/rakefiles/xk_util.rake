@@ -51,3 +51,20 @@ task :rotate_secrets_key, [:encryption_key] => [:configure] do |taskname, args|
   Secrets.set_secrets(@secrets, rotate_secrets = true)
   Secrets.disable_non_primary_key_versions(args[:encryption_key], new_version_id)
 end
+
+task :destroy_sa_keys => [:configure] do
+  sh "
+    if [ \"$TF_VAR_serviceaccount_key\" != \"\" ] && [ -f $TF_VAR_serviceaccount_key ]; then \
+      existing_keys=$(gcloud iam service-accounts keys list \
+        --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com \
+        --managed-by user | grep -oE \"^[a-z0-9]+\"); \
+      current_key=$(cat $TF_VAR_serviceaccount_key 2>/dev/null | jq -r '.private_key_id'); \
+      for key in $existing_keys; do \
+        if [ \"$key\" != \"$current_key\" ]; then \
+          yes | gcloud iam service-accounts keys delete \
+            --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com $key; \
+        fi \
+      done
+    fi
+  "
+end

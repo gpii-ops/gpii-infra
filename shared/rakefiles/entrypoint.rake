@@ -162,17 +162,7 @@ end
 
 desc "[ADVANCED] Destroy all SA keys except current one"
 task :destroy_sa_keys => [:set_vars, :check_destroy_allowed] do
-  sh "#{@exekube_cmd} sh -c ' \
-    existing_keys=$(gcloud iam service-accounts keys list \
-      --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com \
-      --managed-by user | grep -oE \"^[a-z0-9]+\"); \
-    current_key=$(cat $TF_VAR_serviceaccount_key 2>/dev/null | jq -r '.private_key_id'); \
-    for key in $existing_keys; do \
-      if [ \"$key\" != \"$current_key\" ]; then \
-        yes | gcloud iam service-accounts keys delete \
-          --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com $key; \
-      fi \
-    done'"
+  sh "#{@exekube_cmd} rake destroy_sa_keys"
 end
 
 desc "[ADVANCED] Destroy secrets file stored in GS bucket for encryption key, passed as argument -- rake destroy_secrets['default']"
