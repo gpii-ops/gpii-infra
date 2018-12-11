@@ -135,3 +135,7 @@ end
 task :apply_infra => [:configure] do
   sh "#{@exekube_cmd} up live/#{@env}/infra"
 end
+
+task :destroy_infra => [:configure] do
+  sh "#{@exekube_cmd} down live/#{@env}/infra"
+end

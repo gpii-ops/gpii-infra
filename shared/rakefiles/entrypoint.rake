@@ -126,7 +126,7 @@ end
 
 desc "Destroy cluster and low-level infrastructure"
 task :destroy_infra => [:set_vars, :check_destroy_allowed, :destroy] do
-  sh "#{@exekube_cmd} down live/#{@env}/infra"
+  sh "#{@exekube_cmd} rake destroy_infra"
 end
 
 desc "[ADVANCED] Remove stale Terraform locks from GS -- for non-dev environments coordinate with the team first"
