@@ -1,1 +1,1 @@
-GPII preferences has been deployed successfully!
+couchdb-prometheus-exporter has been deployed successfully!

@@ -1,14 +1,15 @@
-name: gpii-preferences
+name: couchdb-prometheus-exporter
 version: 0.0.1
-appVersion: 57d0a17da505c8bc28c221c88b8de54447c78dc873c355d0bfd435d28f8b09ee
-home: https://github.com/gpii-ops/gpii-infra
-description: GPII Preferences Service.
-icon: https://gpii.net/sites/all/themes/gpii_main/logo.png
+appVersion: 77a019a7707f581f70239783d0b76500ba25b9382d9ee0702452b0381d5722c2
+home: https://github.com/gesellix/couchdb-prometheus-exporter
+description: CouchDB Prometheus Exporter
+icon: http://couchdb.apache.org/image/couch@2x.png
 keywords:
-  - gpii
-  - preferences
+  - couchdb
+  - prometheus
+  - exporter
 sources:
-  - https://github.com/gpii-ops/gpii-infra
+    - https://github.com/gesellix/couchdb-prometheus-exporter
 maintainers:
   - name: amatas
     email: alfredo@raisingthefloor.org
@@ -16,3 +17,5 @@ maintainers:
     email: sergey@raisingthefloor.org
   - name: mrtyler
     email: tyler@raisingthefloor.org
+  - name: stepan
+    email: stepan@raisingthefloor.org
