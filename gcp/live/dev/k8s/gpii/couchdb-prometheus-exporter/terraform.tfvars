@@ -18,7 +18,7 @@ terragrunt = {
 # ↓ Module configuration (empty means all default)
 
 replica_count     = 2
-requests_cpu      = "250m"
+requests_cpu      = "25m"
 requests_memory   = "128Mi"
-limits_cpu        = "500m"
+limits_cpu        = "50m"
 limits_memory     = "128Mi"
