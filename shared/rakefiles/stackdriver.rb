@@ -70,20 +70,17 @@ end
 
 def compare_alert_policies(stackdriver_alert_policy, alert_policy)
   stackdriver_alert_policy = JSON.parse(stackdriver_alert_policy.to_hash.to_json)
+  ["name", "creation_record", "mutated_by", "mutation_record"]. each do |attribute|
+    stackdriver_alert_policy.delete(attribute)
+  end
+  stackdriver_alert_policy.delete("documentation") if stackdriver_alert_policy["documentation"] == nil
   stackdriver_alert_policy["conditions"].each do |condition|
     condition.delete("name")
     condition.delete("condition_absent") if condition["condition_absent"] == nil
     condition.delete("condition_threshold") if condition["condition_threshold"] == nil
   end
-  result = false
-  ["display_name", "combiner", "conditions", "user_labels", "enabled"].each do |attribute|
-    if stackdriver_alert_policy[attribute] != alert_policy[attribute]
-      result = true
-      break
-    end
-  end
 
-  return result
+  return stackdriver_alert_policy != alert_policy
 end
 
 def compare_uptime_checks(stackdriver_uptime_check, uptime_check)
