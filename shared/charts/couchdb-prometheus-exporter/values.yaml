@@ -7,7 +7,7 @@ replicaCount: 1
 exporter_listen_port: 9984
 couchdb_uri: http://couchdb-svc-couchdb.default.svc.cluster.local:5984
 couchdb_username: admin
-couchdb_password: hunter2
+couchdb_password: password
 couchdb_databases: _all_dbs
 
 image:

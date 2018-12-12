@@ -1,6 +1,6 @@
 # CouchDB Prometheus Exporter
 
-[CouchDB](http://couchdb.apache.org/) metrics exporter for [Prometheus](http://prometheus.io/)
+[couchdb-prometheus-exporter](https://github.com/gesellix/couchdb-prometheus-exporter) is a [CouchDB](http://couchdb.apache.org/) metrics exporter for [Prometheus](http://prometheus.io/)
 
 The CouchDB metrics exporter requests the CouchDB stats from the `/_stats` and `/_active_tasks` endpoints and exposes them for Prometheus consumption. You can optionally monitor detailed database stats like disk and data size to monitor the storage overhead. The exporter can be configured via program parameters, environment variables, and config file.
 
@@ -50,7 +50,7 @@ Parameter | Description | Default
 `exporter_listen_port` | port for exporter service to listen on | `9984`
 `couchdb_uri` | URI for couchdb | `http://couchdb-svc-couchdb.default.svc.cluster.local:5984`
 `couchdb_username` | username for couchdb uri | `admin`
-`couchdb_password` | password for couchdb uri | `hunter2`
+`couchdb_password` | password for couchdb uri | `password`
 `couchdb_databases` | list of specific databases to monitor | `_all_dbs`
 `image.repository` | container image repository | `gpii/universal`
 `image.checksum` | container image checksum | `sha256:77a019a7707f581f70239783d0b76500ba25b9382d9ee0702452b0381d5722c2`
