@@ -55,9 +55,4 @@ Parameter | Description | Default
 `image.repository` | container image repository | `gpii/universal`
 `image.checksum` | container image checksum | `sha256:77a019a7707f581f70239783d0b76500ba25b9382d9ee0702452b0381d5722c2`
 `image.pullPolicy` | container image pullPolicy | `IfNotPresent`
-`resources` | optional resource requests and limits for deployment | `requests:
-   cpu: 25m
-   memory: 80Mi
-  limits:
-   cpu: 25m
-   memory: 80Mi`
+`resources` | optional resource requests and limits for deployment | `requests:`<br/>&nbsp;&nbsp;`cpu: 25m`<br/>&nbsp;&nbsp;`memory: 80Mi`<br/>`limits:`<br/>&nbsp;&nbsp;`cpu: 25m`<br/>&nbsp;&nbsp;`memory: 80Mi`
