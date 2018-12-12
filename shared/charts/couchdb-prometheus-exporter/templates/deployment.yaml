@@ -50,3 +50,13 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: "app"
+                    operator: In
+                    values:
+                    - couchdb-prometheus-exporter
+              topologyKey: "kubernetes.io/hostname"
