@@ -15,6 +15,12 @@ image:
   checksum: sha256:77a019a7707f581f70239783d0b76500ba25b9382d9ee0702452b0381d5722c2
   pullPolicy: IfNotPresent
 
+prometheusToSdExporter:
+  image:
+    repository: gcr.io/google-containers/prometheus-to-sd
+    tag: v0.3.2
+    pullPolicy: IfNotPresent
+
 ## Optional resource requests and limits for deployment
 ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
 resources:

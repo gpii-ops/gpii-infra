@@ -13,13 +13,13 @@ spec:
       containers:
       - name: couchdb-prometheus-exporter
         image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         args:
         - -logtostderr
         - -couchdb.uri=$(COUCHDB_URI)
         - -couchdb.username=$(COUCHDB_USERNAME)
         - -couchdb.password=$(COUCHDB_PASSWORD)
         - -databases=$(COUCHDB_DATABASES)
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.exporter_listen_port }}
         env:
@@ -34,7 +34,8 @@ spec:
         resources:
 {{ toYaml .Values.resources | indent 10 }}
       - name: prometheus-to-sd
-        image: gcr.io/google-containers/prometheus-to-sd:v0.3.2
+        image: {{ .Values.prometheusToSdExporter.image.repository }}:{{ .Values.prometheusToSdExporter.tag }}
+        imagePullPolicy: {{ .Values.prometheusToSdExporter.image.pullPolicy }}
         command:
           - /monitor
           - --stackdriver-prefix=custom.googleapis.com

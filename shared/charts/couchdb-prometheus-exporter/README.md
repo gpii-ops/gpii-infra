@@ -52,7 +52,10 @@ Parameter | Description | Default
 `couchdb_username` | username for couchdb uri | `admin`
 `couchdb_password` | password for couchdb uri | `password`
 `couchdb_databases` | list of specific databases to monitor | `_all_dbs`
-`image.repository` | container image repository | `gpii/universal`
+`image.repository` | container image repository | `gesellix/couchdb-prometheus-exporter`
 `image.checksum` | container image checksum | `sha256:77a019a7707f581f70239783d0b76500ba25b9382d9ee0702452b0381d5722c2`
 `image.pullPolicy` | container image pullPolicy | `IfNotPresent`
+`image.prometheusToSdExporter.repository` | prometheus-to-sd container image repository | `gcr.io/google-containers/prometheus-to-sd`
+`image.prometheusToSdExporter.tag` | prometheus-to-sd container image tag | `v0.3.2`
+`image.pullPolicy` | prometheus-to-sd container image pullPolicy | `IfNotPresent`
 `resources` | optional resource requests and limits for deployment | `requests:`<br/>&nbsp;&nbsp;`cpu: 10m`<br/>&nbsp;&nbsp;`memory: 60Mi`<br/>`limits:`<br/>&nbsp;&nbsp;`cpu: 10m`<br/>&nbsp;&nbsp;`memory: 60Mi`
