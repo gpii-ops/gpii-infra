@@ -66,11 +66,6 @@ task :set_compose_env do
   end
 end
 
-desc "[ADVANCED] Create and download credentials for projectowner service account"
-task :configure_serviceaccount => [:set_vars] do
-  sh "#{@exekube_cmd} rake configure_serviceaccount"
-end
-
 desc "[ADVANCED] Create or update low-level infrastructure"
 task :apply_infra => [:set_vars] do
   sh "#{@exekube_cmd} rake refresh_common_infra['#{@project_type}']"

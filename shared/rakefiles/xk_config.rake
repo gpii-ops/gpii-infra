@@ -1,4 +1,3 @@
-
 @gcp_creds_file = "/root/.config/gcloud/credentials.db"
 task :configure_login => [@gcp_creds_file]
 rule @gcp_creds_file do
@@ -32,13 +31,15 @@ task :configure_serviceaccount => [@gcp_creds_file] do
   end
 end
 
-@default_creds_file = "/root/.config/gcloud/application_default_credentials.json"
-task :configure_app_default_login => [@default_creds_file]
-rule @default_creds_file do
+@app_default_creds_file = "/root/.config/gcloud/application_default_credentials.json"
+task :configure_app_default_login => [@app_default_creds_file]
+rule @app_default_creds_file do
   # This retrieves application-default credentials using interactive auth,
   # only in case service account credentials are not present.
   unless File.file?(@serviceaccount_key_file)
     sh "gcloud auth application-default login"
+  else
+    puts "SA credentials are present locally, skipping app-default login..."
   end
 end
 
@@ -46,7 +47,7 @@ end
 task :configure_kubectl => [@kubectl_creds_file]
 rule @kubectl_creds_file => [@gcp_creds_file] do
   # This duplicates information in terraform code, 'k8s-cluster'
-  cluster_name = 'k8s-cluster'
+  cluster_name = "k8s-cluster"
   sh "
     existing_cluster_zone=$(gcloud container clusters list --filter #{cluster_name} --project #{ENV["TF_VAR_project_id"]} --format json | jq -er '.[0].zone')
     if [ $? == 0 ]; then \
@@ -54,9 +55,14 @@ rule @kubectl_creds_file => [@gcp_creds_file] do
     fi"
 end
 
-task :configure => [@gcp_creds_file, @default_creds_file, @kubectl_creds_file] do
+task :configure => [@gcp_creds_file, @app_default_creds_file, @kubectl_creds_file] do
   sh "gcloud config set project $TF_VAR_project_id"
   # We need to set service account key var only if SA credentials are present locally.
   # In case var is unset, application-default credentials will be used.
-  ENV['TF_VAR_serviceaccount_key'] = File.file?(@serviceaccount_key_file) ? @serviceaccount_key_file : ''
+  ENV["TF_VAR_serviceaccount_key"] = File.file?(@serviceaccount_key_file) ? @serviceaccount_key_file : ""
+  # Setting authenticated user's email into env variable, so it can be
+  # accessible in modules: https://issues.gpii.net/browse/GPII-3516
+  ENV["TF_VAR_auth_user_email"] = %x{
+    gcloud auth list --filter='account!~gserviceaccount.com' --format json |  jq -r '.[].account'
+  }.chomp!
 end

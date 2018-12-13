@@ -53,7 +53,7 @@ task :rotate_secrets_key, [:encryption_key] => [:configure] do |taskname, args|
 end
 
 # This task destroy all keys except current one for projectowner's SA.
-# All operations will be ignored in case local credentials not present or SA usage not configured.
+# It does nothing in case local SA credentials not present.
 task :destroy_sa_keys => [:configure] do
   sh "
     if [ \"$TF_VAR_serviceaccount_key\" != \"\" ] && [ -f $TF_VAR_serviceaccount_key ]; then \
