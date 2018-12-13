@@ -92,7 +92,7 @@ An environment needs some resources created in the organization before the follo
 1. (OPTIONAL) `rake clobber`
    * This command is also optional, but performs a deletion of some more files than `rake clean`, it will leave your personal environment without generated data. You will need to authenticate again the application in GCP after this.
 
-## One-time Google Cloud Account Setup
+## One-time Google Cloud Account setup
 * https://cloud.google.com/resource-manager/docs/quickstart-organizations
    * G Suite: "The first time a user in your domain creates a project or billing account, the Organization resource is automatically created and linked to your company’s G Suite account. The current project and all future projects will automatically belong to the organization."
       * @mrtyler believes he did this when he created his Free Trial account using his RtF email address.
@@ -111,10 +111,19 @@ An environment needs some resources created in the organization before the follo
    * @mrtyler requested a quota bump to 100 Projects.
       * He only authorized his own email for now, to see what it did. But it's possible other Ops team members will need to go through this step.
 
-## One-time CI Setup
+## One-time CI setup
 1. Log in to the CI Worker and clone this repo.
 1. `cd gpii-infra/ && rake -f rakefiles/ci_save_all.rake`
 
+## Authentication workflow
+
+There are number of infrastructure components that require access tokens to interact with various GCP services.
+
+* For developers we use [application-default credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default/). This approach allows us to trace every action performed by individual users back to their G Suite accounts.
+   * After initial interactive login you will be asked to login one more time to retrieve application-default credentials for your account. Locally stored credentials can be destroyed with `rake clobber`.
+* For CI we use `projectowner` service account, so all CI actions appear in audit logs under that SA.
+   * SA credentials are being generated and stored locally during [CI setup](#one-time-ci-setup).
+* In case SA credentials are present locally, application-default credentials are ignored.
 
 ## Monitoring and alerting
 
