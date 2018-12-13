@@ -1,0 +1,21 @@
+name: couchdb-prometheus-exporter
+version: 0.0.1
+appVersion: 77a019a7707f581f70239783d0b76500ba25b9382d9ee0702452b0381d5722c2
+home: https://github.com/gesellix/couchdb-prometheus-exporter
+description: CouchDB Prometheus Exporter
+icon: http://couchdb.apache.org/image/couch@2x.png
+keywords:
+  - couchdb
+  - prometheus
+  - exporter
+sources:
+    - https://github.com/gesellix/couchdb-prometheus-exporter
+maintainers:
+  - name: amatas
+    email: alfredo@raisingthefloor.org
+  - name: natarajaya
+    email: sergey@raisingthefloor.org
+  - name: mrtyler
+    email: tyler@raisingthefloor.org
+  - name: stepan
+    email: stepan@raisingthefloor.org

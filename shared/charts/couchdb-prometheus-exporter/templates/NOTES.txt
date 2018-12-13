@@ -1,0 +1,1 @@
+couchdb-prometheus-exporter has been deployed successfully!
