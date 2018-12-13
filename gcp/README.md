@@ -38,6 +38,16 @@ The DNS zones are:
 - dev.gcp.gpii.net
 - ${user}.dev.gcp.gpii.net
 
+## Authentication workflow
+
+There are number of infrastructure components that require access tokens to interact with various GCP services.
+
+* For developers we use [application-default credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default/). This approach allows us to trace every action performed by individual users back to their G Suite accounts.
+   * After initial interactive login you will be asked to login one more time to retrieve application-default credentials for your account. Locally stored credentials can be destroyed with `rake clobber`.
+* For CI we use `projectowner` service account, so all CI actions appear in audit logs under that SA.
+   * SA credentials are being generated and stored locally during [CI setup](#one-time-ci-setup).
+* In case SA credentials are present locally, application-default credentials are ignored.
+
 ## Creating the infrastructure
 
 The environments that run in GCP need some initial resources that must be created by an administrator first. The [common part of this repository](../common) has the code and the instructions to do so.
@@ -114,16 +124,6 @@ An environment needs some resources created in the organization before the follo
 ## One-time CI setup
 1. Log in to the CI Worker and clone this repo.
 1. `cd gpii-infra/ && rake -f rakefiles/ci_save_all.rake`
-
-## Authentication workflow
-
-There are number of infrastructure components that require access tokens to interact with various GCP services.
-
-* For developers we use [application-default credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default/). This approach allows us to trace every action performed by individual users back to their G Suite accounts.
-   * After initial interactive login you will be asked to login one more time to retrieve application-default credentials for your account. Locally stored credentials can be destroyed with `rake clobber`.
-* For CI we use `projectowner` service account, so all CI actions appear in audit logs under that SA.
-   * SA credentials are being generated and stored locally during [CI setup](#one-time-ci-setup).
-* In case SA credentials are present locally, application-default credentials are ignored.
 
 ## Monitoring and alerting
 
