@@ -5,7 +5,9 @@ terraform {
 variable "secrets_dir" {}
 variable "charts_dir" {}
 
-variable "replica_count" {}
+variable "replica_count" {
+  default = "1"
+}
 
 # Secret variables
 variable "secret_couchdb_admin_username" {}

@@ -16,5 +16,3 @@ terragrunt = {
 }
 
 # ↓ Module configuration (empty means all default)
-
-replica_count = 2
