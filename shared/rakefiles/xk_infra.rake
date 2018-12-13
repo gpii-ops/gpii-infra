@@ -38,7 +38,7 @@ task :refresh_common_infra, [:project_type] => [:configure] do | taskname, args|
   end
 end
 
-task :apply_common_infra => [:configure] do
+task :apply_common_infra => [@gcp_creds_file] do
   # Steps to initialize GCP with a minimum set of resources to allow Terraform
   # create the rest of the infrastructure.
   # These steps are the same found in this tutorial:
@@ -56,8 +56,6 @@ task :apply_common_infra => [:configure] do
     sh "#{@exekube_cmd} gcloud projects create #{ENV["TF_VAR_project_id"]} \
       --organization #{ENV["ORGANIZATION_ID"]} \
       --set-as-default"
-  else
-    Rake::Task[:configure_current_project].invoke
   end
 
   sh "#{@exekube_cmd} gcloud beta billing projects link #{ENV["TF_VAR_project_id"]} \
@@ -73,6 +71,7 @@ task :apply_common_infra => [:configure] do
   end
 
   Rake::Task[:configure_serviceaccount].invoke
+  Rake::Task[:configure].invoke
 
   ["roles/viewer", "roles/storage.admin", "roles/dns.admin"].each do |role|
     sh "#{@exekube_cmd} gcloud projects add-iam-policy-binding #{ENV["TF_VAR_project_id"]} \
