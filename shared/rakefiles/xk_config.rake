@@ -35,12 +35,10 @@ task :configure_kubectl => [@kubectl_creds_file]
 rule @kubectl_creds_file => [@gcp_creds_file] do
   # This duplicates information in terraform code, 'k8s-cluster'
   cluster_name = 'k8s-cluster'
-  # This duplicates information in terraform code, 'zone'. Could be a variable with some plumbing.
-  zone = 'us-central1-a'
   sh "
-    existing_cluster=$(gcloud container clusters list --filter #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]})
-    if [ $? == 0 ] && [ \"$existing_cluster\" != \"\" ]; then \
-      gcloud container clusters get-credentials #{cluster_name} --zone #{zone} --project #{ENV["TF_VAR_project_id"]}
+    existing_cluster_zone=$(gcloud container clusters list --filter #{cluster_name} --project #{ENV["TF_VAR_project_id"]} --format json | jq -er '.[0].zone')
+    if [ $? == 0 ]; then \
+      gcloud container clusters get-credentials #{cluster_name} --zone ${existing_cluster_zone} --project #{ENV["TF_VAR_project_id"]}
     fi"
 end
 
