@@ -2,4 +2,4 @@ image:
   repository: ${dataloader_repository}
   checksum: ${dataloader_checksum}
 
-couchdb_url: "http://${couchdb_admin_username}:${couchdb_admin_password}@couchdb-svc-couchdb.gpii.svc.cluster.local:5984/gpii"
+couchdbUrl: "http://${couchdb_admin_username}:${couchdb_admin_password}@couchdb-svc-couchdb.gpii.svc.cluster.local:5984/gpii"

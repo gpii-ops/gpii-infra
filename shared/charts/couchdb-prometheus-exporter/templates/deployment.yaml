@@ -21,16 +21,16 @@ spec:
         - -couchdb.password=$(COUCHDB_PASSWORD)
         - -databases=$(COUCHDB_DATABASES)
         ports:
-        - containerPort: {{ .Values.exporter_listen_port }}
+        - containerPort: {{ .Values.exporterListenPort }}
         env:
         - name: COUCHDB_URI
-          value: {{ .Values.couchdb_uri }}
+          value: {{ .Values.couchdbUri }}
         - name: COUCHDB_USERNAME
-          value: {{ .Values.couchdb_username }}
+          value: {{ .Values.couchdbUsername }}
         - name: COUCHDB_PASSWORD
-          value: {{ .Values.couchdb_password }}
+          value: {{ .Values.couchdbPassword }}
         - name: COUCHDB_DATABASES
-          value: {{ .Values.couchdb_databases }}
+          value: {{ .Values.couchdbDatabases }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
       - name: prometheus-to-sd
@@ -39,7 +39,7 @@ spec:
         command:
           - /monitor
           - --stackdriver-prefix=custom.googleapis.com
-          - --source=couchdb:http://localhost:{{ .Values.exporter_listen_port }}
+          - --source=couchdb:http://localhost:{{ .Values.exporterListenPort }}
           - --pod-id=$(POD_NAME)
           - --namespace-id=$(POD_NAMESPACE)
         env:

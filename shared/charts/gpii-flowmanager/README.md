@@ -47,12 +47,12 @@ The following table lists the configurable parameters of the gpii-flowmanager ch
 Parameter | Description | Default
 --- | --- | ---
 `replicaCount` | desired number of controller pods | `1`
-`svc_listen_port` | ClusterIP service port | `80`
-`flowmanager_listen_port` | port for flowmanager service to listen on | `8081`
-`datasource_listen_port` | data source port for flowmanager service | `5984`
-`datasource_hostname` | data source hostname for preferences service | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`
-`node_env` | flowmanager node env | `gpii.config.cloudBased.flowManager.production`
-`preferences_url` | preferences service url | `http://preferences.gpii.svc.cluster.local`
+`svcListenPort` | ClusterIP service port | `80`
+`flowmanagerListenPort` | port for flowmanager service to listen on | `8081`
+`datasourceListenPort` | data source port for flowmanager service | `5984`
+`datasourceHostname` | data source hostname for preferences service | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`
+`nodeEnv` | flowmanager node env | `gpii.config.cloudBased.flowManager.production`
+`preferencesUrl` | preferences service url | `http://preferences.gpii.svc.cluster.local`
 `enableStackdriverTrace` | enable [GCP Stackdriver Trace](https://cloud.google.com/trace/) | `false`
 `issuerRef.name` | name of the cert-manager issuer | `letsencrypt-production`
 `issuerRef.kind` | kind of the cert-manager issuer | `Issuer`

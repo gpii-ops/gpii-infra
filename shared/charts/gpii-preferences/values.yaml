@@ -4,12 +4,12 @@
 
 replicaCount: 1
 
-svc_listen_port: 80
-preferences_listen_port: 8081
-datasource_listen_port: 5984
-datasource_hostname: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local"
+svcListenPort: 80
+preferencesListenPort: 8081
+datasourceListenPort: 5984
+datasourceHostname: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local"
 
-node_env: gpii.config.preferencesServer.standalone.production
+nodeEnv: gpii.config.preferencesServer.standalone.production
 enableStackdriverTrace: false
 
 image:

@@ -47,11 +47,11 @@ The following table lists the configurable parameters of the gpii-preferences ch
 Parameter | Description | Default
 --- | --- | ---
 `replicaCount` | desired number of controller pods | `1`
-`svc_listen_port` | ClusterIP service port | `80`
-`preferences_listen_port` | port for preferences service to listen on | `8081`
-`datasource_listen_port` | data source port for preferences service | `5984`
-`datasource_hostname` | data source hostname for preferences service | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`
-`node_env` | preferences node env | `gpii.config.preferencesServer.standalone.production`
+`svcListenPort` | ClusterIP service port | `80`
+`preferencesListenPort` | port for preferences service to listen on | `8081`
+`datasourceListenPort` | data source port for preferences service | `5984`
+`datasourceHostname` | data source hostname for preferences service | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`
+`nodeEnv` | preferences node env | `gpii.config.preferencesServer.standalone.production`
 `enableStackdriverTrace` | enable [GCP Stackdriver Trace](https://cloud.google.com/trace/) | `false`
 `issuerRef.name` | name of the cert-manager issuer | `letsencrypt-production`
 `issuerRef.kind` | kind of the cert-manager issuer | `Issuer`

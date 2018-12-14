@@ -4,13 +4,13 @@
 
 replicaCount: 1
 
-svc_listen_port: 80
-flowmanager_listen_port: 8081
-datasource_listen_port: 5984
-datasource_hostname: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local"
+svcListenPort: 80
+flowmanagerListenPort: 8081
+datasourceListenPort: 5984
+datasourceHostname: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local"
 
-node_env: gpii.config.cloudBased.flowManager.production
-preferences_url: http://preferences.gpii.svc.cluster.local
+nodeEnv: gpii.config.cloudBased.flowManager.production
+preferencesUrl: http://preferences.gpii.svc.cluster.local
 enableStackdriverTrace: false
 
 image:

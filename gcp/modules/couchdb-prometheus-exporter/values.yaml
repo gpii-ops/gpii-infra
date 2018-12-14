@@ -1,5 +1,5 @@
 replicaCount: ${replica_count}
 
-couchdb_uri: http://couchdb-svc-couchdb.gpii.svc.cluster.local:5984
-couchdb_username: ${couchdb_admin_username}
-couchdb_password: ${couchdb_admin_password}
+couchdbUri: http://couchdb-svc-couchdb.gpii.svc.cluster.local:5984
+couchdbUsername: ${couchdb_admin_username}
+couchdbPassword: ${couchdb_admin_password}
