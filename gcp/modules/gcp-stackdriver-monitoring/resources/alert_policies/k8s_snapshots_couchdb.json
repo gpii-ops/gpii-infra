@@ -10,8 +10,8 @@
           "nanos": 0
         },
         "trigger": {
-          "count": 1,
-          "percent": 0
+          "count": 0,
+          "percent": 0.0
         },
         "aggregations": [
           {
@@ -35,8 +35,8 @@
           "nanos": 0
         },
         "trigger": {
-          "count": 1,
-          "percent": 0
+          "count": 0,
+          "percent": 0.0
         },
         "aggregations": [
           {

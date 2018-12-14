@@ -68,6 +68,36 @@ def get_alert_policy_identifier(alert_policy)
   return result
 end
 
+def compare_alert_policies(stackdriver_alert_policy, alert_policy)
+  stackdriver_alert_policy = JSON.parse(stackdriver_alert_policy.to_hash.to_json)
+  ["name", "creation_record", "mutated_by", "mutation_record"]. each do |attribute|
+    stackdriver_alert_policy.delete(attribute)
+  end
+  stackdriver_alert_policy.delete("documentation") if stackdriver_alert_policy["documentation"] == nil
+  stackdriver_alert_policy["conditions"].each do |condition|
+    condition.delete("name")
+    condition.delete("condition_absent") if condition["condition_absent"] == nil
+    condition.delete("condition_threshold") if condition["condition_threshold"] == nil
+  end
+
+  return stackdriver_alert_policy != alert_policy
+end
+
+def compare_uptime_checks(stackdriver_uptime_check, uptime_check)
+  stackdriver_uptime_check = JSON.parse(stackdriver_uptime_check.to_hash.to_json)
+  stackdriver_uptime_check.each do |attribute, value|
+    stackdriver_uptime_check.delete(attribute) if value == nil or attribute == "name"
+  end
+
+  return stackdriver_uptime_check != uptime_check
+end
+
+def compare_notification_channels(stackdriver_notification_channel, notification_channel)
+  stackdriver_notification_channel = JSON.parse(stackdriver_notification_channel.to_hash.to_json)
+
+  return stackdriver_notification_channel != notification_channel
+end
+
 def debug_output(resource)
   return resource.to_hash.to_json
 end
@@ -91,7 +121,7 @@ def process_log_based_metrics(log_based_metrics = [])
         metric.filter = log_based_metric["filter"]
         metric.save
       else
-        puts "Skipping log-based metric \"#{log_based_metric["name"]}\"..."
+        puts "Log-based metric \"#{log_based_metric["name"]}\" is up-to-date..."
       end
     else
       puts "Creating log-based metric \"#{log_based_metric["name"]}\"..."
@@ -134,8 +164,12 @@ def process_notification_channels(notification_channels = [])
     if stackdriver_notification_channels[notification_channel_identifier]
       notification_channel["name"] = stackdriver_notification_channels[notification_channel_identifier]["name"]
       unless notification_channel["immutable"]
-        puts "Updating notification channel \"#{notification_channel_identifier}\"..."
-        notification_channel_service_client.update_notification_channel(notification_channel)
+        if compare_notification_channels(stackdriver_notification_channels[notification_channel_identifier], notification_channel)
+          puts "Updating notification channel \"#{notification_channel_identifier}\"..."
+          notification_channel_service_client.update_notification_channel(notification_channel)
+        else
+          puts "Notification channel \"#{notification_channel_identifier}\" is up-to-date..."
+        end
       else
         puts "Skipping update of immutable notification channel \"#{notification_channel_identifier}\"..."
       end
@@ -183,9 +217,13 @@ def process_uptime_checks(uptime_checks = [])
     uptime_check_identifier = get_uptime_check_identifier(uptime_check)
 
     if stackdriver_uptime_checks[uptime_check_identifier]
-      uptime_check["name"] = stackdriver_uptime_checks[uptime_check_identifier]["name"]
-      puts "Updating uptime check \"#{uptime_check_identifier}\"..."
-      uptime_check_service_client.update_uptime_check_config(uptime_check)
+      if compare_uptime_checks(stackdriver_uptime_checks[uptime_check_identifier], uptime_check)
+        uptime_check["name"] = stackdriver_uptime_checks[uptime_check_identifier]["name"]
+        puts "Updating uptime check \"#{uptime_check_identifier}\"..."
+        uptime_check_service_client.update_uptime_check_config(uptime_check)
+      else
+        puts "Uptime check \"#{uptime_check_identifier}\" is up-to-date..."
+      end
     else
       puts "Creating uptime check \"#{uptime_check_identifier}\"..."
       uptime_check = uptime_check_service_client.create_uptime_check_config(formatted_parent, uptime_check)
@@ -228,9 +266,13 @@ def process_alert_policies(alert_policies = [], notification_channels = {})
     alert_policy["notification_channels"] = notification_channels.values if notification_channels.values
 
     if stackdriver_alert_policies[alert_policy_identifier]
-      alert_policy["name"] = stackdriver_alert_policies[alert_policy_identifier]["name"]
-      puts "Updating alert policy \"#{alert_policy_identifier}\"..."
-      alert_policy_service_client.update_alert_policy(alert_policy)
+      if compare_alert_policies(stackdriver_alert_policies[alert_policy_identifier], alert_policy)
+        alert_policy["name"] = stackdriver_alert_policies[alert_policy_identifier]["name"]
+        puts "Updating alert policy \"#{alert_policy_identifier}\"..."
+        alert_policy_service_client.update_alert_policy(alert_policy)
+      else
+        puts "Alert policy \"#{alert_policy_identifier}\" is up-to-date..."
+      end
     else
       puts "Creating alert policy \"#{alert_policy_identifier}\"..."
       alert_policy = alert_policy_service_client.create_alert_policy(formatted_parent, alert_policy)

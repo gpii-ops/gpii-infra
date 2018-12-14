@@ -6,14 +6,14 @@
       "condition_threshold": {
         "filter": "metric.type=\"logging.googleapis.com/user/k8s_snapshots.error\" resource.type=\"k8s_container\"",
         "comparison": "COMPARISON_GT",
-        "threshold_value": 1,
+        "threshold_value": 1.0,
         "duration": {
           "seconds": 300,
           "nanos": 0
         },
         "trigger": {
-          "count": 1,
-          "percent": 0
+          "count": 0,
+          "percent": 0.0
         },
         "aggregations": [
           {
