@@ -20,8 +20,6 @@ end
 
 @exekube_cmd = "docker-compose run --rm xk"
 
-@serviceaccount_key_file = "secrets/kube-system/owner.json"
-
 desc "Pull the current exekube container from the Docker hub"
 task :update_exekube => :set_vars do
   sh "docker-compose pull"
@@ -68,22 +66,10 @@ task :set_compose_env do
   end
 end
 
-desc "[ADVANCED] Authenticate and generate GCP credentials (gcloud auth login)"
-task :configure_login => [:set_vars] do
-  sh "#{@exekube_cmd} rake configure_login"
-end
-
-# This duplicates information in docker-compose.yaml,
-# TF_VAR_serviceaccount_key.
-desc "[ADVANCED] Create and download credentials for projectowner service account"
-task :configure_serviceaccount => [:set_vars] do
-  sh "#{@exekube_cmd} rake configure_serviceaccount"
-end
-
 desc "[ADVANCED] Create or update low-level infrastructure"
-task :apply_infra => [:set_vars, :configure_serviceaccount] do
+task :apply_infra => [:set_vars] do
   sh "#{@exekube_cmd} rake refresh_common_infra['#{@project_type}']"
-  sh "#{@exekube_cmd} up live/#{@env}/infra"
+  sh "#{@exekube_cmd} rake apply_infra"
 end
 
 desc "Create cluster and deploy GPII components to it"
@@ -134,8 +120,8 @@ task :destroy => [:set_vars, :check_destroy_allowed] do
 end
 
 desc "Destroy cluster and low-level infrastructure"
-task :destroy_infra => [:set_vars, :check_destroy_allowed, :configure_serviceaccount, :destroy] do
-  sh "#{@exekube_cmd} down live/#{@env}/infra"
+task :destroy_infra => [:set_vars, :check_destroy_allowed, :destroy] do
+  sh "#{@exekube_cmd} rake destroy_infra"
 end
 
 desc "[ADVANCED] Remove stale Terraform locks from GS -- for non-dev environments coordinate with the team first"
@@ -171,17 +157,7 @@ end
 
 desc "[ADVANCED] Destroy all SA keys except current one"
 task :destroy_sa_keys => [:set_vars, :check_destroy_allowed] do
-  sh "#{@exekube_cmd} sh -c ' \
-    existing_keys=$(gcloud iam service-accounts keys list \
-      --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com \
-      --managed-by user | grep -oE \"^[a-z0-9]+\"); \
-    current_key=$(cat $TF_VAR_serviceaccount_key 2>/dev/null | jq -r '.private_key_id'); \
-    for key in $existing_keys; do \
-      if [ \"$key\" != \"$current_key\" ]; then \
-        yes | gcloud iam service-accounts keys delete \
-          --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com $key; \
-      fi \
-    done'"
+  sh "#{@exekube_cmd} rake destroy_sa_keys"
 end
 
 desc "[ADVANCED] Destroy secrets file stored in GS bucket for encryption key, passed as argument -- rake destroy_secrets['default']"

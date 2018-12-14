@@ -21,7 +21,8 @@ services:
       # TF_VAR_serviceaccount_key will be used by the gcp-project-init script
       #    to put the service account key upon the creation of the GCP project
       # It can then be used by modules to authenticate to GCP
-      TF_VAR_serviceaccount_key: /project/live/${ENV}/secrets/kube-system/owner.json
+      # It is being populated in Rake code, only if SA credentials are configured
+      TF_VAR_serviceaccount_key:
 
       # TF_VAR_default_dir is the default directory for Terraform / Terragrunt
       # Used when we run `xk up` or `xk down` without an argument

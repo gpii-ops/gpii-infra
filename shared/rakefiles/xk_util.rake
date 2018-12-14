@@ -5,7 +5,7 @@
 # Old secret value will be set to TF_VAR_secret_name_rotated until rotation is finished.
 #
 # Arbitrary command to execute after rotation can be set with :cmd argument.
-task :rotate_secret, [:encryption_key, :secret, :cmd] => [:configure_serviceaccount] do |taskname, args|
+task :rotate_secret, [:encryption_key, :secret, :cmd] => [:configure] do |taskname, args|
   if args[:encryption_key].nil? || args[:encryption_key].size == 0
     puts "  ERROR: Argument :encryption_key not present!"
     raise
@@ -33,7 +33,7 @@ task :rotate_secret, [:encryption_key, :secret, :cmd] => [:configure_serviceacco
 end
 
 # This task rotates KMS key and associated secrets file for target args[:encryption_key].
-task :rotate_secrets_key, [:encryption_key] => [:configure_serviceaccount] do |taskname, args|
+task :rotate_secrets_key, [:encryption_key] => [:configure] do |taskname, args|
   if args[:encryption_key].nil? || args[:encryption_key].size == 0
     puts "  ERROR: Argument :encryption_key not present!"
     raise
@@ -50,4 +50,23 @@ task :rotate_secrets_key, [:encryption_key] => [:configure_serviceaccount] do |t
   new_version_id = Secrets.create_key_version(args[:encryption_key])
   Secrets.set_secrets(@secrets, rotate_secrets = true)
   Secrets.disable_non_primary_key_versions(args[:encryption_key], new_version_id)
+end
+
+# This task destroy all keys except current one for projectowner's SA.
+# It does nothing in case local SA credentials not present.
+task :destroy_sa_keys => [:configure] do
+  sh "
+    if [ \"$TF_VAR_serviceaccount_key\" != \"\" ] && [ -f $TF_VAR_serviceaccount_key ]; then \
+      existing_keys=$(gcloud iam service-accounts keys list \
+        --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com \
+        --managed-by user | grep -oE \"^[a-z0-9]+\"); \
+      current_key=$(cat $TF_VAR_serviceaccount_key 2>/dev/null | jq -r '.private_key_id'); \
+      for key in $existing_keys; do \
+        if [ \"$key\" != \"$current_key\" ]; then \
+          yes | gcloud iam service-accounts keys delete \
+            --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com $key; \
+        fi \
+      done
+    fi
+  "
 end

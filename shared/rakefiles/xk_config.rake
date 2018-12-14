@@ -15,26 +15,39 @@ end
 # (and a new Serviceaccount Key) whenever @gcp_creds_file changes. This is not
 # what we want, i.e. don't create a new Key/key file when @gcp_creds_file
 # changes because of :configure_kubectl.
-@serviceaccount_key_file = ENV["TF_VAR_serviceaccount_key"]
-task :configure_serviceaccount => [@gcp_creds_file, :configure_current_project] do
+@serviceaccount_key_file = "/project/live/#{ENV['ENV']}/secrets/kube-system/owner.json"
+task :configure_serviceaccount => [@gcp_creds_file] do
   # TODO: This command is duplicated from exekube's gcp-project-init (and
   # hardcodes 'projectowner' instead of $SA_NAME which is only defined in
   # gcp-project-init). If gcp-project-init becomes idempotent (GPII-2989,
   # https://github.com/exekube/exekube/issues/92), or if this 'keys create'
   # step moves somewhere else in exekube, call this command from that place
   # instead.
-  sh "
-    [ -f $TF_VAR_serviceaccount_key ] || \
-    gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
-      --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com
-  "
+  unless File.file?(@serviceaccount_key_file)
+    sh "
+      gcloud iam service-accounts keys create #{@serviceaccount_key_file} \
+        --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com
+    "
+  end
+end
+
+@app_default_creds_file = "/root/.config/gcloud/application_default_credentials.json"
+task :configure_app_default_login => [@app_default_creds_file]
+rule @app_default_creds_file do
+  # This retrieves application-default credentials using interactive auth,
+  # only in case service account credentials are not present.
+  unless File.file?(@serviceaccount_key_file)
+    sh "gcloud auth application-default login"
+  else
+    puts "SA credentials are present locally, skipping app-default login..."
+  end
 end
 
 @kubectl_creds_file = "/root/.kube/config"
 task :configure_kubectl => [@kubectl_creds_file]
 rule @kubectl_creds_file => [@gcp_creds_file] do
   # This duplicates information in terraform code, 'k8s-cluster'
-  cluster_name = 'k8s-cluster'
+  cluster_name = "k8s-cluster"
   sh "
     existing_cluster_zone=$(gcloud container clusters list --filter #{cluster_name} --project #{ENV["TF_VAR_project_id"]} --format json | jq -er '.[0].zone')
     if [ $? == 0 ]; then \
@@ -42,6 +55,14 @@ rule @kubectl_creds_file => [@gcp_creds_file] do
     fi"
 end
 
-task :configure_current_project => [@gcp_creds_file] do
+task :configure => [@gcp_creds_file, @app_default_creds_file, @kubectl_creds_file] do
   sh "gcloud config set project $TF_VAR_project_id"
+  # We need to set service account key var only if SA credentials are present locally.
+  # In case var is unset, application-default credentials will be used.
+  ENV["TF_VAR_serviceaccount_key"] = File.file?(@serviceaccount_key_file) ? @serviceaccount_key_file : ""
+  # Setting authenticated user's email into env variable, so it can be
+  # accessible in modules: https://issues.gpii.net/browse/GPII-3516
+  ENV["TF_VAR_auth_user_email"] = %x{
+    gcloud auth list --filter='account!~gserviceaccount.com' --format json |  jq -r '[.[].account][0]'
+  }.chomp!
 end
