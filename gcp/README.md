@@ -279,3 +279,15 @@ There may be a situation, when we want to roll back entire DB data set to anothe
 
 * Avoid deploying changes near the end of your work day.
 * Avoid deploying on Friday or prior to a holiday.
+
+### Kubernetes resource requests and limits
+
+* Use [resource requests and limits](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/) for components that run in Kubernetes.
+   * Among their many benefits, Stackdriver needs resource requests and limits to generate meaningful Kubernetes dashboards.
+* Memory: use the same value for Request and Limit. This makes scheduling in the cluster more predictable.
+* CPU: favor using the same value for Request and Limit as this makes scheduling in the cluster more predictable.
+   * However, to ease running resource-intensive components (CouchDB, Flowmanager, Preferences) in clusters with fewer resources (dev environments), you may set a component's CPU Request to a smaller value of the component's CPU Limit (e.g. `Request = 0.5 * Limit`).
+* To determine initial values for a component's Requests and Limits:
+   * Observe the component at idle and under some load.
+   * Add a buffer for safety, e.g. `1.5 * observed value`.
+* Favor specifying default Requests and Limits as far "down the stack" as possible, i.e. favor Chart defaults over Terraform module defaults over environment-specific settings.
