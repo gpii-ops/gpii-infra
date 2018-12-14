@@ -71,7 +71,7 @@ task :apply_common_infra => [@gcp_creds_file] do
   end
 
   Rake::Task[:configure_serviceaccount].invoke
-  Rake::Task[:configure].invoke
+  Rake::Task[:configure_current_project].invoke
 
   ["roles/viewer", "roles/storage.admin", "roles/dns.admin"].each do |role|
     sh "#{@exekube_cmd} gcloud projects add-iam-policy-binding #{ENV["TF_VAR_project_id"]} \
