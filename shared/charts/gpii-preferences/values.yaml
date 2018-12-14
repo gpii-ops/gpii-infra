@@ -28,10 +28,6 @@ issuerRef:
 dnsNames:
 - preferences.test.local
 
-secretKeyRef:
-  name: couchdb-secrets
-  key: datasource_hostname
-
 ingress:
   disable_ssl_redirect: false
 
