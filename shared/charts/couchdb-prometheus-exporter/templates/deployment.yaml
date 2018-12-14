@@ -1,0 +1,63 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: {{ .Release.Namespace | quote }}
+  name: {{ template "couchdb_prometheus_exporter.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: couchdb-prometheus-exporter
+    spec:
+      containers:
+      - name: couchdb-prometheus-exporter
+        image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        args:
+        - -logtostderr
+        - -couchdb.uri=$(COUCHDB_URI)
+        - -couchdb.username=$(COUCHDB_USERNAME)
+        - -couchdb.password=$(COUCHDB_PASSWORD)
+        - -databases=$(COUCHDB_DATABASES)
+        ports:
+        - containerPort: {{ .Values.exporter_listen_port }}
+        env:
+        - name: COUCHDB_URI
+          value: {{ .Values.couchdb_uri }}
+        - name: COUCHDB_USERNAME
+          value: {{ .Values.couchdb_username }}
+        - name: COUCHDB_PASSWORD
+          value: {{ .Values.couchdb_password }}
+        - name: COUCHDB_DATABASES
+          value: {{ .Values.couchdb_databases }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+      - name: prometheus-to-sd
+        image: "{{ .Values.prometheusToSdExporter.image.repository }}:{{ .Values.prometheusToSdExporter.image.tag }}"
+        imagePullPolicy: {{ .Values.prometheusToSdExporter.image.pullPolicy }}
+        command:
+          - /monitor
+          - --stackdriver-prefix=custom.googleapis.com
+          - --source=couchdb:http://localhost:{{ .Values.exporter_listen_port }}
+          - --pod-id=$(POD_NAME)
+          - --namespace-id=$(POD_NAMESPACE)
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: "app"
+                    operator: In
+                    values:
+                    - couchdb-prometheus-exporter
+              topologyKey: "kubernetes.io/hostname"
