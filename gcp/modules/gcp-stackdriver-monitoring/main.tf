@@ -2,13 +2,16 @@ terraform {
   backend "gcs" {}
 }
 
+variable "env" {}
 variable "nonce" {}
 variable "domain_name" {}
 variable "project_id" {}
 variable "serviceaccount_key" {}
+variable "auth_user_email" {}
 
-# Terragrunt variable
+# Terragrunt variables
 variable "ssl_enabled_uptime_checks" {}
+variable "notification_email" {}
 
 # Enables debug mode when TF_VAR_stackdriver_debug is not empty
 variable "stackdriver_debug" {
@@ -23,6 +26,7 @@ resource "template_dir" "resources" {
     project_id                = "${var.project_id}"
     domain_name               = "${var.domain_name}"
     ssl_enabled_uptime_checks = "${var.ssl_enabled_uptime_checks}"
+    notification_email        = "${var.env == "dev" ? var.auth_user_email : var.notification_email}"
   }
 }
 
