@@ -55,8 +55,11 @@ rule @kubectl_creds_file => [@gcp_creds_file] do
     fi"
 end
 
-task :configure => [@gcp_creds_file, @app_default_creds_file, @kubectl_creds_file] do
+task :configure_current_project do
   sh "gcloud config set project $TF_VAR_project_id"
+end
+
+task :configure => [@gcp_creds_file, @app_default_creds_file, @kubectl_creds_file, :configure_current_project] do
   # We need to set service account key var only if SA credentials are present locally.
   # In case var is unset, application-default credentials will be used.
   ENV["TF_VAR_serviceaccount_key"] = File.file?(@serviceaccount_key_file) ? @serviceaccount_key_file : ""
