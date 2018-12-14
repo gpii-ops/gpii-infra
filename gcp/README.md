@@ -288,6 +288,6 @@ There may be a situation, when we want to roll back entire DB data set to anothe
 * CPU: favor using the same value for Request and Limit as this makes scheduling in the cluster more predictable.
    * However, to ease running resource-intensive components (CouchDB, Flowmanager, Preferences) in clusters with fewer resources (dev environments), you may set a component's CPU Request to a smaller value of the component's CPU Limit (e.g. `Request = 0.5 * Limit`).
 * To determine initial values for a component's Requests and Limits:
-   * Observe the component at idle and under some load.
+   * Observe the component at idle and under some load, e.g. by running Locust tests against the component or environment.
    * Add a buffer for safety, e.g. `1.5 * observed value`.
 * Favor specifying default Requests and Limits as far "down the stack" as possible, i.e. favor Chart defaults over Terraform module defaults over environment-specific settings.
