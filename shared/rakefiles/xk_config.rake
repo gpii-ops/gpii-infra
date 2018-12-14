@@ -63,6 +63,6 @@ task :configure => [@gcp_creds_file, @app_default_creds_file, @kubectl_creds_fil
   # Setting authenticated user's email into env variable, so it can be
   # accessible in modules: https://issues.gpii.net/browse/GPII-3516
   ENV["TF_VAR_auth_user_email"] = %x{
-    gcloud auth list --filter='account!~gserviceaccount.com' --format json |  jq -r '.[].account'
+    gcloud auth list --filter='account!~gserviceaccount.com' --format json |  jq -r '[.[].account][0]'
   }.chomp!
 end
