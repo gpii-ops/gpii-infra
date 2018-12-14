@@ -9,6 +9,8 @@ task :set_vars_ci => [:set_vars] do
     " run ",
     " run --volume #{ENV["HOME"]}/.aws:/aws-backup ",
   )
+  # This duplicates information from xk_config.rake,
+  # see corresponding :configure_serviceaccount task for more info.
   @serviceaccount_key_file = "/project/live/#{@env}/secrets/kube-system/owner.json"
   @serviceaccount_key_file_in_backups = @serviceaccount_key_file.sub(
     "/project",
