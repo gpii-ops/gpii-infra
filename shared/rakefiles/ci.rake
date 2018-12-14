@@ -9,8 +9,6 @@ task :set_vars_ci => [:set_vars] do
     " run ",
     " run --volume #{ENV["HOME"]}/.aws:/aws-backup ",
   )
-  # This duplicates information in docker-compose.yaml,
-  # TF_VAR_serviceaccount_key.
   @serviceaccount_key_file = "/project/live/#{@env}/secrets/kube-system/owner.json"
   @serviceaccount_key_file_in_backups = @serviceaccount_key_file.sub(
     "/project",
@@ -31,14 +29,14 @@ task :configure_serviceaccount_ci_restore => [:set_vars_ci] do
   # use by `gcloud` commands.
   #
   # Another way to think of it: this task uses an alternate strategy to create
-  # $TF_VAR_serviceaccount_key.
+  # service account key file.
   sh "#{@exekube_cmd_with_backups} sh -c '\
-    mkdir -p $(dirname $TF_VAR_serviceaccount_key) && \
-    cp -av #{@serviceaccount_key_file_in_backups} $TF_VAR_serviceaccount_key \
+    mkdir -p $(dirname #{@serviceaccount_key_file}) && \
+    cp -av #{@serviceaccount_key_file_in_backups} #{@serviceaccount_key_file} \
   '"
   sh "#{@exekube_cmd} sh -c '\
     gcloud auth activate-service-account \
-      --key-file $TF_VAR_serviceaccount_key \
+      --key-file #{@serviceaccount_key_file} \
       --project $TF_VAR_project_id \
   '"
 end
@@ -54,7 +52,7 @@ desc "[CI ONLY] Save GCP credentials to local backup on CI worker"
 task :configure_serviceaccount_ci_save => [:set_vars_ci] do
   sh "#{@exekube_cmd_with_backups} sh -c '\
     mkdir -p $(dirname #{@serviceaccount_key_file_in_backups}) && \
-    cp -av $TF_VAR_serviceaccount_key #{@serviceaccount_key_file_in_backups} \
+    cp -av #{@serviceaccount_key_file} #{@serviceaccount_key_file_in_backups} \
   '"
 end
 
