@@ -59,7 +59,7 @@ task :configure_current_project do
   sh "gcloud config set project $TF_VAR_project_id"
 end
 
-task :configure => [@gcp_creds_file, @app_default_creds_file, @kubectl_creds_file, :configure_current_project] do
+task :configure_extra_tf_vars do
   # We need to set service account key var only if SA credentials are present locally.
   # In case var is unset, application-default credentials will be used.
   ENV["TF_VAR_serviceaccount_key"] = File.file?(@serviceaccount_key_file) ? @serviceaccount_key_file : ""
@@ -68,4 +68,9 @@ task :configure => [@gcp_creds_file, @app_default_creds_file, @kubectl_creds_fil
   ENV["TF_VAR_auth_user_email"] = %x{
     gcloud auth list --filter='account!~gserviceaccount.com' --format json |  jq -r '[.[].account][0]'
   }.chomp!
+end
+
+task :configure => [@gcp_creds_file, @app_default_creds_file, @kubectl_creds_file, :configure_current_project, :configure_extra_tf_vars] do
+  # This is a wrapper configuration task.
+  # It does nothing, but it has all dependencies that required for standard rake workflow.
 end
