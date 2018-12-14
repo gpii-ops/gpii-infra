@@ -7,7 +7,7 @@ organizations_permissions = [
   "roles/serviceusage.serviceUsageAdmin"
 ]
 
-task :refresh_common_infra, [:project_type] => [@gcp_creds_file, :configure_extra_tf_vars] do | taskname, args|
+task :refresh_common_infra, [:project_type] => [@gcp_creds_file, @app_default_creds_file, :configure_extra_tf_vars] do | taskname, args|
 
   next if args[:project_type] == "common"
 
