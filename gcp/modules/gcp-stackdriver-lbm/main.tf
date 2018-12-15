@@ -7,6 +7,7 @@ variable "project_id" {}
 variable "serviceaccount_key" {}
 
 # Enables debug mode when TF_VAR_stackdriver_debug is not empty
+
 variable "stackdriver_debug" {
   default = ""
 }

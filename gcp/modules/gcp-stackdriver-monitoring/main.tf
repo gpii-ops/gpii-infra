@@ -10,10 +10,12 @@ variable "serviceaccount_key" {}
 variable "auth_user_email" {}
 
 # Terragrunt variables
-variable "ssl_enabled_uptime_checks" {}
+
 variable "notification_email" {}
+variable "ssl_enabled_uptime_checks" {}
 
 # Enables debug mode when TF_VAR_stackdriver_debug is not empty
+
 variable "stackdriver_debug" {
   default = ""
 }
