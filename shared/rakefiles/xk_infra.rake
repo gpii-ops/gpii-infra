@@ -7,7 +7,7 @@ organizations_permissions = [
   "roles/serviceusage.serviceUsageAdmin"
 ]
 
-task :refresh_common_infra, [:project_type] => [@gcp_creds_file] do | taskname, args|
+task :refresh_common_infra, [:project_type] => [@gcp_creds_file, @app_default_creds_file, :configure_extra_tf_vars] do | taskname, args|
 
   next if args[:project_type] == "common"
 
@@ -115,7 +115,7 @@ task :apply_common_infra => [@gcp_creds_file] do
   end
 end
 
-task :fix_common_service_account_permissions => [:configure] do
+task :fix_common_service_account_permissions => [@gcp_creds_file] do
   organizations_permissions.each do |role|
     sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
       --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com --role #{role}"
