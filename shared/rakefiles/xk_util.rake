@@ -54,7 +54,7 @@ end
 
 # This task destroy all keys except current one for projectowner's SA.
 # It does nothing in case local SA credentials not present.
-task :destroy_sa_keys => [:configure] do
+task :destroy_sa_keys => [@gcp_creds_file, :configure_extra_tf_vars] do
   sh "
     if [ \"$TF_VAR_serviceaccount_key\" != \"\" ] && [ -f $TF_VAR_serviceaccount_key ]; then \
       existing_keys=$(gcloud iam service-accounts keys list \
