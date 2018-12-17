@@ -19,4 +19,4 @@ spec:
         - path: /
           backend:
             serviceName: {{ template "flowmanager.name" . }}
-            servicePort: {{ .Values.svc_listen_port }}
+            servicePort: {{ .Values.svcListenPort }}

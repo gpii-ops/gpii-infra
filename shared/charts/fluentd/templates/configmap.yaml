@@ -10,4 +10,3 @@ metadata:
 data:
   fluent.conf: {{ if eq .Values.logtype "elasticsearch" }}{{ toYaml (printf "%s%s" .Values.fluentdCommonConfig .Values.elasticsearch.fluentdElasticsearchConfig) | indent 2 }}{{ end }}
   {{- if eq .Values.logtype "cloudwatch" }}{{ toYaml (printf "%s%s" .Values.fluentdCommonConfig .Values.cloudwatch.fluentdCloudwatchConfig) | indent 2 }}{{ end }}
-  
