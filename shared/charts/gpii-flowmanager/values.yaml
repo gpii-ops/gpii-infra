@@ -30,7 +30,7 @@ dnsNames:
 - flowmanager.test.local
 
 ingress:
-  disable_ssl_redirect: false
+  disableSslRedirect: false
 
 nameOverride: flowmanager
 
