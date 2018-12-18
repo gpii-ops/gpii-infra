@@ -21,7 +21,7 @@ dnsNames:
 
 <% if !ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.") %>
 ingress:
-  disable_ssl_redirect: true
+  disableSslRedirect: true
 <% end %>
 
-datasource_hostname: "http://<%= @secrets["couchdb_user"] %>:<%= @secrets["couchdb_password"] %>@couchdb-lb.gpii.svc.cluster.local"
+datasourceHostname: "http://<%= @secrets["couchdb_user"] %>:<%= @secrets["couchdb_password"] %>@couchdb-lb.gpii.svc.cluster.local"

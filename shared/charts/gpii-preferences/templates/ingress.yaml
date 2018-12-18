@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: {{ template "preferences.name" . }}-ingress
-  {{- if .Values.ingress.disable_ssl_redirect }}
+  {{- if .Values.ingress.disableSslRedirect }}
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
   {{- end }}
