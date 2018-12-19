@@ -65,9 +65,11 @@ task :configure_extra_tf_vars do
   ENV["TF_VAR_serviceaccount_key"] = File.file?(@serviceaccount_key_file) ? @serviceaccount_key_file : ""
   # Setting authenticated user's email into env variable, so it can be
   # accessible in modules: https://issues.gpii.net/browse/GPII-3516
+  # In case auth user data is missing, it will be set to empty string
   ENV["TF_VAR_auth_user_email"] = %x{
     gcloud auth list --filter='account!~gserviceaccount.com' --format json |  jq -r '[.[].account][0]'
   }.chomp!
+  ENV["TF_VAR_auth_user_email"] = "" if ENV["TF_VAR_auth_user_email"] == "null"
 end
 
 task :configure => [@gcp_creds_file, @app_default_creds_file, @kubectl_creds_file, :configure_current_project, :configure_extra_tf_vars] do

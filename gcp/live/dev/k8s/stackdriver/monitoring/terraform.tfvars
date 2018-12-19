@@ -21,6 +21,5 @@ terragrunt = {
 
 ssl_enabled_uptime_checks = false
 
-# This variable is empty, so it can be overridden by TF_VAR_auth_user_email in module,
-# because Terragrunt does not support interpolations here.
-notification_email = ""
+# This variable can be overridden by TF_VAR_auth_user_email in case latter is present
+notification_email = "alerts+dev@raisingthefloor.org"

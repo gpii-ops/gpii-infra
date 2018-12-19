@@ -2,6 +2,7 @@ terraform {
   backend "gcs" {}
 }
 
+variable "env" {}
 variable "nonce" {}
 variable "domain_name" {}
 variable "project_id" {}
@@ -27,7 +28,7 @@ resource "template_dir" "resources" {
     project_id                = "${var.project_id}"
     domain_name               = "${var.domain_name}"
     ssl_enabled_uptime_checks = "${var.ssl_enabled_uptime_checks}"
-    notification_email        = "${var.notification_email != "" ? var.notification_email : var.auth_user_email}"
+    notification_email        = "${(var.env == "dev" && var.auth_user_email != "") ? var.auth_user_email : var.notification_email}"
   }
 }
 
