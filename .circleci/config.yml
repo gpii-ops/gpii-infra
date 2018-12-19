@@ -23,7 +23,6 @@ jobs:
           command: |
             echo "Running GCP unit tests...";
             cd /workspace/shared/rakefiles/tests;
-            gem install bundler --no-ri --no-rdoc;
             bundle install --path "vendor/bundle";
             rake
 
