@@ -20,6 +20,5 @@ terragrunt = {
 # ↓ Module configuration (empty means all default)
 
 ssl_enabled_uptime_checks = false
-
-# This variable can be overridden by TF_VAR_auth_user_email in case latter is present
+use_auth_user_email = true
 notification_email = "alerts+dev@raisingthefloor.org"
