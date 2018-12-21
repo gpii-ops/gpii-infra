@@ -6,8 +6,5 @@
   "user_labels": {},
   "enabled": {
     "value": true
-  },
-  "immutable": {
-    "value": true
   }
 }
