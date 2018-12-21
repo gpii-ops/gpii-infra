@@ -182,6 +182,7 @@ resource "google_project_services" "project" {
     "deploymentmanager.googleapis.com",
     "dns.googleapis.com",
     "iam.googleapis.com",
+    "iamcredentials.googleapis.com",
     "logging.googleapis.com",
     "monitoring.googleapis.com",
     "oslogin.googleapis.com",
