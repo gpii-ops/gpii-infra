@@ -11,6 +11,7 @@ resource "null_resource" "add_audit_config" {
 
   provisioner "local-exec" {
     command = <<EOF
+      EXIT_STATUS=0
 
       auditConfigs=$(cat ${path.module}/resources/auditConfigs.json | jq -c -r -S .)
       policy=$(gcloud projects get-iam-policy ${google_project.project.project_id} --format json)
@@ -26,10 +27,16 @@ resource "null_resource" "add_audit_config" {
         echo "Applying audit configs..."
         gcloud -q projects set-iam-policy ${google_project.project.project_id} ${path.module}/${google_project.project.project_id}.iam.policy.json
 
+        if [ "$?" != "0" ]; then
+          EXIT_STATUS=1
+        fi
+
         rm ${path.module}/${google_project.project.project_id}.iam.policy.json
       else
         echo "Audit configs are up-to-date..."
       fi
+
+      exit $EXIT_STATUS
     EOF
   }
 }
