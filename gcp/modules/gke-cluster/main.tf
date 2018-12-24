@@ -20,7 +20,7 @@ module "gke_cluster" {
   initial_node_count = 1
   node_type          = "${var.node_type}"
 
-  kubernetes_version = "1.11.3-gke.18"
+  kubernetes_version = "1.11.3-gke.24"
 
   region           = "us-central1"
   additional_zones = ["us-central1-a", "us-central1-b", "us-central1-c", "us-central1-f"]

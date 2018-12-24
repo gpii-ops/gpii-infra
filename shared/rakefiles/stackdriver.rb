@@ -163,7 +163,7 @@ def process_notification_channels(notification_channels = [])
 
     if stackdriver_notification_channels[notification_channel_identifier]
       notification_channel["name"] = stackdriver_notification_channels[notification_channel_identifier]["name"]
-      unless notification_channel["immutable"]
+      unless notification_channel["type"] == "slack"
         if compare_notification_channels(stackdriver_notification_channels[notification_channel_identifier], notification_channel)
           puts "Updating notification channel \"#{notification_channel_identifier}\"..."
           notification_channel_service_client.update_notification_channel(notification_channel)
@@ -174,7 +174,7 @@ def process_notification_channels(notification_channels = [])
         puts "Skipping update of immutable notification channel \"#{notification_channel_identifier}\"..."
       end
     else
-      unless notification_channel["immutable"]
+      unless notification_channel["type"] == "slack"
         puts "Creating notification channel \"#{notification_channel_identifier}\"..."
         notification_channel = notification_channel_service_client.create_notification_channel(formatted_parent, notification_channel)
       else
@@ -191,6 +191,8 @@ def process_notification_channels(notification_channels = [])
     unless processed_notification_channels.include? notification_channel_identifier
       if @debug_mode
         puts "[DEBUG] Skipping deletion of notification channel \"#{notification_channel_identifier}\"..."
+      elsif notification_channel["type"] == "slack"
+        puts "Skipping deletion of immutable notification channel \"#{notification_channel_identifier}\"..."
       else
         puts "Deleting notification channel \"#{notification_channel_identifier}\"..."
         notification_channel_service_client.delete_notification_channel(notification_channel["name"])

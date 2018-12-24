@@ -141,15 +141,13 @@ resource "null_resource" "couchdb_enable_pv_backups" {
 }
 
 resource "null_resource" "couchdb_destroy_pvcs" {
-  depends_on = ["module.couchdb"]
-
   provisioner "local-exec" {
     when = "destroy"
 
     command = <<EOF
       if [ "${var.execute_destroy_pvcs}" == "true" ]; then
         for PVC in $(kubectl get pvc --namespace ${var.release_namespace} -o json | jq --raw-output '.items[] | select(.metadata.name | startswith("database-storage-couchdb")) | .metadata.name'); do
-          kubectl --namespace ${var.release_namespace} delete --ignore-not-found pvc $PVC
+          kubectl --namespace ${var.release_namespace} delete --ignore-not-found --grace-period=600 pvc $PVC
         done
       fi
     EOF
