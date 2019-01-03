@@ -289,6 +289,8 @@ There may be a situation, when we want to roll back entire DB data set to anothe
 
 * Avoid deploying changes near the end of your work day.
 * Avoid deploying on Friday or prior to a holiday.
+* Create JIRA tickets for issues (mainly CI/CD) we encounter and fix - to track the
+  work done and to have data for future reference.
 
 ### Kubernetes resource requests and limits
 

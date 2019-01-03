@@ -139,6 +139,32 @@ data "google_iam_policy" "admin" {
       "${var.project_owner}",
     ]
   }
+
+  binding {
+    role = "roles/compute.serviceAgent"
+
+    members = [
+      "serviceAccount:service-${google_project.project.number}@compute-system.iam.gserviceaccount.com",
+    ]
+  }
+
+  binding {
+    role = "roles/container.serviceAgent"
+
+    members = [
+      "serviceAccount:service-${google_project.project.number}@container-engine-robot.iam.gserviceaccount.com",
+    ]
+  }
+
+  binding {
+    role = "roles/editor"
+
+    members = [
+      "serviceAccount:${google_project.project.number}-compute@developer.gserviceaccount.com",
+      "serviceAccount:${google_project.project.number}@cloudservices.gserviceaccount.com",
+      "serviceAccount:service-${google_project.project.number}@containerregistry.iam.gserviceaccount.com",
+    ]
+  }
 }
 
 provider "google" {
@@ -182,6 +208,7 @@ resource "google_project_services" "project" {
     "deploymentmanager.googleapis.com",
     "dns.googleapis.com",
     "iam.googleapis.com",
+    "iamcredentials.googleapis.com",
     "logging.googleapis.com",
     "monitoring.googleapis.com",
     "oslogin.googleapis.com",

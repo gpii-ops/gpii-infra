@@ -6,16 +6,18 @@ require "google/cloud/monitoring"
 
 def process_locust_result(locust_stats_file, locust_distribution_file, app_name)
 
-  stats = JSON.parse(File.read(locust_stats_file))
-  stats = stats["stats"].select do |stat|
+  metrics = {}
+  all_stats = JSON.parse(File.read(locust_stats_file))
+
+  metrics["user_count"] = all_stats["user_count"]
+
+  stats = all_stats["stats"].select do |stat|
     stat["name"] == "Total"
   end
 
-  metrics = {}
-
   stats = stats.first
   ["median_response_time", "min_response_time", "max_response_time",
-   "avg_response_time", "num_failures", "num_requests"].each do |metric|
+   "avg_response_time", "num_failures", "num_requests", "current_rps"].each do |metric|
     metrics[metric] = stats[metric]
   end
 
