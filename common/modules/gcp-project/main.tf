@@ -25,6 +25,44 @@ variable "serviceaccount_key" {}
 
 variable "project_id" {} # id of the project which owns the credentials used by the provider
 
+variable "project_apis" {
+  default = [
+    "bigquery-json.googleapis.com",
+    "cloudbilling.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "containerregistry.googleapis.com",
+    "deploymentmanager.googleapis.com",
+    "iamcredentials.googleapis.com",
+    "oslogin.googleapis.com",
+    "pubsub.googleapis.com",
+    "replicapool.googleapis.com",
+    "replicapoolupdater.googleapis.com",
+    "resourceviews.googleapis.com",
+    "stackdriver.googleapis.com",
+    "storage-api.googleapis.com",
+  ]
+}
+
+variable "audited_project_apis" {
+  default = [
+    "cloudkms.googleapis.com",
+    "cloudtrace.googleapis.com",
+    "compute.googleapis.com",
+    "container.googleapis.com",
+    "dns.googleapis.com",
+    "iam.googleapis.com",
+    "logging.googleapis.com",
+    "monitoring.googleapis.com",
+    "serviceusage.googleapis.com",
+  ]
+}
+
+variable "audited_apis" {
+  default = [
+    "storage.googleapis.com",
+  ]
+}
+
 data "google_iam_policy" "admin" {
   binding {
     role = "roles/cloudkms.admin"
@@ -196,30 +234,7 @@ resource "google_project" "project" {
 resource "google_project_services" "project" {
   project = "${google_project.project.project_id}"
 
-  services = [
-    "bigquery-json.googleapis.com",
-    "cloudbilling.googleapis.com",
-    "cloudkms.googleapis.com",
-    "cloudresourcemanager.googleapis.com",
-    "cloudtrace.googleapis.com",
-    "compute.googleapis.com",
-    "container.googleapis.com",
-    "containerregistry.googleapis.com",
-    "deploymentmanager.googleapis.com",
-    "dns.googleapis.com",
-    "iam.googleapis.com",
-    "iamcredentials.googleapis.com",
-    "logging.googleapis.com",
-    "monitoring.googleapis.com",
-    "oslogin.googleapis.com",
-    "pubsub.googleapis.com",
-    "replicapool.googleapis.com",
-    "replicapoolupdater.googleapis.com",
-    "resourceviews.googleapis.com",
-    "serviceusage.googleapis.com",
-    "stackdriver.googleapis.com",
-    "storage-api.googleapis.com",
-  ]
+  services = "${concat(var.project_apis, var.audited_project_apis)}"
 }
 
 resource "google_project_iam_policy" "project" {

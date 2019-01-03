@@ -13,7 +13,17 @@ resource "null_resource" "add_audit_config" {
     command = <<EOF
       set -e
 
-      auditConfigs=$(cat ${path.module}/resources/auditConfigs.json | jq -c -r -S .)
+      auditConfigs=$(echo '[${join(
+        ",",
+        formatlist(
+          "{\"auditLogConfigs\":[{\"logType\":\"DATA_READ\"},{\"logType\":\"DATA_WRITE\"}],\"service\":\"%s\"}",
+          concat(
+            var.audited_project_apis,
+            var.audited_apis
+          )
+        )
+      )}]' | jq -c -r -S .)
+
       policy=$(gcloud projects get-iam-policy ${google_project.project.project_id} --format json)
       policy_bindings=$(echo $policy | jq -c -r .bindings)
       policy_auditConfigs=$(echo $policy | jq -c -r -S .auditConfigs)
