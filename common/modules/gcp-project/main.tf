@@ -23,8 +23,10 @@ variable "organization_id" {}
 
 variable "serviceaccount_key" {}
 
-variable "project_id" {} # id of the project which owns the credentials used by the provider
+# Id of the project which owns the credentials used by the provider
+variable "project_id" {}
 
+# List of APIs in use by the project without audit configuration
 variable "project_apis" {
   default = [
     "bigquery-json.googleapis.com",
@@ -43,6 +45,7 @@ variable "project_apis" {
   ]
 }
 
+# List of APIs in use by the project with audit configuration
 variable "audited_project_apis" {
   default = [
     "cloudkms.googleapis.com",
@@ -57,6 +60,7 @@ variable "audited_project_apis" {
   ]
 }
 
+# List of APIs solely for audit configuration
 variable "audited_apis" {
   default = [
     "storage.googleapis.com",
