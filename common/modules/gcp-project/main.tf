@@ -26,6 +26,11 @@ variable "serviceaccount_key" {}
 # Id of the project which owns the credentials used by the provider
 variable "project_id" {}
 
+# We have to split all GCP APIs required by the project
+# into 3 separate lists, because only some of them produce
+# audit logs, and there is also a discrepancy in naming for storage API:
+# https://cloud.google.com/logging/docs/audit/#services
+
 # List of APIs in use by the project without audit configuration
 variable "apis_without_audit_configuration" {
   default = [
