@@ -27,7 +27,7 @@ variable "serviceaccount_key" {}
 variable "project_id" {}
 
 # List of APIs in use by the project without audit configuration
-variable "project_apis" {
+variable "apis_without_audit_configuration" {
   default = [
     "bigquery-json.googleapis.com",
     "cloudbilling.googleapis.com",
@@ -46,7 +46,7 @@ variable "project_apis" {
 }
 
 # List of APIs in use by the project with audit configuration
-variable "audited_project_apis" {
+variable "apis_with_audit_configuration" {
   default = [
     "cloudkms.googleapis.com",
     "cloudtrace.googleapis.com",
@@ -61,7 +61,7 @@ variable "audited_project_apis" {
 }
 
 # List of APIs solely for audit configuration
-variable "audited_apis" {
+variable "apis_solely_for_audit_configuration" {
   default = [
     "storage.googleapis.com",
   ]
@@ -238,7 +238,7 @@ resource "google_project" "project" {
 resource "google_project_services" "project" {
   project = "${google_project.project.project_id}"
 
-  services = "${concat(var.project_apis, var.audited_project_apis)}"
+  services = "${concat(var.apis_with_audit_configuration, var.apis_without_audit_configuration)}"
 }
 
 resource "google_project_iam_policy" "project" {

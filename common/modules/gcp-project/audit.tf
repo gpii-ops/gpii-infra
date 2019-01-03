@@ -17,26 +17,26 @@ resource "null_resource" "add_audit_config" {
     command = <<EOF
       set -e
 
-      auditConfigs="$(echo '[${join(
+      expected_audit_configs="$(echo '[${join(
         ",",
         formatlist(
           "{\"auditLogConfigs\":[{\"logType\":\"DATA_READ\"},{\"logType\":\"DATA_WRITE\"}],\"service\":\"%s\"}",
           concat(
-            var.audited_project_apis,
-            var.audited_apis
+            var.apis_with_audit_configuration,
+            var.apis_solely_for_audit_configuration
           )
         )
       )}]' | jq -c -r -S .)"
 
-      policy="$(timeout -t ${var.gcloud_timeout} gcloud projects get-iam-policy ${google_project.project.project_id} --format json)"
-      policy_bindings="$(echo $policy | jq -c -r .bindings)"
-      policy_auditConfigs="$(echo $policy | jq -c -r -S .auditConfigs)"
+      current_iam_policy="$(timeout -t ${var.gcloud_timeout} gcloud projects get-iam-policy ${google_project.project.project_id} --format json)"
+      current_iam_policy_bindings="$(echo $current_iam_policy | jq -c -r .bindings)"
+      current_iam_policy_audit_configs="$(echo $current_iam_policy | jq -c -r -S .auditConfigs)"
 
-      if [ "$(echo $auditConfigs | md5sum)" != "$(echo $policy_auditConfigs | md5sum)" ]; then
+      if [ "$(echo $expected_audit_configs | md5sum)" != "$(echo $current_iam_policy_audit_configs | md5sum)" ]; then
         jq -n -r \
-          --argjson auditConfigs "$auditConfigs" \
-          --argjson bindings "$policy_bindings" \
-          '{"auditConfigs":$auditConfigs,"bindings":$bindings}' > ${path.module}/${google_project.project.project_id}.iam.policy.json
+          --argjson policy_audit_configs "$expected_audit_configs" \
+          --argjson policy_bindings "$current_iam_policy_bindings" \
+          '{"auditConfigs":$policy_audit_configs,"bindings":$policy_bindings}' > ${path.module}/${google_project.project.project_id}.iam.policy.json
 
         echo "Applying audit configs..."
         timeout -t ${var.gcloud_timeout} gcloud -q projects set-iam-policy ${google_project.project.project_id} ${path.module}/${google_project.project.project_id}.iam.policy.json
