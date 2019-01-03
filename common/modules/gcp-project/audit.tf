@@ -17,7 +17,7 @@ resource "null_resource" "add_audit_config" {
     command = <<EOF
       set -e
 
-      auditConfigs=$(echo '[${join(
+      auditConfigs="$(echo '[${join(
         ",",
         formatlist(
           "{\"auditLogConfigs\":[{\"logType\":\"DATA_READ\"},{\"logType\":\"DATA_WRITE\"}],\"service\":\"%s\"}",
@@ -26,11 +26,11 @@ resource "null_resource" "add_audit_config" {
             var.audited_apis
           )
         )
-      )}]' | jq -c -r -S .)
+      )}]' | jq -c -r -S .)"
 
-      policy=$(timeout -t ${var.gcloud_timeout} gcloud projects get-iam-policy ${google_project.project.project_id} --format json)
-      policy_bindings=$(echo $policy | jq -c -r .bindings)
-      policy_auditConfigs=$(echo $policy | jq -c -r -S .auditConfigs)
+      policy="$(timeout -t ${var.gcloud_timeout} gcloud projects get-iam-policy ${google_project.project.project_id} --format json)"
+      policy_bindings="$(echo $policy | jq -c -r .bindings)"
+      policy_auditConfigs="$(echo $policy | jq -c -r -S .auditConfigs)"
 
       if [ "$(echo $auditConfigs | md5sum)" != "$(echo $policy_auditConfigs | md5sum)" ]; then
         jq -n -r \
