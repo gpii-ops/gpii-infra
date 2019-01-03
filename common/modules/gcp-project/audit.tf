@@ -1,5 +1,9 @@
 variable "nonce" {}
 
+variable "gcloud_timeout" {
+  default = 30
+}
+
 resource "null_resource" "add_audit_config" {
   triggers = {
     nonce = "${var.nonce}"
@@ -24,7 +28,7 @@ resource "null_resource" "add_audit_config" {
         )
       )}]' | jq -c -r -S .)
 
-      policy=$(gcloud projects get-iam-policy ${google_project.project.project_id} --format json)
+      policy=$(timeout -t ${var.gcloud_timeout} gcloud projects get-iam-policy ${google_project.project.project_id} --format json)
       policy_bindings=$(echo $policy | jq -c -r .bindings)
       policy_auditConfigs=$(echo $policy | jq -c -r -S .auditConfigs)
 
@@ -35,7 +39,7 @@ resource "null_resource" "add_audit_config" {
           '{"auditConfigs":$auditConfigs,"bindings":$bindings}' > ${path.module}/${google_project.project.project_id}.iam.policy.json
 
         echo "Applying audit configs..."
-        gcloud -q projects set-iam-policy ${google_project.project.project_id} ${path.module}/${google_project.project.project_id}.iam.policy.json
+        timeout -t ${var.gcloud_timeout} gcloud -q projects set-iam-policy ${google_project.project.project_id} ${path.module}/${google_project.project.project_id}.iam.policy.json
 
         rm ${path.module}/${google_project.project.project_id}.iam.policy.json
       else
