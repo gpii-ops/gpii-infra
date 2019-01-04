@@ -22,6 +22,7 @@ module "gcp-secret-mgmt" {
   encryption_keys    = "${var.encryption_keys}"
   storage_location   = "${var.storage_location}"
   keyring_name       = "${var.keyring_name}"
+  apply_audit_config = false
 }
 
 # Re-export variable. See https://www.terraform.io/docs/providers/terraform/d/remote_state.html#root-outputs-only

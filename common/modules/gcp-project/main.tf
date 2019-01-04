@@ -23,7 +23,54 @@ variable "organization_id" {}
 
 variable "serviceaccount_key" {}
 
-variable "project_id" {} # id of the project which owns the credentials used by the provider
+# Id of the project which owns the credentials used by the provider
+variable "project_id" {}
+
+# We have to split all GCP APIs required by the project
+# into 3 separate lists, because only some of them produce
+# audit logs, and there is also a discrepancy in naming for storage API:
+# https://cloud.google.com/logging/docs/audit/#services
+
+# List of APIs in use by the project without audit configuration
+variable "apis_without_audit_configuration" {
+  default = [
+    "bigquery-json.googleapis.com",
+    "cloudbilling.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "containerregistry.googleapis.com",
+    "deploymentmanager.googleapis.com",
+    "iamcredentials.googleapis.com",
+    "oslogin.googleapis.com",
+    "pubsub.googleapis.com",
+    "replicapool.googleapis.com",
+    "replicapoolupdater.googleapis.com",
+    "resourceviews.googleapis.com",
+    "stackdriver.googleapis.com",
+    "storage-api.googleapis.com",
+  ]
+}
+
+# List of APIs in use by the project with audit configuration
+variable "apis_with_audit_configuration" {
+  default = [
+    "cloudkms.googleapis.com",
+    "cloudtrace.googleapis.com",
+    "compute.googleapis.com",
+    "container.googleapis.com",
+    "dns.googleapis.com",
+    "iam.googleapis.com",
+    "logging.googleapis.com",
+    "monitoring.googleapis.com",
+    "serviceusage.googleapis.com",
+  ]
+}
+
+# List of APIs solely for audit configuration
+variable "apis_solely_for_audit_configuration" {
+  default = [
+    "storage.googleapis.com",
+  ]
+}
 
 data "google_iam_policy" "admin" {
   binding {
@@ -196,30 +243,7 @@ resource "google_project" "project" {
 resource "google_project_services" "project" {
   project = "${google_project.project.project_id}"
 
-  services = [
-    "bigquery-json.googleapis.com",
-    "cloudbilling.googleapis.com",
-    "cloudkms.googleapis.com",
-    "cloudresourcemanager.googleapis.com",
-    "cloudtrace.googleapis.com",
-    "compute.googleapis.com",
-    "container.googleapis.com",
-    "containerregistry.googleapis.com",
-    "deploymentmanager.googleapis.com",
-    "dns.googleapis.com",
-    "iam.googleapis.com",
-    "iamcredentials.googleapis.com",
-    "logging.googleapis.com",
-    "monitoring.googleapis.com",
-    "oslogin.googleapis.com",
-    "pubsub.googleapis.com",
-    "replicapool.googleapis.com",
-    "replicapoolupdater.googleapis.com",
-    "resourceviews.googleapis.com",
-    "serviceusage.googleapis.com",
-    "stackdriver.googleapis.com",
-    "storage-api.googleapis.com",
-  ]
+  services = "${concat(var.apis_with_audit_configuration, var.apis_without_audit_configuration)}"
 }
 
 resource "google_project_iam_policy" "project" {
