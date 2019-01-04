@@ -5,7 +5,7 @@ Accounts and permissions
 
 ### cloud-admin@raisingthefloor.org
 
-  This is a Google group where all the operators are members. The members of this group only have the permissions needed to allow IAM changes in the projects of the organization.
+  This is a Google group of which all the operators are members. The members of this group only have the permissions needed to allow IAM changes in the projects of the organization.
 
   1. Organization Administrator
 
@@ -22,7 +22,7 @@ Accounts and permissions
 
 ### dev-user@raisingthefloor.org
 
-  This account only exists in the _dev_ projects, where a particular user is the owner of the hole project. In the case of the STG and PRD projects there is not a particular owner.
+  This account only exists in the _dev_ projects, where a particular user is the owner of the whole project. In the case of the STG and PRD projects there is not a particular owner.
 
   1. Owner
 
@@ -61,12 +61,6 @@ Accounts and permissions
   Compute Engine default service account
 
   1. Editor
-
-### [PROJECT_NUMBER]@cloudbuild.gserviceaccount.com
-
-  Cloud Build default service account
-
-  1. Cloud Build Service Account
 
 ### [PROJECT_NUMBER]@cloudservices.gserviceaccount.com (Google-managed service account)
 
