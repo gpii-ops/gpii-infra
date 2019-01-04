@@ -58,13 +58,13 @@ task :destroy_sa_keys => [@gcp_creds_file, :configure_extra_tf_vars] do
   sh "
     if [ \"$TF_VAR_serviceaccount_key\" != \"\" ] && [ -f $TF_VAR_serviceaccount_key ]; then \
       existing_keys=$(gcloud iam service-accounts keys list \
-        --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com \
+        --iam-account projectowner@\"$F_VAR_project_id\".iam.gserviceaccount.com \
         --managed-by user | grep -oE \"^[a-z0-9]+\"); \
       current_key=$(cat $TF_VAR_serviceaccount_key 2>/dev/null | jq -r '.private_key_id'); \
       for key in $existing_keys; do \
         if [ \"$key\" != \"$current_key\" ]; then \
           yes | gcloud iam service-accounts keys delete \
-            --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com $key; \
+            --iam-account projectowner@\"$F_VAR_project_id\".iam.gserviceaccount.com $key; \
         fi \
       done
     fi
@@ -74,19 +74,19 @@ end
 # This task attaches the owner role to the current user
 task :grant_owner_role => [@gcp_creds_file] do
   sh "
-    gcloud config set account $TF_VAR_auth_user_email
-    gcloud projects add-iam-policy-binding $TF_VAR_project_id --member user:alfredo@raisingthefloor.org --role roles/owner
-    (gcloud auth list | grep projectowner@$TF_VAR_project_id.iam.gserviceaccount.com) \
-    && gcloud config set account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com
+    gcloud config set account \"$TF_VAR_auth_user_email\"
+    gcloud projects add-iam-policy-binding \"$F_VAR_project_id\" --member user:\"$TF_VAR_auth_user_email\" --role roles/owner
+    (gcloud auth list | grep projectowner@\"$F_VAR_project_id\".iam.gserviceaccount.com) \
+    && gcloud config set account projectowner@\"$F_VAR_project_id\".iam.gserviceaccount.com
   "
 end
 
 # This task removes the owner role to the current user
 task :revoke_owner_role => [@gcp_creds_file] do
   sh "
-    gcloud config set account $TF_VAR_auth_user_email
-    gcloud projects remove-iam-policy-binding $TF_VAR_project_id --member user:alfredo@raisingthefloor.org --role roles/owner
-    (gcloud auth list | grep projectowner@$TF_VAR_project_id.iam.gserviceaccount.com) \
-    && gcloud config set account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com
+    gcloud config set account \"$TF_VAR_auth_user_email\"
+    gcloud projects remove-iam-policy-binding \"$F_VAR_project_id\" --member user:\"$TF_VAR_auth_user_email\" --role roles/owner
+    (gcloud auth list | grep projectowner@\"$F_VAR_project_id\".iam.gserviceaccount.com) \
+    && gcloud config set account projectowner@\"$F_VAR_project_id\".iam.gserviceaccount.com
   "
 end
