@@ -74,19 +74,13 @@ end
 # This task attaches the owner role to the current user
 task :grant_owner_role => [@gcp_creds_file] do
   sh "
-    gcloud config set account \"$TF_VAR_auth_user_email\"
     gcloud projects add-iam-policy-binding \"$F_VAR_project_id\" --member user:\"$TF_VAR_auth_user_email\" --role roles/owner
-    (gcloud auth list | grep projectowner@\"$F_VAR_project_id\".iam.gserviceaccount.com) \
-    && gcloud config set account projectowner@\"$F_VAR_project_id\".iam.gserviceaccount.com
   "
 end
 
 # This task removes the owner role to the current user
 task :revoke_owner_role => [@gcp_creds_file] do
   sh "
-    gcloud config set account \"$TF_VAR_auth_user_email\"
     gcloud projects remove-iam-policy-binding \"$F_VAR_project_id\" --member user:\"$TF_VAR_auth_user_email\" --role roles/owner
-    (gcloud auth list | grep projectowner@\"$F_VAR_project_id\".iam.gserviceaccount.com) \
-    && gcloud config set account projectowner@\"$F_VAR_project_id\".iam.gserviceaccount.com
   "
 end
