@@ -62,7 +62,7 @@ resource "null_resource" "apply_stackdriver_monitoring" {
           STACKDRIVER_DID_NOT_FAIL="false"
         fi
 
-        if [ "$RETRY_COUNT" == "$RETRIES" ]; then
+        if [ "$RETRY_COUNT" == "$RETRIES" ] && [ "$STACKDRIVER_DID_NOT_FAIL" == "false" ]; then
           echo "Retry limit reached, giving up!"
           exit 1
         fi
@@ -98,7 +98,7 @@ resource "null_resource" "destroy_stackdriver_monitoring" {
           STACKDRIVER_DID_NOT_FAIL="false"
         fi
 
-        if [ "$RETRY_COUNT" == "$RETRIES" ]; then
+        if [ "$RETRY_COUNT" == "$RETRIES" ] && [ "$STACKDRIVER_DID_NOT_FAIL" == "false" ]; then
           echo "Retry limit reached, giving up!"
           exit 1
         fi
