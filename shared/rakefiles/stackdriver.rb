@@ -80,7 +80,15 @@ def compare_alert_policies(stackdriver_alert_policy, alert_policy)
     condition.delete("condition_threshold") if condition["condition_threshold"] == nil
   end
 
-  return stackdriver_alert_policy != alert_policy
+  policy_changed = (stackdriver_alert_policy != alert_policy)
+  if @debug_mode and policy_changed
+    puts "[DEBUG] alert policy has changed. Old:"
+    puts debug_output(alert_policy)
+    puts "New:"
+    puts debug_output(stackdriver_alert_policy)
+  end
+
+  return policy_changed
 end
 
 def compare_uptime_checks(stackdriver_uptime_check, uptime_check)
@@ -89,7 +97,15 @@ def compare_uptime_checks(stackdriver_uptime_check, uptime_check)
     stackdriver_uptime_check.delete(attribute) if value == nil or attribute == "name"
   end
 
-  return stackdriver_uptime_check != uptime_check
+  uptime_check_changed = (stackdriver_uptime_check != uptime_check)
+  if @debug_mode and uptime_check_changed
+    puts "[DEBUG] uptime check has changed. Old:"
+    puts debug_output(uptime_check)
+    puts "New:"
+    puts debug_output(stackdriver_uptime_check)
+  end
+
+  return uptime_check_changed
 end
 
 def compare_notification_channels(stackdriver_notification_channel, notification_channel)
@@ -99,7 +115,7 @@ def compare_notification_channels(stackdriver_notification_channel, notification
 end
 
 def debug_output(resource)
-  return resource.to_hash.to_json
+  return JSON.pretty_generate(resource.to_hash)
 end
 
 def process_log_based_metrics(log_based_metrics = [])
