@@ -11,10 +11,7 @@
     "use_ssl": ${ssl_enabled_uptime_checks ? "true" : "false"},
     "path": "/preferences/carla",
     "port": ${ssl_enabled_uptime_checks ? "443" : "80"},
-    "auth_info": {
-      "username": "",
-      "password": ""
-    },
+    "auth_info": null,
     "mask_headers": false,
     "headers": {}
   },
@@ -26,11 +23,7 @@
     "seconds": 10,
     "nanos": 0
   },
-  "content_matchers": [
-    {
-      "content": ""
-    }
-  ],
+  "content_matchers": [],
   "selected_regions": [],
   "internal_checkers": [],
   "is_internal": false
