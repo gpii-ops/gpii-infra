@@ -28,7 +28,7 @@ task :test_preferences => [:set_vars, :check_destroy_allowed, :set_test_protocol
   ENV['TF_VAR_locust_target_app'] = "preferences"
   ENV['TF_VAR_locust_script'] = "preferences.py"
   ENV['TF_VAR_locust_desired_median_response_time'] = "300"
-  ENV['TF_VAR_locust_desired_max_response_time'] = "2000"
+  ENV['TF_VAR_locust_desired_max_response_time'] = "1000"
 
   Rake::Task[:set_compose_env].reenable
   Rake::Task[:set_compose_env].invoke
@@ -43,7 +43,7 @@ task :test_flowmanager => [:set_vars, :check_destroy_allowed, :set_test_protocol
   ENV['TF_VAR_locust_users'] = "15"
   ENV['TF_VAR_locust_desired_total_rps'] = "5"
   ENV['TF_VAR_locust_desired_median_response_time'] = "500"
-  ENV['TF_VAR_locust_desired_max_response_time'] = "3000"
+  ENV['TF_VAR_locust_desired_max_response_time'] = "1000"
 
   Rake::Task[:set_compose_env].reenable
   Rake::Task[:set_compose_env].invoke
