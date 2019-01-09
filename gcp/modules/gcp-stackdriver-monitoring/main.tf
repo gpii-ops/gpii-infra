@@ -92,7 +92,7 @@ resource "null_resource" "destroy_stackdriver_monitoring" {
         echo "[Try $RETRY_COUNT of $RETRIES] Destroying Stackdriver resources..."
         ruby -e '
           require "/rakefiles/stackdriver.rb"
-          destroy_resources(["uptime_checks","alert_policies","notification_channels"])
+          destroy_resources({"uptime_checks"=>[],"alert_policies"=>[],"notification_channels"=>[]})
         '
         if [ "$?" != "0" ]; then
           STACKDRIVER_DID_NOT_FAIL="false"

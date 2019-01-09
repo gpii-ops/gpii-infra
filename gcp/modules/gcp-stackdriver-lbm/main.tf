@@ -65,7 +65,7 @@ resource "null_resource" "destroy_stackdriver_lbm" {
         echo "[Try $RETRY_COUNT of $RETRIES] Destroying Stackdriver resources..."
         ruby -e '
           require "/rakefiles/stackdriver.rb"
-          destroy_resources(["log_based_metrics"])
+          destroy_resources({"log_based_metrics"=>[]})
         '
         if [ "$?" != "0" ]; then
           STACKDRIVER_DID_NOT_FAIL="false"
