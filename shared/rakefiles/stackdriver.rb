@@ -11,6 +11,10 @@ if ENV['STACKDRIVER_DEBUG']
   @debug_mode = true unless ENV['STACKDRIVER_DEBUG'].empty?
 end
 
+# This method looks for resource types in resources hash that
+# read_resources generates, and invokes apply methods in proper order.
+# Each apply method returns array with orphaned (not described in configs)
+# resources that is later passed to destroy_resources method for deletion.
 def apply_resources(resources)
   orphaned_resources = {}
 
@@ -22,6 +26,14 @@ def apply_resources(resources)
   destroy_resources(orphaned_resources, true)
 end
 
+# We may want to destroy resources in two cases:
+# 1. During Terraform module destruction – all resources.
+# 2. After resource application – only orphaned (not described in configs)
+#    resources, to ensure that current Stackdriver state matches with the state that
+#    described by configuration primitives. In this case destroy_orphaned_only
+#    variable must be set to true, and resources_to_destroy must contain
+#    Stackdriver hash with:
+#      { "resource_type" => [array with orphaned resource names] }
 def destroy_resources(resources_to_destroy, destroy_orphaned_only = false)
   destroy_alert_policies(resources_to_destroy["alert_policies"], destroy_orphaned_only) if resources_to_destroy.include? "alert_policies"
   destroy_uptime_checks(resources_to_destroy["uptime_checks"], destroy_orphaned_only) if resources_to_destroy.include? "uptime_checks"
