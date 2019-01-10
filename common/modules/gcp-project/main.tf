@@ -118,7 +118,6 @@ data "google_iam_policy" "admin" {
 
     members = [
       "serviceAccount:${google_service_account.project.email}",
-      "serviceAccount:projectowner@${var.project_id}.iam.gserviceaccount.com",
     ]
   }
 
@@ -175,7 +174,6 @@ data "google_iam_policy" "admin" {
 
     members = [
       "serviceAccount:${google_service_account.project.email}",
-      "serviceAccount:projectowner@${var.project_id}.iam.gserviceaccount.com",
     ]
   }
 
