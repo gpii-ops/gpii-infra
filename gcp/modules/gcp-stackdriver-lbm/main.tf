@@ -38,7 +38,7 @@ resource "null_resource" "apply_stackdriver_lbm" {
           STACKDRIVER_DEADLINE_EXCEEDED="true"
         elif [ "$STACKDRIVER_EXIT_STATUS" != "0" ]; then
           exit $STACKDRIVER_EXIT_STATUS
-        fis
+        fi
         if [ "$RETRY_COUNT" == "$RETRIES" ] && [ "$STACKDRIVER_DEADLINE_EXCEEDED" == "true" ]; then
           echo "Retry limit reached, giving up!"
           exit 1
