@@ -59,10 +59,10 @@ resource "null_resource" "apply_stackdriver_monitoring" {
           apply_resources(resources)
         '
         STACKDRIVER_EXIT_STATUS="$?"
-        if [ "$STACKDRIVER_EXIT_STATUS" == "1" ]; then
-          exit 1
-        elif [ "$STACKDRIVER_EXIT_STATUS" == "120" ]; then
-           STACKDRIVER_DEADLINE_EXCEEDED="true"
+        if [ "$STACKDRIVER_EXIT_STATUS" == "120" ]; then
+          STACKDRIVER_DEADLINE_EXCEEDED="true"
+        elif [ "$STACKDRIVER_EXIT_STATUS" != "0" ]; then
+          exit $STACKDRIVER_EXIT_STATUS
         fi
         if [ "$RETRY_COUNT" == "$RETRIES" ] && [ "$STACKDRIVER_DEADLINE_EXCEEDED" == "true" ]; then
           echo "Retry limit reached, giving up!"
@@ -97,10 +97,10 @@ resource "null_resource" "destroy_stackdriver_monitoring" {
           destroy_resources({"uptime_checks"=>[],"alert_policies"=>[],"notification_channels"=>[]})
         '
         STACKDRIVER_EXIT_STATUS="$?"
-        if [ "$STACKDRIVER_EXIT_STATUS" == "1" ]; then
-          exit 1
-        elif [ "$STACKDRIVER_EXIT_STATUS" == "120" ]; then
-           STACKDRIVER_DEADLINE_EXCEEDED="true"
+        if [ "$STACKDRIVER_EXIT_STATUS" == "120" ]; then
+          STACKDRIVER_DEADLINE_EXCEEDED="true"
+        elif [ "$STACKDRIVER_EXIT_STATUS" != "0" ]; then
+          exit $STACKDRIVER_EXIT_STATUS
         fi
         if [ "$RETRY_COUNT" == "$RETRIES" ] && [ "$STACKDRIVER_DEADLINE_EXCEEDED" == "true" ]; then
           echo "Retry limit reached, giving up!"
