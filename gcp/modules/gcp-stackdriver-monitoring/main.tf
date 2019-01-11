@@ -58,10 +58,12 @@ resource "null_resource" "apply_stackdriver_monitoring" {
           resources = read_resources("${path.module}/resources_rendered")
           apply_resources(resources)
         '
-        if [ "$?" != "0" ]; then
-          STACKDRIVER_DID_NOT_FAIL="false"
+        STACKDRIVER_EXIT_STATUS="$?"
+        if [ "$STACKDRIVER_EXIT_STATUS" == "1" ]; then
+          exit 1
+        elif [ "$STACKDRIVER_EXIT_STATUS" == "120" ]; then
+           STACKDRIVER_DID_NOT_FAIL="false"
         fi
-
         if [ "$RETRY_COUNT" == "$RETRIES" ] && [ "$STACKDRIVER_DID_NOT_FAIL" == "false" ]; then
           echo "Retry limit reached, giving up!"
           exit 1
@@ -94,10 +96,12 @@ resource "null_resource" "destroy_stackdriver_monitoring" {
           require "/rakefiles/stackdriver.rb"
           destroy_resources({"uptime_checks"=>[],"alert_policies"=>[],"notification_channels"=>[]})
         '
-        if [ "$?" != "0" ]; then
-          STACKDRIVER_DID_NOT_FAIL="false"
+        STACKDRIVER_EXIT_STATUS="$?"
+        if [ "$STACKDRIVER_EXIT_STATUS" == "1" ]; then
+          exit 1
+        elif [ "$STACKDRIVER_EXIT_STATUS" == "120" ]; then
+           STACKDRIVER_DID_NOT_FAIL="false"
         fi
-
         if [ "$RETRY_COUNT" == "$RETRIES" ] && [ "$STACKDRIVER_DID_NOT_FAIL" == "false" ]; then
           echo "Retry limit reached, giving up!"
           exit 1

@@ -18,10 +18,15 @@ end
 def apply_resources(resources)
   orphaned_resources = {}
 
-  orphaned_resources["log_based_metrics"] = apply_log_based_metrics(resources["log_based_metrics"]) if resources["log_based_metrics"]
-  orphaned_resources["notification_channels"], processed_notification_channels = apply_notification_channels(resources["notification_channels"]) if resources["notification_channels"]
-  orphaned_resources["uptime_checks"] = apply_uptime_checks(resources["uptime_checks"]) if resources["uptime_checks"]
-  orphaned_resources["alert_policies"] = apply_alert_policies(resources["alert_policies"], processed_notification_channels) if resources["alert_policies"]
+  begin
+    orphaned_resources["log_based_metrics"] = apply_log_based_metrics(resources["log_based_metrics"]) if resources["log_based_metrics"]
+    orphaned_resources["notification_channels"], processed_notification_channels = apply_notification_channels(resources["notification_channels"]) if resources["notification_channels"]
+    orphaned_resources["uptime_checks"] = apply_uptime_checks(resources["uptime_checks"]) if resources["uptime_checks"]
+    orphaned_resources["alert_policies"] = apply_alert_policies(resources["alert_policies"], processed_notification_channels) if resources["alert_policies"]
+  rescue Google::Gax::RetryError
+    puts "[ERROR]: Deadline exceeded while applying resources!"
+    exit 120
+  end
 
   destroy_resources(orphaned_resources, true)
 end
@@ -35,10 +40,15 @@ end
 #    Stackdriver hash with:
 #      { "resource_type" => [array with orphaned resource names] }
 def destroy_resources(resources_to_destroy, destroy_orphaned_only = false)
-  destroy_alert_policies(resources_to_destroy["alert_policies"], destroy_orphaned_only) if resources_to_destroy.include? "alert_policies"
-  destroy_uptime_checks(resources_to_destroy["uptime_checks"], destroy_orphaned_only) if resources_to_destroy.include? "uptime_checks"
-  destroy_notification_channels(resources_to_destroy["notification_channels"], destroy_orphaned_only) if resources_to_destroy.include? "notification_channels"
-  destroy_log_based_metrics(resources_to_destroy["log_based_metrics"], destroy_orphaned_only) if resources_to_destroy.include? "log_based_metrics"
+  begin
+    destroy_alert_policies(resources_to_destroy["alert_policies"], destroy_orphaned_only) if resources_to_destroy.include? "alert_policies"
+    destroy_uptime_checks(resources_to_destroy["uptime_checks"], destroy_orphaned_only) if resources_to_destroy.include? "uptime_checks"
+    destroy_notification_channels(resources_to_destroy["notification_channels"], destroy_orphaned_only) if resources_to_destroy.include? "notification_channels"
+    destroy_log_based_metrics(resources_to_destroy["log_based_metrics"], destroy_orphaned_only) if resources_to_destroy.include? "log_based_metrics"
+  rescue Google::Gax::RetryError
+    puts "[ERROR]: Deadline exceeded while destroying resources!"
+    exit 120
+  end
 end
 
 def read_resources(resource_dir = "")
