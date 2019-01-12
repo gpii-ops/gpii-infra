@@ -1,0 +1,9 @@
+{{- if and .Values.persistentVolume.storageClass (not (eq .Values.persistentVolume.storageClass "-")) }}
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: "couchdb-{{ .Values.persistentVolume.storageClass }}"
+provisioner: "{{ .Values.persistentVolume.provisioner }}"
+parameters:
+  type: "{{ .Values.persistentVolume.storageClass }}"
+{{- end }}
