@@ -178,10 +178,135 @@ data "google_iam_policy" "admin" {
   }
 
   binding {
-    role = "roles/owner"
+    role = "roles/compute.serviceAgent"
 
     members = [
-      "${var.project_owner}",
+      "serviceAccount:service-${google_project.project.number}@compute-system.iam.gserviceaccount.com",
+    ]
+  }
+
+  binding {
+    role = "roles/container.serviceAgent"
+
+    members = [
+      "serviceAccount:service-${google_project.project.number}@container-engine-robot.iam.gserviceaccount.com",
+    ]
+  }
+
+  binding {
+    role = "roles/editor"
+
+    members = [
+      "serviceAccount:${google_project.project.number}-compute@developer.gserviceaccount.com",
+      "serviceAccount:${google_project.project.number}@cloudservices.gserviceaccount.com",
+      "serviceAccount:service-${google_project.project.number}@containerregistry.iam.gserviceaccount.com",
+    ]
+  }
+}
+
+data "google_iam_policy" "admin_dev" {
+  # This needs to be interpolate somehow:
+  binding {
+    role = "roles/cloudkms.admin"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/compute.admin"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/container.clusterAdmin"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/container.admin"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/dns.admin"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/iam.serviceAccountKeyAdmin"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/iam.serviceAccountUser"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/logging.configWriter"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/monitoring.editor"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/resourcemanager.projectIamAdmin"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/serviceusage.serviceUsageAdmin"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/storage.admin"
+
+    members = [
+      "serviceAccount:${google_service_account.project.email}",
     ]
   }
 
@@ -208,6 +333,14 @@ data "google_iam_policy" "admin" {
       "serviceAccount:${google_project.project.number}-compute@developer.gserviceaccount.com",
       "serviceAccount:${google_project.project.number}@cloudservices.gserviceaccount.com",
       "serviceAccount:service-${google_project.project.number}@containerregistry.iam.gserviceaccount.com",
+    ]
+  }
+
+  binding {
+    role = "roles/owner"
+
+    members = [
+      "${var.project_owner}",
     ]
   }
 }
@@ -247,6 +380,13 @@ resource "google_project_services" "project" {
 resource "google_project_iam_policy" "project" {
   project     = "${google_project.project.project_id}"
   policy_data = "${data.google_iam_policy.admin.policy_data}"
+  count       = "${length(split("-", var.project_name)) == 1 ? 1 : 0}"
+}
+
+resource "google_project_iam_policy" "project_dev" {
+  project     = "${google_project.project.project_id} "
+  policy_data = "${data.google_iam_policy.admin_dev.policy_data}"
+  count       = "${length(split("-", var.project_name)) >= 2 ? 1 : 0}"
 }
 
 resource "google_service_account" "project" {
