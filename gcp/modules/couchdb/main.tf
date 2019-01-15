@@ -16,8 +16,9 @@ variable "requests_memory" {}
 variable "limits_cpu" {}
 variable "limits_memory" {}
 variable "pv_capacity" {}
-variable "pv_storage_class" {}
 variable "pv_reclaim_policy" {}
+variable "pv_storage_class" {}
+variable "pv_provisioner" {}
 variable "execute_destroy_pvcs" {}
 
 # Secret variables
@@ -41,6 +42,7 @@ data "template_file" "couchdb_values" {
     limits_memory          = "${var.limits_memory}"
     pv_capacity            = "${var.pv_capacity}"
     pv_storage_class       = "${var.pv_storage_class}"
+    pv_provisioner         = "${var.pv_provisioner}"
   }
 }
 

@@ -30,12 +30,18 @@ adminUsername: admin
 ## local storage. Setting the storageClass attribute to "-" disables dynamic
 ## provisioning of Persistent Volumes; leaving it unset will invoke the default
 ## provisioner.
+##
+## If a non-default storageClass is to be used, both storageClass and
+## provisioner must be specified.
 persistentVolume:
   enabled: false
   accessModes:
     - ReadWriteOnce
   size: 10Gi
   # storageClass: "-"
+  # OR
+  # storageClass: "pd-ssd"
+  # provisioner: "kubernetes.io/gce-pd"
 
 ## The CouchDB image
 image:
