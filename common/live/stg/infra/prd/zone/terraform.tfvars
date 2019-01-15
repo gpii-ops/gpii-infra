@@ -22,4 +22,7 @@ project_name    = "prd"
 # of the role:
 # https://www.terraform.io/docs/providers/google/r/google_project_iam.html#argument-reference
 
-project_owner   = "group:admins@test1.gpii.net"
+# root projects: dev,stg and prd don't need a project_owner. They will use the
+# IAMs inherited from the org.
+#
+#project_owner   = "group:admins@test1.gpii.net"
