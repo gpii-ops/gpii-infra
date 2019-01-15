@@ -304,6 +304,7 @@ resource "google_service_account" "project" {
   account_id   = "projectowner"
   display_name = "Project owner service account"
   project      = "${google_project.project.project_id}"
+  count        = "${length(split("-", var.project_name)) == 1 ? 1 : 0}"
 }
 
 resource "google_dns_managed_zone" "project" {
