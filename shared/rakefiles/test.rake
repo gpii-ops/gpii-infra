@@ -10,12 +10,12 @@ task :test do
       RETRIES=10; \
       RETRY_COUNT=1; \
       while [ \"$(kubectl get pods -n locust -o json 2> /dev/null | jq -r .items[] | grep -c .)\" != \"0\" ]; do \
-        echo \"[Try $RETRY_COUNT of $RETRIES] Waiting for K8s to terminate Locust pods...\"; \
-        RETRY_COUNT=$(($RETRY_COUNT+1)); \
-        if [ \"$RETRY_COUNT\" == \"$RETRIES\" ]; then \
+        if [ \"$RETRY_COUNT\" -gt \"$RETRIES\" ]; then \
           echo \"Retry limit reached, giving up!\"; \
           exit 1; \
         fi; \
+        echo \"[Try $RETRY_COUNT of $RETRIES] Waiting for K8s to terminate Locust pods...\"; \
+        RETRY_COUNT=$(($RETRY_COUNT+1)); \
         sleep 10; \
       done'"
 
