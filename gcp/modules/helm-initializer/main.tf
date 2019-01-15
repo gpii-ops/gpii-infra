@@ -9,7 +9,7 @@ variable tiller_namespace {
 }
 
 variable tiller_wait_period {
-  default = "60"
+  default = "90"
 }
 
 # Install Tiller in kube-system namespace with cluster-admin access to all namespaces
