@@ -194,6 +194,14 @@ data "google_iam_policy" "admin" {
   }
 
   binding {
+    role = "roles/cloudbuild.builds.builder"
+
+    members = [
+      "${google_project.project.number}@cloudbuild.gserviceaccount.com",
+    ]
+  }
+
+  binding {
     role = "roles/editor"
 
     members = [
@@ -218,6 +226,14 @@ data "google_iam_policy" "admin_dev" {
 
     members = [
       "serviceAccount:service-${google_project.project.number}@container-engine-robot.iam.gserviceaccount.com",
+    ]
+  }
+
+  binding {
+    role = "roles/cloudbuild.builds.builder"
+
+    members = [
+      "${google_project.project.number}@cloudbuild.gserviceaccount.com",
     ]
   }
 
