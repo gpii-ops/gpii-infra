@@ -71,5 +71,10 @@ def process_locust_result(locust_stats_file, locust_distribution_file, app_name)
     }
   end
 
-  metric_service_client.create_time_series(formatted_name, time_series)
+  begin
+    metric_service_client.create_time_series(formatted_name, time_series)
+  rescue Google::Gax::RetryError
+    puts "[ERROR]: Error while submitting metrics to Stackdriver (Google::Gax::RetryError)."
+    exit 120
+  end
 end
