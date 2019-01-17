@@ -103,28 +103,28 @@ resource "null_resource" "locust_swarm_session" {
       done
       [ "$EXIT_STATUS" != "0" ] && echo "Failed to post resutls to Stackdriver, retry limit reached, giving up."
 
-      if [ $total_rps -lt ${var.locust_desired_total_rps} ]; then
+      if [ "$total_rps" -lt "${var.locust_desired_total_rps}" ]; then
         echo
         echo "Looks like total_rps ($total_rps) is worse than desired (${var.locust_desired_total_rps})!"
         echo "This is unacceptable!"
         EXIT_STATUS=1
       fi
 
-      if [ $median_response_time -gt ${var.locust_desired_median_response_time} ]; then
+      if [ "$median_response_time" -gt "${var.locust_desired_median_response_time}" ]; then
         echo
         echo "Looks like median_response_time ($median_response_time) is worse than desired (${var.locust_desired_median_response_time})!"
         echo "This is unacceptable!"
         EXIT_STATUS=1
       fi
 
-      if [ $max_response_time -gt ${var.locust_desired_max_response_time} ]; then
+      if [ "$max_response_time" -gt "${var.locust_desired_max_response_time}" ]; then
         echo
         echo "Looks like max_response_time ($max_response_time) is worse than desired (${var.locust_desired_max_response_time})!"
         echo "This is unacceptable!"
         EXIT_STATUS=1
       fi
 
-      if [ $num_failures -gt ${var.locust_desired_num_failures} ]; then
+      if [ "$num_failures" -gt "${var.locust_desired_num_failures}" ]; then
         echo
         echo "Looks like num_failures ($num_failures) is worse than desired (${var.locust_desired_num_failures})!"
         echo "This is unacceptable!"
