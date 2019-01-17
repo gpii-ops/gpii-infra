@@ -84,7 +84,7 @@ resource "null_resource" "couchdb_finish_cluster" {
         if [ "$CLUSTER_MEMBERS_COUNT" != "${var.replica_count}" ]; then
           CLUSTER_READY="false"
         fi
-        if [ "$RETRY_COUNT" == "$RETRIES" ]; then
+        if [ "$RETRY_COUNT" == "$RETRIES" ] && [ "$CLUSTER_READY" != "true" ]; then
           echo "Retry limit reached, giving up!"
           kill $(pgrep -f "^$PORT_FORWARD_CMD")
           exit 1
@@ -102,7 +102,7 @@ resource "null_resource" "couchdb_finish_cluster" {
           -X POST -H 'Content-Type: application/json' -d '{"action": "finish_cluster"}')
         echo "[Try $RETRY_COUNT of $RETRIES] Posting \"finish_cluster\", CouchDB returned: $RESULT"
         STATUS=$(echo $RESULT | jq ".reason")
-        if [ "$RETRY_COUNT" == "$RETRIES" ]; then
+        if [ "$RETRY_COUNT" == "$RETRIES" ] && [ "$STATUS" != '"Cluster is already finished"' ]; then
           echo "Retry limit reached, giving up!"
           kill $(pgrep -f "^$PORT_FORWARD_CMD")
           exit 1
