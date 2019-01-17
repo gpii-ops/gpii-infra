@@ -78,18 +78,17 @@ resource "null_resource" "couchdb_finish_cluster" {
       RETRY_COUNT=1
       while [ "$CLUSTER_READY" != "true" ]; do
         echo "[Try $RETRY_COUNT of $RETRIES] Waiting for all CouchDB pods to join the cluster..."
-        CLUSTER_READY="true"
         CLUSTER_MEMBERS_COUNT=$(curl -s $COUCHDB_URL/_membership 2>/dev/null | jq -r .cluster_nodes[] | grep -c .)
         echo "$CLUSTER_MEMBERS_COUNT of ${var.replica_count} pods have joined the cluster."
-        if [ "$CLUSTER_MEMBERS_COUNT" != "${var.replica_count}" ]; then
-          CLUSTER_READY="false"
+        if [ "$CLUSTER_MEMBERS_COUNT" == "${var.replica_count}" ]; then
+          CLUSTER_READY="true"
         fi
         if [ "$RETRY_COUNT" == "$RETRIES" ] && [ "$CLUSTER_READY" != "true" ]; then
           echo "Retry limit reached, giving up!"
           kill $(pgrep -f "^$PORT_FORWARD_CMD")
           exit 1
         fi
-        if [ "$CLUSTER_READY" == "false" ]; then
+        if [ "$CLUSTER_READY" != "true" ]; then
           sleep 10
         fi
         RETRY_COUNT=$(($RETRY_COUNT+1))
