@@ -12,6 +12,6 @@ variable tiller_namespace {
 module "system_tiller" {
   source = "/exekube-modules/helm-initializer"
 
-  secrets_dir        = "${var.secrets_dir}"
-  tiller_namespace   = "${var.tiller_namespace}"
+  secrets_dir      = "${var.secrets_dir}"
+  tiller_namespace = "${var.tiller_namespace}"
 }
