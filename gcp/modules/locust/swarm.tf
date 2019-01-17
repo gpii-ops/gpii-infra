@@ -68,7 +68,7 @@ resource "null_resource" "locust_swarm_session" {
       echo "Processing stats..."
       SESSION_STATS=$(curl -s $LOCUST_URL/stats/requests)
       total_rps=$(echo $SESSION_STATS | jq -r ".total_rps | floor")
-      median_response_time=$(echo $SESSION_STATS | jq -r '.stats[] | select(.name == "Total").median_response_time | floor')
+      median_response_time=$(echo $SESSION_STATS | jq -r '.stats[] | select(.name == "Total").median_response_time | . // 0 | floor')
       max_response_time=$(echo $SESSION_STATS | jq -r '.stats[] | select(.name == "Total").max_response_time | floor')
       num_failures=$(echo $SESSION_STATS | jq -r '.stats[] | select(.name == "Total").num_failures')
 
