@@ -98,7 +98,9 @@ resource "null_resource" "locust_swarm_session" {
         EXIT_STATUS="$?"
 
         # Sleep only if this is not the last run
-        [ "$RETRY_COUNT" -lt "$RETRIES" -a "$EXIT_STATUS" != "0" ] && sleep 10
+        if [ "$RETRY_COUNT" -lt "$RETRIES" -a "$EXIT_STATUS" != "0" ]; then
+          sleep 10
+        fi
         RETRY_COUNT=$((RETRY_COUNT+1))
       done
       [ "$EXIT_STATUS" != "0" ] && echo "Failed to post resutls to Stackdriver, retry limit reached, giving up."
