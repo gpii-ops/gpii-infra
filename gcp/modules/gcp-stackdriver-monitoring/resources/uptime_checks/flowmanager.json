@@ -18,11 +18,7 @@
     "seconds": 10,
     "nanos": 0
   },
-  "content_matchers": [
-    {
-      "content": ""
-    }
-  ],
+  "content_matchers": [],
   "selected_regions": [],
   "internal_checkers": [],
   "is_internal": false

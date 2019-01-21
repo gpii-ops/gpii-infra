@@ -25,23 +25,25 @@ resource "null_resource" "apply_stackdriver_lbm" {
 
       RETRIES=5
       RETRY_COUNT=1
-      while [ "$STACKDRIVER_DID_NOT_FAIL" != "true" ]; do
-        STACKDRIVER_DID_NOT_FAIL="true"
+      while [ "$STACKDRIVER_DEADLINE_EXCEEDED" != "false" ]; do
+        STACKDRIVER_DEADLINE_EXCEEDED="false"
         echo "[Try $RETRY_COUNT of $RETRIES] Applying Stackdriver resources..."
         ruby -e '
           require "/rakefiles/stackdriver.rb"
           resources = read_resources("${path.module}/resources")
           apply_resources(resources)
         '
-        if [ "$?" != "0" ]; then
-          STACKDRIVER_DID_NOT_FAIL="false"
+        STACKDRIVER_EXIT_STATUS="$?"
+        if [ "$STACKDRIVER_EXIT_STATUS" == "120" ]; then
+          STACKDRIVER_DEADLINE_EXCEEDED="true"
+        elif [ "$STACKDRIVER_EXIT_STATUS" != "0" ]; then
+          exit $STACKDRIVER_EXIT_STATUS
         fi
-
-        if [ "$RETRY_COUNT" == "$RETRIES" ]; then
+        if [ "$RETRY_COUNT" == "$RETRIES" ] && [ "$STACKDRIVER_DEADLINE_EXCEEDED" == "true" ]; then
           echo "Retry limit reached, giving up!"
           exit 1
         fi
-        if [ "$STACKDRIVER_DID_NOT_FAIL" == "false" ]; then
+        if [ "$STACKDRIVER_DEADLINE_EXCEEDED" == "true" ]; then
           sleep 10
         fi
         RETRY_COUNT=$(($RETRY_COUNT+1))
@@ -60,22 +62,24 @@ resource "null_resource" "destroy_stackdriver_lbm" {
 
       RETRIES=5
       RETRY_COUNT=1
-      while [ "$STACKDRIVER_DID_NOT_FAIL" != "true" ]; do
-        STACKDRIVER_DID_NOT_FAIL="true"
+      while [ "$STACKDRIVER_DEADLINE_EXCEEDED" != "false" ]; do
+        STACKDRIVER_DEADLINE_EXCEEDED="false"
         echo "[Try $RETRY_COUNT of $RETRIES] Destroying Stackdriver resources..."
         ruby -e '
           require "/rakefiles/stackdriver.rb"
-          destroy_resources(["log_based_metrics"])
+          destroy_resources({"log_based_metrics"=>[]})
         '
-        if [ "$?" != "0" ]; then
-          STACKDRIVER_DID_NOT_FAIL="false"
+        STACKDRIVER_EXIT_STATUS="$?"
+        if [ "$STACKDRIVER_EXIT_STATUS" == "120" ]; then
+          STACKDRIVER_DEADLINE_EXCEEDED="true"
+        elif [ "$STACKDRIVER_EXIT_STATUS" != "0" ]; then
+          exit $STACKDRIVER_EXIT_STATUS
         fi
-
-        if [ "$RETRY_COUNT" == "$RETRIES" ]; then
+        if [ "$RETRY_COUNT" == "$RETRIES" ] && [ "$STACKDRIVER_DEADLINE_EXCEEDED" == "true" ]; then
           echo "Retry limit reached, giving up!"
           exit 1
         fi
-        if [ "$STACKDRIVER_DID_NOT_FAIL" == "false" ]; then
+        if [ "$STACKDRIVER_DEADLINE_EXCEEDED" == "true" ]; then
           sleep 10
         fi
         RETRY_COUNT=$(($RETRY_COUNT+1))

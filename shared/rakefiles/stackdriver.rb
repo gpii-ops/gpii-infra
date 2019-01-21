@@ -11,18 +11,44 @@ if ENV['STACKDRIVER_DEBUG']
   @debug_mode = true unless ENV['STACKDRIVER_DEBUG'].empty?
 end
 
+# This method looks for resource types in resources hash that
+# read_resources generates, and invokes apply methods in proper order.
+# Each apply method returns array with orphaned (not described in configs)
+# resources that is later passed to destroy_resources method for deletion.
 def apply_resources(resources)
-  process_log_based_metrics(resources["log_based_metrics"]) if resources["log_based_metrics"]
-  processed_notification_channels = process_notification_channels(resources["notification_channels"]) if resources["notification_channels"]
-  process_uptime_checks(resources["uptime_checks"]) if resources["uptime_checks"]
-  process_alert_policies(resources["alert_policies"], processed_notification_channels) if resources["alert_policies"]
+  orphaned_resources = {}
+
+  begin
+    orphaned_resources["log_based_metrics"] = apply_log_based_metrics(resources["log_based_metrics"]) if resources["log_based_metrics"]
+    orphaned_resources["notification_channels"], processed_notification_channels = apply_notification_channels(resources["notification_channels"]) if resources["notification_channels"]
+    orphaned_resources["uptime_checks"] = apply_uptime_checks(resources["uptime_checks"]) if resources["uptime_checks"]
+    orphaned_resources["alert_policies"] = apply_alert_policies(resources["alert_policies"], processed_notification_channels) if resources["alert_policies"]
+  rescue Google::Gax::RetryError
+    puts "[ERROR]: Deadline exceeded while applying resources!"
+    exit 120
+  end
+
+  destroy_resources(orphaned_resources, true)
 end
 
-def destroy_resources(resources)
-  process_alert_policies if resources.include? "alert_policies"
-  process_uptime_checks if resources.include? "uptime_checks"
-  process_notification_channels if resources.include? "notification_channels"
-  process_log_based_metrics if resources.include? "log_based_metrics"
+# We may want to destroy resources in two cases:
+# 1. During Terraform module destruction – all resources.
+# 2. After resource application – only orphaned (not described in configs)
+#    resources, to ensure that current Stackdriver state matches with the state that
+#    described by configuration primitives. In this case destroy_orphaned_only
+#    variable must be set to true, and resources_to_destroy must contain
+#    Stackdriver hash with:
+#      { "resource_type" => [array with orphaned resource names] }
+def destroy_resources(resources_to_destroy, destroy_orphaned_only = false)
+  begin
+    destroy_alert_policies(resources_to_destroy["alert_policies"], destroy_orphaned_only) if resources_to_destroy.include? "alert_policies"
+    destroy_uptime_checks(resources_to_destroy["uptime_checks"], destroy_orphaned_only) if resources_to_destroy.include? "uptime_checks"
+    destroy_notification_channels(resources_to_destroy["notification_channels"], destroy_orphaned_only) if resources_to_destroy.include? "notification_channels"
+    destroy_log_based_metrics(resources_to_destroy["log_based_metrics"], destroy_orphaned_only) if resources_to_destroy.include? "log_based_metrics"
+  rescue Google::Gax::RetryError
+    puts "[ERROR]: Deadline exceeded while destroying resources!"
+    exit 120
+  end
 end
 
 def read_resources(resource_dir = "")
@@ -80,7 +106,15 @@ def compare_alert_policies(stackdriver_alert_policy, alert_policy)
     condition.delete("condition_threshold") if condition["condition_threshold"] == nil
   end
 
-  return stackdriver_alert_policy != alert_policy
+  policy_changed = (stackdriver_alert_policy != alert_policy)
+  if @debug_mode and policy_changed
+    puts "[DEBUG] alert policy has changed. Old:"
+    puts debug_output(alert_policy)
+    puts "New:"
+    puts debug_output(stackdriver_alert_policy)
+  end
+
+  return policy_changed
 end
 
 def compare_uptime_checks(stackdriver_uptime_check, uptime_check)
@@ -89,7 +123,15 @@ def compare_uptime_checks(stackdriver_uptime_check, uptime_check)
     stackdriver_uptime_check.delete(attribute) if value == nil or attribute == "name"
   end
 
-  return stackdriver_uptime_check != uptime_check
+  uptime_check_changed = (stackdriver_uptime_check != uptime_check)
+  if @debug_mode and uptime_check_changed
+    puts "[DEBUG] uptime check has changed. Old:"
+    puts debug_output(uptime_check)
+    puts "New:"
+    puts debug_output(stackdriver_uptime_check)
+  end
+
+  return uptime_check_changed
 end
 
 def compare_notification_channels(stackdriver_notification_channel, notification_channel)
@@ -99,10 +141,10 @@ def compare_notification_channels(stackdriver_notification_channel, notification
 end
 
 def debug_output(resource)
-  return resource.to_hash.to_json
+  return JSON.pretty_generate(resource.to_hash)
 end
 
-def process_log_based_metrics(log_based_metrics = [])
+def apply_log_based_metrics(log_based_metrics = [])
   stackdriver_logging_client = Google::Cloud::Logging.new(project_id: @project_id)
 
   stackdriver_log_based_metrics = {}
@@ -131,22 +173,17 @@ def process_log_based_metrics(log_based_metrics = [])
     processed_log_based_metrics[log_based_metric["name"]] = log_based_metric
   end
 
+  orphaned_resources = []
   stackdriver_log_based_metrics.each do |name, log_based_metric|
     unless processed_log_based_metrics.include? name
-      if @debug_mode
-        puts "[DEBUG] Skipping deletion of log-based metric \"#{name}\"..."
-      else
-        puts "Deleting log-based metric \"#{name}\"..."
-        metric = stackdriver_logging_client.metric name
-        metric.delete
-      end
+      orphaned_resources << log_based_metric.name
     end
   end
 
-  return processed_log_based_metrics
+  return orphaned_resources
 end
 
-def process_notification_channels(notification_channels = [])
+def apply_notification_channels(notification_channels = [])
   notification_channel_service_client = Google::Cloud::Monitoring::NotificationChannel.new(version: :v3)
   formatted_parent = Google::Cloud::Monitoring::V3::NotificationChannelServiceClient.project_path(@project_id)
 
@@ -185,25 +222,19 @@ def process_notification_channels(notification_channels = [])
     processed_notification_channels[notification_channel_identifier] = notification_channel["name"] if notification_channel["name"]
   end
 
+  orphaned_resources = []
   stackdriver_notification_channels.each do |name, notification_channel|
     notification_channel_identifier = get_notification_channel_identifier(notification_channel)
 
     unless processed_notification_channels.include? notification_channel_identifier
-      if @debug_mode
-        puts "[DEBUG] Skipping deletion of notification channel \"#{notification_channel_identifier}\"..."
-      elsif notification_channel["type"] == "slack"
-        puts "Skipping deletion of immutable notification channel \"#{notification_channel_identifier}\"..."
-      else
-        puts "Deleting notification channel \"#{notification_channel_identifier}\"..."
-        notification_channel_service_client.delete_notification_channel(notification_channel["name"])
-      end
+      orphaned_resources << notification_channel.name
     end
   end
 
-  return processed_notification_channels
+  return orphaned_resources, processed_notification_channels
 end
 
-def process_uptime_checks(uptime_checks = [])
+def apply_uptime_checks(uptime_checks = [])
   uptime_check_service_client = Google::Cloud::Monitoring::UptimeCheck.new(version: :v3)
   formatted_parent = Google::Cloud::Monitoring::V3::UptimeCheckServiceClient.project_path(@project_id)
 
@@ -234,24 +265,19 @@ def process_uptime_checks(uptime_checks = [])
     processed_uptime_checks[uptime_check_identifier] = uptime_check["name"]
   end
 
-
+  orphaned_resources = []
   stackdriver_uptime_checks.each do |name, uptime_check|
     uptime_check_identifier = get_uptime_check_identifier(uptime_check)
 
     unless processed_uptime_checks.include? uptime_check_identifier
-      if @debug_mode
-        puts "[DEBUG] Skipping deletion of uptime check \"#{uptime_check_identifier}\"..."
-      else
-        puts "Deleting uptime check \"#{uptime_check_identifier}\"..."
-        uptime_check_service_client.delete_uptime_check_config(uptime_check["name"])
-      end
+      orphaned_resources << uptime_check.name
     end
   end
 
-  return processed_uptime_checks
+  return orphaned_resources
 end
 
-def process_alert_policies(alert_policies = [], notification_channels = {})
+def apply_alert_policies(alert_policies = [], notification_channels = {})
   alert_policy_service_client = Google::Cloud::Monitoring::AlertPolicy.new(version: :v3)
   formatted_parent = Google::Cloud::Monitoring::V3::AlertPolicyServiceClient.project_path(@project_id)
 
@@ -283,19 +309,82 @@ def process_alert_policies(alert_policies = [], notification_channels = {})
     processed_alert_policies[alert_policy_identifier] = alert_policy["name"]
   end
 
-
+  orphaned_resources = []
   stackdriver_alert_policies.each do |name, alert_policy|
     alert_policy_identifier = get_alert_policy_identifier(alert_policy)
 
     unless processed_alert_policies.include? alert_policy_identifier
+      orphaned_resources << alert_policy.name
+    end
+  end
+
+  return orphaned_resources
+end
+
+def destroy_alert_policies(resources_to_destroy = [], destroy_orphaned_only = false)
+  alert_policy_service_client = Google::Cloud::Monitoring::AlertPolicy.new(version: :v3)
+  formatted_parent = Google::Cloud::Monitoring::V3::AlertPolicyServiceClient.project_path(@project_id)
+  alert_policy_service_client.list_alert_policies(formatted_parent).each do |alert_policy|
+    if not destroy_orphaned_only or resources_to_destroy.include?(alert_policy.name)
+      alert_policy_identifier = get_alert_policy_identifier(alert_policy)
+
       if @debug_mode
         puts "[DEBUG] Skipping deletion of alert policy \"#{alert_policy_identifier}\"..."
       else
         puts "Deleting alert policy \"#{alert_policy_identifier}\"..."
-        alert_policy_service_client.delete_alert_policy(alert_policy["name"])
+        alert_policy_service_client.delete_alert_policy(alert_policy.name)
       end
     end
   end
+end
 
-  return processed_alert_policies
+def destroy_uptime_checks(resources_to_destroy = [], destroy_orphaned_only = false)
+  uptime_check_service_client = Google::Cloud::Monitoring::UptimeCheck.new(version: :v3)
+  formatted_parent = Google::Cloud::Monitoring::V3::UptimeCheckServiceClient.project_path(@project_id)
+  uptime_check_service_client.list_uptime_check_configs(formatted_parent).each do |uptime_check|
+    if not destroy_orphaned_only or resources_to_destroy.include?(uptime_check.name)
+      uptime_check_identifier = get_uptime_check_identifier(uptime_check)
+
+      if @debug_mode
+        puts "[DEBUG] Skipping deletion of uptime check \"#{uptime_check_identifier}\"..."
+      else
+        puts "Deleting uptime check \"#{uptime_check_identifier}\"..."
+        uptime_check_service_client.delete_uptime_check_config(uptime_check.name)
+      end
+    end
+  end
+end
+
+def destroy_notification_channels(resources_to_destroy = [], destroy_orphaned_only = false)
+  notification_channel_service_client = Google::Cloud::Monitoring::NotificationChannel.new(version: :v3)
+  formatted_parent = Google::Cloud::Monitoring::V3::NotificationChannelServiceClient.project_path(@project_id)
+  notification_channel_service_client.list_notification_channels(formatted_parent).each do |notification_channel|
+    if not destroy_orphaned_only or resources_to_destroy.include?(notification_channel.name)
+      notification_channel_identifier = get_notification_channel_identifier(notification_channel)
+
+      if @debug_mode
+        puts "[DEBUG] Skipping deletion of notification channel \"#{notification_channel_identifier}\"..."
+      elsif notification_channel["type"] == "slack"
+        puts "Skipping deletion of immutable notification channel \"#{notification_channel_identifier}\"..."
+      else
+        puts "Deleting notification channel \"#{notification_channel_identifier}\"..."
+        notification_channel_service_client.delete_notification_channel(notification_channel.name)
+      end
+    end
+  end
+end
+
+def destroy_log_based_metrics(resources_to_destroy = [], destroy_orphaned_only = false)
+  stackdriver_logging_client = Google::Cloud::Logging.new(project_id: @project_id)
+  stackdriver_logging_client.metrics.each do |log_based_metric|
+    if not destroy_orphaned_only or resources_to_destroy.include?(log_based_metric.name)
+      if @debug_mode
+        puts "[DEBUG] Skipping deletion of log-based metric \"#{log_based_metric.name}\"..."
+      else
+        puts "Deleting log-based metric \"#{log_based_metric.name}\"..."
+        metric = stackdriver_logging_client.metric log_based_metric.name
+        metric.delete
+      end
+    end
+  end
 end

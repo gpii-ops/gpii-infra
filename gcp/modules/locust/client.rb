@@ -26,10 +26,13 @@ def process_locust_result(locust_stats_file, locust_distribution_file, app_name)
     dist.include? "None Total"
   end
 
-  distributions = distributions.reverse.first
-  ["100th_percentile", "99th_percentile", "98th_percentile", "95th_percentile", "90th_percentile",
-   "80th_percentile", "75th_percentile", "66th_percentile", "50th_percentile"].each do |metric|
-    metrics[metric] = distributions.pop
+  # Only add distributions if we actually have any
+  if distributions
+    distributions = distributions.reverse.first
+    ["100th_percentile", "99th_percentile", "98th_percentile", "95th_percentile", "90th_percentile",
+     "80th_percentile", "75th_percentile", "66th_percentile", "50th_percentile"].each do |metric|
+      metrics[metric] = distributions.pop if metrics.key?(metric)
+    end
   end
 
   metric_service_client = Google::Cloud::Monitoring::Metric.new(version: :v3)
@@ -68,5 +71,10 @@ def process_locust_result(locust_stats_file, locust_distribution_file, app_name)
     }
   end
 
-  metric_service_client.create_time_series(formatted_name, time_series)
+  begin
+    metric_service_client.create_time_series(formatted_name, time_series)
+  rescue Google::Gax::RetryError
+    puts "[ERROR]: Error while submitting metrics to Stackdriver (Google::Gax::RetryError)."
+    exit 120
+  end
 end

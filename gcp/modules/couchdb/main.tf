@@ -16,8 +16,9 @@ variable "requests_memory" {}
 variable "limits_cpu" {}
 variable "limits_memory" {}
 variable "pv_capacity" {}
-variable "pv_storage_class" {}
 variable "pv_reclaim_policy" {}
+variable "pv_storage_class" {}
+variable "pv_provisioner" {}
 variable "execute_destroy_pvcs" {}
 
 # Secret variables
@@ -41,6 +42,7 @@ data "template_file" "couchdb_values" {
     limits_memory          = "${var.limits_memory}"
     pv_capacity            = "${var.pv_capacity}"
     pv_storage_class       = "${var.pv_storage_class}"
+    pv_provisioner         = "${var.pv_provisioner}"
   }
 }
 
@@ -76,18 +78,17 @@ resource "null_resource" "couchdb_finish_cluster" {
       RETRY_COUNT=1
       while [ "$CLUSTER_READY" != "true" ]; do
         echo "[Try $RETRY_COUNT of $RETRIES] Waiting for all CouchDB pods to join the cluster..."
-        CLUSTER_READY="true"
         CLUSTER_MEMBERS_COUNT=$(curl -s $COUCHDB_URL/_membership 2>/dev/null | jq -r .cluster_nodes[] | grep -c .)
         echo "$CLUSTER_MEMBERS_COUNT of ${var.replica_count} pods have joined the cluster."
-        if [ "$CLUSTER_MEMBERS_COUNT" != "${var.replica_count}" ]; then
-          CLUSTER_READY="false"
+        if [ "$CLUSTER_MEMBERS_COUNT" == "${var.replica_count}" ]; then
+          CLUSTER_READY="true"
         fi
-        if [ "$RETRY_COUNT" == "$RETRIES" ]; then
+        if [ "$RETRY_COUNT" == "$RETRIES" ] && [ "$CLUSTER_READY" != "true" ]; then
           echo "Retry limit reached, giving up!"
           kill $(pgrep -f "^$PORT_FORWARD_CMD")
           exit 1
         fi
-        if [ "$CLUSTER_READY" == "false" ]; then
+        if [ "$CLUSTER_READY" != "true" ]; then
           sleep 10
         fi
         RETRY_COUNT=$(($RETRY_COUNT+1))
@@ -100,7 +101,7 @@ resource "null_resource" "couchdb_finish_cluster" {
           -X POST -H 'Content-Type: application/json' -d '{"action": "finish_cluster"}')
         echo "[Try $RETRY_COUNT of $RETRIES] Posting \"finish_cluster\", CouchDB returned: $RESULT"
         STATUS=$(echo $RESULT | jq ".reason")
-        if [ "$RETRY_COUNT" == "$RETRIES" ]; then
+        if [ "$RETRY_COUNT" == "$RETRIES" ] && [ "$STATUS" != '"Cluster is already finished"' ]; then
           echo "Retry limit reached, giving up!"
           kill $(pgrep -f "^$PORT_FORWARD_CMD")
           exit 1
@@ -147,7 +148,7 @@ resource "null_resource" "couchdb_destroy_pvcs" {
     command = <<EOF
       if [ "${var.execute_destroy_pvcs}" == "true" ]; then
         for PVC in $(kubectl get pvc --namespace ${var.release_namespace} -o json | jq --raw-output '.items[] | select(.metadata.name | startswith("database-storage-couchdb")) | .metadata.name'); do
-          kubectl --namespace ${var.release_namespace} delete --ignore-not-found --grace-period=600 pvc $PVC
+          timeout -t 600 kubectl --namespace ${var.release_namespace} delete --ignore-not-found --grace-period=300 pvc $PVC
         done
       fi
     EOF
