@@ -1,8 +1,8 @@
 Name: locust
 
 image:
-  repository: quay.io/honestbee/locust
-  tag: 0.7.5
+  repository: gpii/locust
+  tag: 0.9.0-gpii.0
   pullPolicy: IfNotPresent
   pullSecrets: []
 
