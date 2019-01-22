@@ -9,7 +9,7 @@ This document is for Ops team members setting up new developers to work in the G
 
 ## The Speech
 
-* You are about to be granted administrative (aka "root") access to a number of resources on the public internet, including our staging and production environments. This is a serious responsiblity! You will be able to do harm to the system!
+* You are about to be granted administrative (aka "root") access to a number of resources on the public internet. This is a serious responsiblity!
 * Measure twice, cut once.
 * If you're ever in doubt about what a command will do, STOP! Then ask for help.
    1. First, ask other developers who have experience using gpii-infra
@@ -33,7 +33,7 @@ This document is for Ops team members setting up new developers to work in the G
    * From the [G Suite Admin Organizational Units page](https://admin.google.com/u/1/ac/orgunits), add a new Organizational Unit
 * Disable unneeded G Suite Services
    * From the [G Suite Admin Apps page](https://admin.google.com/u/1/ac/appslist/core), select all Services, and select Off
-   * From the [G Suite Admin Additional Services page](https://admin.google.com/u/1/ac/appslist/additional), select all Services XXX **EXCEPT** Google Groups and Google Developers Console, and select Off
+   * From the [G Suite Admin Additional Services page](https://admin.google.com/u/1/ac/appslist/additional), select all Services **EXCEPT** Google Groups, and select Off
 * Create a public Group "cloud-developers"
    * From the [G Suite Admin Groups page](https://admin.google.com/raisingthefloor.org/AdminHome?hl=en&fc=true#GroupList:), add a new Group
    * Set it so that anyone can view or post, but only Managers and Owners can invite members
