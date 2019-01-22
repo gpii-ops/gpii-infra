@@ -305,3 +305,24 @@ There may be a situation, when we want to roll back entire DB data set to anothe
    * Observe the component at idle and under some load, e.g. by running Locust tests against the component or environment.
    * Add a buffer for safety, e.g. `1.5 * observed value`.
 * Favor specifying default Requests and Limits as far "down the stack" as possible, i.e. favor Chart defaults over Terraform module defaults over environment-specific settings.
+
+### Downtime procedures
+
+#### Before (planned) downtime
+
+* Email `outage@` ahead of time explaining at a high level the what, when, and why of the planned downtime.
+   * The audience for `outage@` is all GPII Cloud stakeholders. Keep it brief and non-technical, and highlight any required actions.
+* Consider manually disabling alerts related to your maintenance using the "Enabled" sliders on the [Stackdriver Alerting Policies dashboard](https://app.google.stackdriver.com/policies?project=gpii-gcp-prd).
+
+#### During downtime
+
+* Before performing manual or extraordinary actions, disable the CI/CD pipeline to prevent automated processes from interfering.
+   * On the [Gitlab Project -> Settings -> General page](https://gitlab.com/gpii-ops/gpii-infra/edit), go to "Permissions" and disable "Pipelines". 
+      * This hides the CI/CD tab on the Project page. If you need to access that view (e.g. to view old pipeline logs), you can still navigate to it [directly](https://gitlab.com/gpii-ops/gpii-infra/pipelines). Note that running/retrying builds is disabled.
+
+#### After downtime
+
+* Create a record of any manual steps you perform, e.g. copy your terminal and paste it into a tracking ticket.
+* If you manually disabled alerts previously, re-enable them.
+* Email `outage@` that the downtime is ended.
+   * The audience for `outage@` is all GPII Cloud stakeholders. Keep it brief and non-technical, and highlight any required actions.
