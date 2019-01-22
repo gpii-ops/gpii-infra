@@ -305,3 +305,14 @@ There may be a situation, when we want to roll back entire DB data set to anothe
    * Observe the component at idle and under some load, e.g. by running Locust tests against the component or environment.
    * Add a buffer for safety, e.g. `1.5 * observed value`.
 * Favor specifying default Requests and Limits as far "down the stack" as possible, i.e. favor Chart defaults over Terraform module defaults over environment-specific settings.
+
+### Docker images
+
+We should be well-aware of Docker images we use in our infrastructrue, as
+deploying an untrusted, potentially malicious, image poses a significant
+security threat.
+
+As a rule of thumb: official Docker curated images
+(https://docs.docker.com/docker-hub/official_images/) or images directly
+published by trusted OSS projects are acceptable, otherwise we should
+build the images ourselves.
