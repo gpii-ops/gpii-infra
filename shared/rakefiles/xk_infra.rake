@@ -132,7 +132,7 @@ task :fix_common_service_account_permissions => [@gcp_creds_file] do
 end
 
 task :plan_infra => [@gcp_creds_file, @app_default_creds_file, :configure_extra_tf_vars] do
-  sh "#{@exekube_cmd} plan-all live/#{@env}/infra"
+  sh "#{@exekube_cmd} plan-all live/#{@env}/infra 2> /dev/null"
 end
 
 task :apply_infra => [@gcp_creds_file, @app_default_creds_file, :configure_extra_tf_vars] do
