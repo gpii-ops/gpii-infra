@@ -7,6 +7,7 @@ stages:
   - promote-common-to-prd
   - common-prd
   - dev
+  - plan-all-stg
   - promote-to-stg
   - stg
   - plan-all-prd
@@ -222,6 +223,25 @@ gcp-dev:
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys || true
     - rake clobber || true
+  only:
+    - master@gpii-ops/gpii-infra
+
+gcp-plan-all-stg:
+  stage: plan-all-stg
+  tags:
+    - gcp
+  environment:
+    name: stg
+  script:
+    - cd gcp/live/stg
+    - rake clobber
+    - rake configure_serviceaccount_ci_restore
+    # Next step is required to restore local tiller certs and prevent
+    # terraform from failing during helm_release.release status checks
+    - rake deploy_module['k8s/kube-system/helm-initializer'] || true
+    # Infra requires special treatment because of secrets configuration
+    - rake plain_sh['rake plan_infra'] || true
+    - rake sh['xk plan-all live/stg/k8s 2> /dev/null'] || true
   only:
     - master@gpii-ops/gpii-infra
 
