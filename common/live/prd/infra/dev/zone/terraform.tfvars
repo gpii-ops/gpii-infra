@@ -25,4 +25,6 @@ project_name    = "dev"
 # root projects: dev,stg and prd don't need a project_owner. They will use the
 # IAMs inherited from the org.
 #
-# project_owner   = "group:gpii-bot@raisingthefloor.org"
+# The variable is set to avoid a failure in the execution of the module, but it won't be set.
+
+project_owner   = "group:cloud-admin@raisingthefloor.org"
