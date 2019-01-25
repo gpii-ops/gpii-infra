@@ -275,20 +275,20 @@ resource "google_project_services" "project" {
 resource "google_project_iam_policy" "project" {
   project     = "${google_project.project.project_id}"
   policy_data = "${data.google_iam_policy.admin.policy_data}"
-  count       = "${length(split("-", var.project_name)) == 1 ? 1 : 0}"
+  count       = "${replace(var.project_name, "^dev-.*", "") == "" ? 0 : 1}"
 }
 
 resource "google_project_iam_policy" "project_dev" {
   project     = "${google_project.project.project_id} "
   policy_data = "${data.google_iam_policy.admin_dev.policy_data}"
-  count       = "${length(split("-", var.project_name)) >= 2 ? 1 : 0}"
+  count       = "${replace(var.project_name, "^dev-.*", "") == "" ? 1 : 0}"
 }
 
 resource "google_service_account" "project" {
   account_id   = "projectowner"
   display_name = "Project owner service account"
   project      = "${google_project.project.project_id}"
-  count        = "${length(split("-", var.project_name)) == 1 ? 1 : 0}"
+  count        = "${replace(var.project_name, "^dev-.*", "") == "" ? 0 : 1}"
 }
 
 resource "google_dns_managed_zone" "project" {
@@ -310,7 +310,7 @@ resource "google_dns_record_set" "ns" {
   ttl          = 3600
   project      = "${var.organization_name}-gcp-${element(split("-", var.project_name), 0)}"
   rrdatas      = ["${google_dns_managed_zone.project.name_servers}"]
-  count        = "${length(split("-", var.project_name)) >= 2 ? 1 : 0}"
+  count        = "${replace(var.project_name, "^dev-.*", "") == "" ? 1 : 0}"
 }
 
 # Set the NS records in the gcp.$organization_domain zone of the
@@ -322,7 +322,7 @@ resource "google_dns_record_set" "ns-root" {
   ttl          = 3600
   project      = "${var.project_id}"
   rrdatas      = ["${google_dns_managed_zone.project.name_servers}"]
-  count        = "${length(split("-", var.project_name)) == 1 ? 1 : 0}"
+  count        = "${replace(var.project_name, "^dev-.*", "") == "" ? 0 : 1}"
 }
 
 resource "google_storage_bucket" "project-tfstate" {
