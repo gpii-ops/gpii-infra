@@ -37,3 +37,11 @@ spec:
         {{- end}}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.flowmanagerListenPort }}
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: {{ .Values.flowmanagerListenPort }}
