@@ -21,7 +21,6 @@ def apply_resources(resources)
   begin
     orphaned_resources["log_based_metrics"] = apply_log_based_metrics(resources["log_based_metrics"]) if resources["log_based_metrics"]
     orphaned_resources["notification_channels"], processed_notification_channels = apply_notification_channels(resources["notification_channels"]) if resources["notification_channels"]
-    orphaned_resources["uptime_checks"] = apply_uptime_checks(resources["uptime_checks"]) if resources["uptime_checks"]
     orphaned_resources["alert_policies"] = apply_alert_policies(resources["alert_policies"], processed_notification_channels) if resources["alert_policies"]
   rescue Google::Gax::RetryError
     puts "[ERROR]: Deadline exceeded while applying resources!"
@@ -42,7 +41,6 @@ end
 def destroy_resources(resources_to_destroy, destroy_orphaned_only = false)
   begin
     destroy_alert_policies(resources_to_destroy["alert_policies"], destroy_orphaned_only) if resources_to_destroy.include? "alert_policies"
-    destroy_uptime_checks(resources_to_destroy["uptime_checks"], destroy_orphaned_only) if resources_to_destroy.include? "uptime_checks"
     destroy_notification_channels(resources_to_destroy["notification_channels"], destroy_orphaned_only) if resources_to_destroy.include? "notification_channels"
     destroy_log_based_metrics(resources_to_destroy["log_based_metrics"], destroy_orphaned_only) if resources_to_destroy.include? "log_based_metrics"
   rescue Google::Gax::RetryError
@@ -78,14 +76,6 @@ def get_notification_channel_identifier(notification_channel)
   return result
 end
 
-def get_uptime_check_identifier(uptime_check)
-  if uptime_check["display_name"]
-    result = uptime_check["display_name"]
-  end
-
-  return result
-end
-
 def get_alert_policy_identifier(alert_policy)
   if alert_policy["display_name"]
     result = alert_policy["display_name"]
@@ -115,23 +105,6 @@ def compare_alert_policies(stackdriver_alert_policy, alert_policy)
   end
 
   return policy_changed
-end
-
-def compare_uptime_checks(stackdriver_uptime_check, uptime_check)
-  stackdriver_uptime_check = JSON.parse(stackdriver_uptime_check.to_hash.to_json)
-  stackdriver_uptime_check.each do |attribute, value|
-    stackdriver_uptime_check.delete(attribute) if value == nil or attribute == "name"
-  end
-
-  uptime_check_changed = (stackdriver_uptime_check != uptime_check)
-  if @debug_mode and uptime_check_changed
-    puts "[DEBUG] uptime check has changed. Old:"
-    puts debug_output(uptime_check)
-    puts "New:"
-    puts debug_output(stackdriver_uptime_check)
-  end
-
-  return uptime_check_changed
 end
 
 def compare_notification_channels(stackdriver_notification_channel, notification_channel)
@@ -232,49 +205,6 @@ def apply_notification_channels(notification_channels = [])
   end
 
   return orphaned_resources, processed_notification_channels
-end
-
-def apply_uptime_checks(uptime_checks = [])
-  uptime_check_service_client = Google::Cloud::Monitoring::UptimeCheck.new(version: :v3)
-  formatted_parent = Google::Cloud::Monitoring::V3::UptimeCheckServiceClient.project_path(@project_id)
-
-  stackdriver_uptime_checks = {}
-  processed_uptime_checks = {}
-
-  uptime_check_service_client.list_uptime_check_configs(formatted_parent).each do |uptime_check|
-    puts "[DEBUG] uptime_check: " + debug_output(uptime_check) if @debug_mode
-    stackdriver_uptime_checks[get_uptime_check_identifier(uptime_check)] = uptime_check
-  end
-
-  uptime_checks.each do |uptime_check|
-    uptime_check_identifier = get_uptime_check_identifier(uptime_check)
-
-    if stackdriver_uptime_checks[uptime_check_identifier]
-      if compare_uptime_checks(stackdriver_uptime_checks[uptime_check_identifier], uptime_check)
-        uptime_check["name"] = stackdriver_uptime_checks[uptime_check_identifier]["name"]
-        puts "Updating uptime check \"#{uptime_check_identifier}\"..."
-        uptime_check_service_client.update_uptime_check_config(uptime_check)
-      else
-        puts "Uptime check \"#{uptime_check_identifier}\" is up-to-date..."
-      end
-    else
-      puts "Creating uptime check \"#{uptime_check_identifier}\"..."
-      uptime_check = uptime_check_service_client.create_uptime_check_config(formatted_parent, uptime_check)
-    end
-
-    processed_uptime_checks[uptime_check_identifier] = uptime_check["name"]
-  end
-
-  orphaned_resources = []
-  stackdriver_uptime_checks.each do |name, uptime_check|
-    uptime_check_identifier = get_uptime_check_identifier(uptime_check)
-
-    unless processed_uptime_checks.include? uptime_check_identifier
-      orphaned_resources << uptime_check.name
-    end
-  end
-
-  return orphaned_resources
 end
 
 def apply_alert_policies(alert_policies = [], notification_channels = {})
