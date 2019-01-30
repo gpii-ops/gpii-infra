@@ -11,7 +11,6 @@ variable "auth_user_email" {}
 # Terragrunt variables
 
 variable "notification_email" {}
-variable "ssl_enabled_uptime_checks" {}
 
 variable "use_auth_user_email" {
   default = false
@@ -28,10 +27,9 @@ resource "template_dir" "resources" {
   destination_dir = "${path.cwd}/resources_rendered"
 
   vars {
-    project_id                = "${var.project_id}"
-    domain_name               = "${var.domain_name}"
-    ssl_enabled_uptime_checks = "${var.ssl_enabled_uptime_checks}"
-    notification_email        = "${(var.use_auth_user_email && var.auth_user_email != "") ? var.auth_user_email : var.notification_email}"
+    project_id         = "${var.project_id}"
+    domain_name        = "${var.domain_name}"
+    notification_email = "${(var.use_auth_user_email && var.auth_user_email != "") ? var.auth_user_email : var.notification_email}"
   }
 }
 
