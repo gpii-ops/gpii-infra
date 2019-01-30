@@ -268,17 +268,16 @@ def destroy_alert_policies(resources_to_destroy = [], destroy_orphaned_only = fa
   end
 end
 
-def destroy_uptime_checks(resources_to_destroy = [], destroy_orphaned_only = false)
+def destroy_uptime_checks(resources_to_exclude = [])
   uptime_check_service_client = Google::Cloud::Monitoring::UptimeCheck.new(version: :v3)
   formatted_parent = Google::Cloud::Monitoring::V3::UptimeCheckServiceClient.project_path(@project_id)
-  uptime_check_service_client.list_uptime_check_configs(formatted_parent).each do |uptime_check|
-    if not destroy_orphaned_only or resources_to_destroy.include?(uptime_check.name)
-      uptime_check_identifier = get_uptime_check_identifier(uptime_check)
 
+  uptime_check_service_client.list_uptime_check_configs(formatted_parent).each do |uptime_check|
+    if not resources_to_exclude.include?(uptime_check.name)
       if @debug_mode
-        puts "[DEBUG] Skipping deletion of uptime check \"#{uptime_check_identifier}\"..."
+        puts "[DEBUG] Skipping deletion of uptime check \"#{uptime_check.name}\"..."
       else
-        puts "Deleting uptime check \"#{uptime_check_identifier}\"..."
+        puts "Deleting uptime check \"#{uptime_check.name}\"..."
         uptime_check_service_client.delete_uptime_check_config(uptime_check.name)
       end
     end
