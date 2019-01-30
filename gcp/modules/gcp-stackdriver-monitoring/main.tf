@@ -2,6 +2,11 @@ terraform {
   backend "gcs" {}
 }
 
+provider "google-beta" {
+  project     = "${var.project_id}"
+  credentials = "${var.serviceaccount_key}"
+}
+
 variable "nonce" {}
 variable "domain_name" {}
 variable "project_id" {}
