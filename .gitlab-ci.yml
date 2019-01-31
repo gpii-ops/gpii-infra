@@ -238,7 +238,7 @@ gcp-plan-all-stg:
     - rake configure_serviceaccount_ci_restore
     # Next step is required to restore local tiller certs and prevent
     # terraform from failing during helm_release.release status checks
-    - rake deploy_module['k8s/kube-system/helm-initializer'] || true
+    - rake deploy_helm_tls
     # Infra requires special treatment because of secrets configuration
     - rake plain_sh['rake plan_infra'] || true
     - rake sh['xk plan-all live/stg/k8s 2> /dev/null'] || true
@@ -346,7 +346,7 @@ gcp-plan-all-prd:
     - rake configure_serviceaccount_ci_restore
     # Next step is required to restore local tiller certs and prevent
     # terraform from failing during helm_release.release status checks
-    - rake deploy_module['k8s/kube-system/helm-initializer'] || true
+    - rake deploy_helm_tls
     # Infra requires special treatment because of secrets configuration
     - rake plain_sh['rake plan_infra'] || true
     - rake sh['xk plan-all live/prd/k8s 2> /dev/null'] || true
