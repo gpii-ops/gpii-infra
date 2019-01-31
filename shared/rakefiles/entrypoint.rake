@@ -221,6 +221,7 @@ task :deploy_module, [:module] => [:set_vars] do |taskname, args|
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
     raise
   end
+  sh "#{@exekube_cmd} rake xk['apply live/#{@env}/k8s/kube-system/helm-tls',skip_secret_mgmt]"
   sh "#{@exekube_cmd} rake xk['apply live/#{@env}/#{args[:module]}',skip_secret_mgmt]"
 end
 
@@ -233,6 +234,7 @@ task :destroy_module, [:module] => [:set_vars, :check_destroy_allowed] do |taskn
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
     raise
   end
+  sh "#{@exekube_cmd} rake xk['apply live/#{@env}/k8s/kube-system/helm-tls',skip_secret_mgmt]"
   sh "#{@exekube_cmd} rake xk['destroy live/#{@env}/#{args[:module]}',skip_secret_mgmt]"
 end
 
