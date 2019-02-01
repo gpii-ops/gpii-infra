@@ -72,12 +72,18 @@ variable "apis_solely_for_audit_configuration" {
   ]
 }
 
+# The following two data resources define the iam policy for the projects
+# managed by the CI and the projects managed by developers. The member field
+# accepts an empty list but I wasn't able to find a way to interpolate in
+# order to reduce the amount of code. Once Terraform 0.12 is here and it
+# supports something like "${ root_project ? list(local.service_account), list()}"
+
 data "google_iam_policy" "admin" {
   binding {
     role = "roles/cloudkms.admin"
 
     members = [
-      "serviceAccount:${google_service_account.project.email}",
+      "serviceAccount:${local.service_account}",
     ]
   }
 
@@ -85,7 +91,7 @@ data "google_iam_policy" "admin" {
     role = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
     members = [
-      "serviceAccount:${google_service_account.project.email}",
+      "serviceAccount:${local.service_account}",
     ]
   }
 
@@ -93,7 +99,7 @@ data "google_iam_policy" "admin" {
     role = "roles/compute.admin"
 
     members = [
-      "serviceAccount:${google_service_account.project.email}",
+      "serviceAccount:${local.service_account}",
     ]
   }
 
@@ -101,7 +107,7 @@ data "google_iam_policy" "admin" {
     role = "roles/container.clusterAdmin"
 
     members = [
-      "serviceAccount:${google_service_account.project.email}",
+      "serviceAccount:${local.service_account}",
     ]
   }
 
@@ -109,7 +115,7 @@ data "google_iam_policy" "admin" {
     role = "roles/container.admin"
 
     members = [
-      "serviceAccount:${google_service_account.project.email}",
+      "serviceAccount:${local.service_account}",
     ]
   }
 
@@ -117,7 +123,7 @@ data "google_iam_policy" "admin" {
     role = "roles/dns.admin"
 
     members = [
-      "serviceAccount:${google_service_account.project.email}",
+      "serviceAccount:${local.service_account}",
     ]
   }
 
@@ -125,7 +131,7 @@ data "google_iam_policy" "admin" {
     role = "roles/iam.serviceAccountKeyAdmin"
 
     members = [
-      "serviceAccount:${google_service_account.project.email}",
+      "serviceAccount:${local.service_account}",
     ]
   }
 
@@ -133,7 +139,7 @@ data "google_iam_policy" "admin" {
     role = "roles/iam.serviceAccountUser"
 
     members = [
-      "serviceAccount:${google_service_account.project.email}",
+      "serviceAccount:${local.service_account}",
     ]
   }
 
@@ -141,7 +147,7 @@ data "google_iam_policy" "admin" {
     role = "roles/logging.configWriter"
 
     members = [
-      "serviceAccount:${google_service_account.project.email}",
+      "serviceAccount:${local.service_account}",
     ]
   }
 
@@ -149,7 +155,7 @@ data "google_iam_policy" "admin" {
     role = "roles/monitoring.editor"
 
     members = [
-      "serviceAccount:${google_service_account.project.email}",
+      "serviceAccount:${local.service_account}",
     ]
   }
 
@@ -157,7 +163,7 @@ data "google_iam_policy" "admin" {
     role = "roles/resourcemanager.projectIamAdmin"
 
     members = [
-      "serviceAccount:${google_service_account.project.email}",
+      "serviceAccount:${local.service_account}",
     ]
   }
 
@@ -165,7 +171,7 @@ data "google_iam_policy" "admin" {
     role = "roles/serviceusage.serviceUsageAdmin"
 
     members = [
-      "serviceAccount:${google_service_account.project.email}",
+      "serviceAccount:${local.service_account}",
     ]
   }
 
@@ -173,7 +179,7 @@ data "google_iam_policy" "admin" {
     role = "roles/storage.admin"
 
     members = [
-      "serviceAccount:${google_service_account.project.email}",
+      "serviceAccount:${local.service_account}",
     ]
   }
 
@@ -257,6 +263,15 @@ locals {
               "/^\\./",
               "")
             }"
+
+  service_account = "${element(concat(google_service_account.project.*.email, list("")),0)}"
+
+  # stg, prd, dev, and dev-doe are managed by the CI so they should have the service account
+  # and the permissions attached to it
+  #
+  # I wish Go supports this expression instead (?!^dev-doe$)(^dev-.*), but "?!" is not valid.
+  #
+  root_project_iam = "${replace(var.project_name, "/^dev-doe$/", "") != "" && replace(var.project_name, "/^dev-.*/", "") == ""}"
 }
 
 resource "google_project" "project" {
@@ -275,20 +290,20 @@ resource "google_project_services" "project" {
 resource "google_project_iam_policy" "project" {
   project     = "${google_project.project.project_id}"
   policy_data = "${data.google_iam_policy.admin.policy_data}"
-  count       = "${replace(var.project_name, "/^dev-.*/", "") == "" ? 0 : 1}"
+  count       = "${local.root_project_iam ? 0 : 1}"
 }
 
 resource "google_project_iam_policy" "project_dev" {
   project     = "${google_project.project.project_id}"
   policy_data = "${data.google_iam_policy.admin_dev.policy_data}"
-  count       = "${replace(var.project_name, "/^dev-.*/", "") == "" ? 1 : 0}"
+  count       = "${local.root_project_iam ? 1 : 0}"
 }
 
 resource "google_service_account" "project" {
   account_id   = "projectowner"
   display_name = "Project owner service account"
   project      = "${google_project.project.project_id}"
-  count        = "${replace(var.project_name, "/^dev-.*/", "") == "" ? 0 : 1}"
+  count        = "${local.root_project_iam ? 0 : 1}"
 }
 
 resource "google_dns_managed_zone" "project" {
