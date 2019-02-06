@@ -1,14 +1,7 @@
 # ↓ Module metadata
 terragrunt = {
   terraform {
-    source = "/project/modules//helm-initializer"
-  }
-
-  dependencies {
-    paths = [
-      "../../cluster",
-      "../helm-tls",
-    ]
+    source = "/project/modules//helm-tls"
   }
 
   include = {
