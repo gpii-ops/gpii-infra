@@ -115,7 +115,7 @@ task :check_destroy_allowed do
 end
 
 desc "Undeploy GPII compoments and destroy cluster"
-task :destroy => [:set_vars, :check_destroy_allowed] do
+task :destroy => [:set_vars, :check_destroy_allowed, :deploy_helm_tls] do
   sh "#{@exekube_cmd} rake xk[down]"
 end
 
@@ -206,6 +206,11 @@ task :rotate_secrets_key, [:kms_key] => [:set_vars, :check_destroy_allowed] do |
   sh "#{@exekube_cmd} rake rotate_secrets_key['#{kms_key}']"
 end
 
+desc "[ADVANCED] Deploy helm-tls module to generate helm certificates or, if present, fetch from TF state"
+task :deploy_helm_tls do
+  sh "#{@exekube_cmd} rake xk['apply live/#{@env}/k8s/kube-system/helm-tls',skip_secret_mgmt]"
+end
+
 desc "[ADVANCED] Destroy provided module in the cluster, and then deploy it -- rake redeploy_module['k8s/kube-system/cert-manager']"
 task :redeploy_module, [:module] => [:set_vars] do |taskname, args|
   Rake::Task[:destroy_module].invoke(args[:module])
@@ -213,7 +218,7 @@ task :redeploy_module, [:module] => [:set_vars] do |taskname, args|
 end
 
 desc "[ADVANCED] Deploy provided module into the cluster -- rake deploy_module['k8s/kube-system/cert-manager']"
-task :deploy_module, [:module] => [:set_vars] do |taskname, args|
+task :deploy_module, [:module] => [:set_vars, :deploy_helm_tls] do |taskname, args|
   if args[:module].nil?
     puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
     raise
@@ -221,11 +226,11 @@ task :deploy_module, [:module] => [:set_vars] do |taskname, args|
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
     raise
   end
-  sh "#{@exekube_cmd} rake xk['up live/#{@env}/#{args[:module]}',skip_secret_mgmt]"
+  sh "#{@exekube_cmd} rake xk['apply live/#{@env}/#{args[:module]}',skip_secret_mgmt]"
 end
 
 desc "[ADVANCED] Destroy provided module in the cluster -- rake destroy_module['k8s/kube-system/cert-manager']"
-task :destroy_module, [:module] => [:set_vars, :check_destroy_allowed] do |taskname, args|
+task :destroy_module, [:module] => [:set_vars, :check_destroy_allowed, :deploy_helm_tls] do |taskname, args|
   if args[:module].nil?
     puts "  ERROR: args[:module] must be set and point to Terragrunt directory!"
     raise
@@ -233,7 +238,7 @@ task :destroy_module, [:module] => [:set_vars, :check_destroy_allowed] do |taskn
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
     raise
   end
-  sh "#{@exekube_cmd} rake xk['down live/#{@env}/#{args[:module]}',skip_secret_mgmt]"
+  sh "#{@exekube_cmd} rake xk['destroy live/#{@env}/#{args[:module]}',skip_secret_mgmt]"
 end
 
 # vim: et ts=2 sw=2:
