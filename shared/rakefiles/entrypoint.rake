@@ -207,7 +207,7 @@ task :rotate_secrets_key, [:kms_key] => [:set_vars, :check_destroy_allowed] do |
 end
 
 desc "[ADVANCED] Deploy helm-tls module to generate helm certificates or, if present, fetch from TF state"
-task :deploy_helm_tls do
+task :deploy_helm_tls => [:set_vars] do
   sh "#{@exekube_cmd} rake xk['apply live/#{@env}/k8s/kube-system/helm-tls',skip_secret_mgmt]"
 end
 
