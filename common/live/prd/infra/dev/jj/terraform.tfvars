@@ -22,4 +22,4 @@ project_name    = "dev-jj"
 # of the role:
 # https://www.terraform.io/docs/providers/google/r/google_project_iam.html#argument-reference
 
-project_owner   = "group:cloud-developers@raisingthefloor.org"
+project_owner   = "jj@raisingthefloor.org"
