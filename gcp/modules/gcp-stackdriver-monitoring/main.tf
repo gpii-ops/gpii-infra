@@ -2,6 +2,11 @@ terraform {
   backend "gcs" {}
 }
 
+provider "google-beta" {
+  project     = "${var.project_id}"
+  credentials = "${var.serviceaccount_key}"
+}
+
 variable "nonce" {}
 variable "domain_name" {}
 variable "project_id" {}
@@ -11,7 +16,6 @@ variable "auth_user_email" {}
 # Terragrunt variables
 
 variable "notification_email" {}
-variable "ssl_enabled_uptime_checks" {}
 
 variable "use_auth_user_email" {
   default = false
@@ -28,10 +32,9 @@ resource "template_dir" "resources" {
   destination_dir = "${path.cwd}/resources_rendered"
 
   vars {
-    project_id                = "${var.project_id}"
-    domain_name               = "${var.domain_name}"
-    ssl_enabled_uptime_checks = "${var.ssl_enabled_uptime_checks}"
-    notification_email        = "${(var.use_auth_user_email && var.auth_user_email != "") ? var.auth_user_email : var.notification_email}"
+    project_id         = "${var.project_id}"
+    domain_name        = "${var.domain_name}"
+    notification_email = "${(var.use_auth_user_email && var.auth_user_email != "") ? var.auth_user_email : var.notification_email}"
   }
 }
 
@@ -57,6 +60,7 @@ resource "null_resource" "apply_stackdriver_monitoring" {
           require "/rakefiles/stackdriver.rb"
           resources = read_resources("${path.module}/resources_rendered")
           apply_resources(resources)
+          destroy_uptime_checks(["${join("\",\"", google_monitoring_uptime_check_config.this.*.name)}"])
         '
         STACKDRIVER_EXIT_STATUS="$?"
         if [ "$STACKDRIVER_EXIT_STATUS" == "120" ]; then
@@ -94,7 +98,8 @@ resource "null_resource" "destroy_stackdriver_monitoring" {
         echo "[Try $RETRY_COUNT of $RETRIES] Destroying Stackdriver resources..."
         ruby -e '
           require "/rakefiles/stackdriver.rb"
-          destroy_resources({"uptime_checks"=>[],"alert_policies"=>[],"notification_channels"=>[]})
+          destroy_resources({"alert_policies"=>[],"notification_channels"=>[]})
+          destroy_uptime_checks(["${join("\",\"", google_monitoring_uptime_check_config.this.*.name)}"])
         '
         STACKDRIVER_EXIT_STATUS="$?"
         if [ "$STACKDRIVER_EXIT_STATUS" == "120" ]; then

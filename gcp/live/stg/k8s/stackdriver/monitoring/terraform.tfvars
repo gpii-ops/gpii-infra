@@ -19,5 +19,4 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
-ssl_enabled_uptime_checks = true
 notification_email = "alerts+stg@raisingthefloor.org"
