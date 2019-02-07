@@ -15,7 +15,19 @@ variable "organization_domain" {
 
 variable "project_name" {} # name of the project to create
 
-variable "project_owner" {}
+# This variable set an owner account in addition to the service accounts needed
+# to manage the project The format of this variable must match the argument
+# reference for the members of the role:
+# https://www.terraform.io/docs/providers/google/r/google_project_iam.html#argument-reference
+
+# root projects: dev,stg and prd don't need a project_owner. They will use the
+# IAMs inherited from the org.
+#
+# The variable is set to avoid a failure in the execution of the module, but it won't be set.
+
+variable "project_owner" {
+  default = ""
+}
 
 variable "billing_id" {}
 
@@ -25,6 +37,15 @@ variable "serviceaccount_key" {}
 
 # Id of the project which owns the credentials used by the provider
 variable "project_id" {}
+
+# the ci_dev_project_regex is a regular expression that matches the projects that will
+# be excercised by the CI it will be ephemeral, with the same specs as any other
+# developer project, except for the IAM permissions will be based on a service
+# account in order to let the CI operate.
+
+variable "ci_dev_project_regex" {
+  default = "/^dev-doe$|^dev-gitlab-runner$/"
+}
 
 # We have to split all GCP APIs required by the project
 # into 3 separate lists, because only some of them produce
@@ -207,7 +228,7 @@ data "google_iam_policy" "combined" {
     role = "roles/owner"
 
     members = [
-      "${var.project_owner}",
+      "${local.project_owners}",
     ]
   }
 }
@@ -237,12 +258,10 @@ locals {
   # Project owners will be empty list if var.project_owner is empty string ""
   project_owners = "${compact(list(var.project_owner))}"
 
-  # stg, prd, dev, and dev-doe are managed by the CI so they should have the service account
-  # and the permissions attached to it
+  # stg, prd, dev, and the projects that matches the ci_dev_project_regex variable are managed 
+  # by the CI so they should have the service account and the permissions attached to it
   #
-  # I wish Go supports this expression instead (?!^dev-doe$)(^dev-.*), but "?!" is not valid.
-  #
-  root_project_iam = "${replace(var.project_name, "/^dev-doe$/", "") != "" && replace(var.project_name, "/^dev-.*/", "") == ""}"
+  root_project_iam = "${replace(var.project_name, var.ci_dev_project_regex, "") != "" && replace(var.project_name, "/^dev-.*/", "") == ""}"
 }
 
 resource "google_project" "project" {
