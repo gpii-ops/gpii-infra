@@ -72,18 +72,12 @@ variable "apis_solely_for_audit_configuration" {
   ]
 }
 
-# The following two data resources define the iam policy for the projects
-# managed by the CI and the projects managed by developers. The member field
-# accepts an empty list but I wasn't able to find a way to interpolate in
-# order to reduce the amount of code. Once Terraform 0.12 is here and it
-# supports something like "${ root_project ? list(local.service_account), list()}"
-
-data "google_iam_policy" "admin" {
+data "google_iam_policy" "combined" {
   binding {
     role = "roles/cloudkms.admin"
 
     members = [
-      "serviceAccount:${local.service_account}",
+      "${local.service_accounts}",
     ]
   }
 
@@ -91,7 +85,7 @@ data "google_iam_policy" "admin" {
     role = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
     members = [
-      "serviceAccount:${local.service_account}",
+      "${local.service_accounts}",
     ]
   }
 
@@ -99,7 +93,7 @@ data "google_iam_policy" "admin" {
     role = "roles/compute.admin"
 
     members = [
-      "serviceAccount:${local.service_account}",
+      "${local.service_accounts}",
     ]
   }
 
@@ -107,7 +101,7 @@ data "google_iam_policy" "admin" {
     role = "roles/container.clusterAdmin"
 
     members = [
-      "serviceAccount:${local.service_account}",
+      "${local.service_accounts}",
     ]
   }
 
@@ -115,7 +109,7 @@ data "google_iam_policy" "admin" {
     role = "roles/container.admin"
 
     members = [
-      "serviceAccount:${local.service_account}",
+      "${local.service_accounts}",
     ]
   }
 
@@ -123,7 +117,7 @@ data "google_iam_policy" "admin" {
     role = "roles/dns.admin"
 
     members = [
-      "serviceAccount:${local.service_account}",
+      "${local.service_accounts}",
     ]
   }
 
@@ -131,7 +125,7 @@ data "google_iam_policy" "admin" {
     role = "roles/iam.serviceAccountKeyAdmin"
 
     members = [
-      "serviceAccount:${local.service_account}",
+      "${local.service_accounts}",
     ]
   }
 
@@ -139,7 +133,7 @@ data "google_iam_policy" "admin" {
     role = "roles/iam.serviceAccountUser"
 
     members = [
-      "serviceAccount:${local.service_account}",
+      "${local.service_accounts}",
     ]
   }
 
@@ -147,7 +141,7 @@ data "google_iam_policy" "admin" {
     role = "roles/logging.configWriter"
 
     members = [
-      "serviceAccount:${local.service_account}",
+      "${local.service_accounts}",
     ]
   }
 
@@ -155,7 +149,7 @@ data "google_iam_policy" "admin" {
     role = "roles/monitoring.editor"
 
     members = [
-      "serviceAccount:${local.service_account}",
+      "${local.service_accounts}",
     ]
   }
 
@@ -163,7 +157,7 @@ data "google_iam_policy" "admin" {
     role = "roles/resourcemanager.projectIamAdmin"
 
     members = [
-      "serviceAccount:${local.service_account}",
+      "${local.service_accounts}",
     ]
   }
 
@@ -171,7 +165,7 @@ data "google_iam_policy" "admin" {
     role = "roles/serviceusage.serviceUsageAdmin"
 
     members = [
-      "serviceAccount:${local.service_account}",
+      "${local.service_accounts}",
     ]
   }
 
@@ -179,38 +173,10 @@ data "google_iam_policy" "admin" {
     role = "roles/storage.admin"
 
     members = [
-      "serviceAccount:${local.service_account}",
+      "${local.service_accounts}",
     ]
   }
 
-  binding {
-    role = "roles/compute.serviceAgent"
-
-    members = [
-      "serviceAccount:service-${google_project.project.number}@compute-system.iam.gserviceaccount.com",
-    ]
-  }
-
-  binding {
-    role = "roles/container.serviceAgent"
-
-    members = [
-      "serviceAccount:service-${google_project.project.number}@container-engine-robot.iam.gserviceaccount.com",
-    ]
-  }
-
-  binding {
-    role = "roles/editor"
-
-    members = [
-      "serviceAccount:${google_project.project.number}-compute@developer.gserviceaccount.com",
-      "serviceAccount:${google_project.project.number}@cloudservices.gserviceaccount.com",
-      "serviceAccount:service-${google_project.project.number}@containerregistry.iam.gserviceaccount.com",
-    ]
-  }
-}
-
-data "google_iam_policy" "admin_dev" {
   binding {
     role = "roles/compute.serviceAgent"
 
@@ -264,7 +230,12 @@ locals {
               "")
             }"
 
-  service_account = "${element(concat(google_service_account.project.*.email, list("")),0)}"
+  # Service accounts will be empty list in case there's no google_service_account.project created
+  # (this is instead of current `local.service_account` that is either actual account or empty)
+  service_accounts = "${formatlist("serviceAccount:%s", google_service_account.project.*.email)}"
+
+  # Project owners will be empty list if var.project_owner is empty string ""
+  project_owners = "${compact(list(var.project_owner))}"
 
   # stg, prd, dev, and dev-doe are managed by the CI so they should have the service account
   # and the permissions attached to it
@@ -289,14 +260,7 @@ resource "google_project_services" "project" {
 
 resource "google_project_iam_policy" "project" {
   project     = "${google_project.project.project_id}"
-  policy_data = "${data.google_iam_policy.admin.policy_data}"
-  count       = "${local.root_project_iam ? 0 : 1}"
-}
-
-resource "google_project_iam_policy" "project_dev" {
-  project     = "${google_project.project.project_id}"
-  policy_data = "${data.google_iam_policy.admin_dev.policy_data}"
-  count       = "${local.root_project_iam ? 1 : 0}"
+  policy_data = "${data.google_iam_policy.combined.policy_data}"
 }
 
 resource "google_service_account" "project" {
