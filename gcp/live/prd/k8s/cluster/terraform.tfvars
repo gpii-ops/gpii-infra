@@ -20,6 +20,10 @@ terragrunt = {
 # ↓ Module configuration (empty means all default)
 
 node_type = "n1-highcpu-4"
+initial_node_count = 1
+region             = "us-central1"
+additional_zones   = ["us-central1-a", "us-central1-b", "us-central1-c", "us-central1-f"]
+
 # This is to prevent accidental deletion of a long-lived cluster (e.g. due to
 # changing a parameter like 'oauth_scopes').
 #

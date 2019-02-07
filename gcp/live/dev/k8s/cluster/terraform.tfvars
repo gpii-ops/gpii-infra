@@ -19,4 +19,7 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
-node_type = "n1-standard-2"
+node_type          = "n1-standard-2"
+initial_node_count = 2
+region             = "us-east1"
+additional_zones   = ["us-east1-b", "us-east1-c"]
