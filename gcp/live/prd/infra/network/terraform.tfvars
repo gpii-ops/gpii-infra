@@ -25,3 +25,6 @@ create_static_ip_address = true
 # reasonable.)
 dns_zones = {}
 dns_records = {}
+
+static_ip_region = "us-central1"
+cluster_subnets  = { "0" = "us-central1,10.16.0.0/20,10.17.0.0/16,10.18.0.0/16" }

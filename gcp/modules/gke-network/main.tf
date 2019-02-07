@@ -14,22 +14,19 @@ variable "project_id" {}
 variable "serviceaccount_key" {}
 variable "create_static_ip_address" {}
 
+# Terragrunt variables
+variable "static_ip_region" {}
+
+variable "cluster_subnets" {
+  type = "map"
+}
+
 variable "dns_zones" {
   default = {}
 }
 
 variable "dns_records" {
   default = {}
-}
-
-variable "cluster_subnets" {
-  default = {
-    "0" = "us-central1,10.16.0.0/20,10.17.0.0/16,10.18.0.0/16"
-  }
-}
-
-variable "static_ip_region" {
-  default = "us-central1"
 }
 
 # ------------------------------------------------------------------------------
