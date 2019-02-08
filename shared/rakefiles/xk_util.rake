@@ -72,14 +72,14 @@ task :destroy_sa_keys => [@gcp_creds_file, :configure_extra_tf_vars] do
 end
 
 # This task attaches the owner role to the current user
-task :grant_owner_role => [@gcp_creds_file] do
+task :grant_owner_role => [@gcp_creds_file, :configure_extra_tf_vars] do
   sh "
     gcloud projects add-iam-policy-binding \"$TF_VAR_project_id\" --member user:\"$TF_VAR_auth_user_email\" --role roles/owner
   "
 end
 
 # This task removes the owner role to the current user
-task :revoke_owner_role => [@gcp_creds_file] do
+task :revoke_owner_role => [@gcp_creds_file, :configure_extra_tf_vars] do
   sh "
     gcloud projects remove-iam-policy-binding \"$TF_VAR_project_id\" --member user:\"$TF_VAR_auth_user_email\" --role roles/owner
   "
