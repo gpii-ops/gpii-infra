@@ -2,15 +2,16 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "cert-manager.name" -}}
+{{- define "webhook.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+If release name contains chart name it will be used as a full name.
 */}}
-{{- define "cert-manager.fullname" -}}
+{{- define "webhook.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -26,17 +27,22 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "cert-manager.chart" -}}
+{{- define "webhook.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "cert-manager.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create -}}
-    {{ default (include "cert-manager.fullname" .) .Values.serviceAccount.name }}
-{{- else -}}
-    {{ default "default" .Values.serviceAccount.name }}
+{{- define "webhook.selfSignedIssuer" -}}
+{{ printf "%s-selfsign" (include "webhook.fullname" .) }}
 {{- end -}}
+
+{{- define "webhook.rootCAIssuer" -}}
+{{ printf "%s-ca" (include "webhook.fullname" .) }}
+{{- end -}}
+
+{{- define "webhook.rootCACertificate" -}}
+{{ printf "%s-ca" (include "webhook.fullname" .) }}
+{{- end -}}
+
+{{- define "webhook.servingCertificate" -}}
+{{ printf "%s-webhook-tls" (include "webhook.fullname" .) }}
 {{- end -}}
