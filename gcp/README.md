@@ -93,7 +93,7 @@ An environment needs some resources created in the organization before the follo
 
    Once you have the shell on your browser execute the following lines to manage the Kubernetes cluster using the embedded *kubectl* command:
 
-   1. `gcloud container clusters get-credentials k8s-cluster --zone us-central1`
+   1. `gcloud container clusters get-credentials k8s-cluster --zone YOUR_CLUSTER_ZONE`
    1. `kubectl -n gpii get pods`
 
    It's a Debian GNU/Linux so all the `apt` commands are also available.
