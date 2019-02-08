@@ -63,6 +63,8 @@ Each project has a SA which performs almost all the actions over the resources o
 
 The permissions set at resource level are automaticallly set by Terraform in order to work properly among the rest of the components of the GPII cloud. i.e the storage bucket permissions for exported logs https://console.cloud.google.com/storage/browser/gpii-gcp-dev-alfredo-exported-logs?project=gpii-gcp-dev-alfredo
 
+More details about which roles and permissions are set in the infrastructure can be found in the [PERMISSIONS.md](PERMISSIONS.md)
+
 ## Creating an environment
 
 An environment needs some resources created in the organization before the following actions are done. Ask an operator of the organization to create a new project for such environment. In the case of a `dev` project the $USER environment variable is used to name the project. Provide such value to the operator. After the common part is created the following steps will spin up the cluster:
