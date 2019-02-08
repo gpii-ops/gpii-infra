@@ -15,11 +15,7 @@ variable "serviceaccount_key" {}
 variable "create_static_ip_address" {}
 
 # Terragrunt variables
-variable "static_ip_region" {}
-
-variable "cluster_subnets" {
-  type = "map"
-}
+variable "infra_region" {}
 
 variable "dns_zones" {
   default = {}
@@ -38,8 +34,8 @@ module "gke_network" {
 
   dns_zones                = "${var.dns_zones}"
   dns_records              = "${var.dns_records}"
-  cluster_subnets          = "${var.cluster_subnets}"
-  static_ip_region         = "${var.static_ip_region}"
+  cluster_subnets          = { "0" = "${var.infra_region},10.16.0.0/20,10.17.0.0/16,10.18.0.0/16" }
+  static_ip_region         = "${var.infra_region}"
   create_static_ip_address = "${var.create_static_ip_address}"
 }
 
