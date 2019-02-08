@@ -14,6 +14,10 @@ variable "project_id" {}
 variable "serviceaccount_key" {}
 variable "create_static_ip_address" {}
 
+variable "cluster_subnets" {
+  default = "10.16.0.0/20,10.17.0.0/16,10.18.0.0/16"
+}
+
 # Terragrunt variables
 variable "infra_region" {}
 
@@ -32,9 +36,13 @@ variable "dns_records" {
 module "gke_network" {
   source = "/exekube-modules/gke-network"
 
-  dns_zones                = "${var.dns_zones}"
-  dns_records              = "${var.dns_records}"
-  cluster_subnets          = { "0" = "${var.infra_region},10.16.0.0/20,10.17.0.0/16,10.18.0.0/16" }
+  dns_zones   = "${var.dns_zones}"
+  dns_records = "${var.dns_records}"
+
+  cluster_subnets = {
+    "0" = "${var.infra_region},${var.cluster_subnets}"
+  }
+
   static_ip_region         = "${var.infra_region}"
   create_static_ip_address = "${var.create_static_ip_address}"
 }
