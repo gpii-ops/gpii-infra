@@ -44,7 +44,12 @@ This document is for Ops team members setting up new developers to work in the G
    * Add each member of "ops@" to the Group and make each a Manager
       * Admins must be Managers to post to this announce-only group, but Groups (like ops@) can't have elevated permissions
 
-## AWS: Creating the user's IAM
+## GCP: Your first cluster
+* Direct user to follow the Getting Started instructions in the [gpii-infra GCP README](gcp/README.md).
+
+# DEPRECATED TOPICS
+
+## AWS: Creating the user's IAM (DEPRECATED)
 * From the AWS Dashboard, navigate to IAM controls (under Services or use the search box)
 * Add User
    * Naming convention is "FirstLast", e.g. "TylerRoscoe"
@@ -59,5 +64,5 @@ This document is for Ops team members setting up new developers to work in the G
 * Send generated password to user, ask user to log in
    * User will be prompted to change password. Please do so.
 
-## AWS: Your first cluster
+## AWS: Your first cluster (DEPRECATED)
 * Direct user to follow the Getting Started instructions in the [gpii-infra AWS README](aws/README.md).

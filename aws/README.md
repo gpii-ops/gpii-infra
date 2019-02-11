@@ -1,4 +1,6 @@
-# gpii-infra AWS
+# gpii-infra AWS (DEPRECATED)
+
+**AWS support is DEPRECATED. Please migrate to [GCP](../gcp/README.md).**
 
 Following the pattern laid out in "[How to create reusable infrastructure with Terraform modules](https://blog.gruntwork.io/how-to-create-reusable-infrastructure-with-terraform-modules-25526d65f73d)" and "[Terragrunt: Remote Terraform configurations](https://github.com/gruntwork-io/terragrunt#keep-your-remote-state-configuration-dry)", this repo describes both the state of deployed infrastructure ("houses") and the modules ("blueprints") that comprise the [GPII](http://gpii.net/).
 

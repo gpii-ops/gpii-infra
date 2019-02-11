@@ -11,7 +11,7 @@ Project structure:
 
 * [Google Cloud Platform (GCP)](gcp/) *(stable)*
 * [Common plumbing](common/) *(mostly for admins)*
-* [Amazon Web Services (AWS)](aws/) *(soon to be DEPRECATED)*
+* [Amazon Web Services (AWS)](aws/) *(DEPRECATED)*
 
 Additional documents are available at the root of this repository:
 
