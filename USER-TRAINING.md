@@ -30,22 +30,6 @@ This document is for Ops team members setting up new developers to work in the G
 * For all users:
    * Add to Group "cloud-developers"
 
-## GCP: One-time G Suite setup
-* Create an Organizational Unit "Cloud Development Only"
-   * From the [G Suite Admin Organizational Units page](https://admin.google.com/u/1/ac/orgunits), add a new Organizational Unit
-* Disable unneeded G Suite Services
-   * From the [G Suite Admin Apps page](https://admin.google.com/u/1/ac/appslist/core), select all Services, and select Off
-   * From the [G Suite Admin Additional Services page](https://admin.google.com/u/1/ac/appslist/additional), select all Services **EXCEPT** Google Groups, and select Off
-* Create a public Group "cloud-developers"
-   * From the [G Suite Admin Groups page](https://admin.google.com/raisingthefloor.org/AdminHome?hl=en&fc=true#GroupList:), add a new Group
-   * Set it so that anyone can view or post, but only Managers and Owners can invite members
-   * Add "ops@" to the Group
-* Create a Group "outage", for announcing public-facing outages
-   * From the [G Suite Admin Groups page](https://admin.google.com/raisingthefloor.org/AdminHome?hl=en&fc=true#GroupList:), add a new Group
-   * Set it to "Announce-only"
-   * Add each member of "ops@" to the Group and make each a Manager
-      * Admins must be Managers to post to this announce-only group, but Groups (like ops@) can't have elevated permissions
-
 ## GCP: Your first cluster
 * Direct user to follow the Getting Started instructions in the [gpii-infra GCP README](gcp/README.md).
 

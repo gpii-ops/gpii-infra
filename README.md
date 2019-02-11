@@ -15,6 +15,7 @@ Project structure:
 
 Additional documents are available at the root of this repository:
 
+* [One-time Setup](./ONE-TIME-SETUP.md) if this is your organization's first time using gpii-infra
 * [Continuous Integration/Delivery Process](./CI-CD.md)
 * [Testing the GPII frontend against the backend](./TESTING.md)
 * [User Training Notes](./USER-TRAINING.md)
