@@ -26,6 +26,8 @@ This document is for Ops team members setting up new developers to work in the G
    * From the [G Suite Admin Users page](https://admin.google.com/u/1/ac/users), add a new User
    * Move to Organizational Unit "Cloud Development Only"
    * Add a forwarding rule to [Gmail's Recipient Address Map](https://support.google.com/a/answer/4524505?hl=en) from the user's new @RtF email (Gmail is disabled for these users) to the user's primary email (e.g. their OCAD email)
+
+* For all users:
    * Add to Group "cloud-developers"
 
 ## GCP: One-time G Suite setup

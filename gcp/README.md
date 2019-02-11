@@ -225,7 +225,7 @@ If you see this error during any `rake` execution, run `rake destroy_sa_keys` an
 ### oauth2: cannot fetch token: 400 Bad Request
 
 This happens when you run some commands in an environment (usually `stg` or `prd`) before, did not run `rake clobber`, CI run after that and destroyed your SA key. Error is basically saying that locally stored SA key is invalid and needs to re-issued.
-Solution is to `rake clobber` and re-authenticate.
+Solution is to `rake clobber` and re-authenticate. This will not affect your running cluster, only local state.
 
 ### helm_release.release: rpc error: code = Unavailable desc = transport is closing
 

@@ -3,9 +3,9 @@
 
 This repository manages infrastructure for the [GPII](https://gpii.net/).
 
-It has GitHub Checks integration [with CircleCI](https://circleci.com/docs/2.0/enable-checks/).
+It has [GitHub Checks integration with CircleCI](https://circleci.com/docs/2.0/enable-checks/).
 
-[CircleCI pipeline](https://circleci.com/gh/gpii-ops/gpii-infra) will run for every PR opened into this repository.
+A [CircleCI pipeline](https://circleci.com/gh/gpii-ops/gpii-infra) will run for every PR opened against this repository.
 
 Project structure:
 
