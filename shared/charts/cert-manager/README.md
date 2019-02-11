@@ -106,6 +106,8 @@ The following table lists the configurable parameters of the cert-manager chart 
 | `webhook.caSyncImage.repository` | CA sync image repository | `quay.io/munnerz/apiextensions-ca-helper` |
 | `webhook.caSyncImage.tag` | CA sync image tag | `v0.1.0` |
 | `webhook.caSyncImage.pullPolicy` | CA sync image pull policy | `IfNotPresent` |
+| `createCustomResource` | Create CRD/TPR with this release | `false` |
+| `useCrdInstallHook` | Use crd-install hook when deploying CRDs | `true` |
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`.
 

@@ -117,3 +117,7 @@ affinity: {}
 #     value: master
 #     effect: NoSchedule
 tolerations: []
+
+# CRDs
+createCustomResource: false
+useCrdInstallHook: true
