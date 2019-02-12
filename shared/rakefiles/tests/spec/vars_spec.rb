@@ -103,6 +103,7 @@ describe Vars do
     expect(ENV).to have_received(:[]=).with("BILLING_ID", "01A0E1-B0B31F-349F4F")
     expect(ENV).to have_received(:[]=).with("TF_VAR_organization_name", "gpii")
     expect(ENV).to have_received(:[]=).with("TF_VAR_organization_domain", "gpii.net")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_infra_region", "us-central1")
   end
 
   it "set_vars sets default vars for billing and organization" do
