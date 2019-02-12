@@ -106,9 +106,10 @@ describe Vars do
     expect(ENV).to have_received(:[]=).with("TF_VAR_infra_region", "us-central1")
   end
 
-  it "set_vars sets default vars for billing and organization" do
+  it "set_vars sets default vars for billing, organization and region" do
     allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
+    allow(ENV).to receive(:[]).with("TF_VAR_infra_region").and_return("fake-region1")
     allow(ENV).to receive(:[]).with("ORGANIZATION_ID").and_return("fake-organization-id")
     allow(ENV).to receive(:[]).with("BILLING_ID").and_return("fake-billing-id")
     env = "fake-env"
@@ -116,6 +117,7 @@ describe Vars do
     Vars.set_vars(env, project_type)
     expect(ENV).to have_received(:[]=).with("TF_VAR_organization_id", "fake-organization-id")
     expect(ENV).to have_received(:[]=).with("TF_VAR_billing_id", "fake-billing-id")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_infra_region", "fake-region1")
   end
 
   it "set_vars doesn't clobber vars that are already set (even when env=stg)" do
