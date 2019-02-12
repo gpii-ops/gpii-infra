@@ -1,4 +1,8 @@
-## GCP: One-time G Suite setup
+# One-time setup steps
+
+This document describes manual steps needed for initial configuration when using gpii-infra with a public cloud provider for the first time.
+
+## G Suite
 * Create an Organizational Unit "Cloud Development Only"
    * From the [G Suite Admin Organizational Units page](https://admin.google.com/u/1/ac/orgunits), add a new Organizational Unit
 * Disable unneeded G Suite Services
@@ -14,7 +18,7 @@
    * Add each member of "ops@" to the Group and make each a Manager
       * Admins must be Managers to post to this announce-only group, but Groups (like ops@) can't have elevated permissions
 
-## One-time Google Cloud Account setup
+## Google Cloud Account
 * https://cloud.google.com/resource-manager/docs/quickstart-organizations
    * G Suite: "The first time a user in your domain creates a project or billing account, the Organization resource is automatically created and linked to your company’s G Suite account. The current project and all future projects will automatically belong to the organization."
       * @mrtyler believes he did this when he created his Free Trial account using his RtF email address.
@@ -33,8 +37,6 @@
    * @mrtyler requested a quota bump to 100 Projects.
       * He only authorized his own email for now, to see what it did. But it's possible other Ops team members will need to go through this step.
 
-## One-time CI setup
+## CI
 1. Log in to the CI Worker and clone this repo.
 1. `cd gpii-infra/ && rake -f rakefiles/ci_save_all.rake`
-
-

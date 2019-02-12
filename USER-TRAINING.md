@@ -22,6 +22,9 @@ This document is for Ops team members setting up new developers to work in the G
    * Remember that many product developers don't have a lot of experience with infrastructure tools and concepts. Introduction of high-level concepts like containers, container orchestration, and automated deployment as well as a general view of how the pieces fit together is the goal; the fine details are less important.
 
 ## GCP: Setting up the user
+
+_Note: there are pre-requisite steps in [ONE-TIME-SETUP.md](ONE-TIME-SETUP.md)._
+
 * If the user does not have an @RtF email address (e.g. an OCAD developer who works on GPII but is not part of RtF):
    * From the [G Suite Admin Users page](https://admin.google.com/u/1/ac/users), add a new User
    * Move to Organizational Unit "Cloud Development Only"
