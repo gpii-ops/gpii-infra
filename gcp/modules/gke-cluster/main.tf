@@ -8,11 +8,7 @@ variable "serviceaccount_key" {}
 # Terragrunt variables
 variable "node_type" {}
 
-variable "region" {}
-
-variable "additional_zones" {
-  type = "list"
-}
+variable "infra_region" {}
 
 variable "initial_node_count" {
   default = 1
@@ -32,8 +28,7 @@ module "gke_cluster" {
 
   kubernetes_version = "1.11.6-gke.3"
 
-  region           = "${var.region}"
-  additional_zones = "${var.additional_zones}"
+  region = "${var.infra_region}"
 
   monitoring_service = "monitoring.googleapis.com/kubernetes"
   logging_service    = "logging.googleapis.com/kubernetes"
