@@ -4,7 +4,9 @@ This directory manages GPII infrastructure in [Google Cloud Project (GCP)](https
 
 Initial instructions were based on [exekube's Getting Started](https://exekube.github.io/exekube/in-practice/getting-started/) (version 0.3.0).
 
-## Install packages
+## Getting started
+
+### Install packages
 
 1. Install Ruby **==2.4.3**.
    * There's nothing particularly special about this version. We could relax the constraint in Gemfile, but a single version for everyone is fine for now.
@@ -12,6 +14,56 @@ Initial instructions were based on [exekube's Getting Started](https://exekube.g
    * If you're using a package manager, you may need to install "ruby-devel" as well.
 1. Install [rake](https://github.com/ruby/rake) **==12.3.0**, probably via `gem install rake -v 12.3.0`.
 1. Install [Docker](https://www.docker.com/get-started), and be sure that the **docker-compose** application is available at the command line.
+
+### Creating an environment
+
+An environment needs some resources created in the organization before the following actions are done. Ask an operator of the organization to create a new project for such environment. In the case of a `dev` project the $USER environment variable is used to name the project. Provide such value to the operator. After the common part is created the following steps will spin up the cluster:
+
+1. Clone this repo.
+1. (Optional) Clone [the gpii-ops fork of exekube](https://github.com/gpii-ops/exekube).
+   * The `gpii-infra` clone and the `exekube` clone should be siblings in the same directory (there are some references to `../exekube`). This is useful for testing the Terraform modules allocated in the exekube's project. If you want to have those modules in your exekube container uncomment the proper line in the docker-compose.yml file before running any command.
+1. By default you'll use the RtF Organization and Billing Account.
+   * You can use a different Organization or Billing Account, e.g. from a GCP Free Trial Account, with `export ORGANIZATION_ID=111111111111` and/or `export BILLING_ID=222222-222222-222222`.
+1. In the case of using a **dev** environment, be sure that the environment variable `$USER` is set to the same name used to name your dev project at GCP. In case of doubt ask to the ops team.
+1. `cd gpii-infra/gcp/live/dev`
+1. `rake`
+1. If it's the first time that you deploy the infrastructure you will be prompted to verify your identity at Google and allow permissions to your applications to perform modifications in your personal project at GCP. Go to the url shown and copy and paste the token once the application is authorized.
+1. Once finished all the GPII endpoints should be available at `https://<service>.<your cluster name>.dev.gcp.gpii.net/`
+
+   * e.g. http://preferences.alfredo.dev.gcp.gpii.net/preferences/carla
+   * e.g. http://flowmanager.alfredo.dev.gcp.gpii.net
+
+1. The dashboard is available through the [Google Cloud Console](https://console.cloud.google.com).
+
+   Here it is a list of the common links:
+
+   * [Storage](https://console.cloud.google.com/storage/browser)
+   * [DNS zones](https://console.cloud.google.com/net-services/dns/zones)
+   * [Kubernetes clusters](https://console.cloud.google.com/kubernetes/list)
+
+   The dashboard also has a very good feature called [**Google Cloud Shell**](https://cloud.google.com/shell/docs/) which allows to have an interactive terminal embedded in the GCP dashboard. To use it just click on the icon that you will find at the top right, next to the magnifier icon.
+
+   Once you have the shell on your browser execute the following lines to manage the Kubernetes cluster using the embedded *kubectl* command:
+
+   1. `gcloud container clusters get-credentials k8s-cluster --zone us-central1`
+   1. `kubectl -n gpii get pods`
+
+   It's a Debian GNU/Linux so all the `apt` commands are also available.
+
+   You can also upload/download files using such functionality that you will find in the top right menu of the interactive shell.
+
+### Tearing down an environment
+
+1. `rake destroy`
+   * This is the important one since it shuts down the expensive bits (VMs in the Kubernetes cluster, mostly)
+1. `rake destroy_infra`
+   * Exekube recommends leaving these resources up since they are cheap
+1. There's no automation for destroying the Project and starting over. I usually use the GCP Dashboard.
+   * Note that "deleting" a Project really marks it for deletion in 30 days. You can't create a new Project with the same name until the old one is culled.
+1. (OPTIONAL) `rake clean`
+   * This command is optional, but it's recommended to run after a destroy. It will remove some temporal and cache files that can conflict in the case of an unfinished deployment.
+1. (OPTIONAL) `rake clobber`
+   * This command is also optional, but performs a deletion of some more files than `rake clean`, it will leave your personal environment without generated data. You will need to authenticate again the application in GCP after this.
 
 ## Project structure
 
@@ -64,56 +116,6 @@ Each project has a SA which performs almost all the actions over the resources o
 The permissions set at resource level are automaticallly set by Terraform in order to work properly among the rest of the components of the GPII cloud. i.e the storage bucket permissions for exported logs https://console.cloud.google.com/storage/browser/gpii-gcp-dev-alfredo-exported-logs?project=gpii-gcp-dev-alfredo
 
 More details about which roles and permissions are set in the infrastructure can be found in the [PERMISSIONS.md](PERMISSIONS.md)
-
-## Creating an environment
-
-An environment needs some resources created in the organization before the following actions are done. Ask an operator of the organization to create a new project for such environment. In the case of a `dev` project the $USER environment variable is used to name the project. Provide such value to the operator. After the common part is created the following steps will spin up the cluster:
-
-1. Clone this repo.
-1. (Optional) Clone [the gpii-ops fork of exekube](https://github.com/gpii-ops/exekube).
-   * The `gpii-infra` clone and the `exekube` clone should be siblings in the same directory (there are some references to `../exekube`). This is useful for testing the Terraform modules allocated in the exekube's project. If you want to have those modules in your exekube container uncomment the proper line in the docker-compose.yml file before running any command.
-1. By default you'll use the RtF Organization and Billing Account.
-   * You can use a different Organization or Billing Account, e.g. from a GCP Free Trial Account, with `export ORGANIZATION_ID=111111111111` and/or `export BILLING_ID=222222-222222-222222`.
-1. In the case of using a **dev** environment, be sure that the environment variable `$USER` is set to the same name used to name your dev project at GCP. In case of doubt ask to the ops team.
-1. `cd gpii-infra/gcp/live/dev`
-1. `rake`
-1. If it's the first time that you deploy the infrastructure you will be prompted to verify your identity at Google and allow permissions to your applications to perform modifications in your personal project at GCP. Go to the url shown and copy and paste the token once the application is authorized.
-1. Once finished all the GPII endpoints should be available at `https://<service>.<your cluster name>.dev.gcp.gpii.net/`
-
-   * e.g. http://preferences.alfredo.dev.gcp.gpii.net/preferences/carla
-   * e.g. http://flowmanager.alfredo.dev.gcp.gpii.net
-
-1. The dashboard is available through the [Google Cloud Console](https://console.cloud.google.com).
-
-   Here it is a list of the common links:
-
-   * [Storage](https://console.cloud.google.com/storage/browser)
-   * [DNS zones](https://console.cloud.google.com/net-services/dns/zones)
-   * [Kubernetes clusters](https://console.cloud.google.com/kubernetes/list)
-
-   The dashboard also has a very good feature called [**Google Cloud Shell**](https://cloud.google.com/shell/docs/) which allows to have an interactive terminal embedded in the GCP dashboard. To use it just click on the icon that you will find at the top right, next to the magnifier icon.
-
-   Once you have the shell on your browser execute the following lines to manage the Kubernetes cluster using the embedded *kubectl* command:
-
-   1. `gcloud container clusters get-credentials k8s-cluster --zone us-central1`
-   1. `kubectl -n gpii get pods`
-
-   It's a Debian GNU/Linux so all the `apt` commands are also available.
-
-   You can also upload/download files using such functionality that you will find in the top right menu of the interactive shell.
-
-## Tearing down an environment
-
-1. `rake destroy`
-   * This is the important one since it shuts down the expensive bits (VMs in the Kubernetes cluster, mostly)
-1. `rake destroy_infra`
-   * Exekube recommends leaving these resources up since they are cheap
-1. There's no automation for destroying the Project and starting over. I usually use the GCP Dashboard.
-   * Note that "deleting" a Project really marks it for deletion in 30 days. You can't create a new Project with the same name until the old one is culled.
-1. (OPTIONAL) `rake clean`
-   * This command is optional, but it's recommended to run after a destroy. It will remove some temporal and cache files that can conflict in the case of an unfinished deployment.
-1. (OPTIONAL) `rake clobber`
-   * This command is also optional, but performs a deletion of some more files than `rake clean`, it will leave your personal environment without generated data. You will need to authenticate again the application in GCP after this.
 
 ## Monitoring and alerting
 
