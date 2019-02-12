@@ -114,7 +114,7 @@ task :check_destroy_allowed do
   end
 end
 
-desc "Undeploy GPII compoments and destroy cluster"
+desc "Undeploy GPII components and destroy cluster"
 task :destroy => [:set_vars, :check_destroy_allowed, :fetch_helm_certs] do
   sh "#{@exekube_cmd} rake xk[down]"
 end
