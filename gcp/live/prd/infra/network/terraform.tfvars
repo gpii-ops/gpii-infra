@@ -25,5 +25,3 @@ create_static_ip_address = true
 # reasonable.)
 dns_zones   = {}
 dns_records = {}
-
-infra_region = "us-central1"
