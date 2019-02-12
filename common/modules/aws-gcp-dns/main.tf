@@ -25,7 +25,10 @@ variable "aws_zone_id" {
 provider "google" {
   credentials = "${var.serviceaccount_key}"
   project     = "${var.project_id}"
-  region      = "us-central1"
+
+  # Hardcoded region should be fixed in favor of TF_VAR_infra_region for consistency:
+  # https://issues.gpii.net/browse/GPII-3707
+  region = "us-central1"
 }
 
 provider "aws" {
