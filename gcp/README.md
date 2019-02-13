@@ -317,3 +317,44 @@ As a rule of thumb: official Docker curated images
 (https://docs.docker.com/docker-hub/official_images/) or images directly
 published by trusted OSS projects are acceptable, otherwise we should
 build the images ourselves.
+
+### Downtime procedures
+
+#### Before (planned) downtime
+
+* Email `outage@` ahead of time explaining at a high level the what, when, and why of the planned downtime.
+   * See below for a template.
+   * The audience for `outage@` is all GPII Cloud stakeholders. Keep it brief and non-technical, and highlight any required actions.
+* Consider manually disabling alerts related to your maintenance using the "Enabled" sliders on the [Stackdriver Alerting Policies dashboard](https://app.google.stackdriver.com/policies?project=gpii-gcp-prd).
+
+#### During downtime
+
+* Before performing manual or extraordinary actions, disable the CI/CD pipeline to prevent automated processes from interfering.
+   * On the [Gitlab Project -> Settings -> General page](https://gitlab.com/gpii-ops/gpii-infra/edit), go to "Permissions" and disable "Pipelines". 
+      * This hides the CI/CD tab on the Project page. If you need to access that view (e.g. to view old pipeline logs), you can still navigate to it [directly](https://gitlab.com/gpii-ops/gpii-infra/pipelines). Note that running/retrying builds is disabled.
+
+#### After downtime
+
+* Create a record of any manual steps you perform, e.g. copy your terminal and paste it into a tracking ticket.
+* If you manually disabled alerts previously, re-enable them.
+* Email `outage@` that the downtime is ended.
+   * See below for a template.
+   * The audience for `outage@` is all GPII Cloud stakeholders. Keep it brief and non-technical, and highlight any required actions.
+
+#### outage@ email template
+
+```
+Subject line: GPII [Scheduled/Completed/In progress] Production Outage - $start_date [- $end_date]
+
+Body (plaintext please), dates in "Jan 14, 19:00 UTC" format:
+
+What: What service(s) are affected
+When: $start_data [-$end-date]
+Status: [Scheduled/Completed/In progress]
+
+Details:
+Couple of lines explaining why this is planned, what is being done, and when
+users can expect the next update. E.g., "The Ops team is currently
+investigating the issue and we will update you once the cause is known/issue is
+resolved/update is done.
+```
