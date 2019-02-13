@@ -74,6 +74,7 @@ An environment needs some resources created in the organization before the follo
    * You can use a different Organization or Billing Account, e.g. from a GCP Free Trial Account, with `export ORGANIZATION_ID=111111111111` and/or `export BILLING_ID=222222-222222-222222`.
 1. By default your K8s cluster and related resources will be deployed into `us-central1`.
    * You can use a different GCP region by setting `TF_VAR_infra_region` variable, for example `export TF_VAR_infra_region=us-east1`.
+   * Before changing region you need to destroy all deployed resources, TF state and secrets with `rake destroy && rake destroy_tfstate && rake destroy_secrets`.
 1. In the case of using a **dev** environment, be sure that the environment variable `$USER` is set to the same name used to name your dev project at GCP. In case of doubt ask to the ops team.
 1. `cd gpii-infra/gcp/live/dev`
 1. `rake`
