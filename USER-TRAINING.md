@@ -9,7 +9,7 @@ This document is for Ops team members setting up new developers to work in the G
 
 ## The Speech
 
-* You are about to be granted administrative (aka "root") access to a number of resources on the public internet. This is a serious responsiblity!
+* You are about to be granted administrative (aka "root") access to a number of resources on the public internet, including our staging and production environments. This is a serious responsiblity! You will be able to do harm to the system!
 * Measure twice, cut once.
 * If you're ever in doubt about what a command will do, STOP! Then ask for help.
    1. First, ask other developers who have experience using gpii-infra
@@ -20,29 +20,6 @@ This document is for Ops team members setting up new developers to work in the G
 ## Overview of the system
 * Go over the [Build and Release Overview slide deck](https://docs.google.com/presentation/d/1l8qQEvFaml_qgc0fynHScVhWseu0loytcYaFP_m0tBs/edit#slide=id.g3150fb0231_0_0) with the user.
    * Remember that many product developers don't have a lot of experience with infrastructure tools and concepts. Introduction of high-level concepts like containers, container orchestration, and automated deployment as well as a general view of how the pieces fit together is the goal; the fine details are less important.
-
-## GCP: Setting up the user
-* If the user does not have an @RtF email address (e.g. an OCAD developer who works on GPII but is not part of RtF):
-   * From the [G Suite Admin Users page](https://admin.google.com/u/1/ac/users), add a new User
-   * Move to Organizational Unit "Cloud Development Only"
-   * Add a forwarding rule to [Gmail's Recipient Address Map](https://support.google.com/a/answer/4524505?hl=en) from the user's new @RtF email (Gmail is disabled for these users) to the user's primary email (e.g. their OCAD email)
-   * Add to Group "cloud-developers"
-
-## GCP: One-time G Suite setup
-* Create an Organizational Unit "Cloud Development Only"
-   * From the [G Suite Admin Organizational Units page](https://admin.google.com/u/1/ac/orgunits), add a new Organizational Unit
-* Disable unneeded G Suite Services
-   * From the [G Suite Admin Apps page](https://admin.google.com/u/1/ac/appslist/core), select all Services, and select Off
-   * From the [G Suite Admin Additional Services page](https://admin.google.com/u/1/ac/appslist/additional), select all Services **EXCEPT** Google Groups, and select Off
-* Create a public Group "cloud-developers"
-   * From the [G Suite Admin Groups page](https://admin.google.com/raisingthefloor.org/AdminHome?hl=en&fc=true#GroupList:), add a new Group
-   * Set it so that anyone can view or post, but only Managers and Owners can invite members
-   * Add "ops@" to the Group
-* Create a Group "outage", for announcing public-facing outages
-   * From the [G Suite Admin Groups page](https://admin.google.com/raisingthefloor.org/AdminHome?hl=en&fc=true#GroupList:), add a new Group
-   * Set it to "Announce-only"
-   * Add each member of "ops@" to the Group and make each a Manager
-      * Admins must be Managers to post to this announce-only group, but Groups (like ops@) can't have elevated permissions
 
 ## AWS: Creating the user's IAM
 * From the AWS Dashboard, navigate to IAM controls (under Services or use the search box)
