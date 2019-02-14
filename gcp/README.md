@@ -328,7 +328,8 @@ Subject line: GPII [Scheduled/Completed/In progress] Production Outage - $start_
 Body (plaintext please), dates in "Jan 14, 19:00 UTC" format:
 
 What: What service(s) are affected
-When: $start_data [-$end-date]
+When: $start_date [-$end-date]
+   * Announce an outage for ~2x the time you expect it to take. This allows some buffer if problems arise.
 Status: [Scheduled/Completed/In progress]
 
 Details:
