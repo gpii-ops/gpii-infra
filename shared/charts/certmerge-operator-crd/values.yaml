@@ -1,0 +1,9 @@
+secretLists:
+# Lists of secretlists to be collected realised via certmerge CRD
+# secretlists:
+# - name:
+#   namespace:
+#   secretlist:
+#   - name:
+#     namespace:
+# - ...
