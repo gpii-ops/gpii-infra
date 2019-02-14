@@ -206,30 +206,9 @@ task :rotate_secrets_key, [:kms_key] => [:set_vars, :check_destroy_allowed] do |
   sh "#{@exekube_cmd} rake rotate_secrets_key['#{kms_key}']"
 end
 
-desc "[ADVANCED] Fetch helm TLS certificates from TF state (only in case they are present and valid)"
+desc "[ADVANCED] Fetch helm TLS certificates from TF state (only in case they are present)"
 task :fetch_helm_certs => [:set_vars] do
-  puts "[helm-tls] Checking existing Helm TLS certificates validity..."
-  cert_validities = %x{
-    #{@exekube_cmd} rake xk[\"sh -c ' \
-    cd /project/live/#{@env}/k8s/kube-system/helm-tls; \
-    terragrunt state pull 2> /dev/null'\",skip_secret_mgmt] | grep validity_end_time
-  }
-  if cert_validities.empty?
-    puts "  WARNING: Helm TLS certificates are not present in TF state, skipping..."
-  else
-    require "date"
-    cert_validities.scan(/:\s"(.*?)"/).each do |valid_until|
-      valid_until = Date.parse(valid_until.first)
-      if valid_until < Date.today
-        puts "  ERROR: At least one of Helm TLS certificates expired!"
-        exit 1
-      elsif valid_until < Date.today.prev_month
-        puts "  WARNING: At least one of Helm TLS certificates will expire in 1 month or sooner!"
-      end
-    end
-    puts "[helm-tls] Helm TLS certificates are valid, deploying helm-tls module to populate local files..."
-    Rake::Task[:deploy_module].invoke("k8s/kube-system/helm-tls")
-  end
+  sh "#{@exekube_cmd} rake xk['/project/modules/helm-tls/fetch_helm_certs.sh',skip_secret_mgmt]"
 end
 
 desc "[ADVANCED] Destroy provided module in the cluster, and then deploy it -- rake redeploy_module['k8s/kube-system/cert-manager']"
