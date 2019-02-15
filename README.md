@@ -20,6 +20,7 @@ GPII infrastructure comes in a few "flavors".
 * [Contacting Ops](./CONTACTING-OPS.md) in case of questions or operational emergency
 * [One-time Setup](./ONE-TIME-SETUP.md) if this is your organization's first time using gpii-infra
 * [Continuous Integration/Delivery Process](./CI-CD.md)
+* [Principles](./PRINCIPLES.md) of design, development, and operation
 * [Testing the GPII frontend against the backend](./TESTING.md)
 * [User Training Notes](./USER-TRAINING.md)
 
