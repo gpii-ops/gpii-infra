@@ -80,7 +80,7 @@ cd common/live/stg/infra/
 cp -r john $USER
 #(edit $USER/terraform.tfvars)
   project_name = "dev-$USER"
-  project_owner = "$USER@RtF"
+  project_owner = "user:$USER@RtF"
 #(save)
 cd common/live/stg/
 rake apply_infra
