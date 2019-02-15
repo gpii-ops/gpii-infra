@@ -9,7 +9,6 @@ metadata:
 {{- end }}
   labels:
     app: {{ template "cert-manager.name" . }}
-    chart: {{ template "cert-manager.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
