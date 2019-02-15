@@ -74,6 +74,9 @@ An environment needs some resources created in the organization before the follo
    * The `gpii-infra` clone and the `exekube` clone should be siblings in the same directory (there are some references to `../exekube`). This is useful for testing the Terraform modules allocated in the exekube's project. If you want to have those modules in your exekube container uncomment the proper line in the docker-compose.yml file before running any command.
 1. By default you'll use the RtF Organization and Billing Account.
    * You can use a different Organization or Billing Account, e.g. from a GCP Free Trial Account, with `export ORGANIZATION_ID=111111111111` and/or `export BILLING_ID=222222-222222-222222`.
+1. By default your K8s cluster and related resources will be deployed into `us-central1`.
+   * You can use a different GCP region by setting `TF_VAR_infra_region` variable, for example `export TF_VAR_infra_region=us-east1`.
+   * Before changing region you need to destroy all deployed resources, TF state and secrets with `rake destroy && rake destroy_tfstate && rake destroy_secrets`.
 1. In the case of using a **dev** environment, be sure that the environment variable `$USER` is set to the same name used to name your dev project at GCP. In case of doubt ask to the ops team.
 1. `cd gpii-infra/gcp/live/dev`
 1. `rake`
@@ -95,7 +98,7 @@ An environment needs some resources created in the organization before the follo
 
    Once you have the shell on your browser execute the following lines to manage the Kubernetes cluster using the embedded *kubectl* command:
 
-   1. `gcloud container clusters get-credentials k8s-cluster --zone us-central1`
+   1. `gcloud container clusters get-credentials k8s-cluster --zone YOUR_INFRA_REGION`
    1. `kubectl -n gpii get pods`
 
    It's a Debian GNU/Linux so all the `apt` commands are also available.

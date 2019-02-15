@@ -101,7 +101,10 @@ task :display_cluster_info do
   puts "Flowmanager endpoint:"
   puts "  curl -k https://flowmanager.#{ENV["TF_VAR_domain_name"] }"
   puts
-  puts "Run `rake destroy` to delete all the expensive resources created by the deployment"
+  puts "Run `rake test_preferences` to execute Locust tests for Preferences."
+  puts "Run `rake test_flowmanager` to execute Locust tests for Flowmanager."
+  puts
+  puts "Run `rake destroy` to delete all the expensive resources created by the deployment."
   puts
 end
 

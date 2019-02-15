@@ -19,7 +19,8 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
-node_type = "n1-highcpu-4"
+node_type = "n1-highcpu-8"
+
 # This is to prevent accidental deletion of a long-lived cluster (e.g. due to
 # changing a parameter like 'oauth_scopes').
 #
