@@ -208,7 +208,7 @@ end
 
 desc "[ADVANCED] Fetch helm TLS certificates from TF state (only in case they are present)"
 task :fetch_helm_certs => [:set_vars] do
-  sh "#{@exekube_cmd} rake xk['/project/modules/helm-tls/fetch_helm_certs.sh',skip_secret_mgmt]"
+  sh "#{@exekube_cmd} rake fetch_helm_certs"
 end
 
 desc "[ADVANCED] Destroy provided module in the cluster, and then deploy it -- rake redeploy_module['k8s/kube-system/cert-manager']"
