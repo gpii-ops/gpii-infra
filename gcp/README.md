@@ -15,6 +15,19 @@ Start here if you are a GPII developer who wants to create a personal GPII Cloud
 1. Install [rake](https://github.com/ruby/rake) **==12.3.0**, probably via `gem install rake -v 12.3.0`.
 1. Install [Docker](https://www.docker.com/get-started), and be sure that the **docker-compose** application is available from the command line.
 
+### Get an account
+
+Ask the Ops team to set up an account and train you. (The training doc is [here](../USER-TRAINING.md) if you're curious.)
+
+### Enable Multi-Factor Authentication (MFA) on your account
+
+* From [Google 2-Step Verification](https://www.google.com/landing/2step/), click Get Started and follow the prompts.
+   * I like [Duo](https://duo.com/product/trusted-users/two-factor-authentication/duo-mobile), but any tool from [Amazon's list](https://aws.amazon.com/iam/details/mfa/) should be fine. See also [Google's documentation](https://www.google.com/landing/2step/).
+   * (If you don't have access to a separate device for MFA (smartphone, tablet, hardware device such as a Yubikey), it is acceptable (though not recommended -- especially for administrators) to run an MFA tool on your development machine. A few of us like [Authy](https://authy.com/download/).
+
+
+
+
 ### Creating an environment
 
 An environment needs some resources created in the organization before the following actions are done. Ask an operator of the organization to create a new project for such environment. In the case of a `dev` project the $USER environment variable is used to name the project. Provide such value to the operator. After the common part is created the following steps will spin up the cluster:
