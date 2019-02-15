@@ -79,7 +79,7 @@ task :deploy => [:set_vars, :apply_infra] do
 end
 
 desc "Display some handy info about the cluster"
-task :display_cluster_info do
+task :display_cluster_info => [:set_vars] do
   puts
   puts
   puts "*************************************************"
