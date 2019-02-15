@@ -2,18 +2,18 @@
 
 This directory manages GPII infrastructure in [Google Cloud Project (GCP)](https://cloud.google.com/). It is organized as an [exekube](https://github.com/exekube/exekube) project and is very loosely based on the [exekube demo-apps-project](https://github.com/exekube/demo-apps-project)
 
-Initial instructions were based on [exekube's Getting Started](https://exekube.github.io/exekube/in-practice/getting-started/) (version 0.3.0).
-
 ## Getting started
+
+Start here if you are a GPII developer who wants to create a personal GPII Cloud for development or testing.
 
 ### Install packages
 
 1. Install Ruby **==2.4.3**.
    * There's nothing particularly special about this version. We could relax the constraint in Gemfile, but a single version for everyone is fine for now.
-   * I like [rvm](https://rvm.io/) for ruby management.
+   * I like [rvm](https://rvm.io/) for managing and versioning Ruby environments.
    * If you're using a package manager, you may need to install "ruby-devel" as well.
 1. Install [rake](https://github.com/ruby/rake) **==12.3.0**, probably via `gem install rake -v 12.3.0`.
-1. Install [Docker](https://www.docker.com/get-started), and be sure that the **docker-compose** application is available at the command line.
+1. Install [Docker](https://www.docker.com/get-started), and be sure that the **docker-compose** application is available from the command line.
 
 ### Creating an environment
 
