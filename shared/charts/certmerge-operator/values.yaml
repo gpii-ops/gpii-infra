@@ -1,0 +1,5 @@
+# Default values for certmerge-operator
+image:
+  repository: gpii/certmerge-operator
+  tag: 0.0.3-gpii.0
+  pullPolicy: IfNotPresent

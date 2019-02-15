@@ -9,8 +9,9 @@ class Secrets
   KMS_KEYRING  = "keyring"
   KMS_LOCATION = "global"
 
-  SECRETS_DIR  = "secrets"
-  SECRETS_FILE = "secrets.yaml"
+  SECRETS_DIR    = "secrets"
+  SECRETS_FILE   = "secrets.yaml"
+  SECRETS_CONFIG = "/project/modules/gcp-secret-mgmt/config.yaml"
 
   GOOGLE_CLOUD_API = "https://www.googleapis.com"
   GOOGLE_KMS_API   = "https://cloudkms.googleapis.com"
@@ -41,6 +42,11 @@ class Secrets
   # We also advice to add module name to each secret's name (e.g. "secret_couchdb_admin_password" instead of just "secret_admin_password")
   # to avoid naming collisions, since secrets scope is global
   def self.collect_secrets()
+    unless File.file?(Secrets::SECRETS_CONFIG)
+      puts "[secret-mgmt] Secrets config not present, skipping..."
+      return {}
+    end
+
     ENV['TF_VAR_keyring_name'] = Secrets::KMS_KEYRING
 
     collected_secrets = {}
@@ -71,7 +77,7 @@ class Secrets
     end
 
     encryption_keys = {}
-    secrets_config = YAML.load(File.read("./modules/gcp-secret-mgmt/config.yaml"))
+    secrets_config = YAML.load(File.read(Secrets::SECRETS_CONFIG))
     secrets_config["encryption_keys"].each do |encryption_key|
       encryption_keys[encryption_key] = %Q|"#{encryption_key}"|
     end

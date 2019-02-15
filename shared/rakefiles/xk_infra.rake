@@ -1,10 +1,12 @@
 organizations_permissions = [
+  "roles/dns.admin",
   "roles/iam.organizationRoleViewer",
   "roles/iam.serviceAccountAdmin",
   "roles/iam.serviceAccountKeyAdmin",
   "roles/resourcemanager.projectIamAdmin",
   "roles/resourcemanager.projectCreator",
-  "roles/serviceusage.serviceUsageAdmin"
+  "roles/serviceusage.serviceUsageAdmin",
+  "roles/storage.admin"
 ]
 
 task :refresh_common_infra, [:project_type] => [@gcp_creds_file, @app_default_creds_file, :configure_extra_tf_vars] do | taskname, args|

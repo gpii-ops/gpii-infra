@@ -9,9 +9,9 @@ It has GitHub Checks integration [with CircleCI](https://circleci.com/docs/2.0/e
 
 Project structure:
 
-* [Amazon Web Services (AWS)](aws/) *(stable but soon to be deprecated)*
-* [Google Cloud Platform (GCP)](gcp/) *(beta but soon to be stable)*
+* [Google Cloud Platform (GCP)](gcp/) *(stable)*
 * [Common plumbing](common/) *(mostly for admins)*
+* [Amazon Web Services (AWS)](aws/) *(soon to be DEPRECATED)*
 
 Additional documents are available at the root of this repository:
 
