@@ -41,7 +41,7 @@ Ask the Ops team to set up an account and train you. (The training doc is [here]
    * [Monitoring, metrics, and alerts](https://app.google.stackdriver.com/)
    * [Storage](https://console.cloud.google.com/storage/browser)
 1. To see a list of other commands you can try: `rake -T`
-1. If something didn't work, see [Troubleshooting / FAQ](#troubleshooting-faq).
+1. If something didn't work, see [Troubleshooting / FAQ](#troubleshooting--faq).
 
 ### Tearing down an environment
 
