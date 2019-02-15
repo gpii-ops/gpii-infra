@@ -104,6 +104,44 @@ Deploying to `prd` requires a [manual action](https://docs.gitlab.com/ce/ci/yaml
 
 ## Troubleshooting / FAQ
 
+### Running manually in non-dev environments (stg, prd)
+
+See [CI-CD.md#running-in-non-dev-environments](../CI-CD.md#running-manually-in-non-dev-environments-stg-prd)
+
+### I want to test my local changes to GPII components in my cluster
+
+1. Build a local Docker image containing your changes.
+1. Push your image to Docker Hub under your user account.
+1. Clone https://github.com/gpii-ops/gpii-version-updater/.
+1. Edit `components.conf`. Find your component and edit the `image` field to point to your Docker Hub user account.
+   * E.g., `gpii/universal -> mrtyler/universal`
+1. Run `./update-version versions.yml`. It will generate a `versions.yml` in the current directory.
+1. `cp versions.yml ../gpii-infra/shared`
+1. `cd ../gpii-infra/gcp/live/dev && rake`
+
+#### Can't I just edit `versions.yml` by hand?
+
+gpii-infra uses explicit SHAs to refer to specific Docker images for GPII components. This has a number of advantages (repeatability, auditability) but the main thing you care about is that changing the SHA forces Kubernetes to re-deploy a component.
+
+If you don't want to deal with gpii-version-updater, you can instead:
+1. Edit `shared/versions.yml`. Find your component and replace the entire image value (path and SHA) with your Docker Hub user account.
+   * E.g., `flowmanager: "gpii/universal@sha256:4b3...64f" -> flowmanager: "mrtyler/universal"`
+1. Manually delete the component via Kubernetes Dashboard or with `kubectl delete`.
+1. `cd ../gpii-infra/gcp/live/dev && rake`
+
+### I want to work on a different dev cluster
+
+**Note: this is an advanced / non-standard workflow.** There aren't a lot of guard rails to prevent you from making a mistake. User discretion is advised.
+
+Examples of when you might want to do this:
+* (Most common) Cleaning up when CI ends up with a broken `dev-gitlab-runner` cluster, e.g. the CI server reboots and orphans a Terraform lock.
+* Collaborating with another developer in their dev cluster.
+* Running multiple personal dev environments (e.g. `dev-mrtyler-experiment1`).
+   * Note that this additional dev environment will require configuration in [common/](../common).
+
+1. Prepend `USER=gitlab-runner` to all `rake` commands.
+   * Or, to add an additional dev cluster: `USER=mrtyler-experiment1`
+
 ### Errors trying to enable/disable Google Cloud APIs
 
 When destroying an environment completely (`rake destroy`), or creating an environment for the first time or after complete destruction (`rake deploy`), we disable/enable some Google Cloud APIs. This action is asynchronous and can take a few minutes to propagate.
@@ -277,6 +315,148 @@ There may be a situation, when we want to roll back entire DB data set to anothe
    * You can check the status of all nodes with `for i in {0..N}; do kubectl exec --namespace gpii -it couchdb-couchdb-$i -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/_up; done`, where N is a number of CouchDB replicas.
 * Once DB state is verified and you sure that everything went as desired, you can scale `preferences` and `flowmanager` deployments back as well. From this point system functionality for the customer is fully restored.
 * Deploy `k8s-snapshots` module to resume regular snapshot process with `rake deploy_module["k8s/kube-system/k8s-snapshots"]`.
+
+### Hack: Adding data to CouchDB
+
+This is what I used to create a fake preference while verifying that volumes are restored correctly.
+
+1. Run a container inside the cluster: `cd aws/dev && rake run_interactive`
+1. From inside the container, install some tools: `apk update && apk add curl`
+1. Define a record:
+```
+# Copied and modified from vicky.json.
+data='
+{
+  "_id": "mrtyler",
+  "type": "prefsSafe",
+  "schemaVersion": "0.1",
+  "prefsSafeType": "user",
+  "name": "mrtyler",
+  "password": null,
+  "email": null,
+  "preferences": {
+    "flat": {
+      "contexts": {
+        "gpii-default": {
+          "name": "HI EVERYBODY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+          "preferences": {
+            "http://registry.gpii.net/common/stickyKeys": true
+          }
+        }
+      }
+    }
+  },
+  "timestampCreated": "2018-04-27T20:41:01.850Z",
+  "timestampUpdated": null
+}
+'
+```
+1. Add the record: `curl -f -H 'Content-Type: application/json' -X POST http://couchdb.default.svc.cluster.local:5984/gpii -d "$data"`
+1. Before the restore: verify that the new record is present.
+1. After the restore: verify that the new record is no longer present.
+
+### Manual process: Generating db data of user preferences and load it into a cluster's preferences server
+
+#### Generate the data
+
+1. `git clone git://github.com/gpii/universal.git && cd universal && npm install`
+1. Put the preferences set you want to load into a folder, i.e.: _testData/myPrefsSets_.
+1. Create a folder to store the db data, i.e.: _testData/myDbData_.
+1. `node ./scripts/convertPrefs.js testData/myPrefsSets testData/myDbData`
+
+Now there are two new files inside _testData/myDbData_, _gpiiKeys.json_ and _prefsSafes.json_.
+Both files contain an array of JSON objects, i.e.:
+
+```
+[
+    {
+        "_id": "GPII-270-rbmm-demo",
+        "type": "gpiiKey",
+        "schemaVersion": "0.1",
+        "prefsSafeId": "prefsSafe-GPII-270-rbmm-demo",
+        "prefsSetId": "gpii-default",
+        "revoked": false,
+        "revokedReason": null,
+        "timestampCreated": "2018-08-12T16:34:04.656Z",
+        "timestampUpdated": null
+    },
+    {
+        "_id": "MikelVargas",
+        "type": "gpiiKey",
+        "schemaVersion": "0.1",
+        "prefsSafeId": "prefsSafe-MikelVargas",
+        "prefsSetId": "gpii-default",
+        "revoked": false,
+        "revokedReason": null,
+        "timestampCreated": "2018-08-12T16:34:04.661Z",
+        "timestampUpdated": null
+    }
+]
+```
+
+And we want to edit these files to look like the following:
+
+```
+{ "docs":
+    [
+        {
+            "_id": "GPII-270-rbmm-demo",
+            "type": "gpiiKey",
+            "schemaVersion": "0.1",
+            "prefsSafeId": "prefsSafe-GPII-270-rbmm-demo",
+            "prefsSetId": "gpii-default",
+            "revoked": false,
+            "revokedReason": null,
+            "timestampCreated": "2018-08-12T16:34:04.656Z",
+            "timestampUpdated": null
+        },
+        {
+            "_id": "MikelVargas",
+            "type": "gpiiKey",
+            "schemaVersion": "0.1",
+            "prefsSafeId": "prefsSafe-MikelVargas",
+            "prefsSetId": "gpii-default",
+            "revoked": false,
+            "revokedReason": null,
+            "timestampCreated": "2018-08-12T16:34:04.661Z",
+            "timestampUpdated": null
+        }
+    ]
+}
+
+```
+
+For the lazy:
+* `cd testData/myDbData`
+* `sed -i '1i { "docs": ' prefsSafes.json gpiiKeys.json`
+* `sed -i '$ a }' prefsSafes.json gpiiKeys.json`
+
+Congratulations, half of the work is done, now on to the load step.
+
+#### Load the data into a cluster
+
+Requirements:
+* You are either an Op or you have been trained by one of them in using gpii-infra.
+* Your computer is already set up to work with gpii-infra.
+* And the most important thing, you know what you are doing. If not, ask the Ops team ;)
+
+Note that we assume that you are going to perform these steps into an already up & running cluster. Also, remember that you always need to test the changes in your "dev" cluster first. In case that everything worked in your "dev" cluster, then proceed with "stg". If everything worked in "stg" too, then, proceed with "prd". In order for you to understand the differences beetween the different environments, check [this section](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/README.md#what-are-all-these-environments) from our documentation.
+
+The process:
+
+1. Go into the corresponding folder with the cluster name where you want to perform the process, "stg", "prd" or "dev". In this case We are going to perform the process in "dev": `cd gpii-infra/gcp/live/dev`.
+1. Set up the env you are going to deal with: rake configure_kubectl
+1. Optional, re-run the current dataloader to be sure that it's using the original dbData, run `helm delete --purge dataloader && rake deploy`. Note that if you are going to perform this step in either "prd" or "stg" environments, take into account that the same CouchDB credentials usded in "stg"/"prd" must be set in the _secrets.yml_ to avoid authentication failures. For that, you will need to ask an Op for such credentials which are set in the CI configuration.
+1. Open a port forwarding between the cluster's couchdb host:port and your local machine: `kubectl --namespace gpii port-forward couchdb-0 5984`
+
+The port forwarding will be there until you hit _Ctrl-C_, so leave it running until we are done loading the preferences sets.
+__Note__ that if you are going to perform this in production (prd) you should do it from the _prd_ folder and remember to use the _RAKE_REALLY_RUN_IN_PRD=true_ variable when issuing the commands against the production cluster.
+
+Let's load the data, go back to the folder _testData/myDbData_ and run:
+1. `curl -d @gpiiKeys.json -H "Content-type: application/json" -X POST http://localhost:5984/gpii/_bulk_docs`
+1. `curl -d @.json -H "Content-type: application/json" -X POST http://localhost:5984/gpii/_bulk_docs`
+
+Unless you get errors, that's all. Now you can close the port forwarding as mentioned earlier.
 
 ### Downtime procedures
 
