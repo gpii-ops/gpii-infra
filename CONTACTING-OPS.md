@@ -1,0 +1,26 @@
+# Contacting the Ops team
+
+The steps below for finding an Ops person escalate in urgency and disruptiveness. Favor earlier steps and waiting for a response, but use your best judgement.
+
+If there is an emergency -- production is down right before a big demo, an attack is in progress -- then it's more important to get an engineer's attention than it is to avoid sending notifications to a few extra people.
+
+1. Note that we do not currently have a formal on-call rotation. 24x7 support is Best Effort.
+1. If you don't have an account on the RtF Slack, skip the next few steps.
+1. Go to #ops in Slack. Ask for help using `@here`. [More on Slack announcements](https://get.slack.help/hc/en-us/articles/202009646-Make-an-announcement).
+1. Go to #ops in Slack. Ask for help using `@channel`.
+1. Email `ops at raisingthefloor dot org`.
+
+## There is an operational emergency (production is broken, there's been a security breach, etc.)
+
+First of all, DON'T PANIC! Everything is going to be fine. :)
+
+Your next task is to find a human on the Ops team. Ops engineers are trained to handle emergencies (including asking other experts for help).
+
+Start with the procedure above -- it is the quickest way to notify as many Ops team members as possible -- but bias toward action rather than waiting. For example, for an ordinary question or non-urgent problem, I would post in Slack and wait a while before trying again or moving to the next contact step. If production were down, I would post in Slack but wait only a minute or two before moving to the next contact step.
+
+If you have exhausted the contact steps above, move on to these steps only for emergencies:
+
+1. Call or text specific Ops engineers. [Contact info](https://docs.google.com/document/d/1EDYhWYipUluzG6K8S-W4clsAGInm2RdjkpKq9Lw_dhE/edit).
+   * If possible, pick an engineer who is in the middle of their work day over an engineer who is likely asleep. Timezone information is in [Contact info](https://docs.google.com/document/d/1EDYhWYipUluzG6K8S-W4clsAGInm2RdjkpKq9Lw_dhE/edit)
+   * Repeat until you've reached an Ops engineer, or exhausted the list of Ops engineers (likely-awake or otherwise).
+1. Slack, Skype, text, or call Sandra, Colin, or Gregg. These people may know where to find an Ops engineer.

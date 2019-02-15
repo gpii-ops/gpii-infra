@@ -40,9 +40,12 @@ Ask the Ops team to set up an account and train you. (The training doc is [here]
    * [Logs](https://console.cloud.google.com/logs/viewer)
    * [Monitoring, metrics, and alerts](https://app.google.stackdriver.com/)
    * [Storage](https://console.cloud.google.com/storage/browser)
+1. To see a list of other commands you can try: `rake -T`
+1. If something didn't work, see [Troubleshooting / FAQ](#troubleshooting-faq).
 
 ### Tearing down an environment
 
+1. `cd gpii-infra/gcp/live/dev`
 1. `rake destroy`
    * This is the important one since it shuts down the expensive bits (VMs in the Kubernetes cluster, mostly)
 1. (Optional) `rake clean`
@@ -73,6 +76,95 @@ Ask the Ops team to set up an account and train you. (The training doc is [here]
    * Note that "deleting" a Project really marks it for deletion in 30 days. You can't create a new Project with the same name until the old one is culled.
    * See also [Shutting down a project](https://github.com/gpii-ops/gpii-infra/tree/master/common#shutting-down-a-project) and [Removing a dev project](https://github.com/gpii-ops/gpii-infra/tree/master/common#removing-a-dev-project).
 
+## Contacting the Ops team
+
+Want help with your cluster? Is production down, or is there some other kind of operational emergency? See [CONTACTING-OPS.md](../CONTACTING-OPS.md).
+
+## What are all these environments?
+
+An "environment" describes a (more-or-less) self-contained cluster of machines running the GPII and its supporting infrastructure (e.g. monitoring, alerting, backups, etc.). There are a few types of environments, each with different purposes.
+
+### dev-$USER
+
+These are ephemeral environments, generally used by individual developers when working on the `gpii-infra` codebase or on cloud-based GPII components. An early phase of CI creates an ephemeral environment (`dev-gitlab-runner`) for integration testing.
+
+### stg
+
+This is a shared, long-lived environment for staging / pre-production. It aims to emulate `prd`, the production environment, as closely as possible.
+
+Deploying to `stg` verifies that the gpii-infra code that worked to create a `dev-$USER` environment from scratch also works to update a pre-existing environment. This is important since we generally don't want to destroy and re-create the production environment from scratch.
+
+Because `stg` emulates production, it will (in the future) allow us to run realistic end-to-end tests before deploying to `prd`.
+
+### prd
+
+This is the production environment which supports actual users of the GPII.
+
+Deploying to `prd` requires a [manual action](https://docs.gitlab.com/ce/ci/yaml/#manual-actions). This enables automated testing (CI) and a consistent deployment process (CD) while providing finer control over when changes are made to production (e.g. on a holiday weekend when no engineers are around).
+
+## Troubleshooting / FAQ
+
+### Errors trying to enable/disable Google Cloud APIs
+
+When destroying an environment completely (`rake destroy`), or creating an environment for the first time or after complete destruction (`rake deploy`), we disable/enable some Google Cloud APIs. This action is asynchronous and can take a few minutes to propagate.
+
+1. If you encounter an error like this during a `rake` run:
+
+```
+* google_project_service.services.1:
+Error enabling service:
+Error enabling service ["container.googleapis.com"]
+for project "gpii-dev-mrtyler": googleapi:
+Error 400: Precondition check failed., failedPrecondition
+```
+
+then try again.
+
+See https://github.com/exekube/exekube/pull/91 for further discussion.
+
+2. There is a slightly different error related to enabling/disabling GCP APIs:
+
+```
+Error 403: The caller does not have permission, forbidden
+```
+
+This happens when trying to enable an API that is already enabled. This shouldn't happen in normal operation, but a quick fix is to run something like this for each affected API:
+
+```
+rake sh["gcloud services disable container.googleapis.com"]
+```
+
+### Error (gcloud.iam.service-accounts.keys.create) RESOURCE_EXHAUSTED: Maximum number of keys on account reached
+
+This happens due to limitation of maximum 10 keys per ServiceAccount.
+If you see this error during any `rake` execution, run `rake destroy_sa_keys` and then try again.
+
+### oauth2: cannot fetch token: 400 Bad Request
+
+This happens when you run some commands in an environment (usually `stg` or `prd`) before, did not run `rake clobber`, CI run after that and destroyed your SA key. Error is basically saying that locally stored SA key is invalid and needs to re-issued.
+Solution is to `rake clobber` and re-authenticate. This will not affect your running cluster, only local state.
+
+### helm_release.release: rpc error: code = Unavailable desc = transport is closing
+
+This caused by locally missing helm certificates (similarly to previous error, it usually happens when working to `stg` or `prd` environment, after `rake clobber`) and can be fixed by running `rake deploy_module['k8s/kube-system/helm-initializer']`.
+
+### helm_release.release: error creating tunnel: "could not find tiller"
+
+This some times happens during forceful cluster re-creation (for example when updating oauth scopes), and caused by Terraform failing to trigger `helm-initializer` module deployment.
+Solution is to run `rake deploy_module['k8s/kube-system/helm-initializer']`.
+
+### The metric referenced by the provided filter is unknown. Check the metric name and labels. (Google::Gax::RetryError)
+
+This some times happens, when Stackdriver Ruby client is trying to apply alerting policy on newly created log-based metric. Solution is to wait 5-10 minutes and try again.
+
+## Common plumbing
+
+The environments that run in GCP need some initial resources that must be created by an administrator first. The [common part of this repository](../common) has the code and the instructions to do so.
+
+## Continuous Integration / Continuous Delivery
+
+See [CI-CD.md](../CI-CD.md).
+
 ## Authentication workflow
 
 There are number of infrastructure components that require access tokens to interact with various GCP services.
@@ -83,10 +175,6 @@ There are number of infrastructure components that require access tokens to inte
 * For CI we use `projectowner` service account, so all CI actions appear in audit logs under that SA.
    * SA credentials are being generated and stored locally during [CI setup](#one-time-ci-setup).
    * In case SA credentials are present locally, application-default credentials are ignored.
-
-## Creating the infrastructure
-
-The environments that run in GCP need some initial resources that must be created by an administrator first. The [common part of this repository](../common) has the code and the instructions to do so.
 
 ## Permissions
 
@@ -146,61 +234,6 @@ Manual workspace configuration is required in case you never used Stackdriver in
 1. Click "Authorize".
 1. Enter channel name including "#". Click "Test Connection" and then "Save".
 1. Now you can use new notification channel in `gcp-stackdriver-monitoring` module. Here is example json: `{"type":"slack","labels":{"channel_name":"#alerts"},"user_labels":{},"enabled":{"value":true},"immutable":{"value":true}}`.
-
-## FAQ / Troubleshooting
-
-### Errors trying to enable/disable Google Cloud APIs
-
-When destroying an environment completely (`rake destroy`), or creating an environment for the first time or after complete destruction (`rake deploy`), we disable/enable some Google Cloud APIs. This action is asynchronous and can take a few minutes to propagate.
-
-1. If you encounter an error like this during a `rake` run:
-
-```
-* google_project_service.services.1:
-Error enabling service:
-Error enabling service ["container.googleapis.com"]
-for project "gpii-dev-mrtyler": googleapi:
-Error 400: Precondition check failed., failedPrecondition
-```
-
-then try again.
-
-See https://github.com/exekube/exekube/pull/91 for further discussion.
-
-2. There is a slightly different error related to enabling/disabling GCP APIs:
-
-```
-Error 403: The caller does not have permission, forbidden
-```
-
-This happens when trying to enable an API that is already enabled. This shouldn't happen in normal operation, but a quick fix is to run something like this for each affected API:
-
-```
-rake sh["gcloud services disable container.googleapis.com"]
-```
-
-### Error (gcloud.iam.service-accounts.keys.create) RESOURCE_EXHAUSTED: Maximum number of keys on account reached
-
-This happens due to limitation of maximum 10 keys per ServiceAccount.
-If you see this error during any `rake` execution, run `rake destroy_sa_keys` and then try again.
-
-### oauth2: cannot fetch token: 400 Bad Request
-
-This happens when you run some commands in an environment (usually `stg` or `prd`) before, did not run `rake clobber`, CI run after that and destroyed your SA key. Error is basically saying that locally stored SA key is invalid and needs to re-issued.
-Solution is to `rake clobber` and re-authenticate. This will not affect your running cluster, only local state.
-
-### helm_release.release: rpc error: code = Unavailable desc = transport is closing
-
-This caused by locally missing helm certificates (similarly to previous error, it usually happens when working to `stg` or `prd` environment, after `rake clobber`) and can be fixed by running `rake deploy_module['k8s/kube-system/helm-initializer']`.
-
-### helm_release.release: error creating tunnel: "could not find tiller"
-
-This some times happens during forceful cluster re-creation (for example when updating oauth scopes), and caused by Terraform failing to trigger `helm-initializer` module deployment.
-Solution is to run `rake deploy_module['k8s/kube-system/helm-initializer']`.
-
-### The metric referenced by the provided filter is unknown. Check the metric name and labels. (Google::Gax::RetryError)
-
-This some times happens, when Stackdriver Ruby client is trying to apply alerting policy on newly created log-based metric. Solution is to wait 5-10 minutes and try again.
 
 ## Restoring CouchDB data
 
@@ -271,14 +304,9 @@ There may be a situation, when we want to roll back entire DB data set to anothe
 
 ### Docker images
 
-We should be well-aware of Docker images we use in our infrastructrue, as
-deploying an untrusted, potentially malicious, image poses a significant
-security threat.
+We should be well-aware of Docker images we use in our infrastructrue, as deploying an untrusted, potentially malicious, image poses a significant security threat.
 
-As a rule of thumb: official Docker curated images
-(https://docs.docker.com/docker-hub/official_images/) or images directly
-published by trusted OSS projects are acceptable, otherwise we should
-build the images ourselves.
+As a rule of thumb: official Docker curated images (https://docs.docker.com/docker-hub/official_images/) or images directly published by trusted OSS projects are acceptable, otherwise we should build the images ourselves.
 
 ### Downtime procedures
 
