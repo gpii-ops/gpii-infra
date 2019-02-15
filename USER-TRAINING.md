@@ -43,14 +43,14 @@ _Note: there are pre-requisite steps in [ONE-TIME-SETUP.md](ONE-TIME-SETUP.md)._
    1. First, ask other developers who have experience using gpii-infra
    1. Next, ask #ops in Slack, or #fluid-work or #fluid-tech in IRC
 * Be ethical. Don't steal data. Don't run your startup on RtF's billing account.
-* RtF pays for these resources so please destroy your cluster when you're done using it, or won't use it for a while (e.g. before the weekend).
+* RtF pays for these resources so please destroy your environment when you're done using it, or won't use it for a while (e.g. before the weekend).
 
 ## Overview of the system
 
 * Go over the [Build and Release Overview slide deck](https://docs.google.com/presentation/d/1l8qQEvFaml_qgc0fynHScVhWseu0loytcYaFP_m0tBs/edit#slide=id.g3150fb0231_0_0) with the user.
    * Remember that many product developers don't have a lot of experience with infrastructure tools and concepts. Introduction of high-level concepts like containers, container orchestration, and automated deployment as well as a general view of how the pieces fit together is the goal; the fine details are less important.
 
-## GCP: Your first cluster
+## GCP: Your first environment
 * Direct user to follow the [Getting Started instructions in the gpii-infra GCP README](gcp/README.md#getting-started).
 
 # DEPRECATED TOPICS
@@ -70,5 +70,5 @@ _Note: there are pre-requisite steps in [ONE-TIME-SETUP.md](ONE-TIME-SETUP.md)._
 * Send generated password to user, ask user to log in
    * User will be prompted to change password. Please do so.
 
-## AWS: Your first cluster (DEPRECATED)
+## AWS: Your first environment (DEPRECATED)
 * Direct user to follow the Getting Started instructions in the [gpii-infra AWS README](aws/README.md).
