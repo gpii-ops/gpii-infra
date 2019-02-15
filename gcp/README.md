@@ -25,83 +25,53 @@ Ask the Ops team to set up an account and train you. (The training doc is [here]
    * I like [Duo](https://duo.com/product/trusted-users/two-factor-authentication/duo-mobile), but any tool from [Amazon's list](https://aws.amazon.com/iam/details/mfa/) should be fine. See also [Google's documentation](https://www.google.com/landing/2step/).
    * (If you don't have access to a separate device for MFA (smartphone, tablet, hardware device such as a Yubikey), it is acceptable (though not recommended -- especially for administrators) to run an MFA tool on your development machine. A few of us like [Authy](https://authy.com/download/).
 
-
-
-
 ### Creating an environment
 
-An environment needs some resources created in the organization before the following actions are done. Ask an operator of the organization to create a new project for such environment. In the case of a `dev` project the $USER environment variable is used to name the project. Provide such value to the operator. After the common part is created the following steps will spin up the cluster:
-
 1. Clone this repo.
-1. (Optional) Clone [the gpii-ops fork of exekube](https://github.com/gpii-ops/exekube).
+1. `cd gpii-infra/gcp/live/dev`
+1. `rake`
+   * The first time you deploy a GPII Cloud (or after you run `rake clobber`), you will be prompted to authenticate **twice**. Follow the instructions in the prompts.
+   * If your browser is configured with multiple Google accounts (e.g. a personal Gmail account as well as an RtF Gmail account), make sure to choose the right one when authenticating.
+1. Once `rake` finishes, GPII Cloud endpoints should be available at `https://<service>.<your cluster name>.dev.gcp.gpii.net/`
+   * e.g. https://preferences.alfredo.dev.gcp.gpii.net/preferences/carla
+   * e.g. https://flowmanager.alfredo.dev.gcp.gpii.net
+1. Lots of information about your GPII Cloud is available through the [Google Cloud Console](https://console.cloud.google.com). Some common links:
+   * [Kubernetes clusters](https://console.cloud.google.com/kubernetes/list)
+   * [Logs](https://console.cloud.google.com/logs/viewer)
+   * [Monitoring, metrics, and alerts](https://app.google.stackdriver.com/)
+   * [Storage](https://console.cloud.google.com/storage/browser)
+
+### Tearing down an environment
+
+1. `rake destroy`
+   * This is the important one since it shuts down the expensive bits (VMs in the Kubernetes cluster, mostly)
+1. (Optional) `rake clean`
+   * This command is optional, but is recommended after `rake destroy`. It removes temporary and cache files that can cause trouble after an unfinished deployment.
+1. (Optional) `rake clobber`
+   * This command is also optional, but cleans up more files than `rake clean`. It will leave the local command-line environment without generated data, including authentication (so you will need to authenticate again after running `rake clobber`).
+
+### Less common options when creating an environment
+1. **dev** environments use the environment variable `$USER`. `$USER` in your command-line environment must match your RtF account. If you have any doubts, ask the ops team.
+1. Infrastructure developers may wish to clone [the gpii-ops fork of exekube](https://github.com/gpii-ops/exekube).
    * The `gpii-infra` clone and the `exekube` clone should be siblings in the same directory (there are some references to `../exekube`). This is useful for testing the Terraform modules allocated in the exekube's project. If you want to have those modules in your exekube container uncomment the proper line in the docker-compose.yml file before running any command.
 1. By default you'll use the RtF Organization and Billing Account.
    * You can use a different Organization or Billing Account, e.g. from a GCP Free Trial Account, with `export ORGANIZATION_ID=111111111111` and/or `export BILLING_ID=222222-222222-222222`.
-1. In the case of using a **dev** environment, be sure that the environment variable `$USER` is set to the same name used to name your dev project at GCP. In case of doubt ask to the ops team.
-1. `cd gpii-infra/gcp/live/dev`
-1. `rake`
-1. If it's the first time that you deploy the infrastructure you will be prompted to verify your identity at Google and allow permissions to your applications to perform modifications in your personal project at GCP. Go to the url shown and copy and paste the token once the application is authorized.
-1. Once finished all the GPII endpoints should be available at `https://<service>.<your cluster name>.dev.gcp.gpii.net/`
-
-   * e.g. http://preferences.alfredo.dev.gcp.gpii.net/preferences/carla
-   * e.g. http://flowmanager.alfredo.dev.gcp.gpii.net
-
-1. The dashboard is available through the [Google Cloud Console](https://console.cloud.google.com).
-
-   Here it is a list of the common links:
-
-   * [Storage](https://console.cloud.google.com/storage/browser)
-   * [DNS zones](https://console.cloud.google.com/net-services/dns/zones)
-   * [Kubernetes clusters](https://console.cloud.google.com/kubernetes/list)
-
-   The dashboard also has a very good feature called [**Google Cloud Shell**](https://cloud.google.com/shell/docs/) which allows to have an interactive terminal embedded in the GCP dashboard. To use it just click on the icon that you will find at the top right, next to the magnifier icon.
-
-   Once you have the shell on your browser execute the following lines to manage the Kubernetes cluster using the embedded *kubectl* command:
-
-   1. `gcloud container clusters get-credentials k8s-cluster --zone us-central1`
+1. The [Google Cloud Console](https://console.cloud.google.com) includes [Google Cloud Shell](https://cloud.google.com/shell/docs/) which is an interactive terminal embedded in the GCP dashboard. To use it, click on the icon at the top right of the Console, next to the magnifier icon.
+   * Once the shell opens in your browser, execute the following to manage the Kubernetes cluster using the embedded `kubectl` command: 
+   1. `gcloud container clusters get-credentials k8s-cluster --zone us-central1` (or whatever your `zone` is)
    1. `kubectl -n gpii get pods`
 
    It's a Debian GNU/Linux so all the `apt` commands are also available.
 
    You can also upload/download files using such functionality that you will find in the top right menu of the interactive shell.
 
-### Tearing down an environment
-
-1. `rake destroy`
-   * This is the important one since it shuts down the expensive bits (VMs in the Kubernetes cluster, mostly)
+### Less common options when tearing down an environment
 1. `rake destroy_infra`
+   * This command works only partially; see [GPII-3332](https://issues.gpii.net/browse/GPII-3332).
    * Exekube recommends leaving these resources up since they are cheap
 1. There's no automation for destroying the Project and starting over. I usually use the GCP Dashboard.
    * Note that "deleting" a Project really marks it for deletion in 30 days. You can't create a new Project with the same name until the old one is culled.
-1. (OPTIONAL) `rake clean`
-   * This command is optional, but it's recommended to run after a destroy. It will remove some temporal and cache files that can conflict in the case of an unfinished deployment.
-1. (OPTIONAL) `rake clobber`
-   * This command is also optional, but performs a deletion of some more files than `rake clean`, it will leave your personal environment without generated data. You will need to authenticate again the application in GCP after this.
-
-## Project structure
-
-The project structure is like following:
-
-- gpii-common-prd (only for creating the rest of the infrastructure)
-- gpii-gcp-prd
-- gpii-gcp-stg
-- gpii-gcp-dev
-- gpii-gcp-dev-${user}
-
-Each project will have the IAMs needed to create the GPII infrastructure inside as an Exekube individual project.
-
-Also each project is meant to be managed by its own Terraform code, and also it will have its own tfstate file.
-
-The DNS is the trickiest part, because each subdomain needs a NS record in the parent domain.
-
-The DNS zones are:
-
-- gpii.net
-- gcp.gpii.net
-- prd.gcp.gpii.net
-- stg.gcp.gpii.net
-- dev.gcp.gpii.net
-- ${user}.dev.gcp.gpii.net
+   * See also [Shutting down a project](https://github.com/gpii-ops/gpii-infra/tree/master/common#shutting-down-a-project) and [Removing a dev project](https://github.com/gpii-ops/gpii-infra/tree/master/common#removing-a-dev-project).
 
 ## Authentication workflow
 
