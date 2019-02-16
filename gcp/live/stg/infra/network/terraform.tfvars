@@ -23,5 +23,5 @@ create_static_ip_address = true
 # DNS zone names are dynamic (e.g. mrtyler.dev.gcp.gpii.net) so they will be
 # injected from outside. (If they're not, defaulting to no DNS records is
 # reasonable.)
-dns_zones = {}
+dns_zones   = {}
 dns_records = {}

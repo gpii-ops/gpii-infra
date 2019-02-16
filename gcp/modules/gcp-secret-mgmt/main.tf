@@ -10,9 +10,7 @@ variable "encryption_keys" {
   type = "list"
 }
 
-variable "storage_location" {
-  default = "us-central1"
-}
+variable "infra_region" {}
 
 module "gcp-secret-mgmt" {
   source = "/exekube-modules/gcp-secret-mgmt"
@@ -20,7 +18,7 @@ module "gcp-secret-mgmt" {
   project_id         = "${var.project_id}"
   serviceaccount_key = "${var.serviceaccount_key}"
   encryption_keys    = "${var.encryption_keys}"
-  storage_location   = "${var.storage_location}"
+  storage_location   = "${var.infra_region}"
   keyring_name       = "${var.keyring_name}"
   apply_audit_config = false
 }

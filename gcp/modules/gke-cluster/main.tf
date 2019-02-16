@@ -8,6 +8,12 @@ variable "serviceaccount_key" {}
 # Terragrunt variables
 variable "node_type" {}
 
+variable "infra_region" {}
+
+variable "initial_node_count" {
+  default = 1
+}
+
 variable "prevent_destroy_cluster" {
   default = false
 }
@@ -17,13 +23,12 @@ module "gke_cluster" {
   project_id         = "${var.project_id}"
   serviceaccount_key = "${var.serviceaccount_key}"
 
-  initial_node_count = 1
+  initial_node_count = "${var.initial_node_count}"
   node_type          = "${var.node_type}"
 
   kubernetes_version = "1.11.6-gke.3"
 
-  region           = "us-central1"
-  additional_zones = ["us-central1-a", "us-central1-b", "us-central1-c", "us-central1-f"]
+  region = "${var.infra_region}"
 
   monitoring_service = "monitoring.googleapis.com/kubernetes"
   logging_service    = "logging.googleapis.com/kubernetes"

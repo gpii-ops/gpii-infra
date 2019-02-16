@@ -19,4 +19,4 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
-node_type = "n1-standard-2"
+node_type = "n1-highcpu-4"

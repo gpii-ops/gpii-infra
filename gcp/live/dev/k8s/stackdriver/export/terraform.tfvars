@@ -10,4 +10,4 @@ terragrunt = {
 }
 
 # ↓ Module configuration (empty means all default)
-exported_logs_force_destroy = "true"
+exported_logs_force_destroy  = "true"
