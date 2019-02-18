@@ -7,8 +7,10 @@ stages:
   - promote-common-to-prd
   - common-prd
   - dev
+  - plan-all-stg
   - promote-to-stg
   - stg
+  - plan-all-prd
   - promote-to-prd
   - prd
 
@@ -233,6 +235,25 @@ gcp-dev:
   only:
     - master@gpii-ops/gpii-infra
 
+gcp-plan-all-stg:
+  stage: plan-all-stg
+  tags:
+    - gcp
+  environment:
+    name: stg
+  script:
+    - cd gcp/live/stg
+    - rake clobber
+    - rake configure_serviceaccount_ci_restore
+    # Next step is required to restore local tiller certs and prevent
+    # terraform from failing during helm_release.release status checks
+    - rake fetch_helm_certs
+    # Infra requires special treatment because of secrets configuration
+    - rake plain_sh['rake plan_infra'] || true
+    - rake sh['xk plan-all live/stg/k8s 2> /dev/null'] || true
+  only:
+    - master@gpii-ops/gpii-infra
+
 aws-promote-to-stg:
   stage: promote-to-stg
   tags:
@@ -319,6 +340,28 @@ aws-promote-to-prd:
   allow_failure: false
   only:
     - master@gpii-ops/gpii-infra
+
+gcp-plan-all-prd:
+  stage: plan-all-prd
+  variables:
+    RAKE_REALLY_RUN_IN_PRD: "true"
+  tags:
+    - gcp
+  environment:
+    name: prd
+  script:
+    - cd gcp/live/prd
+    - rake clobber
+    - rake configure_serviceaccount_ci_restore
+    # Next step is required to restore local tiller certs and prevent
+    # terraform from failing during helm_release.release status checks
+    - rake fetch_helm_certs
+    # Infra requires special treatment because of secrets configuration
+    - rake plain_sh['rake plan_infra'] || true
+    - rake sh['xk plan-all live/prd/k8s 2> /dev/null'] || true
+  only:
+    - master@gpii-ops/gpii-infra
+
 
 gcp-promote-to-prd:
   stage: promote-to-prd

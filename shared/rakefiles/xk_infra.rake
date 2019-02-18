@@ -133,6 +133,10 @@ task :fix_common_service_account_permissions => [@gcp_creds_file] do
     --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com --role roles/billing.user"
 end
 
+task :plan_infra => [@gcp_creds_file, @app_default_creds_file, :configure_extra_tf_vars] do
+  sh "#{@exekube_cmd} plan-all live/#{@env}/infra 2> /dev/null"
+end
+
 task :apply_infra => [@gcp_creds_file, @app_default_creds_file, :configure_extra_tf_vars] do
   sh "#{@exekube_cmd} up live/#{@env}/infra"
 end
