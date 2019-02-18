@@ -43,6 +43,14 @@ Ask the Ops team to set up an account and train you. (The training doc is [here]
 1. To see a list of other commands you can try: `rake -T`
 1. If something didn't work, see [Troubleshooting / FAQ](#troubleshooting--faq).
 
+### Interacting with an environment
+
+1. `rake display_cluster_info` shows some helpful links.
+1. `rake sh` opens an interactive shell inside a container on the local host that is configured to communicate with your cluster (e.g. via `kubectl` commands).
+   * `rake sh` has some issues with interactive commands (e.g. `less` and `vi`) -- see https://issues.gpii.net/browse/GPII-3407.
+1. `rake plain_sh` is like `rake sh`, but not all configuration is performed. This can be helpful for debugging (e.g. when `rake sh` does not work) and with interactive commands.
+1. To `curl` a single couchdb instance: `kubectl exec --namespace gpii couchdb-couchdb-0 -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/`
+
 ### Tearing down an environment
 
 1. `cd gpii-infra/gcp/live/dev`
