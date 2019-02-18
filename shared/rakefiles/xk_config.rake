@@ -74,7 +74,7 @@ task :configure_extra_tf_vars do
   end
 end
 
-task :fetch_helm_certs do
+task :fetch_helm_certs => [:configure_extra_tf_vars] do
   @secrets = Secrets.collect_secrets()
   Secrets.set_secrets(@secrets)
   sh "
