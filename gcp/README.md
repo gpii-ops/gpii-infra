@@ -129,6 +129,24 @@ If you don't want to deal with gpii-version-updater, you can instead:
 1. Manually delete the component via Kubernetes Dashboard or with `kubectl delete`.
 1. `cd ../gpii-infra/gcp/live/dev && rake`
 
+### My environment is messed up and I want to get rid of it so I can start over
+
+These steps are ordered roughly by difficulty and disruptiveness.
+
+#### Easy, ordinary steps
+
+1. `rake unlock` - if you orphaned a Terraform lock file, e.g. by Ctrl-C during a Terraform run
+1. `rake destroy` - the cleanest way to terminate a cluster. However, it may fail in certain circumstances.
+1. `rake clobber` - cleans up generated files. You will have to authenticate again after clobbering
+
+#### More difficult, disruptive steps
+
+If you're at these steps, you probably want to [ask #ops for help](../CONTACTING-OPS.md).
+
+1. `rake destroy_tfstate` - cleans up terraform state files in Google Storage
+   * **NOTE:** This will "orphan" any resources Terraform created for you previously and will be difficult to recover from
+1. Manually delete resources using the GCP Dashboard: Kubernetes PVs and PVCs, Kubernetes Cluster, Disks, Snapshots, Logging Export rules, Logging Exclusion rules, Network stuff, Network services `->` Cloud DNS, Google Storage buckets.
+
 ### I want to work on a different dev cluster
 
 **Note: this is an advanced / non-standard workflow.** There aren't a lot of guard rails to prevent you from making a mistake. User discretion is advised.
