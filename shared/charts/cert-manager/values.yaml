@@ -54,10 +54,10 @@ extraEnv: []
 # - name: SOME_VAR
 #   value: 'some value'
 
-resources: {}
-  # requests:
-  #   cpu: 10m
-  #   memory: 32Mi
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
 
 # Pod Security Context
 # ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/

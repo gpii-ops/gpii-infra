@@ -67,9 +67,12 @@ Ask the Ops team to set up an account and train you. (The training doc is [here]
    * The `gpii-infra` clone and the `exekube` clone should be siblings in the same directory (there are some references to `../exekube`). This is useful for testing the Terraform modules allocated in the exekube's project. If you want to have those modules in your exekube container uncomment the proper line in the docker-compose.yml file before running any command.
 1. By default you'll use the RtF Organization and Billing Account.
    * You can use a different Organization or Billing Account, e.g. from a GCP Free Trial Account, with `export ORGANIZATION_ID=111111111111` and/or `export BILLING_ID=222222-222222-222222`.
+1. By default your K8s cluster and related resources will be deployed into `us-central1`.
+   * You can use a different GCP region by setting `TF_VAR_infra_region` variable, for example `export TF_VAR_infra_region=us-east1`.
+   * Before changing region you need to destroy all deployed resources, TF state, and secrets with `rake destroy && rake destroy_tfstate && rake destroy_secrets`.
 1. The [Google Cloud Console](https://console.cloud.google.com) includes [Google Cloud Shell](https://cloud.google.com/shell/docs/) which is an interactive terminal embedded in the GCP dashboard. To use it, click on the icon at the top right of the Console, next to the magnifier icon.
    * Once the shell opens in your browser, execute the following to manage the Kubernetes cluster using the embedded `kubectl` command: 
-   1. `gcloud container clusters get-credentials k8s-cluster --zone us-central1` (or whatever your `zone` is)
+   1. `gcloud container clusters get-credentials k8s-cluster --zone YOUR_INFRA_REGION`
    1. `kubectl -n gpii get pods`
 
    It's a Debian GNU/Linux so all the `apt` commands are also available.
@@ -496,7 +499,7 @@ Unless you get errors, that's all. Now you can close the port forwarding as ment
 #### During downtime
 
 * Before performing manual or extraordinary actions, disable the CI/CD pipeline to prevent automated processes from interfering.
-   * On the [Gitlab Project -> Settings -> General page](https://gitlab.com/gpii-ops/gpii-infra/edit), go to "Permissions" and disable "Pipelines". 
+   * On the [Gitlab Project -> Settings -> General page](https://gitlab.com/gpii-ops/gpii-infra/edit), go to "Permissions" and disable "Pipelines".
       * This hides the CI/CD tab on the Project page. If you need to access that view (e.g. to view old pipeline logs), you can still navigate to it [directly](https://gitlab.com/gpii-ops/gpii-infra/pipelines). Note that running/retrying builds is disabled.
 
 #### After downtime

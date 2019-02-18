@@ -34,9 +34,7 @@ variable "exported_logs_storage_class" {
   default = "REGIONAL"
 }
 
-variable "exported_logs_storage_region" {
-  default = "us-central1"
-}
+variable "infra_region" {}
 
 variable "exported_logs_expire_after" {
   default = "14"
@@ -63,7 +61,7 @@ module "gcp_stackdriver_export" {
   exports                      = "${var.exports}"
   exported_logs_force_destroy  = "${var.exported_logs_force_destroy}"
   exported_logs_storage_class  = "${var.exported_logs_storage_class}"
-  exported_logs_storage_region = "${var.exported_logs_storage_region}"
+  exported_logs_storage_region = "${var.infra_region}"
   exported_logs_expire_after   = "${var.exported_logs_expire_after}"
 
   exported_logs_encryption_key = "${lookup(data.terraform_remote_state.secret-mgmt.encryption_keys, "gcp-stackdriver-export")}"

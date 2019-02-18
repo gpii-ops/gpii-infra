@@ -9,7 +9,7 @@ variable tiller_namespace {
 }
 
 # Install Tiller in kube-system namespace with cluster-admin access to all namespaces
-module "helm_initializer" {
+module "system_tiller" {
   source = "/exekube-modules/helm-initializer"
 
   secrets_dir      = "${var.secrets_dir}"

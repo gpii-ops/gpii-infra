@@ -7,8 +7,10 @@ stages:
   - promote-common-to-prd
   - common-prd
   - dev
+  - plan-all-stg
   - promote-to-stg
   - stg
+  - plan-all-prd
   - promote-to-prd
   - prd
 
@@ -121,6 +123,10 @@ common-stg-test-gcp-dev:
     TF_VAR_organization_name: "gpii2test"
     TF_VAR_organization_domain: "test1.gpii.net"
     TF_VAR_aws_zone_id: "Z1T3NF8J9WVBSP"
+    # We override default infra region for dev environments
+    # due to GCP resource exhaustion issues:
+    # https://issues.gpii.net/browse/GPII-3697
+    TF_VAR_infra_region: "us-east1"
     USER: "doe"
   script:
     - cd gcp/live/dev
@@ -202,6 +208,11 @@ gcp-dev:
   stage: dev
   tags:
     - gcp
+  variables:
+    # We override default infra region for dev environments
+    # due to GCP resource exhaustion issues:
+    # https://issues.gpii.net/browse/GPII-3697
+    TF_VAR_infra_region: "us-east1"
   script:
     - cd gcp/live/dev
     - rake clobber
@@ -221,6 +232,25 @@ gcp-dev:
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys || true
     - rake clobber || true
+  only:
+    - master@gpii-ops/gpii-infra
+
+gcp-plan-all-stg:
+  stage: plan-all-stg
+  tags:
+    - gcp
+  environment:
+    name: stg
+  script:
+    - cd gcp/live/stg
+    - rake clobber
+    - rake configure_serviceaccount_ci_restore
+    # Next step is required to restore local tiller certs and prevent
+    # terraform from failing during helm_release.release status checks
+    - rake fetch_helm_certs
+    # Infra requires special treatment because of secrets configuration
+    - rake plain_sh['rake plan_infra'] || true
+    - rake sh['xk plan-all live/stg/k8s 2> /dev/null'] || true
   only:
     - master@gpii-ops/gpii-infra
 
@@ -310,6 +340,28 @@ aws-promote-to-prd:
   allow_failure: false
   only:
     - master@gpii-ops/gpii-infra
+
+gcp-plan-all-prd:
+  stage: plan-all-prd
+  variables:
+    RAKE_REALLY_RUN_IN_PRD: "true"
+  tags:
+    - gcp
+  environment:
+    name: prd
+  script:
+    - cd gcp/live/prd
+    - rake clobber
+    - rake configure_serviceaccount_ci_restore
+    # Next step is required to restore local tiller certs and prevent
+    # terraform from failing during helm_release.release status checks
+    - rake fetch_helm_certs
+    # Infra requires special treatment because of secrets configuration
+    - rake plain_sh['rake plan_infra'] || true
+    - rake sh['xk plan-all live/prd/k8s 2> /dev/null'] || true
+  only:
+    - master@gpii-ops/gpii-infra
+
 
 gcp-promote-to-prd:
   stage: promote-to-prd
