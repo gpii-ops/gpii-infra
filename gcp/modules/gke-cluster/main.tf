@@ -69,7 +69,7 @@ resource "random_id" "cluster_protector" {
     # cluster re-creation):
     #
     # * cd gcp/live/ENV
-    # * rake sh"[sh -c \"cd /project/live/dev/k8s/cluster && terragrunt state rm random_id.cluster_protector\"]"
+    # * rake sh"[sh -c \"cd /project/live/ENV/k8s/cluster && terragrunt state rm random_id.cluster_protector\"]"
     # * Destroy or re-create the cluster (cluster_protector will be re-created)
     # * See also: https://github.com/gpii-ops/gpii-infra/pull/199#issuecomment-463017515
     #
