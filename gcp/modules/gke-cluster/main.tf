@@ -41,6 +41,10 @@ module "gke_cluster" {
     "https://www.googleapis.com/auth/trace.append",
   ]
 
+  # Istio config
+  istio_disabled = false
+  istio_auth     = "AUTH_MUTUAL_TLS"
+
   dashboard_disabled = true
 
   # empty password and username disables legacy basic authentication
