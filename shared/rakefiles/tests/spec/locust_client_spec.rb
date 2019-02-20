@@ -120,6 +120,18 @@ eof
     # A metric from all_distributions
     expect(actual_metrics).to include("100th_percentile" => "300")
   end
+
+  it "collect_metrics does not explode when all_distributions is empty" do
+    empty_all_distributions_csv = <<eof
+"Name","# requests","50%","66%","75%","80%","90%","95%","98%","99%","100%"
+eof
+    empty_all_distributions = CSV.parse(empty_all_distributions_csv)
+    actual_metrics = LocustClient.collect_metrics(all_stats, empty_all_distributions)
+    # A metric from all_stats
+    expect(actual_metrics).to include("num_requests" => 828)
+    # A metric from all_distributions
+    expect(actual_metrics.keys).not_to include("100th_percentile")
+  end
 end
 
 
