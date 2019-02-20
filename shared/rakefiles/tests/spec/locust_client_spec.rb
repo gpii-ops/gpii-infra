@@ -112,8 +112,13 @@ describe LocustClient do
 "Total",828,36,54,74,90,110,140,170,190,300
 eof
   all_distributions = CSV.parse(all_distributions_csv)
-  it "collect_metrics runs" do
-    LocustClient.collect_metrics(all_stats, all_distributions)
+
+  it "collect_metrics collects metrics from all_stats and all_distributions" do
+    actual_metrics = LocustClient.collect_metrics(all_stats, all_distributions)
+    # A metric from all_stats
+    expect(actual_metrics).to include("num_requests" => 828)
+    # A metric from all_distributions
+    expect(actual_metrics).to include("100th_percentile" => "300")
   end
 end
 

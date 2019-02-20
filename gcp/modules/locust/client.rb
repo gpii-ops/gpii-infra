@@ -30,7 +30,7 @@ module LocustClient
       distributions = distributions.reverse.first
       ["100th_percentile", "99th_percentile", "98th_percentile", "95th_percentile", "90th_percentile",
        "80th_percentile", "75th_percentile", "66th_percentile", "50th_percentile"].each do |metric|
-        metrics[metric] = distributions.pop if metrics.key?(metric)
+        metrics[metric] = distributions.pop
       end
     end
 
