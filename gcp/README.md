@@ -19,16 +19,30 @@ Start here if you are a GPII developer who wants to create a personal GPII Cloud
 
 Ask the Ops team to set up an account and train you. (The training doc is [here](../USER-TRAINING.md) if you're curious.)
 
+### Configure browser to use RtF user
+
+Users who already had an RtF email address/Google account usually have performed these steps already.
+
+* [Sign in to your RtF Google Account](https://myaccount.google.com) using your preferred browser.
+   * If you already have another Google Account configured in your preferred browser (e.g. a personal Gmail account), go to the User dropdown on the top-right `->` Add account
+* Ops will provide the email address and password.
+* Google may prompt you for a code from an MFA token.
+   * I think this might happen if an admin creates your account, logs into it to test something, and the account's MFA "grace period" expires.
+   * If this happens, ask an Ops team member to generate Backup Codes for your account and give them to you. You will need these to log in, and to configure MFA (see below).
+* Google will prompt you for a phone number to verify your account. You must pass this step before you can set up MFA.
+   * If you cannot (or do not wish to) provide Google a phone number, an Ops team member can use their own phone number to verify the account. After MFA is configured (see below), the Ops team member can remove their phone number from the user's account.
+
 ### Enable Multi-Factor Authentication (MFA) on your account
 
 * From [Google 2-Step Verification](https://www.google.com/landing/2step/), click Get Started and follow the prompts.
    * I like [Duo](https://duo.com/product/trusted-users/two-factor-authentication/duo-mobile), but any tool from [Amazon's list](https://aws.amazon.com/iam/details/mfa/) should be fine. See also [Google's documentation](https://www.google.com/landing/2step/).
-   * (If you don't have access to a separate device for MFA (smartphone, tablet, hardware device such as a Yubikey), it is acceptable (though not recommended -- especially for administrators) to run an MFA tool on your development machine. A few of us like [Authy](https://authy.com/download/).
+   * If you don't have access to a separate device for MFA (e.g. a smartphone, tablet, or hardware device such as a Yubikey), it is acceptable (though not recommended -- especially for administrators) to run an MFA tool on your development machine. A few of us use [Authy](https://authy.com/download/) for this.
 
 ### Creating an environment
 
-1. Clone this repo.
+1. Clone this repo (or update to the tip of gpii-ops/master).
 1. `cd gpii-infra/gcp/live/dev`
+1. `rake update_exekube`
 1. `rake`
    * The first time you deploy a GPII Cloud (or after you run `rake clobber`), you will be prompted to authenticate **twice**. Follow the instructions in the prompts.
    * If your browser is configured with multiple Google accounts (e.g. a personal Gmail account as well as an RtF Gmail account), make sure to choose the right one when authenticating.
@@ -37,7 +51,8 @@ Ask the Ops team to set up an account and train you. (The training doc is [here]
    * e.g. https://flowmanager.alfredo.dev.gcp.gpii.net
 1. Lots of information about your GPII Cloud is available through the [Google Cloud Console](https://console.cloud.google.com). Some common links:
    * [Kubernetes clusters](https://console.cloud.google.com/kubernetes/list)
-   * [Logs](https://console.cloud.google.com/logs/viewer)
+   * [Logs](https://console.cloud.google.com/logs/viewer?&advancedFilter=search%20text)
+      * I find the "Advanced filter" (drop down at far right of filter box `->` Convert to advanced filter)  less confusing that "Basic mode"
    * [Monitoring, metrics, and alerts](https://app.google.stackdriver.com/)
    * [Storage](https://console.cloud.google.com/storage/browser)
 1. To see a list of other commands you can try: `rake -T`
