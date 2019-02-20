@@ -2,14 +2,12 @@ require "csv"
 require "json"
 require "google/cloud/monitoring"
 
-module Client
+module LocustClient
 
   @project_id = ENV['PROJECT_ID']
 
-  def process_locust_result(locust_stats_file, locust_distribution_file, app_name)
-
+  def self.collect_metrics(all_stats, all_distributions)
     metrics = {}
-    all_stats = JSON.parse(File.read(locust_stats_file))
 
     metrics["user_count"] = all_stats["user_count"]
 
@@ -23,9 +21,8 @@ module Client
       metrics[metric] = stats[metric]
     end
 
-    distributions = CSV.parse(File.read(locust_distribution_file))
-    distributions = distributions.select do |dist|
-      dist.include? "None Total"
+    distributions = all_distributions.select do |dist|
+      dist.include? "Total"
     end
 
     # Only add distributions if we actually have any
@@ -37,13 +34,21 @@ module Client
       end
     end
 
+    return metrics
+  end
+
+  def self.process_locust_result(locust_stats_file, locust_distribution_file, app_name)
+    all_stats = JSON.parse(File.read(locust_stats_file))
+    all_distributions = CSV.parse(File.read(locust_distribution_file))
+    collected_metrics = collect_metrics(all_stats, all_distributions)
+
     metric_service_client = Google::Cloud::Monitoring::Metric.new(version: :v3)
     formatted_name = Google::Cloud::Monitoring::V3::MetricServiceClient.project_path(@project_id)
 
     time_series = []
     time = Time.now.to_i
 
-    metrics.each do |metric, value|
+    collected_metrics.each do |metric, value|
 
       time_series << {
         "metric" => {
