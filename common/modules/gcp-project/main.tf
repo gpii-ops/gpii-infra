@@ -47,49 +47,30 @@ variable "ci_dev_project_regex" {
   default = "/^dev-doe$|^dev-gitlab-runner$/"
 }
 
-# We have to split all GCP APIs required by the project
-# into 3 separate lists, because only some of them produce
-# audit logs, and there is also a discrepancy in naming for storage API:
-# https://cloud.google.com/logging/docs/audit/#services
-
-# List of APIs in use by the project without audit configuration
-variable "apis_without_audit_configuration" {
+variable "service_apis" {
   default = [
     "bigquery-json.googleapis.com",
     "cloudbilling.googleapis.com",
+    "cloudkms.googleapis.com",
     "cloudresourcemanager.googleapis.com",
+    "cloudtrace.googleapis.com",
+    "compute.googleapis.com",
+    "container.googleapis.com",
     "containerregistry.googleapis.com",
     "deploymentmanager.googleapis.com",
+    "dns.googleapis.com",
+    "iam.googleapis.com",
     "iamcredentials.googleapis.com",
+    "logging.googleapis.com",
+    "monitoring.googleapis.com",
     "oslogin.googleapis.com",
     "pubsub.googleapis.com",
     "replicapool.googleapis.com",
     "replicapoolupdater.googleapis.com",
     "resourceviews.googleapis.com",
+    "serviceusage.googleapis.com",
     "stackdriver.googleapis.com",
     "storage-api.googleapis.com",
-  ]
-}
-
-# List of APIs in use by the project with audit configuration
-variable "apis_with_audit_configuration" {
-  default = [
-    "cloudkms.googleapis.com",
-    "cloudtrace.googleapis.com",
-    "compute.googleapis.com",
-    "container.googleapis.com",
-    "dns.googleapis.com",
-    "iam.googleapis.com",
-    "logging.googleapis.com",
-    "monitoring.googleapis.com",
-    "serviceusage.googleapis.com",
-  ]
-}
-
-# List of APIs solely for audit configuration
-variable "apis_solely_for_audit_configuration" {
-  default = [
-    "storage.googleapis.com",
   ]
 }
 
@@ -231,6 +212,22 @@ data "google_iam_policy" "combined" {
       "${local.project_owners}",
     ]
   }
+
+  audit_config {
+    service = "allServices"
+
+    audit_log_configs {
+      log_type = "DATA_READ"
+    }
+
+    audit_log_configs {
+      log_type = "DATA_WRITE"
+    }
+
+    audit_log_configs {
+      log_type = "ADMIN_READ"
+    }
+  }
 }
 
 provider "google" {
@@ -275,9 +272,8 @@ resource "google_project" "project" {
 }
 
 resource "google_project_services" "project" {
-  project = "${google_project.project.project_id}"
-
-  services = "${concat(var.apis_with_audit_configuration, var.apis_without_audit_configuration)}"
+  project  = "${google_project.project.project_id}"
+  services = "${var.service_apis}"
 }
 
 resource "google_project_iam_policy" "project" {
