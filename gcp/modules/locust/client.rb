@@ -6,10 +6,10 @@ module LocustClient
 
   @project_id = ENV['PROJECT_ID']
 
-  def self.collect_metrics(all_stats, all_distributions)
+  def self.collect_metrics(all_stats, all_distributions, user_count)
     metrics = {}
 
-    metrics["user_count"] = all_stats["user_count"]
+    metrics["user_count"] = user_count
 
     stats = all_stats["stats"].select do |stat|
       stat["name"] == "Total"
@@ -37,10 +37,10 @@ module LocustClient
     return metrics
   end
 
-  def self.process_locust_result(locust_stats_file, locust_distribution_file, app_name)
+  def self.process_locust_result(locust_stats_file, locust_distribution_file, app_name, user_count)
     all_stats = JSON.parse(File.read(locust_stats_file))
     all_distributions = CSV.parse(File.read(locust_distribution_file))
-    collected_metrics = collect_metrics(all_stats, all_distributions)
+    collected_metrics = collect_metrics(all_stats, all_distributions, user_count)
 
     metric_service_client = Google::Cloud::Monitoring::Metric.new(version: :v3)
     formatted_name = Google::Cloud::Monitoring::V3::MetricServiceClient.project_path(@project_id)

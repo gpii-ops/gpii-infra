@@ -113,8 +113,10 @@ describe LocustClient do
 eof
   all_distributions = CSV.parse(all_distributions_csv)
 
+  fake_user_count = 11111
+
   it "collect_metrics collects metrics from all_stats and all_distributions" do
-    actual_metrics = LocustClient.collect_metrics(all_stats, all_distributions)
+    actual_metrics = LocustClient.collect_metrics(all_stats, all_distributions, fake_user_count)
     # A metric from all_stats
     expect(actual_metrics).to include("num_requests" => 828)
     # A metric from all_distributions
@@ -126,11 +128,16 @@ eof
 "Name","# requests","50%","66%","75%","80%","90%","95%","98%","99%","100%"
 eof
     empty_all_distributions = CSV.parse(empty_all_distributions_csv)
-    actual_metrics = LocustClient.collect_metrics(all_stats, empty_all_distributions)
+    actual_metrics = LocustClient.collect_metrics(all_stats, empty_all_distributions, fake_user_count)
     # A metric from all_stats
     expect(actual_metrics).to include("num_requests" => 828)
     # A metric from all_distributions
     expect(actual_metrics.keys).not_to include("100th_percentile")
+  end
+
+  it "collect_metrics returns user_count" do
+    actual_metrics = LocustClient.collect_metrics(all_stats, all_distributions, fake_user_count)
+    expect(actual_metrics).to include("user_count" => fake_user_count)
   end
 end
 
