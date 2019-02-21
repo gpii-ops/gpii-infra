@@ -36,11 +36,11 @@ spec:
         {{- end}}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: {{ .Values.preferencesListenPort }}
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: {{ .Values.preferencesListenPort }}
+###        livenessProbe:
+###          httpGet:
+###            path: /health
+###            port: {{ .Values.preferencesListenPort }}
+###        readinessProbe:
+###          httpGet:
+###            path: /ready
+###            port: {{ .Values.preferencesListenPort }}
