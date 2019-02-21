@@ -5,19 +5,21 @@ This repo is designed to fit into a CI/CD scheme: new commits are automatically 
 [GPII Build and Release Overview](https://docs.google.com/presentation/d/1vkVi1iCDSqdfC9YPmpd-xyUJORFtXE72soLtFLHEEcg/view://docs.google.com/presentation/d/1l8qQEvFaml_qgc0fynHScVhWseu0loytcYaFP_m0tBs/view) - overview of how GPII is built, tested, and deployed to the public cloud
 [A more detailed view of CI/CD](https://docs.google.com/presentation/d/1vkVi1iCDSqdfC9YPmpd-xyUJORFtXE72soLtFLHEEcg/view) - this one has more about gpii-version-updater
 
-## Configure AWS
+## One-time setup steps
 
-   * One design goal of this infrastructure is to use the same code to spin up clusters for development and production. This model bumps up against some of Amazon's (fairly conservative) default limits for various resource types. Usually this kind of failure is obvious from the error message returned by AWS ("Your quota allows for 0 more running instance(s).").
-      * The general procedure for increasing a limit is: web search "aws <name of thing> limit", find Amazon documentation about the limit, click link in documentation to service request form for increasing said limit, wait for response from Amazon support.
-      * Limits we've hit and increased: number of VPCs, number of ASGs, number of EC2 Instances (t2.micro through t2.large).
+### Configure GCP
 
-## Configure Github
+1. Log in to the CI Worker as `gitlab-runner` and clone this repo.
+   * It would be better to do this as a non-shared account, but the way Ruby is installed on the CI worker makes this difficult.
+1. `cd gpii-infra/ && rake -f rakefiles/ci_save_all.rake` and follow the authentication prompts.
+
+### Configure Github
 
    * Create a role account `gpii-bot` for use by `gitlab-runner`. Add it to the `gpii-ops` Organization. Add it to the `gpii-infra` repo as a Collaborator with Write access.
       * You'll need to accept the invitation using `gpii-bot`'s Github account.
    * Create an ssh key. Associate the public key with the `gpii-bot` Github account. Save the private key as `~gitlab-runner/.ssh/id_rsa.gpii-ci`.
 
-## Configure Gitlab
+### Configure Gitlab
 
    * Import the `gpii-infra` repo from Github into the `gpii-ops` Gitlab organization.
       * In that repo, disable all Shared Runners.
@@ -26,31 +28,37 @@ This repo is designed to fit into a CI/CD scheme: new commits are automatically 
    * Create a role account `gpii-bot` for use by `gitlab-runner`. Add it to the `gpii-ops` Organization with `Master` permissions.
    * Associate the public key above (from Github) with the `gpii-bot` Gitlab account.
 
-### Configure Gitlab Secret Variables
+#### Configure Gitlab Secret Variables
 
 Until we have better credential management (i.e. Vault integration), we fall back to that oldest of techniques: injection via environment variables stored in a safe place -- [Gitlab Secret Variables](https://gitlab.com/gpii-ops/gpii-infra/settings/ci_cd).
 
 Examples of things that get credentials this way include: CouchDB, Alertmanager. For an exhaustive list, see [`:setup_secrets`](https://github.com/gpii-ops/gpii-infra/blob/master/modules/deploy/Rakefile).
 
-## Configure Docker Hub
+### Configure Docker Hub
 
    * Create a [Docker Hub](https://hub.docker.com) account `gpiibot` for use by `gitlab-runner`. Add it to the `Owners` group of the `gpii` Organization.
 
-## Configure a build node
+### Configure a build node
 
    * Add the Gitlab Project and Registration Token from [Configure Gitlab](CI-CD.md#configure-gitlab) to `vault.yml`.
    * Apply the ansible role [ansible-gpii-ci-worker](https://github.com/idi-ops/ansible-gpii-ci-worker) to the build node.
       * The [internal ansible repo](https://github.com/inclusive-design/ops) has a playbook to do this: `config_host_gpii_ci_worker.yml`.
 
-### Set up credentials
+### gpii-version-updater
+
+   * There is a standalone system for managing the versions of GPII components running on this infrastructure, via [shared/versions.yml](shared/versions.yml). See the [gpii-version-updater repo](https://github.com/gpii-ops/gpii-version-updater).
+
+### Configure AWS (DEPRECATED)
+
+   * One design goal of this infrastructure is to use the same code to spin up clusters for development and production. This model bumps up against some of Amazon's (fairly conservative) default limits for various resource types. Usually this kind of failure is obvious from the error message returned by AWS ("Your quota allows for 0 more running instance(s).").
+      * The general procedure for increasing a limit is: web search "aws <name of thing> limit", find Amazon documentation about the limit, click link in documentation to service request form for increasing said limit, wait for response from Amazon support.
+      * Limits we've hit and increased: number of VPCs, number of ASGs, number of EC2 Instances (t2.micro through t2.large).
+
+### Set up credentials (DEPRECATED)
 
    * [Set up .ssh with gpii-key.pem](README.md#configure-ssh).
       * Make sure the private key associated with the gitlab-runner Github account is available at `~gitlab-runner/.ssh/id_rsa.gpii-ci`.
    * [Configure AWS creds](README.md#install-packages) for `gitlab-runner`.
-
-## gpii-version-updater
-
-   * There is a standalone system for managing the versions of GPII components running on this infrastructure, via [shared/versions.yml](shared/versions.yml). See the [gpii-version-updater repo](https://github.com/gpii-ops/gpii-version-updater).
 
 ## Running manually in non-dev environments (stg, prd)
 

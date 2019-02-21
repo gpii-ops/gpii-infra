@@ -73,13 +73,14 @@ From the root of the repository:
 
 ## Adding a dev project
 
-The projects are defined in the directory tree `common/live/stg/infra/`. To add a new user make a copy of the user `john`, edit the file john/terraform.tfvars and change the `project_name` variable. Example:
+The projects are defined in the directory tree `common/live/stg/infra/`. To add a new user make a copy of the user `john`, edit the file john/terraform.tfvars and change the `project_*` variables. Example:
 
 ```
 cd common/live/stg/infra/
 cp -r john $USER
 #(edit $USER/terraform.tfvars)
   project_name = "dev-$USER"
+  project_owner = "user:$USER@RtF"
 #(save)
 cd common/live/stg/
 rake apply_infra
