@@ -79,3 +79,8 @@ Rake commands:
 
   * `rake grant_owner_role` Attaches the owner role to the current user account
   * `rake revoke_owner_role` Removes the owner role from the current user account
+
+  In the case of a developer's dev project:
+
+  * `USER=<developer_user> rake grant_owner_role`
+  * `USER=<developer_user> rake revoke_owner_role`
