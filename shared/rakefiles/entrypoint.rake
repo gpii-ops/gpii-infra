@@ -79,7 +79,7 @@ task :deploy => [:set_vars, :apply_infra] do
 end
 
 desc "Display some handy info about the cluster"
-task :display_cluster_info do
+task :display_cluster_info => [:set_vars] do
   puts
   puts
   puts "*************************************************"
@@ -90,7 +90,7 @@ task :display_cluster_info do
   puts "  https://console.cloud.google.com/home/dashboard?organizationId=#{ ENV["TF_VAR_organization_id"] }&project=#{ ENV["TF_VAR_project_id"] }"
   puts
   puts "Stackdriver Logging Dashboard:"
-  puts "  https://console.cloud.google.com/logs/viewer?project=#{ ENV["TF_VAR_project_id"] }&organizationId=#{ ENV["TF_VAR_organization_id"] }"
+  puts "  https://console.cloud.google.com/logs/viewer?project=#{ ENV["TF_VAR_project_id"] }&organizationId=#{ ENV["TF_VAR_organization_id"] }&advancedFilter=search%20text"
   puts
   puts "Stackdriver Monitoring Dashboard:"
   puts "  https://app.google.stackdriver.com/?project=#{ ENV["TF_VAR_project_id"] }"
