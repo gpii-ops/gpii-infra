@@ -250,6 +250,10 @@ Solution is to run `rake deploy_module['k8s/kube-system/helm-initializer']`.
 
 This some times happens, when Stackdriver Ruby client is trying to apply alerting policy on newly created log-based metric. Solution is to wait 5-10 minutes and try again.
 
+### [ERROR]: Deadline exceeded while destroying resources!
+
+The most common solution for this is to [create your Stackdriver Workspace](README.md#one-time-stackdriver-workspace-setup).
+
 ## Common plumbing
 
 The environments that run in GCP need some initial resources that must be created by an administrator first. The [common part of this repository](../common) has the code and the instructions to do so.
