@@ -20,11 +20,12 @@ jobs:
       - checkout
       - run:
           name: GCP Unit Tests
+          # 'bundle install' must not use '--path. See Gemfile for more details.
           command: |
             echo "Running GCP unit tests...";
             cd /workspace/shared/rakefiles/tests;
             gem install bundler --no-ri --no-rdoc -v 1.17.3;
-            bundle install --path "vendor/bundle";
+            bundle install;
             rake
 
   aws-unit-tests:
