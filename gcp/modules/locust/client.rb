@@ -80,8 +80,9 @@ module LocustClient
 
     begin
       metric_service_client.create_time_series(formatted_name, time_series)
-    rescue Google::Gax::RetryError
+    rescue Google::Gax::RetryError => err
       puts "[ERROR]: Error while submitting metrics to Stackdriver (Google::Gax::RetryError)."
+      puts err.message
       exit 120
     end
   end
