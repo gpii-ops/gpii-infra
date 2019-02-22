@@ -1,4 +1,17 @@
 source 'https://rubygems.org'
 
+# The gems in this group can't be built inside the Exekube container (where
+# CircleCI runs these tests). Hence, these versions must match the versions in
+# the Exekube image built so that bundler will use the already-installed gems
+# instead of trying to build gems it cannot build.
+#
+# Also, bundler running inside the Exekube container must not use '--path', as
+# that will prevent bundler from picking up and using already-installed system
+# gems.
+group :use_gem_installed_in_exekube do
+  gem "google-cloud-monitoring", "0.29.2"
+  gem "grpc", "1.17.1"
+end
+
 gem "rake"
 gem "rspec"
