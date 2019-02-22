@@ -38,6 +38,17 @@ Users who already had an RtF email address/Google account usually have performed
    * I like [Duo](https://duo.com/product/trusted-users/two-factor-authentication/duo-mobile), but any tool from [Amazon's list](https://aws.amazon.com/iam/details/mfa/) should be fine. See also [Google's documentation](https://www.google.com/landing/2step/).
    * If you don't have access to a separate device for MFA (e.g. a smartphone, tablet, or hardware device such as a Yubikey), it is acceptable (though not recommended -- especially for administrators) to run an MFA tool on your development machine. A few of us use [Authy](https://authy.com/download/) for this.
 
+### One-time Stackdriver Workspace setup
+
+1. Go to [Stackdriver Monitoring Overview](https://app.google.stackdriver.com), you will be redirected to Project Setup page if needed.
+1. Select "Create a new Workspace". Click "Continue".
+1. Make sure that you see your project id under "Google Cloud Platform project". Click "Create workspace".
+1. Make sure that only your project is selected under "Add Google Cloud Platform projects to monitor". Click "Continue".
+1. Click "Skip AWS Setup".
+1. Click "Continue".
+1. Select desired reports frequency under "Get Reports by Email". Click "Continue".
+1. Finished initial collection! Click "Launch Monitoring".
+
 ### Creating an environment
 
 1. Clone this repo (or update to the tip of gpii-ops/master).
@@ -239,6 +250,10 @@ Solution is to run `rake deploy_module['k8s/kube-system/helm-initializer']`.
 
 This some times happens, when Stackdriver Ruby client is trying to apply alerting policy on newly created log-based metric. Solution is to wait 5-10 minutes and try again.
 
+### [ERROR]: Deadline exceeded while destroying resources!
+
+The most common solution for this is to [create your Stackdriver Workspace](README.md#one-time-stackdriver-workspace-setup).
+
 ## Common plumbing
 
 The environments that run in GCP need some initial resources that must be created by an administrator first. The [common part of this repository](../common) has the code and the instructions to do so.
@@ -278,16 +293,7 @@ Due to the lack of Terraform integration we use [Ruby client](https://github.com
 
 ### One-time Stackdriver Workspace setup
 
-Manual workspace configuration is required in case you never used Stackdriver in your project before.
-
-1. Go to [Stackdriver Monitoring Overview](https://app.google.stackdriver.com), you will be redirected to Project Setup page if needed.
-1. Select "Create a new Workspace". Click "Continue".
-1. Make sure that you see your project id under "Google Cloud Platform project". Click "Create workspace".
-1. Make sure that only your project is selected under "Add Google Cloud Platform projects to monitor". Click "Continue".
-1. Click "Skip AWS Setup".
-1. Click "Continue".
-1. Select desired reports frequency under "Get Reports by Email". Click "Continue".
-1. Finished initial collection! Click "Launch Monitoring".
+See [Getting started: One-time Stackdriver Workspace setup](README.md#one-time-stackdriver-workspace-setup)
 
 ### To add new resource / debug existing resources:
 1. Add new resource / modify existing resource using corresponding Stackdriver Dashboard. **Supported resources are:**
