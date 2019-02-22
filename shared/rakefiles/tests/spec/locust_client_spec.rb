@@ -135,6 +135,142 @@ eof
     expect(actual_metrics.keys).not_to include("100th_percentile")
   end
 
+  it "collect_metrics does not explode when fake_stats has only failures" do
+    fail_stats = {
+      "current_response_time_percentile_50" => nil,
+      "current_response_time_percentile_95" => nil,
+      "errors" => [
+        {
+          "error" => "'SSLError(MaxRetryError(\"HTTPSConnectionPool(host=\\'preferences.stepan.dev.gcp.gpii.net\\', port=443): Max retries exceeded with url: /preferences/carla (Caused by SSLError(SSLError(1, \\'[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:841)\\'),))\",),)'",
+          "method" => "GET",
+          "name" => "/preferences/carla",
+          "occurences" => 133
+        },
+        {
+          "error" => "'SSLError(MaxRetryError(\"HTTPSConnectionPool(host=\\'preferences.stepan.dev.gcp.gpii.net\\', port=443): Max retries exceeded with url: /preferences/omar (Caused by SSLError(SSLError(1, \\'[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:841)\\'),))\",),)'",
+          "method" => "GET",
+          "name" => "/preferences/omar",
+          "occurences" => 146
+        },
+        {
+          "error" => "'SSLError(MaxRetryError(\"HTTPSConnectionPool(host=\\'preferences.stepan.dev.gcp.gpii.net\\', port=443): Max retries exceeded with url: /preferences/vladimir (Caused by SSLError(SSLError(1, \\'[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:841)\\'),))\",),)'",
+          "method" => "GET",
+          "name" => "/preferences/vladimir",
+          "occurences" => 121
+        },
+        {
+          "error" => "'SSLError(MaxRetryError(\"HTTPSConnectionPool(host=\\'preferences.stepan.dev.gcp.gpii.net\\', port=443): Max retries exceeded with url: /preferences/telugu (Caused by SSLError(SSLError(1, \\'[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:841)\\'),))\",),)'",
+          "method" => "GET",
+          "name" => "/preferences/telugu",
+          "occurences" => 142
+        },
+        {
+          "error" => "'SSLError(MaxRetryError(\"HTTPSConnectionPool(host=\\'preferences.stepan.dev.gcp.gpii.net\\', port=443): Max retries exceeded with url: /preferences/wayne (Caused by SSLError(SSLError(1, \\'[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:841)\\'),))\",),)'",
+          "method" => "GET",
+          "name" => "/preferences/wayne",
+          "occurences" => 121
+        }
+      ],
+      "fail_ratio" => 1.0,
+      "slaves" => [
+        {
+          "id" => "locust-worker-85f6779589-4hnzm_5414a9ea54f6cc2e4dfbe842b75778d0",
+          "state" => "running",
+          "user_count" => 17
+        },
+        {
+          "id" => "locust-worker-85f6779589-s5jsk_24896bab2927be6afe06b1e793ec8a76",
+          "state" => "ready",
+          "user_count" => 0
+        },
+        {
+          "id" => "locust-worker-85f6779589-gzs4x_d123fe4e78ba77cc08a76f83c1718cf0",
+          "state" => "ready",
+          "user_count" => 0
+        }
+      ],
+      "state" => "running",
+      "stats" => [
+        {
+          "avg_content_length" => 0,
+          "avg_response_time" => 0,
+          "current_rps" => 0.0,
+          "max_response_time" => 0,
+          "median_response_time" => 0,
+          "method" => "GET",
+          "min_response_time" => 0,
+          "name" => "/preferences/carla",
+          "num_failures" => 133,
+          "num_requests" => 0
+        },
+        {
+          "avg_content_length" => 0,
+          "avg_response_time" => 0,
+          "current_rps" => 0.0,
+          "max_response_time" => 0,
+          "median_response_time" => 0,
+          "method" => "GET",
+          "min_response_time" => 0,
+          "name" => "/preferences/omar",
+          "num_failures" => 146,
+          "num_requests" => 0
+        },
+        {
+          "avg_content_length" => 0,
+          "avg_response_time" => 0,
+          "current_rps" => 0.0,
+          "max_response_time" => 0,
+          "median_response_time" => 0,
+          "method" => "GET",
+          "min_response_time" => 0,
+          "name" => "/preferences/telugu",
+          "num_failures" => 142,
+          "num_requests" => 0
+        },
+        {
+          "avg_content_length" => 0,
+          "avg_response_time" => 0,
+          "current_rps" => 0.0,
+          "max_response_time" => 0,
+          "median_response_time" => 0,
+          "method" => "GET",
+          "min_response_time" => 0,
+          "name" => "/preferences/vladimir",
+          "num_failures" => 121,
+          "num_requests" => 0
+        },
+        {
+          "avg_content_length" => 0,
+          "avg_response_time" => 0,
+          "current_rps" => 0.0,
+          "max_response_time" => 0,
+          "median_response_time" => 0,
+          "method" => "GET",
+          "min_response_time" => 0,
+          "name" => "/preferences/wayne",
+          "num_failures" => 121,
+          "num_requests" => 0
+        },
+        {
+          "avg_content_length" => 0,
+          "avg_response_time" => 0,
+          "current_rps" => 0.0,
+          "max_response_time" => 0,
+          "median_response_time" => 0,
+          "method" => nil,
+          "min_response_time" => 0,
+          "name" => "Total",
+          "num_failures" => 663,
+          "num_requests" => 0
+        }
+      ],
+      "total_rps" => 0.0,
+      "user_count" => 17
+    }
+    actual_metrics = LocustClient.collect_metrics(fail_stats, fake_distributions, fake_user_count)
+    # If this doesn't raise an exception, we're ok.
+  end
+
   it "collect_metrics uses user_count" do
     actual_metrics = LocustClient.collect_metrics(fake_stats, fake_distributions, fake_user_count)
     expect(actual_metrics).to include("user_count" => fake_user_count)
