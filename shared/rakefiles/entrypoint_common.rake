@@ -7,12 +7,12 @@ task :apply_common_infra => [:set_vars, :configure_aws_restore] do
   sh "#{@exekube_cmd} rake apply_common_infra"
 end
 
-desc "[ONLY ADMIN] Fix the permissions for the common service account"
-task :fix_common_service_account_permissions => [:set_vars] do
-  # This task sets the permissions of the common service account for creating the
+desc "[ONLY ADMIN] Fix the permissions for admin accounts in the organization"
+task :fix_organization_permissions => [:set_vars] do
+  # This task sets the permissions in the organization for creating the
   # projects and for setting the IAMs needed to manage such projects.
   #
   # Due to the needed permissions for setting such permissions, only an
   # administrator of the organization must run this task.
-  sh "#{@exekube_cmd} rake fix_common_service_account_permissions"
+  sh "#{@exekube_cmd} rake fix_organization_permissions"
 end
