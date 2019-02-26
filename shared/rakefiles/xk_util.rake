@@ -71,6 +71,22 @@ task :destroy_sa_keys => [@gcp_creds_file, :configure_extra_tf_vars] do
   "
 end
 
+task :display_cluster_state => [:configure] do
+  puts
+  puts "**************"
+  puts "Cluster state:"
+  puts "**************"
+  puts
+  for cmd in [
+    "kubectl -n gpii get all",
+    "kubectl -n gpii get pv",
+    "kubectl -n gpii get pvc",
+    "kubectl -n gpii get events",
+  ]
+    sh "timeout -t 30 #{cmd}"
+  end
+end
+
 # This task attaches the owner role to the current user
 task :grant_owner_role => [@gcp_creds_file, :configure_extra_tf_vars] do
   sh "
@@ -84,3 +100,5 @@ task :revoke_owner_role => [@gcp_creds_file, :configure_extra_tf_vars] do
     gcloud projects remove-iam-policy-binding \"$TF_VAR_project_id\" --member user:\"$TF_VAR_auth_user_email\" --role roles/owner
   "
 end
+
+# vim: et ts=2 sw=2:
