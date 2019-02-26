@@ -82,6 +82,8 @@ task :display_cluster_state => [:configure] do
     "kubectl -n gpii get pv -o wide",
     "kubectl -n gpii get pvc -o wide",
     "kubectl -n gpii get events -o wide",
+    "kubectl -n locust get all -o wide",
+    "kubectl -n locust get events -o wide",
   ]
     sh "timeout -t 30 #{cmd}"
   end
