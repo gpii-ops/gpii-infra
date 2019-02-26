@@ -138,6 +138,7 @@ common-stg-test-gcp-dev:
   after_script:
     # Clean up dev environment even if one of the previous steps fails
     - cd gcp/live/dev
+    - rake display_cluster_state
     # We need to chain the following into a single command to prevent various issues
     # caused by subsequent after script commands when destroy task fails.
     # More info: https://issues.gpii.net/browse/GPII-3488
@@ -223,6 +224,7 @@ gcp-dev:
   after_script:
     # Clean up even if something failed.
     - cd gcp/live/dev
+    - rake display_cluster_state
     # We need to chain the following into a single command to prevent various issues
     # caused by subsequent after script commands when destroy task fails.
     # More info: https://issues.gpii.net/browse/GPII-3488
@@ -316,6 +318,7 @@ gcp-stg:
   after_script:
     # Clean up even if something failed.
     - cd gcp/live/stg
+    - rake display_cluster_state
     # Destroy Locust module (used for smoke tests) and its TF state
     - rake destroy_module[locust] || true
     - rake destroy_tfstate[locust] || true
@@ -416,6 +419,7 @@ gcp-prd:
   after_script:
     # Clean up even if something failed.
     - cd gcp/live/prd
+    - rake display_cluster_state
     # Destroy Locust module (used for smoke tests) and its TF state
     - rake destroy_module[locust] RAKE_REALLY_DESTROY_IN_PRD=true || true
     - rake destroy_tfstate[locust] RAKE_REALLY_DESTROY_IN_PRD=true || true
