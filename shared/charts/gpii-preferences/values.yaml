@@ -28,9 +28,6 @@ issuerRef:
 dnsNames:
 - preferences.test.local
 
-ingress:
-  disableSslRedirect: false
-
 nameOverride: preferences
 
 ## Optional resource requests and limits for deployment
