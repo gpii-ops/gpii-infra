@@ -78,10 +78,10 @@ task :display_cluster_state => [:configure] do
   puts "**************"
   puts
   for cmd in [
-    "kubectl -n gpii get all",
-    "kubectl -n gpii get pv",
-    "kubectl -n gpii get pvc",
-    "kubectl -n gpii get events",
+    "kubectl -n gpii get all -o wide",
+    "kubectl -n gpii get pv -o wide",
+    "kubectl -n gpii get pvc -o wide",
+    "kubectl -n gpii get events -o wide",
   ]
     sh "timeout -t 30 #{cmd}"
   end
