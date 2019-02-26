@@ -144,20 +144,41 @@ resource "null_resource" "couchdb_enable_pv_backups" {
 }
 
 resource "null_resource" "couchdb_destroy_pvcs" {
+  count = "${var.execute_destroy_pvcs == "true" ? 1 : 0}"
+
   provisioner "local-exec" {
     when = "destroy"
 
     command = <<EOF
-      if [ "${var.execute_destroy_pvcs}" == "true" ]; then
-        for PVC in $(kubectl get pvc --namespace ${var.release_namespace} -o json | jq --raw-output '.items[] | select(.metadata.name | startswith("database-storage-couchdb")) | .metadata.name'); do
-          timeout -t 600 kubectl --namespace ${var.release_namespace} delete --ignore-not-found --grace-period=300 pvc $PVC
+      for PVC in "$(kubectl get pvc --namespace ${var.release_namespace} -o json | jq -r '.items[] | select(.metadata.name | startswith("database-storage-couchdb")) | .metadata.name')"; do
+        timeout -t 600 kubectl -n ${var.release_namespace} delete --ignore-not-found --grace-period=300 pvc $PVC
+      done
+      for PV in "$(kubectl get pv -o json | jq -r '.items[] | select (.spec.claimRef.name | startswith("database-storage-couchdb")) | select(.spec.claimRef.namespace == "${var.release_namespace}") | .metadata.name')"; do
+        timeout -t 600 kubectl delete --ignore-not-found --grace-period=300 pv $PV
+      done
+      # Some times GCP disks persist even after PVC and PVs destruction, removing them with gcloud to not leave stale resources behind
+      # More info: https://issues.gpii.net/browse/GPII-3743
+      RETRIES=10
+      RETRY_COUNT=1
+      while [ "$DISKS_DELETED" != "true" ]; do
+        DISKS_DELETED="true"
+        echo "[Try $RETRY_COUNT of $RETRIES] Deleting CouchDB disks..."
+        for DISK in $(gcloud compute disks list --filter description:couchdb --format json | jq -c '.[]'); do
+          echo "Trying to delete $(echo $DISK | jq -r .name)..."
+          timeout -t 60 gcloud compute disks delete $(echo $DISK | jq -r .selfLink) --quiet 2> /dev/null
+          if [ "$?" != "0" ]; then
+            DISKS_DELETED="false"
+          fi
         done
-        # Some times GCP disks persist even after PVC destruction, removing them with gcloud to not leave stale resources behind
-        # More info: https://issues.gpii.net/browse/GPII-3743
-        for DISK in $(gcloud compute disks list --filter description:couchdb --format json | jq -r -c .[].name); do
-          timeout -t 600 gcloud beta compute disks delete $DISK --quiet --region ${var.infra_region} 2> /dev/null || true
-        done
-      fi
+        if [ "$RETRY_COUNT" == "$RETRIES" ]; then
+          echo "Retry limit reached, giving up!"
+          exit 1
+        fi
+        if [ "$DISKS_DELETED" != "true" ]; then
+          sleep 10
+        fi
+        RETRY_COUNT=$(($RETRY_COUNT+1))
+      done
     EOF
   }
 }
