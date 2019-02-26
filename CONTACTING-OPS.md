@@ -8,7 +8,19 @@ If there is an emergency -- production is down right before a big demo, an attac
 1. If you don't have an account on the RtF Slack, skip the next few steps.
 1. Go to [#ops in Slack](https://raisingthefloor.slack.com/messages/ops/). Ask for help using `@here`. [More on Slack announcements](https://get.slack.help/hc/en-us/articles/202009646-Make-an-announcement).
 1. Go to [#ops in Slack](https://raisingthefloor.slack.com/messages/ops/). Ask for help using `@channel`.
-1. Email `ops at raisingthefloor dot org`.
+1. Email `ops at raisingthefloor dot org`. Please, attach as much detail of the issue as you can. A good template for such email could be:
+
+```
+Subject: [Type here a short description of the issue]
+Body of the message:
+
+* Location of the PC that has issue
+* When it happens
+* Actual behavior
+* Expected behavior
+
+Please, attach any screenshot, detailed error messages or any other details that are needed to diagnose the problem.
+```
 
 ## There is an operational emergency (production is broken, there's been a security breach, etc.)
 
@@ -24,16 +36,4 @@ If you have exhausted the contact steps above, move on to these steps only for e
    * If possible, pick an engineer who is in the middle of their work day over an engineer who is likely asleep. Timezone information is in [Contact info](https://docs.google.com/document/d/1EDYhWYipUluzG6K8S-W4clsAGInm2RdjkpKq9Lw_dhE/edit)
    * Repeat until you've reached an Ops engineer, or exhausted the list of Ops engineers (likely-awake or otherwise).
 1. [#ops in Slack](https://raisingthefloor.slack.com/messages/ops/), Skype, text, or call Sandra, Colin, or Gregg. These people may know where to find an Ops engineer.
-1. Email `ops at raisingthefloor dot org`. Please, attach as much detail of the issue as you can. A good template for such email could be:
-
-```
-Subject: [Type here a short description of the issue]
-Body of the message:
-
-* Location of the issue
-* When it happens
-* Actual behavior
-* Expected behavior
-
-Please, attach any picture, detailed error messages or any other details that are needed to diagnose the problem.
-```
+1. Email `ops at raisingthefloor dot org`, using the above template in order to provide a detailed description of the emergency.
