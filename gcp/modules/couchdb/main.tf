@@ -2,6 +2,7 @@ terraform {
   backend "gcs" {}
 }
 
+variable "infra_region" {}
 variable "secrets_dir" {}
 variable "charts_dir" {}
 variable "nonce" {}
@@ -20,6 +21,7 @@ variable "pv_reclaim_policy" {}
 variable "pv_storage_class" {}
 variable "pv_provisioner" {}
 variable "execute_destroy_pvcs" {}
+variable "execute_recover_pvcs" {}
 
 # Secret variables
 
@@ -28,7 +30,7 @@ variable "secret_couchdb_admin_username" {}
 variable "secret_couchdb_auth_cookie" {}
 
 data "template_file" "couchdb_values" {
-  depends_on = ["null_resource.couchdb_recover"]
+  depends_on = ["null_resource.couchdb_recover_pvcs"]
   template   = "${file("values.yaml")}"
 
   vars {
@@ -149,6 +151,11 @@ resource "null_resource" "couchdb_destroy_pvcs" {
       if [ "${var.execute_destroy_pvcs}" == "true" ]; then
         for PVC in $(kubectl get pvc --namespace ${var.release_namespace} -o json | jq --raw-output '.items[] | select(.metadata.name | startswith("database-storage-couchdb")) | .metadata.name'); do
           timeout -t 600 kubectl --namespace ${var.release_namespace} delete --ignore-not-found --grace-period=300 pvc $PVC
+        done
+        # Some times GCP disks persist even after PVC destruction, removing them with gcloud to not leave stale resources behind
+        # More info: https://issues.gpii.net/browse/GPII-3743
+        for DISK in $(gcloud compute disks list --filter description:couchdb --format json | jq -r -c .[].name); do
+          timeout -t 600 gcloud beta compute disks delete $DISK --quiet --region ${var.infra_region} 2> /dev/null || true
         done
       fi
     EOF
