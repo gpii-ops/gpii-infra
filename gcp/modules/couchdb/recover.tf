@@ -2,7 +2,9 @@
 # We need it to avoid data loss during forceful cluster re-creation
 # https://issues.gpii.net/browse/GPII-3493
 
-resource "null_resource" "couchdb_recover" {
+resource "null_resource" "couchdb_recover_pvcs" {
+  count = "${var.execute_recover_pvcs == "true" ? 1 : 0}"
+
   triggers = {
     nonce = "${var.nonce}"
   }
