@@ -72,6 +72,7 @@ Users who already had an RtF email address/Google account usually have performed
 ### Interacting with an environment
 
 1. `rake display_cluster_info` shows some helpful links.
+1. `rake display_cluster_state` shows debugging info about the current state of the cluster. This output can be helpful when asking for help.
 1. `rake sh` opens an interactive shell inside a container on the local host that is configured to communicate with your cluster (e.g. via `kubectl` commands).
    * `rake sh` has some issues with interactive commands (e.g. `less` and `vi`) -- see https://issues.gpii.net/browse/GPII-3407.
 1. `rake plain_sh` is like `rake sh`, but not all configuration is performed. This can be helpful for debugging (e.g. when `rake sh` does not work) and with interactive commands.
