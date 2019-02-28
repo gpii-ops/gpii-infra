@@ -29,9 +29,6 @@ issuerRef:
 dnsNames:
 - flowmanager.test.local
 
-ingress:
-  disableSslRedirect: false
-
 nameOverride: flowmanager
 
 ## Optional resource requests and limits for deployment

@@ -2,7 +2,7 @@ Name: locust
 
 image:
   repository: gpii/locust
-  tag: 0.9.0-gpii.1
+  tag: 0.9.0-gpii.2
   pullPolicy: IfNotPresent
   pullSecrets: []
 
