@@ -126,7 +126,7 @@ common-stg-test-gcp-dev:
     # We override default infra region for dev environments
     # due to GCP resource exhaustion issues:
     # https://issues.gpii.net/browse/GPII-3697
-    TF_VAR_infra_region: "us-east1"
+    TF_VAR_infra_region: "us-east4"
     USER: "doe"
   script:
     - cd gcp/live/dev
@@ -213,7 +213,7 @@ gcp-dev:
     # We override default infra region for dev environments
     # due to GCP resource exhaustion issues:
     # https://issues.gpii.net/browse/GPII-3697
-    TF_VAR_infra_region: "us-east1"
+    TF_VAR_infra_region: "us-east4"
   script:
     - cd gcp/live/dev
     - rake clobber
