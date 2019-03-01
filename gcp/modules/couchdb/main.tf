@@ -2,7 +2,6 @@ terraform {
   backend "gcs" {}
 }
 
-variable "infra_region" {}
 variable "secrets_dir" {}
 variable "charts_dir" {}
 variable "nonce" {}
