@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: {{ .Release.Namespace | quote }}
+  name: {{ template "flowmanager.name" . }}-ingress
+  {{- if .Values.ingress.disableSslRedirect }}
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  {{- end }}
+spec:
+  tls:
+    - hosts:
+      {{ toYaml .Values.dnsNames | indent 6 }}
+      secretName: {{ template "flowmanager.name" . }}-tls
+  rules:
+    - host: {{ .Values.dnsNames | first }}
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: {{ template "flowmanager.name" . }}
+            servicePort: {{ .Values.svcListenPort }}
