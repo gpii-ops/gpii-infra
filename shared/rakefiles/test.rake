@@ -1,7 +1,3 @@
-task :set_test_protocol do
-  @protocol = (@env == "dev" ? "http" : "https")
-end
-
 task :test do
   sh "#{@exekube_cmd} rake xk['down live/#{@env}/locust',skip_secret_mgmt] || true"
   Rake::Task[:destroy_tfstate].invoke('locust')
@@ -23,8 +19,8 @@ task :test do
 end
 
 desc "[TEST] Run Locust swarm against Preferences service in current cluster"
-task :test_preferences => [:set_vars, :check_destroy_allowed, :set_test_protocol,] do
-  ENV["TF_VAR_locust_target_host"] = "#{@protocol}://preferences.#{ENV["TF_VAR_domain_name"]}"
+task :test_preferences => [:set_vars, :check_destroy_allowed] do
+  ENV["TF_VAR_locust_target_host"] = "https://preferences.#{ENV["TF_VAR_domain_name"]}"
   ENV["TF_VAR_locust_target_app"] = "preferences"
   ENV["TF_VAR_locust_script"] = "preferences.py"
   ENV["TF_VAR_locust_desired_median_response_time"] = "300"
@@ -36,8 +32,8 @@ task :test_preferences => [:set_vars, :check_destroy_allowed, :set_test_protocol
 end
 
 desc "[TEST] Run Locust swarm against Flowmanager service in current cluster"
-task :test_flowmanager => [:set_vars, :check_destroy_allowed, :set_test_protocol] do
-  ENV["TF_VAR_locust_target_host"] = "#{@protocol}://flowmanager.#{ENV["TF_VAR_domain_name"]}"
+task :test_flowmanager => [:set_vars, :check_destroy_allowed] do
+  ENV["TF_VAR_locust_target_host"] = "https://flowmanager.#{ENV["TF_VAR_domain_name"]}"
   ENV["TF_VAR_locust_target_app"] = "flowmanager"
   ENV["TF_VAR_locust_script"] = "flowmanager.py"
   ENV["TF_VAR_locust_users"] = "15"

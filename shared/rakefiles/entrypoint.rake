@@ -108,6 +108,11 @@ task :display_cluster_info => [:set_vars] do
   puts
 end
 
+desc "Display debugging info about the current state of the cluster"
+task :display_cluster_state => [:set_vars] do
+  sh "#{@exekube_cmd} rake display_cluster_state"
+end
+
 task :check_destroy_allowed do
   if ["prd"].include?(@env)
     if ENV["RAKE_REALLY_DESTROY_IN_PRD"].nil?

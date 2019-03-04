@@ -12,7 +12,6 @@ variable "preferences_checksum" {}
 # Terragrunt variables
 variable "cert_issuer_name" {}
 
-variable "disable_ssl_redirect" {}
 variable "replica_count" {}
 variable "requests_cpu" {}
 variable "requests_memory" {}
@@ -34,7 +33,6 @@ data "template_file" "preferences_values" {
     couchdb_admin_username = "${var.secret_couchdb_admin_username}"
     couchdb_admin_password = "${var.secret_couchdb_admin_password}"
     cert_issuer_name       = "${var.cert_issuer_name}"
-    disable_ssl_redirect   = "${var.disable_ssl_redirect}"
     replica_count          = "${var.replica_count}"
     requests_cpu           = "${var.requests_cpu}"
     requests_memory        = "${var.requests_memory}"
