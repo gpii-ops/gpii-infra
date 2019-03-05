@@ -241,6 +241,12 @@ class Secrets
 
     begin
       decrypted_secrets = JSON.parse(decrypted_secrets)
+      unless decrypted_secrets['plaintext']
+        if decrypted_secrets['error']
+          puts decrypted_secrets['error']
+        end
+        raise "Response from API is JSON but contains no key 'plaintext', so we can't parse it."
+      end
       decrypted_secrets = JSON.parse(Base64.decode64(decrypted_secrets['plaintext']))
     rescue
       debug_output "ERROR: Unable to parse secrets data for key '#{encryption_key}', terminating!"
