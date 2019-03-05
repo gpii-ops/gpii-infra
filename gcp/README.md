@@ -240,7 +240,7 @@ Solution is to `rake clobber` and re-authenticate. This will not affect your run
 
 ### helm_release.release: rpc error: code = Unavailable desc = transport is closing
 
-This caused by locally missing helm certificates (similarly to previous error, it usually happens when working to `stg` or `prd` environment, after `rake clobber`) and can be fixed by running `rake deploy_module['k8s/kube-system/helm-initializer']`.
+This caused by locally missing helm certificates (similarly to previous error, it usually happens when working to `stg` or `prd` environment, after `rake clobber`) and can be fixed by running `rake fetch_helm_certs`.
 
 ### helm_release.release: error creating tunnel: "could not find tiller"
 
