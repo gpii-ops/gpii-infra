@@ -344,6 +344,32 @@ In this scenario we rely on CouchDB ability to recover from loss of one or more 
 1. Corrupted node is now recovered.
    * You can check DB status on recovered node with `kubectl exec --namespace gpii -it couchdb-couchdb-N -c couchdb -- curl -s http://$TF_VAR_couchdb_admin_username:$TF_VAR_couchdb_admin_password@127.0.0.1:5984/gpii/`, where N is node index.
 
+### The CouchDB cluster won't converge because one of its disks is in the wrong zone
+
+Consider this scenario:
+* A Kubernetes cluster has 3 Nodes, one each in us-central1-a, us-central1-b, and us-central1-c.
+* On this Kubernetes cluster runs a CouchDB cluster with 3 replicas, one on each Node (and thus one in each Zone).
+* Each CouchDB replica is attached to a Persistent Volume, which is tied to a specific Zone.
+* A change is deployed which requires the Kubernetes cluster to be destroyed and re-created. The new Kubernetes cluster has 3 Nodes, but now they are in us-central1-a, us-central1-b, and us-central1-f (i.e. no Nodes in us-central1-c).
+* CouchDB is deployed. The replicas in us-central1-a and us-central1-b are scheduled so that they can re-attach to the Persistent Volumes containing their data.
+* But the replica that wants to re-attach to the PV in us-central1-c cannot do so, because there is no Node in us-central1-c on which to run.
+   * You'll know you're in this state if one CouchDB Pod can't start at all (`0/2 running`), and there are messages about `unschedulable` due to `Persistent Volume` in the output of `rake display_cluster_state`.
+
+The workaround is to manually move the Persistent Disk that backs the Persistent Volume into a Zone where it can be attached by a CouchDB replica:
+1. Find a Zone that has a Node with no CouchDB Pod running on it. Note this for later.
+1. Open Google Cloud console, go to "Compute Engine" -> "Disks".
+1. Find the un-attached Persistent Disk used by CouchDB.
+   * Usually this will be the one with an empty "In use by" column.
+1. Select this Disk, then "Create Snapshot". Give the Snapshot a meaningful name.
+   * If you are certain the latest Snapshot created by k8s-snapshots is up-to-date (e.g. because you shut down all services that talk to CouchDB before the latest Snapshot was created), you may skip this step and use that Snapshot instead.
+1. Using the CouchDB disk you identified above:
+   * Save disk name, type, size, zone and description.
+   * Pick the Snapshot you made (or selected) earlier.
+   * Delete the PD in the old (wrong) zone.
+   * Create a new PD from Snapshot with the same name, type, size, and description, but in the new (correct) Zone you noted earlier.
+1. Kubernetes should run the CouchDB Pod in the correct Zone, and CouchDB should attach to the Persistent Disk. Verify this with e.g. `kubectl -n gpii get pods` or the GKE Dashboard.
+1. When you are sure the CouchDB cluster is healthy, delete any new Snapshots you created (k8s-snapshots manages its own Snapshots).
+
 ### Data corruption on all replicas of CouchDB cluster
 
 There may be a situation, when we want to roll back entire DB data set to another point in the past. Current solution is disruptive, requires bringing entire CouchDB cluster down and some manual actions (we'll most likely automate this in future):
