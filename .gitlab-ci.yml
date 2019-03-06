@@ -132,18 +132,7 @@ common-stg-test-gcp-dev:
     - cd gcp/live/dev
     - rake clobber
     - rake configure_serviceaccount_ci_restore
-    # We need to chain the following into a single command to prevent various issues
-    # caused by subsequent after script commands when destroy task fails.
-    # More info: https://issues.gpii.net/browse/GPII-3488
-    - (rake destroy && rake destroy_secrets && rake destroy_tfstate[k8s]) || true
-    # Terraform state encryption key is also gone with secrets, we have to destroy tfstate as well
-    - rake destroy_tfstate[locust] || true
-    - rake || (rake display_cluster_state ; false)
-    - rake test_preferences || (rake display_cluster_state ; false)
-    - rake test_flowmanager || (rake display_cluster_state ; false)
-    - rake display_cluster_state
-    - (rake destroy && rake destroy_secrets && rake destroy_tfstate[k8s]) || true
-    - rake destroy_tfstate[locust] || true
+    - rake destroy_and_deploy_ci
   after_script:
     - cd gcp/live/dev
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
@@ -219,18 +208,7 @@ gcp-dev:
     - cd gcp/live/dev
     - rake clobber
     - rake configure_serviceaccount_ci_restore
-    # We need to chain the following into a single command to prevent various issues
-    # caused by subsequent after script commands when destroy task fails.
-    # More info: https://issues.gpii.net/browse/GPII-3488
-    - (rake destroy && rake destroy_secrets && rake destroy_tfstate[k8s]) || true
-    # Terraform state encryption key is also gone with secrets, we have to destroy tfstate as well
-    - rake destroy_tfstate[locust] || true
-    - rake || (rake display_cluster_state ; false)
-    - rake test_preferences || (rake display_cluster_state ; false)
-    - rake test_flowmanager || (rake display_cluster_state ; false)
-    - rake display_cluster_state
-    - (rake destroy && rake destroy_secrets && rake destroy_tfstate[k8s]) || true
-    - rake destroy_tfstate[locust] || true
+    - rake destroy_and_deploy_ci
   after_script:
     - cd gcp/live/dev
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
