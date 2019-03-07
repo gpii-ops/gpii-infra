@@ -1,0 +1,50 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ template "backup-exporter.fullname" . }}
+  labels:
+    app: {{ template "backup-exporter.fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+  namespace: backup-exporter
+spec:
+  schedule: {{ .Values.schedule }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: backup-container
+              image: google/cloud-sdk
+              args:
+                - /bin/bash
+                - -x
+                - /data/backup.sh
+              env:
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ template "backup-exporter.fullname" . }}
+                      key: AwsAccessKeyId
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ template "backup-exporter.fullname" . }}
+                      key: AwsSecretAccessKey
+              volumeMounts:
+                - readOnly: true
+                  mountPath: /data
+                  name: backup-script
+                - readOnly: true
+                  mountPath: /secret
+                  name: service-account
+          restartPolicy: OnFailure
+          volumes:
+            - name: backup-script
+              configMap:
+                name: {{ template "backup-exporter.fullname" . }}
+            - name: service-account
+              secret:
+                secretName: {{ template "backup-exporter.fullname" . }}
+
