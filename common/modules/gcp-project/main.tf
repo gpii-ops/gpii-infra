@@ -51,6 +51,7 @@ variable "service_apis" {
   default = [
     "bigquery-json.googleapis.com",
     "cloudbilling.googleapis.com",
+    "cloudbuild.googleapis.com",
     "cloudkms.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "cloudtrace.googleapis.com",
@@ -68,6 +69,7 @@ variable "service_apis" {
     "replicapool.googleapis.com",
     "replicapoolupdater.googleapis.com",
     "resourceviews.googleapis.com",
+    "servicemanagement.googleapis.com",
     "serviceusage.googleapis.com",
     "stackdriver.googleapis.com",
     "storage-api.googleapis.com",
@@ -180,6 +182,38 @@ data "google_iam_policy" "combined" {
   }
 
   binding {
+    role = "roles/cloudbuild.builds.builder"
+
+    members = [
+      "${local.backup_service_accounts}",
+    ]
+  }
+
+  binding {
+    role = "roles/cloudbuild.builds.editor"
+
+    members = [
+      "${local.backup_service_accounts}",
+    ]
+  }
+
+  binding {
+    role = "roles/compute.storageAdmin"
+
+    members = [
+      "${local.backup_service_accounts}",
+    ]
+  }
+
+  binding {
+    role = "roles/viewer"
+
+    members = [
+      "${local.backup_service_accounts}",
+    ]
+  }
+
+  binding {
     role = "roles/compute.serviceAgent"
 
     members = [
@@ -255,10 +289,12 @@ locals {
   # (this is instead of current `local.service_account` that is either actual account or empty)
   service_accounts = "${formatlist("serviceAccount:%s", google_service_account.project.*.email)}"
 
+  backup_service_accounts = "${formatlist("serviceAccount:%s", google_service_account.backup.*.email)}"
+
   # Project owners will be empty list if var.project_owner is empty string ""
   project_owners = "${compact(list(var.project_owner))}"
 
-  # stg, prd, dev, and the projects that matches the ci_dev_project_regex variable are managed 
+  # stg, prd, dev, and the projects that matches the ci_dev_project_regex variable are managed
   # by the CI so they should have the service account and the permissions attached to it
   #
   root_project_iam = "${replace(var.project_name, var.ci_dev_project_regex, "") != "" && replace(var.project_name, "/^dev-.*/", "") == ""}"
@@ -286,6 +322,13 @@ resource "google_service_account" "project" {
   display_name = "Project owner service account"
   project      = "${google_project.project.project_id}"
   count        = "${local.root_project_iam ? 0 : 1}"
+}
+
+resource "google_service_account" "backup" {
+  account_id   = "backup-exporter"
+  display_name = "backup exporter service account"
+  project      = "${google_project.project.project_id}"
+#  count        = "${local.root_project_iam ? 0 : 1}"
 }
 
 resource "google_dns_managed_zone" "project" {
