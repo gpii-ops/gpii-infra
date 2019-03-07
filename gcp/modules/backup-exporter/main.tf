@@ -11,6 +11,7 @@ variable "charts_dir" {}
 
 variable "aws_access_key_id" {}
 variable "aws_secret_access_key" {}
+
 variable "service_account_name" {
   default = "backup-exporter@${var.project_id}.iam.gserviceaccount.com"
 }

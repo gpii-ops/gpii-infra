@@ -328,7 +328,8 @@ resource "google_service_account" "backup" {
   account_id   = "backup-exporter"
   display_name = "backup exporter service account"
   project      = "${google_project.project.project_id}"
-#  count        = "${local.root_project_iam ? 0 : 1}"
+
+  #  count        = "${local.root_project_iam ? 0 : 1}"
 }
 
 resource "google_dns_managed_zone" "project" {
