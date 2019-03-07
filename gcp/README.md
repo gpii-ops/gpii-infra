@@ -360,20 +360,41 @@ Consider this scenario:
 * A change is deployed which requires the Kubernetes cluster to be destroyed and re-created. The new Kubernetes cluster has 3 Nodes, but now they are in us-central1-a, us-central1-b, and us-central1-f (i.e. no Nodes in us-central1-c).
 * CouchDB is deployed. The replicas in us-central1-a and us-central1-b are scheduled so that they can re-attach to the Persistent Volumes containing their data.
 * But the replica that wants to re-attach to the PV in us-central1-c cannot do so, because there is no Node in us-central1-c on which to run.
-   * You'll know you're in this state if one CouchDB Pod can't start at all (`0/2 running`), and there are messages about `unschedulable` due to `Persistent Volume` in the output of `rake display_cluster_state`.
+   * You'll know you're in this state if one CouchDB Pod can't start at all (`0/2 Pending`), and there are messages about `0/3 nodes are available: 3 node(s) had no available volume zone` in the output of `rake display_cluster_state`.
 
 The workaround is to manually move the Persistent Disk that backs the Persistent Volume into a Zone where it can be attached by a CouchDB replica:
+1. Find a destination Zone that has a Node with no CouchDB Pod running on it. Note this for later.
+1. Find the un-attached Persistent Disk used by CouchDB.
+   * Usually this will be the one with an empty "In use by" column in the GCP Dashboard.
+1. Move the un-attached Disk to the destination Zone
+   * `gcloud compute disks move gke-k8s-cluster-000000-pvc-11111111-2222-3333-4444-555555555555 --zone us-central1-AAA --destination-zone us-central1-ZZZ`
+1. Edit the PVC associated with the un-attached Disk.
+   * `kubectl -n gpii edit pv pvc-11111111-2222-3333-4444-555555555555`
+   * Find all mentions of the old Zone and replace them with the destination Zone.
+1. Kubernetes should run the CouchDB Pod in the correct Zone, and CouchDB should attach to the Persistent Disk. Verify this with e.g. `kubectl -n gpii get pods` or the GKE Dashboard.
+   * You may need to deploy the couchdb module again (`rake deploy_module"[k8s/gpii/couchdb]"`), nudge the Pod (`kubectl -n gpii delete pod couchdb-couchdb-NNN`), or destroy and re-create the couchdb module (`rake redeploy_module"[k8s/gpii/couchdb]"`).
+1. When you are sure the CouchDB cluster is healthy, delete any new Snapshots you created (k8s-snapshots manages its own Snapshots).
+
+An alternative workaround is to do a snapshot-restore cycle to move the Persistent Disk to a better Zone:
 1. Find a Zone that has a Node with no CouchDB Pod running on it. Note this for later.
 1. Open Google Cloud console, go to "Compute Engine" -> "Disks".
 1. Find the un-attached Persistent Disk used by CouchDB.
    * Usually this will be the one with an empty "In use by" column.
+   * Save the Disk's name, type, size, zone and description.
 1. Select this Disk, then "Create Snapshot". Give the Snapshot a meaningful name.
    * If you are certain the latest Snapshot created by k8s-snapshots is up-to-date (e.g. because you shut down all services that talk to CouchDB before the latest Snapshot was created), you may skip this step and use that Snapshot instead.
+1. `rake destroy_module"[k8s/gpii/couchdb]"`
+   * This is a disruptive action! But if you're in this situation, the environment was probably down anyway. :)
+   * You may need to manually delete the CouchDB StatefulSet, due to the Helm deployment failing and the StatefulSet becoming orphaned: `kubectl -n gpii delete statefulset couchdb-couchdb`
+1. Manually remove the PVC associated with the Disk you noted earlier, e.g.: `kubectl -n gpii delete pvc pvc-11111111-2222-3333-4444-555555555555`
+   * Kubernetes will reap the PV eventually.
+   * Wait until both the PV and PVC are gone: `kubectl -n gpii get pv ; kubectl -n gpii get pvc`
 1. Using the CouchDB disk you identified above:
-   * Save disk name, type, size, zone and description.
-   * Pick the Snapshot you made (or selected) earlier.
-   * Delete the PD in the old (wrong) zone.
-   * Create a new PD from Snapshot with the same name, type, size, and description, but in the new (correct) Zone you noted earlier.
+   * Make sure you saved the disk name, type, size, zone and description.
+   * Delete the PD in the old (wrong) zone, if it hasn't already been reaped.
+   * Create a new PD from the Snapshot you identified earlier.
+      * Use the same name, type, size, and description, but the new (correct) Zone you noted earlier.
+1. `rake deploy_module"[k8s/gpii/couchdb]"`
 1. Kubernetes should run the CouchDB Pod in the correct Zone, and CouchDB should attach to the Persistent Disk. Verify this with e.g. `kubectl -n gpii get pods` or the GKE Dashboard.
 1. When you are sure the CouchDB cluster is healthy, delete any new Snapshots you created (k8s-snapshots manages its own Snapshots).
 
