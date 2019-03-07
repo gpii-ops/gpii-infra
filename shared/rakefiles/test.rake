@@ -28,6 +28,7 @@ task :test_preferences => [:set_vars, :check_destroy_allowed] do
 
   Rake::Task[:set_compose_env].reenable
   Rake::Task[:set_compose_env].invoke
+  Rake::Task[:test].reenable
   Rake::Task[:test].invoke
 end
 
@@ -43,6 +44,7 @@ task :test_flowmanager => [:set_vars, :check_destroy_allowed] do
 
   Rake::Task[:set_compose_env].reenable
   Rake::Task[:set_compose_env].invoke
+  Rake::Task[:test].reenable
   Rake::Task[:test].invoke
 end
 
