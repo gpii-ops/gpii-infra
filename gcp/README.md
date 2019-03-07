@@ -198,6 +198,23 @@ Examples of when you might want to do this:
 1. Prepend `USER=gitlab-runner` to all `rake` commands.
    * Or, to add an additional dev cluster: `USER=mrtyler-experiment1`
 
+### I need to work with my tfstate bucket directly
+
+For example: a developer deleted their tfstate bucket in GCS and re-created it with the wrong permissions. You need to back up the contents of the bucket so Terraform can destroy it and re-create it with the correct permissions.
+
+1. Entities in the tfstate bucket may use one of two encryption types:
+   * Google-managed - for initial bootstrapping, storage of tfstate for the secrets themselves
+   * Customer-supplied - managed with our [secrets code](https://github.com/gpii-ops/gpii-infra/blob/master/shared/rakefiles/secrets.rb)
+2. For entities encrypted with a Google-managed key (`infra/`, `secret-mgmt/`):
+   * `rake sh
+   * `gsutil ...`
+3. For entities encrypted with a customer-supplied key (`k8s/`, `locust/`):
+   * `rake sh`
+   * `echo -e "[GSUtil]\nencryption_key = $TF_VAR_key_tfstate_encryption_key" > ~/.boto`
+   * `gustil ...`
+4. The tfstate bucket contains entities with *both kinds* of encryption. When reconstructing the bucket, you must use (or not use, i.e. move out of the way) the custom `.boto` file described above.
+5. Some Google documentation for context, [Using Encryption Keys](https://cloud.google.com/storage/docs/gsutil/addlhelp/UsingEncryptionKeys).
+
 ### Errors trying to enable/disable Google Cloud APIs
 
 When destroying an environment completely (`rake destroy`), or creating an environment for the first time or after complete destruction (`rake deploy`), we disable/enable some Google Cloud APIs. This action is asynchronous and can take a few minutes to propagate.
@@ -240,7 +257,7 @@ Solution is to `rake clobber` and re-authenticate. This will not affect your run
 
 ### helm_release.release: rpc error: code = Unavailable desc = transport is closing
 
-This caused by locally missing helm certificates (similarly to previous error, it usually happens when working to `stg` or `prd` environment, after `rake clobber`) and can be fixed by running `rake deploy_module['k8s/kube-system/helm-initializer']`.
+This caused by locally missing helm certificates (similarly to previous error, it usually happens when working to `stg` or `prd` environment, after `rake clobber`) and can be fixed by running `rake fetch_helm_certs`.
 
 ### helm_release.release: error creating tunnel: "could not find tiller"
 

@@ -20,6 +20,7 @@ variable "pv_reclaim_policy" {}
 variable "pv_storage_class" {}
 variable "pv_provisioner" {}
 variable "execute_destroy_pvcs" {}
+variable "execute_recover_pvcs" {}
 
 # Secret variables
 
@@ -28,7 +29,7 @@ variable "secret_couchdb_admin_username" {}
 variable "secret_couchdb_auth_cookie" {}
 
 data "template_file" "couchdb_values" {
-  depends_on = ["null_resource.couchdb_recover"]
+  depends_on = ["null_resource.couchdb_recover_pvcs"]
   template   = "${file("values.yaml")}"
 
   vars {
@@ -142,15 +143,15 @@ resource "null_resource" "couchdb_enable_pv_backups" {
 }
 
 resource "null_resource" "couchdb_destroy_pvcs" {
+  count = "${var.execute_destroy_pvcs == "true" ? 1 : 0}"
+
   provisioner "local-exec" {
     when = "destroy"
 
     command = <<EOF
-      if [ "${var.execute_destroy_pvcs}" == "true" ]; then
-        for PVC in $(kubectl get pvc --namespace ${var.release_namespace} -o json | jq --raw-output '.items[] | select(.metadata.name | startswith("database-storage-couchdb")) | .metadata.name'); do
-          timeout -t 600 kubectl --namespace ${var.release_namespace} delete --ignore-not-found --grace-period=300 pvc $PVC
-        done
-      fi
+      for PVC in $(kubectl get pvc -n ${var.release_namespace} -o json | jq -r '.items[] | select(.metadata.name | startswith("database-storage-couchdb")) | .metadata.name'); do
+        timeout -t 600 kubectl -n ${var.release_namespace} delete --ignore-not-found --grace-period=300 pvc $PVC
+      done
     EOF
   }
 }

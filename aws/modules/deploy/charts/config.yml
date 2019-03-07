@@ -29,10 +29,10 @@ gpii-dataloader:
   release_name: dataloader
   release_namespace: gpii
   force_upgrade: true
-gpii-preferences:
+gpii-preferences-aws:
   release_name: preferences
   release_namespace: gpii
-gpii-flowmanager:
+gpii-flowmanager-aws:
   release_name: flowmanager
   release_namespace: gpii
 # fluentd:
