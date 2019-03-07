@@ -167,6 +167,13 @@ If you don't want to deal with gpii-version-updater, you can instead:
 1. Manually delete the component via Kubernetes Dashboard or with `kubectl delete`.
 1. `cd ../gpii-infra/gcp/live/dev && rake`
 
+### I need to interact with Helm directly, e.g. because a Helm deployment was orphaned due to an error while running `rake`
+
+1. `cd gcp/live/dev` (or another environment)
+1. `rake sh`
+1. `helm --tiller-namespace kube-system list --tls --tls-verify --tls-ca-cert /project/live/dev/secrets/kube-system/helm-tls/ca.cert.pem --tls-cert /project/live/dev/secrets/kube-system/helm-tls/helm.cert.pem  --tls-key /project/live/dev/secrets/kube-system/helm-tls/helm.key.pem`
+   * Adjust paths for the environment you're using.
+
 ### My environment is messed up and I want to get rid of it so I can start over
 
 These steps are ordered roughly by difficulty and disruptiveness.
@@ -341,48 +348,94 @@ See [Getting started: One-time Stackdriver Workspace setup](README.md#one-time-s
 1. Enter channel name including "#". Click "Test Connection" and then "Save".
 1. Now you can use new notification channel in `gcp-stackdriver-monitoring` module. Here is example json: `{"type":"slack","labels":{"channel_name":"#alerts"},"user_labels":{},"enabled":{"value":true},"immutable":{"value":true}}`.
 
-## Restoring CouchDB data
+## Working with CouchDB data
 
-We are considering number of probable failure scenarios for our GCP infrastructure.
-You can run all `kubectl` commands mentioned below inside of interactive shell started with `rake sh`.
+You can run all `kubectl` commands mentioned below inside of an interactive shell started with `rake sh`.
 
 ### Data corruption on a single CouchDB replica
 
 In this scenario we rely on CouchDB ability to recover from loss of one or more replicas (our current production CouchDB settings allow us to lose up to 2 random nodes and still keep data integrity). The best course of action as follows:
 
-* Make sure that you figured affected CouchDB pod properly
-* There is a PVC object, associated with affected CouchDB pod. Let's say affected pod is `couchdb-couchdb-1`, then corresponding PVC is `database-storage-couchdb-couchdb-1`, located in the same namespace.
-* Delete associated PVC and then affected pod. For our example case:
+1. Make sure that you figured affected CouchDB pod properly
+1. There is a PVC object, associated with affected CouchDB pod. Let's say affected pod is `couchdb-couchdb-1`, then corresponding PVC is `database-storage-couchdb-couchdb-1`, located in the same namespace.
+1. Delete associated PVC and then affected pod. For our example case:
    * `kubectl --namespace gpii delete pvc database-storage-couchdb-couchdb-1`
    * `kubectl --namespace gpii delete pod couchdb-couchdb-1`
-* After target pod is terminated, Persistent Disk that was mounted into it thru corresponding PVC will be destroyed as well.
-* When new pod is created to replace deleted one, corresponding PVC will be created as well, and, thru it, new PV object for new GCE PD.
-* Run `rake deploy_module[couchdb]` to patch newly created PV with annotations for `k8s-snapshots`.
-* CouchDB cluster will replicate data to recreated node automatically.
-* Corrupted node is now recovered.
+1. After target pod is terminated, Persistent Disk that was mounted into it thru corresponding PVC will be destroyed as well.
+1. When new pod is created to replace deleted one, corresponding PVC will be created as well, and, thru it, new PV object for new GCE PD.
+1. Run `rake deploy_module[couchdb]` to patch newly created PV with annotations for `k8s-snapshots`.
+1. CouchDB cluster will replicate data to recreated node automatically.
+1. Corrupted node is now recovered.
    * You can check DB status on recovered node with `kubectl exec --namespace gpii -it couchdb-couchdb-N -c couchdb -- curl -s http://$TF_VAR_couchdb_admin_username:$TF_VAR_couchdb_admin_password@127.0.0.1:5984/gpii/`, where N is node index.
+
+### The CouchDB cluster won't converge because one of its disks is in the wrong zone
+
+Consider this scenario:
+* A Kubernetes cluster has 3 Nodes, one each in us-central1-a, us-central1-b, and us-central1-c.
+* On this Kubernetes cluster runs a CouchDB cluster with 3 replicas, one on each Node (and thus one in each Zone).
+* Each CouchDB replica is attached to a Persistent Volume, which is tied to a specific Zone.
+* A change is deployed which requires the Kubernetes cluster to be destroyed and re-created. The new Kubernetes cluster has 3 Nodes, but now they are in us-central1-a, us-central1-b, and us-central1-f (i.e. no Nodes in us-central1-c).
+* CouchDB is deployed. The replicas in us-central1-a and us-central1-b are scheduled so that they can re-attach to the Persistent Volumes containing their data.
+* But the replica that wants to re-attach to the PV in us-central1-c cannot do so, because there is no Node in us-central1-c on which to run.
+   * You'll know you're in this state if one CouchDB Pod can't start at all (`0/2 Pending`), and there are messages about `0/3 nodes are available: 3 node(s) had no available volume zone` in the output of `rake display_cluster_state`.
+
+The workaround is to manually move the Persistent Disk that backs the Persistent Volume into a Zone where it can be attached by a CouchDB replica:
+1. Find a destination Zone that has a Node with no CouchDB Pod running on it. Note this for later.
+1. Find the un-attached Persistent Disk used by CouchDB.
+   * Usually this will be the one with an empty "In use by" column in the GCP Dashboard.
+1. Move the un-attached Disk to the destination Zone
+   * `gcloud compute disks move gke-k8s-cluster-000000-pvc-11111111-2222-3333-4444-555555555555 --zone us-central1-AAA --destination-zone us-central1-ZZZ`
+1. Edit the PVC associated with the un-attached Disk.
+   * `kubectl -n gpii edit pv pvc-11111111-2222-3333-4444-555555555555`
+   * Find all mentions of the old Zone and replace them with the destination Zone.
+1. Kubernetes should run the CouchDB Pod in the correct Zone, and CouchDB should attach to the Persistent Disk. Verify this with e.g. `kubectl -n gpii get pods` or the GKE Dashboard.
+   * You may need to deploy the couchdb module again (`rake deploy_module"[k8s/gpii/couchdb]"`), nudge the Pod (`kubectl -n gpii delete pod couchdb-couchdb-NNN`), or destroy and re-create the couchdb module (`rake redeploy_module"[k8s/gpii/couchdb]"`).
+1. When you are sure the CouchDB cluster is healthy, delete any new Snapshots you created (k8s-snapshots manages its own Snapshots).
+
+An alternative workaround is to do a snapshot-restore cycle to move the Persistent Disk to a better Zone:
+1. Find a Zone that has a Node with no CouchDB Pod running on it. Note this for later.
+1. Open Google Cloud console, go to "Compute Engine" -> "Disks".
+1. Find the un-attached Persistent Disk used by CouchDB.
+   * Usually this will be the one with an empty "In use by" column.
+   * Save the Disk's name, type, size, zone and description.
+1. Select this Disk, then "Create Snapshot". Give the Snapshot a meaningful name.
+   * If you are certain the latest Snapshot created by k8s-snapshots is up-to-date (e.g. because you shut down all services that talk to CouchDB before the latest Snapshot was created), you may skip this step and use that Snapshot instead.
+1. `rake destroy_module"[k8s/gpii/couchdb]"`
+   * This is a disruptive action! But if you're in this situation, the environment was probably down anyway. :)
+   * You may need to manually delete the CouchDB StatefulSet, due to the Helm deployment failing and the StatefulSet becoming orphaned: `kubectl -n gpii delete statefulset couchdb-couchdb`
+1. Manually remove the PVC associated with the Disk you noted earlier, e.g.: `kubectl -n gpii delete pvc pvc-11111111-2222-3333-4444-555555555555`
+   * Kubernetes will reap the PV eventually.
+   * Wait until both the PV and PVC are gone: `kubectl -n gpii get pv ; kubectl -n gpii get pvc`
+1. Using the CouchDB disk you identified above:
+   * Make sure you saved the disk name, type, size, zone and description.
+   * Delete the PD in the old (wrong) zone, if it hasn't already been reaped.
+   * Create a new PD from the Snapshot you identified earlier.
+      * Use the same name, type, size, and description, but the new (correct) Zone you noted earlier.
+1. `rake deploy_module"[k8s/gpii/couchdb]"`
+1. Kubernetes should run the CouchDB Pod in the correct Zone, and CouchDB should attach to the Persistent Disk. Verify this with e.g. `kubectl -n gpii get pods` or the GKE Dashboard.
+1. When you are sure the CouchDB cluster is healthy, delete any new Snapshots you created (k8s-snapshots manages its own Snapshots).
 
 ### Data corruption on all replicas of CouchDB cluster
 
 There may be a situation, when we want to roll back entire DB data set to another point in the past. Current solution is disruptive, requires bringing entire CouchDB cluster down and some manual actions (we'll most likely automate this in future):
 
-* Choose a snapshot set that you want to restore, make sure that snapshots are present for all disks that are currently in use by CouchDB cluster.
-* Collect CouchDB disk names from PVCs with `kubectl --namespace gpii get pvc -l app=couchdb -o json | jq -r .items[].spec.volumeName`.
-* Get current number of CouchDB stateful set replicas with `kubectl --namespace gpii get statefulset couchdb-couchdb -o jsonpath="{.status.replicas}"`.
-* Scale CouchDB stateful set to 0 replicas with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=0`. This will cause K8s to terminate all CouchDB pods, all PDs that were mounted into them will be released. **This will prevent flowmanager and preferences services from processing customer requests!**
+1. Choose a snapshot set that you want to restore, make sure that snapshots are present for all disks that are currently in use by CouchDB cluster.
+1. Collect CouchDB disk names from PVCs with `kubectl --namespace gpii get pvc -l app=couchdb -o json | jq -r .items[].spec.volumeName`.
+1. Get current number of CouchDB stateful set replicas with `kubectl --namespace gpii get statefulset couchdb-couchdb -o jsonpath="{.status.replicas}"`.
+1. Scale CouchDB stateful set to 0 replicas with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=0`. This will cause K8s to terminate all CouchDB pods, all PDs that were mounted into them will be released. **This will prevent flowmanager and preferences services from processing customer requests!**
    * You may also want to scale `flowmanager` and `preferences` deployments to 0 replicas as well with `kubectl --namespace gpii scale deployment preferences --replicas=0` and `kubectl --namespace gpii scale deployment flowmanager --replicas=0`. This will give you time to verify that DB restoration is successful before allowing the DB to receive traffic again.
-* Destroy `k8s-snapshots` module with `rake destroy_module["k8s/kube-system/k8s-snapshots"]` to prevent new snapshots from being created while you working with disks.
-* Open Google Cloud console, go to "Compute Engine" -> "Disks".
-* Now, repeat for every CouchDB disk name you collected:
+1. Destroy `k8s-snapshots` module with `rake destroy_module["k8s/kube-system/k8s-snapshots"]` to prevent new snapshots from being created while you working with disks.
+1. Open Google Cloud console, go to "Compute Engine" -> "Disks".
+1. Now, repeat for every CouchDB disk name you collected:
    * Save disk name, type, size, zone and description.
    * Pick proper snapshot.
    * Delete PD.
    * Create new PD from snapshot with the same name, type, size, zone and description.
-* Scale CouchDB stateful set back to number of replicas it used to have before with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=N`
-* Database is now restored to the state at the time of target snapshot.
+1. Scale CouchDB stateful set back to number of replicas it used to have before with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=N`
+1. Database is now restored to the state at the time of target snapshot.
    * You can check the status of all nodes with `for i in {0..N}; do kubectl exec --namespace gpii -it couchdb-couchdb-$i -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/_up; done`, where N is a number of CouchDB replicas.
-* Once DB state is verified and you sure that everything went as desired, you can scale `preferences` and `flowmanager` deployments back as well. From this point system functionality for the customer is fully restored.
-* Deploy `k8s-snapshots` module to resume regular snapshot process with `rake deploy_module["k8s/kube-system/k8s-snapshots"]`.
+1. Once DB state is verified and you sure that everything went as desired, you can scale `preferences` and `flowmanager` deployments back as well. From this point system functionality for the customer is fully restored.
+1. Deploy `k8s-snapshots` module to resume regular snapshot process with `rake deploy_module["k8s/kube-system/k8s-snapshots"]`.
 
 ### Hack: Adding data to CouchDB
 
