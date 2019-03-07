@@ -167,6 +167,13 @@ If you don't want to deal with gpii-version-updater, you can instead:
 1. Manually delete the component via Kubernetes Dashboard or with `kubectl delete`.
 1. `cd ../gpii-infra/gcp/live/dev && rake`
 
+### I need to interact with Helm directly, e.g. because a Helm deployment was orphaned due to an error while running `rake`
+
+1. `cd gcp/live/dev` (or another environment)
+1. `rake sh`
+1. `helm --tiller-namespace kube-system list --tls --tls-verify --tls-ca-cert /project/live/dev/secrets/kube-system/helm-tls/ca.cert.pem --tls-cert /project/live/dev/secrets/kube-system/helm-tls/helm.cert.pem  --tls-key /project/live/dev/secrets/kube-system/helm-tls/helm.key.pem`
+   * Adjust paths for the environment you're using.
+
 ### My environment is messed up and I want to get rid of it so I can start over
 
 These steps are ordered roughly by difficulty and disruptiveness.
