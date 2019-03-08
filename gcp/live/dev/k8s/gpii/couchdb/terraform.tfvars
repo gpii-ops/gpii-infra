@@ -30,5 +30,9 @@ pv_capacity          = "10Gi"
 pv_reclaim_policy    = "Delete"
 pv_storage_class     = ""
 pv_provisioner       = ""
+# WARNING: If changing this value to "false", see
+# https://issues.gpii.net/browse/GPII-3743?focusedCommentId=37510&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-37510
+# for an additional manual step. (Otherwise, your next deployment will destroy
+# your PVCs immediately :\.)
 execute_destroy_pvcs = "true"
 execute_recover_pvcs = "false"
