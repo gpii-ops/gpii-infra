@@ -16,6 +16,8 @@ controller:
     limits:
       cpu: 200m
       memory: 256Mi
+  podAnnotations:
+    sidecar.istio.io/inject: "false"
 
 defaultBackend:
   replicaCount: 2
@@ -26,6 +28,8 @@ defaultBackend:
     limits:
       cpu: 100m
       memory: 128Mi
+  podAnnotations:
+    sidecar.istio.io/inject: "false"
 
 rbac:
   create: true

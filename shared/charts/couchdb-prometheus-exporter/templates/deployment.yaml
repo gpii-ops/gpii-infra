@@ -9,6 +9,8 @@ spec:
     metadata:
       labels:
         app: couchdb-prometheus-exporter
+      annotations:
+        sidecar.istio.io/inject: "false"
     spec:
       containers:
       - name: couchdb-prometheus-exporter
