@@ -38,10 +38,14 @@ spec:
         resources:
 {{ toYaml .Values.resources | indent 10 }}
         livenessProbe:
-          httpGet:
-            path: /health
-            port: {{ .Values.flowmanagerListenPort }}
+          exec:
+            command:
+            - '/usr/bin/curl'
+            - '-f'
+            - 'http://localhost:{{ .Values.flowmanagerListenPort }}/health'
         readinessProbe:
-          httpGet:
-            path: /ready
-            port: {{ .Values.flowmanagerListenPort }}
+          exec:
+            command:
+            - '/usr/bin/curl'
+            - '-f'
+            - 'http://localhost:{{ .Values.flowmanagerListenPort }}/ready'
