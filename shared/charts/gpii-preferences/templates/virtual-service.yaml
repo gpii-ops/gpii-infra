@@ -1,0 +1,13 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ template "preferences.name" . }}-vs
+spec:
+  hosts:
+  {{ toYaml .Values.dnsNames | indent 2 | trim }}
+  gateways:
+  - {{ template "preferences.name" . }}-gateway
+  http:
+  - route:
+    - destination:
+        host: {{ template "preferences.name" . }}
