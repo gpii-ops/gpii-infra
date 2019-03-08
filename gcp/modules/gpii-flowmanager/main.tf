@@ -5,6 +5,7 @@ terraform {
 variable "secrets_dir" {}
 variable "charts_dir" {}
 variable "domain_name" {}
+variable "project_id" {}
 
 variable "flowmanager_repository" {}
 variable "flowmanager_checksum" {}
