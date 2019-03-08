@@ -9,10 +9,10 @@ spec:
     name: {{ .Values.issuerRef.name }}
     kind: {{ .Values.issuerRef.kind }}
   dnsNames:
-  {{ toYaml .Values.dnsNames | indent 2 }}
+  {{ toYaml .Values.dnsNames | indent 2 | trim }}
   acme:
     config:
     - http01:
         ingressClass: nginx
       domains:
-      {{ toYaml .Values.dnsNames | indent 6 }}
+      {{ toYaml .Values.dnsNames | indent 6 | trim }}

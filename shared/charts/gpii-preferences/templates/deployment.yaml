@@ -33,9 +33,11 @@ spec:
         {{- if .Values.enableStackdriverTrace }}
         - name: GPII_ENABLE_STACKDRIVER_TRACE
           value: 'true'
-        {{- end}}
+        {{- end }}
+        {{- if .Values.resources }}
         resources:
-{{ toYaml .Values.resources | indent 10 }}
+        {{ toYaml .Values.resources | indent 8 | trim }}
+        {{- end }}
         livenessProbe:
           exec:
             command:
