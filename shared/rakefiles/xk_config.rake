@@ -74,9 +74,12 @@ task :configure_extra_tf_vars do
   end
 end
 
-task :fetch_helm_certs => [:configure_extra_tf_vars] do
+task :configure_secrets do
   @secrets = Secrets.collect_secrets()
   Secrets.set_secrets(@secrets)
+end
+
+task :fetch_helm_certs => [:configure_secrets] do
   sh "
     cd /project/live/${ENV}/k8s/kube-system/helm-initializer
     echo \"[helm-initializer] Pulling TF state...\"
