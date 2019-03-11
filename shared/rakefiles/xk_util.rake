@@ -71,24 +71,34 @@ task :destroy_sa_keys => [@gcp_creds_file, :configure_extra_tf_vars] do
   "
 end
 
-task :display_cluster_state => [:configure] do
+task :display_cluster_state => [:configure, :configure_secrets] do
   puts
   puts "**************"
   puts "Cluster state:"
   puts "**************"
   puts
-  for cmd in [
+  cmds = [
     "kubectl -n gpii get all -o wide",
     "kubectl -n gpii get pv -o wide",
     "kubectl -n gpii get pvc -o wide",
     "kubectl -n gpii get events -o wide",
     "kubectl -n locust get all -o wide",
     "kubectl -n locust get events -o wide",
-    # GPII-3743
     # The 'default-pool' disks are the root partitions. Filter those out to
     # reduce some clutter.
     "gcloud compute disks list --filter 'NOT name:gke-k8s-cluster-default-pool' --format json",
   ]
+  dev_cmds = [
+    # Only run this in dev because a) we expect to see weird behavior in
+    # ephemeral clusters, not long-lived clusters and b) 'kubectl exec'
+    # generates an alert, which is not ok in stg/prd.
+    "kubectl exec --namespace gpii couchdb-couchdb-0 -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/_membership | jq .",
+    "kubectl exec --namespace gpii couchdb-couchdb-1 -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/_membership | jq .",
+  ]
+  if @env == "dev"
+    cmds.concat(dev_cmds)
+  end
+  for cmd in cmds
     sh "timeout -t 30 #{cmd}"
   end
 end
