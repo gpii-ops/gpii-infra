@@ -21,17 +21,6 @@ spec:
                 - /bin/bash
                 - -x
                 - /data/backup.sh
-              env:
-                - name: AWS_ACCESS_KEY_ID
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ template "backup-exporter.fullname" . }}
-                      key: AwsAccessKeyId
-                - name: AWS_SECRET_ACCESS_KEY
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ template "backup-exporter.fullname" . }}
-                      key: AwsSecretAccessKey
               volumeMounts:
                 - readOnly: true
                   mountPath: /data

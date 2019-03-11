@@ -12,9 +12,6 @@ nameOverride: backup-exporter
 serviceAccountName: ""
 serviceAccountJson: ""
 
-AwsSecretKeyId: ""
-AwsSecretAccessKey: ""
-S3Bucket: ""
+DestinationBucket: ""
 
 schedule: "*/5 * * * *"
-

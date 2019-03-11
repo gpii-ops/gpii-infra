@@ -5,23 +5,21 @@ metadata:
   namespace: backup-exporter
   labels:
     app: {{ template "backup-exporter.name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
 data:
   backup.sh: |
-    cat >~/.boto<<EOF
-    [s3]
-    use-sigv4 = True
-    host = s3.us-east-2.amazonaws.com
-    EOF
     export GOOGLE_APPLICATION_CREDENTIALS="/secrets/service-account/gcloud.json"
     gcloud auth activate-service-account --key-file=/secrets/service-account/gcloud.json
     gcloud config set account {{ .Values.serviceAccountName }}
     gcloud auth list
     SNAPSHOTS=$(gcloud compute snapshots list --sort-by=~creationTimestamp --limit=4 --format="value[separator=';'](name,status)"| tail -n2 | grep READY | cut -f1 -d\;)
-    S3_BUCKET=s3://{{ .Values.S3Bucket }}/
+    DESTINATION_BUCKET={{ .Values.DestinationBucket }}/
     TIMESTAMP=$(date +%s)
     for snapshot in ${SNAPSHOTS}; do
       gcloud -q compute images create image-disk-${snapshot} --source-snapshot ${snapshot}
       gcloud -q compute images export --destination-uri gs://external-backups/${TIMESTAMP}-${snapshot}.raw.gz --image image-disk-${snapshot}
-      gsutil -q cp gs://external-backups/${TIMESTAMP}-${snapshot}.raw.gz ${S3_BUCKET}${TIMESTAMP}-${snapshot}.raw.gz
+      gsutil -q cp gs://external-backups/${TIMESTAMP}-${snapshot}.raw.gz ${DESTINATION_BUCKET}${TIMESTAMP}-${snapshot}.raw.gz
       gcloud -q compute images delete image-disk-${snapshot}
-    done 
+    done
