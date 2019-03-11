@@ -84,6 +84,10 @@ task :display_cluster_state => [:configure] do
     "kubectl -n gpii get events -o wide",
     "kubectl -n locust get all -o wide",
     "kubectl -n locust get events -o wide",
+    # GPII-3743
+    # The 'default-pool' disks are the root partitions. Filter those out to
+    # reduce some clutter.
+    "gcloud compute disks list --filter 'NOT name:gke-k8s-cluster-default-pool' --format json",
   ]
     sh "timeout -t 30 #{cmd}"
   end
