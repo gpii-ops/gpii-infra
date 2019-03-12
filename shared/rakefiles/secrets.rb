@@ -16,6 +16,12 @@ class Secrets
   GOOGLE_CLOUD_API = "https://www.googleapis.com"
   GOOGLE_KMS_API   = "https://cloudkms.googleapis.com"
 
+  attr_accessor :project_name
+
+  def initialize(project_name)
+    self.project_name = project_name
+  end
+
   # This method is looking for SECRETS_FILE files in module directories (modules/*), which should have the following structure:
   #
   # secrets:
