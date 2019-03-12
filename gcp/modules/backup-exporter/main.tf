@@ -5,29 +5,29 @@ terraform {
 variable "secrets_dir" {}
 variable "charts_dir" {}
 variable "destination_bucket" {}
+variable "project_id" {}
+variable "replica_count" {}
 
 # Terragrunt variables
-
-variable "service_account_name" {
-  default = "backup-exporter@${var.project_id}.iam.gserviceaccount.com"
-}
 
 data "template_file" "backup-exporter" {
   template = "${file("values.yaml")}"
 
   vars {
-    aws_access_key_id     = "${var.aws_access_key_id}"
-    aws_secret_access_key = "${var.aws_secret_access_key}"
     service_account_json  = "${google_service_account_key.service_account_json.private_key}"
-    service_account_name  = "${var.service_account_name}"
+    service_account_name  = "${local.service_account_name}"
     destination_bucket    = "${var.destination_bucket}"
+    replica_count         = "${var.replica_count}"
   }
 }
 
 resource "google_service_account_key" "service_account_json" {
-  service_account_id = "${var.service_account_name}"
+  service_account_id = "${local.service_account_name}"
 }
 
+locals {
+  service_account_name = "backup-exporter@${var.project_id}.iam.gserviceaccount.com"
+}
 module "backup-exporter" {
   source           = "/exekube-modules/helm-release"
   tiller_namespace = "kube-system"
