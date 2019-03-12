@@ -75,11 +75,12 @@ task :configure_extra_tf_vars do
 end
 
 task :configure_secrets do
-  @secrets = Secrets.collect_secrets()
+  @secrets = Secrets.new(ENV["TF_VAR_project_id"])
+  @secrets.collect_secrets()
 end
 
 task :set_secrets do
-  Secrets.set_secrets(@secrets)
+  @secrets.set_secrets()
 end
 
 task :fetch_helm_certs => [:configure_secrets, :set_secrets] do

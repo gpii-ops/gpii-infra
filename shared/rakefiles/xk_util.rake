@@ -14,7 +14,7 @@ task :rotate_secret, [:encryption_key, :secret, :cmd] => [:configure, :configure
     raise
   end
 
-  if @secrets[args[:encryption_key]].nil?
+  if @secrets.collected_secrets[args[:encryption_key]].nil?
     puts "  ERROR: Encryption key '#{args[:encryption_key]}' does not exist!"
     raise
   elsif args[:secret] and ENV["TF_VAR_#{args[:secret]}"].nil?
@@ -26,7 +26,7 @@ task :rotate_secret, [:encryption_key, :secret, :cmd] => [:configure, :configure
   ENV["TF_VAR_#{args[:secret]}_rotated"] = ENV["TF_VAR_#{args[:secret]}"]
   ENV["TF_VAR_#{args[:secret]}"] = ""
   rotate_secrets = true
-  Secrets.set_secrets(@secrets, rotate_secrets)
+  @secrets.set_secrets(rotate_secrets)
 
   sh_filter "#{@exekube_cmd} #{args[:cmd]}" if args[:cmd]
 end
@@ -38,16 +38,16 @@ task :rotate_secrets_key, [:encryption_key] => [:configure, :configure_secrets] 
     raise
   end
 
-  if @secrets[args[:encryption_key]].nil?
+  if @secrets.collected_secrets[args[:encryption_key]].nil?
     puts "  ERROR: Encryption key '#{args[:encryption_key]}' does not exist!"
     raise
   end
 
   Rake::Task["set_secrets"].invoke
-  new_version_id = Secrets.create_key_version(args[:encryption_key])
+  new_version_id = @secrets.create_key_version(args[:encryption_key])
   rotate_secrets = true
-  Secrets.set_secrets(@secrets, rotate_secrets)
-  Secrets.disable_non_primary_key_versions(args[:encryption_key], new_version_id)
+  @secrets.set_secrets(rotate_secrets)
+  @secrets.disable_non_primary_key_versions(args[:encryption_key], new_version_id)
 end
 
 # This task destroy all keys except current one for projectowner's SA.
