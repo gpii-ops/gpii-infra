@@ -27,7 +27,8 @@ task :rotate_secret, [:encryption_key, :secret, :cmd] => [:configure] do |taskna
   Secrets.set_secrets(@secrets)
   ENV["TF_VAR_#{args[:secret]}_rotated"] = ENV["TF_VAR_#{args[:secret]}"]
   ENV["TF_VAR_#{args[:secret]}"] = ""
-  Secrets.set_secrets(@secrets, rotate_secrets = true)
+  rotate_secrets = true
+  Secrets.set_secrets(@secrets, rotate_secrets)
 
   sh_filter "#{@exekube_cmd} #{args[:cmd]}" if args[:cmd]
 end
@@ -48,7 +49,8 @@ task :rotate_secrets_key, [:encryption_key] => [:configure] do |taskname, args|
 
   Secrets.set_secrets(@secrets)
   new_version_id = Secrets.create_key_version(args[:encryption_key])
-  Secrets.set_secrets(@secrets, rotate_secrets = true)
+  rotate_secrets = true
+  Secrets.set_secrets(@secrets, rotate_secrets)
   Secrets.disable_non_primary_key_versions(args[:encryption_key], new_version_id)
 end
 
