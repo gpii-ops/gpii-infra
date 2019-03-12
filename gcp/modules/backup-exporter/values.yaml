@@ -7,8 +7,6 @@ issuerRef:
 serviceAccountName: "${service_account_name}"
 serviceAccountJson: "${service_account_json}"
 
-AwsSecretKeyId: "${aws_secret_key_id}"
-AwsSecretAccessKey: "${aws_secret_access_key}"
-S3Bucket: "${s3_bucket}"
+DestinationBucket: "${destination_bucket}"
 
 schedule: "*/5 * * * *"
