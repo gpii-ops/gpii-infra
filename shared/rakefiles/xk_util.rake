@@ -5,7 +5,7 @@
 # Old secret value will be set to TF_VAR_secret_name_rotated until rotation is finished.
 #
 # Arbitrary command to execute after rotation can be set with :cmd argument.
-task :rotate_secret, [:encryption_key, :secret, :cmd] => [:configure] do |taskname, args|
+task :rotate_secret, [:encryption_key, :secret, :cmd] => [:configure, :configure_secrets] do |taskname, args|
   if args[:encryption_key].nil? || args[:encryption_key].size == 0
     puts "  ERROR: Argument :encryption_key not present!"
     raise
@@ -13,8 +13,6 @@ task :rotate_secret, [:encryption_key, :secret, :cmd] => [:configure] do |taskna
     puts "  ERROR: Argument :secret not present!"
     raise
   end
-
-  @secrets = Secrets.collect_secrets()
 
   if @secrets[args[:encryption_key]].nil?
     puts "  ERROR: Encryption key '#{args[:encryption_key]}' does not exist!"
@@ -24,7 +22,7 @@ task :rotate_secret, [:encryption_key, :secret, :cmd] => [:configure] do |taskna
     raise
   end
 
-  Secrets.set_secrets(@secrets)
+  Rake::Task["set_secrets"].invoke
   ENV["TF_VAR_#{args[:secret]}_rotated"] = ENV["TF_VAR_#{args[:secret]}"]
   ENV["TF_VAR_#{args[:secret]}"] = ""
   rotate_secrets = true
@@ -34,20 +32,18 @@ task :rotate_secret, [:encryption_key, :secret, :cmd] => [:configure] do |taskna
 end
 
 # This task rotates KMS key and associated secrets file for target args[:encryption_key].
-task :rotate_secrets_key, [:encryption_key] => [:configure] do |taskname, args|
+task :rotate_secrets_key, [:encryption_key] => [:configure, :configure_secrets] do |taskname, args|
   if args[:encryption_key].nil? || args[:encryption_key].size == 0
     puts "  ERROR: Argument :encryption_key not present!"
     raise
   end
-
-  @secrets = Secrets.collect_secrets()
 
   if @secrets[args[:encryption_key]].nil?
     puts "  ERROR: Encryption key '#{args[:encryption_key]}' does not exist!"
     raise
   end
 
-  Secrets.set_secrets(@secrets)
+  Rake::Task["set_secrets"].invoke
   new_version_id = Secrets.create_key_version(args[:encryption_key])
   rotate_secrets = true
   Secrets.set_secrets(@secrets, rotate_secrets)
@@ -73,7 +69,7 @@ task :destroy_sa_keys => [@gcp_creds_file, :configure_extra_tf_vars] do
   "
 end
 
-task :display_cluster_state => [:configure, :configure_secrets] do
+task :display_cluster_state => [:configure, :configure_secrets, :set_secrets] do
   puts
   puts "**************"
   puts "Cluster state:"

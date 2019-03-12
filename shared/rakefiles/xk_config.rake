@@ -76,10 +76,13 @@ end
 
 task :configure_secrets do
   @secrets = Secrets.collect_secrets()
+end
+
+task :set_secrets do
   Secrets.set_secrets(@secrets)
 end
 
-task :fetch_helm_certs => [:configure_secrets] do
+task :fetch_helm_certs => [:configure_secrets, :set_secrets] do
   sh "
     cd /project/live/${ENV}/k8s/kube-system/helm-initializer
     echo \"[helm-initializer] Pulling TF state...\"
