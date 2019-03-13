@@ -7,7 +7,6 @@ require "yaml"
 class Secrets
 
   KMS_KEYRING_BASENAME = "keyring-tylertmp"
-  KMS_LOCATION = "global"
 
   SECRETS_DIR    = "secrets"
   SECRETS_FILE   = "secrets.yaml"
@@ -17,12 +16,14 @@ class Secrets
   GOOGLE_KMS_API   = "https://cloudkms.googleapis.com"
 
   attr_reader :collected_secrets
+  attr_reader :infra_region
   attr_reader :kms_keyring_name
   attr_reader :project_name
 
-  def initialize(project_name)
+  def initialize(project_name, infra_region)
     @project_name = project_name
     @kms_keyring_name = "#{@project_name}-#{KMS_KEYRING_BASENAME}"
+    @infra_region = infra_region
   end
 
   # This method is looking for SECRETS_FILE files in module directories (modules/*), which should have the following structure:
@@ -159,7 +160,7 @@ class Secrets
       curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
       -H \"Content-Type:application/json\" \
-      -X GET \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{@project_id}/locations/#{Secrets::KMS_LOCATION}/keyRings/#{@kms_keyring_name}/cryptoKeys/#{encryption_key}\"
+      -X GET \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{@project_id}/locations/#{@infra_region}/keyRings/#{@kms_keyring_name}/cryptoKeys/#{encryption_key}\"
     }
 
     begin
@@ -175,7 +176,7 @@ class Secrets
       curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
       -H \"Content-Type:application/json\" \
-      -X POST \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{@project_id}/locations/#{Secrets::KMS_LOCATION}/keyRings/#{@kms_keyring_name}/cryptoKeys/#{encryption_key}/cryptoKeyVersions/#{encryption_key_version}:encrypt\" \
+      -X POST \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{@project_id}/locations/#{@infra_region}/keyRings/#{@kms_keyring_name}/cryptoKeys/#{encryption_key}/cryptoKeyVersions/#{encryption_key_version}:encrypt\" \
       -d \"{\\\"plaintext\\\":\\\"#{encoded_secrets}\\\"}\"
     }
 
@@ -244,7 +245,7 @@ class Secrets
       curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
       -H \"Content-Type:application/json\" \
-      -X POST \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{@project_id}/locations/#{Secrets::KMS_LOCATION}/keyRings/#{@kms_keyring_name}/cryptoKeys/#{encryption_key}:decrypt\" \
+      -X POST \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{@project_id}/locations/#{@infra_region}/keyRings/#{@kms_keyring_name}/cryptoKeys/#{encryption_key}:decrypt\" \
       -d \"{\\\"ciphertext\\\":\\\"#{gs_secrets['ciphertext']}\\\"}\"
     }
 
@@ -270,7 +271,7 @@ class Secrets
     puts "[secret-mgmt] Creating new primary version for key '#{encryption_key}'..."
     new_version = %x{
       gcloud kms keys versions create \
-      --location #{Secrets::KMS_LOCATION} \
+      --location #{@infra_region} \
       --keyring #{@kms_keyring_name} \
       --key #{encryption_key} \
       --primary --format json
@@ -292,7 +293,7 @@ class Secrets
     puts "[secret-mgmt] Retrieving versions for key '#{encryption_key}'..."
     key_versions = %x{
       gcloud kms keys versions list \
-      --location #{Secrets::KMS_LOCATION} \
+      --location #{@infra_region} \
       --keyring #{@kms_keyring_name} \
       --key #{encryption_key} \
       --format json
@@ -312,7 +313,7 @@ class Secrets
       puts "[secret-mgmt] Disabling version #{version_id} for key '#{encryption_key}'..."
       version_disabled = %x{
         gcloud kms keys versions disable #{version_id} \
-        --location #{Secrets::KMS_LOCATION} \
+        --location #{@infra_region} \
         --keyring #{@kms_keyring_name} \
         --key #{encryption_key} \
         --format json

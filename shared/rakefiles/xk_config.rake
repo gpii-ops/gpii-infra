@@ -75,7 +75,7 @@ task :configure_extra_tf_vars do
 end
 
 task :configure_secrets do
-  @secrets = Secrets.new(ENV["TF_VAR_project_id"])
+  @secrets = Secrets.new(ENV["TF_VAR_project_id"], ENV["TF_VAR_infra_region"])
   @secrets.collect_secrets()
 end
 
