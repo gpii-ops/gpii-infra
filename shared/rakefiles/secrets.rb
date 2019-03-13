@@ -151,7 +151,7 @@ class Secrets
   end
 
   def push_secrets(secrets, encryption_key)
-    gs_bucket = "#{ENV['TF_VAR_project_id']}-#{encryption_key}-secrets"
+    gs_bucket = "#{@project_id}-#{encryption_key}-secrets"
     encoded_secrets = Base64.encode64(secrets.to_json).delete!("\n")
 
     puts "[secret-mgmt] Retrieving primary key version for key '#{encryption_key}'..."
@@ -159,7 +159,7 @@ class Secrets
       curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
       -H \"Content-Type:application/json\" \
-      -X GET \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{ENV['TF_VAR_project_id']}/locations/#{Secrets::KMS_LOCATION}/keyRings/#{@kms_keyring_name}/cryptoKeys/#{encryption_key}\"
+      -X GET \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{@project_id}/locations/#{Secrets::KMS_LOCATION}/keyRings/#{@kms_keyring_name}/cryptoKeys/#{encryption_key}\"
     }
 
     begin
@@ -175,7 +175,7 @@ class Secrets
       curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
       -H \"Content-Type:application/json\" \
-      -X POST \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{ENV['TF_VAR_project_id']}/locations/#{Secrets::KMS_LOCATION}/keyRings/#{@kms_keyring_name}/cryptoKeys/#{encryption_key}/cryptoKeyVersions/#{encryption_key_version}:encrypt\" \
+      -X POST \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{@project_id}/locations/#{Secrets::KMS_LOCATION}/keyRings/#{@kms_keyring_name}/cryptoKeys/#{encryption_key}/cryptoKeyVersions/#{encryption_key_version}:encrypt\" \
       -d \"{\\\"plaintext\\\":\\\"#{encoded_secrets}\\\"}\"
     }
 
@@ -204,7 +204,7 @@ class Secrets
   end
 
   def fetch_secrets(encryption_key)
-    gs_bucket = "#{ENV['TF_VAR_project_id']}-#{encryption_key}-secrets"
+    gs_bucket = "#{@project_id}-#{encryption_key}-secrets"
     gs_secrets_file = "#{gs_bucket}/o/#{Secrets::SECRETS_FILE}"
 
     puts "[secret-mgmt] Checking if secrets file for key '#{encryption_key}' is present in GS bucket..."
@@ -244,7 +244,7 @@ class Secrets
       curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
       -H \"Content-Type:application/json\" \
-      -X POST \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{ENV['TF_VAR_project_id']}/locations/#{Secrets::KMS_LOCATION}/keyRings/#{@kms_keyring_name}/cryptoKeys/#{encryption_key}:decrypt\" \
+      -X POST \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{@project_id}/locations/#{Secrets::KMS_LOCATION}/keyRings/#{@kms_keyring_name}/cryptoKeys/#{encryption_key}:decrypt\" \
       -d \"{\\\"ciphertext\\\":\\\"#{gs_secrets['ciphertext']}\\\"}\"
     }
 
