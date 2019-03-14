@@ -9,7 +9,7 @@ metadata:
     heritage: "{{ .Release.Service }}"
   namespace: backup-exporter
 spec:
-  schedule: {{ .Values.schedule }}
+  schedule: "{{ .Values.schedule }}"
   jobTemplate:
     spec:
       template:

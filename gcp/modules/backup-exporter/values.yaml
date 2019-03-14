@@ -1,9 +1,5 @@
 replicaCount: ${replica_count}
 
-issuerRef:
-  name: ${cert_issuer_name}
-  kind: ClusterIssuer
-
 serviceAccountName: "${service_account_name}"
 serviceAccountJson: "${service_account_json}"
 
