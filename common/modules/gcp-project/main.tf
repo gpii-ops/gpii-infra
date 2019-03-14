@@ -233,9 +233,6 @@ data "google_iam_policy" "combined" {
     role = "roles/editor"
 
     members = [
-      # TODO: Remove default account in cleanup phase
-      "serviceAccount:${google_project.project.number}-compute@developer.gserviceaccount.com",
-
       "serviceAccount:${google_project.project.number}@cloudservices.gserviceaccount.com",
       "serviceAccount:service-${google_project.project.number}@containerregistry.iam.gserviceaccount.com",
     ]

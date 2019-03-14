@@ -8,11 +8,11 @@ variable "serviceaccount_key" {}
 # Terragrunt variables
 variable "node_type" {}
 
-variable "infra_region" {}
-
-variable "initial_node_count" {
+variable "node_count" {
   default = 1
 }
+
+variable "infra_region" {}
 
 variable "prevent_destroy_cluster" {
   default = false
@@ -28,23 +28,12 @@ module "gke_cluster" {
   project_id         = "${var.project_id}"
   serviceaccount_key = "${var.serviceaccount_key}"
 
-  initial_node_count = "${var.initial_node_count}"
-  node_type          = "${var.node_type}"
-
   kubernetes_version = "1.11.6-gke.3"
 
   region = "${var.infra_region}"
 
   monitoring_service = "monitoring.googleapis.com/kubernetes"
   logging_service    = "logging.googleapis.com/kubernetes"
-
-  oauth_scopes = [
-    "https://www.googleapis.com/auth/compute",
-    "https://www.googleapis.com/auth/devstorage.read_only",
-    "https://www.googleapis.com/auth/logging.write",
-    "https://www.googleapis.com/auth/monitoring",
-    "https://www.googleapis.com/auth/trace.append",
-  ]
 
   # Istio config
   istio_disabled = false
@@ -60,9 +49,9 @@ module "gke_cluster" {
 
   update_timeout = "30m"
 
-  primary_pool_min_node_count     = "${var.initial_node_count}"
-  primary_pool_max_node_count     = "${var.initial_node_count}"
-  primary_pool_initial_node_count = "${var.initial_node_count}"
+  primary_pool_min_node_count     = "${var.node_count}"
+  primary_pool_max_node_count     = "${var.node_count}"
+  primary_pool_initial_node_count = "${var.node_count}"
   primary_pool_machine_type       = "${var.node_type}"
   primary_pool_oauth_scopes       = ["cloud-platform"]
   primary_pool_service_account    = "${data.google_service_account.gke_cluster_node.email}"
