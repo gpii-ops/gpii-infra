@@ -18,6 +18,11 @@ variable "prevent_destroy_cluster" {
   default = false
 }
 
+data "google_service_account" "gke_cluster_node" {
+  account_id = "gke-cluster-node"
+  project    = "${var.project_id}"
+}
+
 module "gke_cluster" {
   source             = "/exekube-modules/gke-cluster"
   project_id         = "${var.project_id}"
@@ -54,6 +59,13 @@ module "gke_cluster" {
   issue_client_certificate = false
 
   update_timeout = "30m"
+
+  primary_pool_min_node_count     = "${var.initial_node_count}"
+  primary_pool_max_node_count     = "${var.initial_node_count}"
+  primary_pool_initial_node_count = "${var.initial_node_count}"
+  primary_pool_machine_type       = "${var.node_type}"
+  primary_pool_oauth_scopes       = ["cloud-platform"]
+  primary_pool_service_account    = "${data.google_service_account.gke_cluster_node.email}"
 }
 
 # Workaround from
