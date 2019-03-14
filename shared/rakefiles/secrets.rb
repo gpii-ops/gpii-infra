@@ -6,7 +6,8 @@ require "yaml"
 
 class Secrets
 
-  KMS_KEYRING_BASENAME = "keyring-tylertmp"
+  ###KMS_KEYRING_BASENAME = "keyring-tylertmp"
+  KMS_KEYRING_BASENAME = "keyring"
 
   SECRETS_DIR    = "secrets"
   SECRETS_FILE   = "secrets.yaml"
@@ -18,12 +19,14 @@ class Secrets
   attr_reader :collected_secrets
   attr_reader :infra_region
   attr_reader :kms_keyring_name
-  attr_reader :project_name
+  attr_reader :project_id
 
-  def initialize(project_name, infra_region)
-    @project_name = project_name
-    @kms_keyring_name = "#{@project_name}-#{KMS_KEYRING_BASENAME}"
-    @infra_region = infra_region
+  def initialize(project_id, infra_region)
+    @project_id = project_id
+    ###@kms_keyring_name = "#{@project_id}-#{Secrets::KMS_KEYRING_BASENAME}"
+    @kms_keyring_name = "#{Secrets::KMS_KEYRING_BASENAME}"
+    ###@infra_region = infra_region
+    @infra_region = "global"
   end
 
   # This method is looking for SECRETS_FILE files in module directories (modules/*), which should have the following structure:
@@ -208,7 +211,7 @@ class Secrets
     gs_bucket = "#{@project_id}-#{encryption_key}-secrets"
     gs_secrets_file = "#{gs_bucket}/o/#{Secrets::SECRETS_FILE}"
 
-    puts "[secret-mgmt] Checking if secrets file for key '#{encryption_key}' is present in GS bucket..."
+    puts "[secret-mgmt] Checking if secrets file for key '#{encryption_key}' is present in GS bucket #{gs_bucket}..."
     api_call_data = %x{
       curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
