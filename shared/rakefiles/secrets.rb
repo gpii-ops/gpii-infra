@@ -107,7 +107,6 @@ class Secrets
     @collected_secrets = collected_secrets
   end
 
-
   # This method is setting secret ENV variables collected from modules
   #
   # When encrypted secret file for current env is not present it GS bucket,
@@ -238,8 +237,11 @@ class Secrets
     }
 
     gs_secrets = JSON.parse(Base64.decode64(api_call_data))
-    if !gs_secrets['ciphertext']
+    unless gs_secrets['ciphertext']
       debug_output "ERROR: Unable to extract ciphertext from YAML data for key '#{encryption_key}', terminating!"
+      if gs_secrets['error']
+        puts gs_secrets['error']
+      end
       raise
     end
 
