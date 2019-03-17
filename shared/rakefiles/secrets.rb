@@ -25,8 +25,8 @@ class Secrets
     @project_id = project_id
     ###@kms_keyring_name = "#{@project_id}-#{Secrets::KMS_KEYRING_BASENAME}"
     @kms_keyring_name = "#{Secrets::KMS_KEYRING_BASENAME}"
-    ###@infra_region = infra_region
-    @infra_region = "global"
+    @infra_region = infra_region
+    ###@infra_region = "global"
   end
 
   # This method is looking for SECRETS_FILE files in module directories (modules/*), which should have the following structure:
