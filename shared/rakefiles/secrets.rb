@@ -203,7 +203,13 @@ class Secrets
   end
 
   def get_decrypt_url(encryption_key)
-    decrypt_url = "#{Secrets::GOOGLE_KMS_API}/v1/projects/#{@project_id}/locations/#{@infra_region}/keyRings/#{Secrets::KMS_KEYRING_NAME}/cryptoKeys/#{encryption_key}:decrypt"
+    region = @infra_region
+    # I'm adding this to assist with migration for GPII-3707. It can likely be
+    # removed afterwards, as we no longer plan to use Keyrings in /global/.
+    if @decrypt_with_global_key
+      region = "global"
+    end
+    decrypt_url = "#{Secrets::GOOGLE_KMS_API}/v1/projects/#{@project_id}/locations/#{region}/keyRings/#{Secrets::KMS_KEYRING_NAME}/cryptoKeys/#{encryption_key}:decrypt"
     return decrypt_url
   end
 
