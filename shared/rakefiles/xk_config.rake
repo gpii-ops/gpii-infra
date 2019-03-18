@@ -75,7 +75,13 @@ task :configure_extra_tf_vars do
 end
 
 task :configure_secrets do
-  @secrets = Secrets.new(ENV["TF_VAR_project_id"], ENV["TF_VAR_infra_region"])
+  # I'm adding this to assist with migration for GPII-3707. It can likely be
+  # removed afterwards, as we no longer plan to use Keyrings in /global/.
+  decrypt_with_global_key = ENV["TF_VAR_decrypt_with_global_key"]
+  @secrets = Secrets.new(
+      ENV["TF_VAR_project_id"],
+      ENV["TF_VAR_infra_region"],
+      decrypt_with_global_key=decrypt_with_global_key)
   @secrets.collect_secrets()
 end
 
@@ -104,3 +110,6 @@ task :configure => [@gcp_creds_file, @app_default_creds_file, @kubectl_creds_fil
   # This is a wrapper configuration task.
   # It does nothing, but it has all dependencies that required for standard rake workflow.
 end
+
+
+# vim: et ts=2 sw=2:
