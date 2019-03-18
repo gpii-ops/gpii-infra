@@ -16,6 +16,14 @@ describe Secrets do
     expect(secrets.infra_region).to eq(fake_infra_region)
   end
 
+  it "new instance accepts decrypt_with_global_key" do
+    fake_project_id = "fakeorg-fakecloud-fakeenv-fakeuser"
+    fake_infra_region = "mars-north1"
+    decrypt_with_global_key = true
+    secrets = Secrets.new(fake_project_id, fake_infra_region, decrypt_with_global_key=decrypt_with_global_key)
+    expect(secrets.infra_region).to eq(fake_infra_region)
+  end
+
   it "get_decrypt_url constructs a url" do
     fake_project_id = "fakeorg-fakecloud-fakeenv-fakeuser"
     fake_infra_region = "mars-north1"

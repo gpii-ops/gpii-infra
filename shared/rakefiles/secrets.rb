@@ -19,9 +19,10 @@ class Secrets
   attr_reader :infra_region
   attr_reader :project_id
 
-  def initialize(project_id, infra_region)
+  def initialize(project_id, infra_region, decrypt_with_global_key=false)
     @project_id = project_id
     @infra_region = infra_region
+    @decrypt_with_global_key = decrypt_with_global_key
   end
 
   # This method is looking for SECRETS_FILE files in module directories (modules/*), which should have the following structure:
