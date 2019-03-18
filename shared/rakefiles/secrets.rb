@@ -201,6 +201,11 @@ class Secrets
     end
   end
 
+  def get_decrypt_url(encryption_key)
+    decrypt_url = "#{Secrets::GOOGLE_KMS_API}/v1/projects/#{@project_id}/locations/#{@infra_region}/keyRings/#{Secrets::KMS_KEYRING_NAME}/cryptoKeys/#{encryption_key}:decrypt"
+    return decrypt_url
+  end
+
   def fetch_secrets(encryption_key)
     gs_bucket = "#{@project_id}-#{encryption_key}-secrets"
     gs_secrets_file = "#{gs_bucket}/o/#{Secrets::SECRETS_FILE}"
@@ -240,12 +245,13 @@ class Secrets
       raise
     end
 
-    puts "[secret-mgmt] Decrypting secrets for key '#{encryption_key}' with KMS key version #{get_crypto_key_version(gs_secrets['name'])}..."
+    decrypt_url = get_decrypt_url(encryption_key)
+    puts "[secret-mgmt] Decrypting secrets for key '#{encryption_key}' with KMS key #{decrypt_url}..."
     decrypted_secrets = %x{
       curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
       -H \"Content-Type:application/json\" \
-      -X POST \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{@project_id}/locations/#{@infra_region}/keyRings/#{Secrets::KMS_KEYRING_NAME}/cryptoKeys/#{encryption_key}:decrypt\" \
+      -X POST \"#{decrypt_url}\" \
       -d \"{\\\"ciphertext\\\":\\\"#{gs_secrets['ciphertext']}\\\"}\"
     }
 
