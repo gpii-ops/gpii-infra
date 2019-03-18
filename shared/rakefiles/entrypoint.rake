@@ -214,6 +214,11 @@ task :rotate_secrets_key, [:kms_key] => [:set_vars, :check_destroy_allowed] do |
   sh "#{@exekube_cmd} rake rotate_secrets_key['#{kms_key}']"
 end
 
+desc "[EXPERIMENTAL] [ADVANCED] Import an existing KMS keyring, e.g when moving an environment to a new (but previously-used) region"
+task :import_keyring => [:set_vars, :check_destroy_allowed] do
+  sh "#{@exekube_cmd} rake import_keyring"
+end
+
 desc "[ADVANCED] Fetch helm TLS certificates from TF state (only in case they are present)"
 task :fetch_helm_certs => [:set_vars] do
   sh "#{@exekube_cmd} rake fetch_helm_certs"
@@ -258,5 +263,6 @@ desc "[ADMIN ONLY] Revoke owner role to the current user"
 task :revoke_owner_role => [:set_vars] do
   sh "#{@exekube_cmd} rake revoke_owner_role"
 end
+
 
 # vim: et ts=2 sw=2:

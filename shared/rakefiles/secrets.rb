@@ -25,6 +25,10 @@ class Secrets
     @decrypt_with_global_key = decrypt_with_global_key
   end
 
+  def load_secrets_config
+    return YAML.load(File.read(Secrets::SECRETS_CONFIG))
+  end
+
   # This method is looking for SECRETS_FILE files in module directories (modules/*), which should have the following structure:
   #
   # secrets:
@@ -86,7 +90,7 @@ class Secrets
     end
 
     encryption_keys = {}
-    secrets_config = YAML.load(File.read(Secrets::SECRETS_CONFIG))
+    secrets_config = load_secrets_config()
     secrets_config["encryption_keys"].each do |encryption_key|
       encryption_keys[encryption_key] = %Q|"#{encryption_key}"|
     end

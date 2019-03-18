@@ -50,6 +50,36 @@ task :rotate_secrets_key, [:encryption_key] => [:configure, :configure_secrets] 
   @secrets.disable_non_primary_key_versions(args[:encryption_key], new_version_id)
 end
 
+# This is an EXPERIMENTAL helper for moving between regions, but it is not very smart and it
+# is strongly coupled with the gcp-secret-mgmt module (e.g. if resource names
+# change there, they will also need to change here).
+task :import_keyring => [:configure, :configure_secrets] do
+  # Remove and then import the Keyring
+  sh "#{@exekube_cmd} sh -c ' \
+    terragrunt state rm module.gcp-secret-mgmt.google_kms_key_ring.key_ring \
+    --terragrunt-working-dir /project/live/#{@env}/secret-mgmt \
+  '"
+  sh "#{@exekube_cmd} sh -c ' \
+    terragrunt import module.gcp-secret-mgmt.google_kms_key_ring.key_ring \
+    projects/#{ENV["TF_VAR_project_id"]}/locations/#{ENV["TF_VAR_infra_region"]}/keyRings/#{ENV["TF_VAR_keyring_name"]} \
+    --terragrunt-working-dir /project/live/#{@env}/secret-mgmt \
+  '"
+
+  # Remove and then import the Keys
+  secrets_config = @secrets.load_secrets_config()
+  secrets_config["encryption_keys"].each_with_index do |key_name, index|
+    sh "#{@exekube_cmd} sh -c ' \
+      terragrunt state rm module.gcp-secret-mgmt.google_kms_crypto_key.encryption_keys[#{index}] \
+      --terragrunt-working-dir /project/live/#{@env}/secret-mgmt \
+    '"
+    sh "#{@exekube_cmd} sh -c ' \
+      terragrunt import module.gcp-secret-mgmt.google_kms_crypto_key.encryption_keys[#{index}] \
+      projects/#{ENV["TF_VAR_project_id"]}/locations/#{ENV["TF_VAR_infra_region"]}/keyRings/#{ENV["TF_VAR_keyring_name"]}/cryptoKeys/#{key_name} \
+      --terragrunt-working-dir /project/live/#{@env}/secret-mgmt \
+    '"
+  end
+end
+
 # This task destroy all keys except current one for projectowner's SA.
 # It does nothing in case local SA credentials not present.
 task :destroy_sa_keys => [@gcp_creds_file, :configure_extra_tf_vars] do
@@ -114,5 +144,6 @@ task :revoke_owner_role => [@gcp_creds_file, :configure_extra_tf_vars] do
     gcloud projects remove-iam-policy-binding \"$TF_VAR_project_id\" --member user:\"$TF_VAR_auth_user_email\" --role roles/owner
   "
 end
+
 
 # vim: et ts=2 sw=2:
