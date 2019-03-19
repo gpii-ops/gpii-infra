@@ -199,7 +199,9 @@ data "google_iam_policy" "combined" {
     role = "roles/editor"
 
     members = [
+      # TODO: Remove default account in cleanup phase
       "serviceAccount:${google_project.project.number}-compute@developer.gserviceaccount.com",
+
       "serviceAccount:${google_project.project.number}@cloudservices.gserviceaccount.com",
       "serviceAccount:service-${google_project.project.number}@containerregistry.iam.gserviceaccount.com",
     ]
@@ -210,6 +212,62 @@ data "google_iam_policy" "combined" {
 
     members = [
       "${local.project_owners}",
+    ]
+  }
+
+  binding {
+    role = "roles/logging.logWriter"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_node.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/monitoring.metricWriter"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_node.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/monitoring.viewer"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_node.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/storage.objectViewer"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_node.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/cloudtrace.agent"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_node.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
+    ]
+  }
+
+  # TODO: This is required for k8s snapshots, once Service Assigner is in
+  # k8s-snapshots should get their own dedicated svc account
+  binding {
+    role = "roles/compute.storageAdmin"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_node.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
     ]
   }
 

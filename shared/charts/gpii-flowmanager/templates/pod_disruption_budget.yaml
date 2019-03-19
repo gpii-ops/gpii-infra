@@ -1,0 +1,14 @@
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ template "flowmanager.name" . }}
+  labels:
+    app: {{ template "flowmanager.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: flowmanager
