@@ -79,7 +79,7 @@ task :configure_secrets do
   Secrets.set_secrets(@secrets)
 end
 
-task :fetch_helm_certs => [:configure_secrets] do
+task :fetch_helm_certs => [:configure, :configure_secrets] do
   sh "
     cd /project/live/${ENV}/k8s/kube-system/helm-initializer
     echo \"[helm-initializer] Pulling TF state...\"
@@ -91,8 +91,12 @@ task :fetch_helm_certs => [:configure_secrets] do
         echo \"[helm-initializer] Populating ${filename}...\"
         mkdir -p $(dirname \"${filename}\")
         echo \"${content}\" > \"${filename}\"
+      else
+        echo \"[helm-initializer] Could not find data for ${filename}. Skipping...\"
       fi
     done
+    echo \"[helm-initializer] Here are the certs I fetched:\"
+    find \"/project/live/${ENV}/secrets\" -type f | sort | xargs ls -l
   "
 end
 
@@ -100,3 +104,5 @@ task :configure => [@gcp_creds_file, @app_default_creds_file, @kubectl_creds_fil
   # This is a wrapper configuration task.
   # It does nothing, but it has all dependencies that required for standard rake workflow.
 end
+
+# vim: et ts=2 sw=2:
