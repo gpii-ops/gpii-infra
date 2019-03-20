@@ -57,12 +57,10 @@ task :import_keyring => [:configure, :configure_secrets] do
   # Remove and then import the Keyring
   sh "#{@exekube_cmd} sh -c ' \
     terragrunt state rm module.gcp-secret-mgmt.google_kms_key_ring.key_ring \
-    --terragrunt-working-dir /project/live/#{@env}/secret-mgmt \
-  '"
-  sh "#{@exekube_cmd} sh -c ' \
+      --terragrunt-working-dir /project/live/#{@env}/secret-mgmt &&\
     terragrunt import module.gcp-secret-mgmt.google_kms_key_ring.key_ring \
-    projects/#{ENV["TF_VAR_project_id"]}/locations/#{ENV["TF_VAR_infra_region"]}/keyRings/#{ENV["TF_VAR_keyring_name"]} \
-    --terragrunt-working-dir /project/live/#{@env}/secret-mgmt \
+      projects/#{ENV["TF_VAR_project_id"]}/locations/#{ENV["TF_VAR_infra_region"]}/keyRings/#{ENV["TF_VAR_keyring_name"]} \
+      --terragrunt-working-dir /project/live/#{@env}/secret-mgmt \
   '"
 
   # Remove and then import the Keys
@@ -70,12 +68,10 @@ task :import_keyring => [:configure, :configure_secrets] do
   secrets_config["encryption_keys"].each_with_index do |key_name, index|
     sh "#{@exekube_cmd} sh -c ' \
       terragrunt state rm module.gcp-secret-mgmt.google_kms_crypto_key.encryption_keys[#{index}] \
-      --terragrunt-working-dir /project/live/#{@env}/secret-mgmt \
-    '"
-    sh "#{@exekube_cmd} sh -c ' \
+        --terragrunt-working-dir /project/live/#{@env}/secret-mgmt &&\
       terragrunt import module.gcp-secret-mgmt.google_kms_crypto_key.encryption_keys[#{index}] \
-      projects/#{ENV["TF_VAR_project_id"]}/locations/#{ENV["TF_VAR_infra_region"]}/keyRings/#{ENV["TF_VAR_keyring_name"]}/cryptoKeys/#{key_name} \
-      --terragrunt-working-dir /project/live/#{@env}/secret-mgmt \
+        projects/#{ENV["TF_VAR_project_id"]}/locations/#{ENV["TF_VAR_infra_region"]}/keyRings/#{ENV["TF_VAR_keyring_name"]}/cryptoKeys/#{key_name} \
+        --terragrunt-working-dir /project/live/#{@env}/secret-mgmt \
     '"
   end
 end
