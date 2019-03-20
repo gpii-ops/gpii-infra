@@ -11,4 +11,4 @@ spec:
   maxUnavailable: 1
   selector:
     matchLabels:
-      app: preferences
+      app: flowmanager
