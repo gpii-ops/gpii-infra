@@ -19,7 +19,7 @@ describe Secrets do
   it "new instance accepts decrypt_with_key_from_region" do
     fake_project_id = "fakeorg-fakecloud-fakeenv-fakeuser"
     fake_infra_region = "mars-north1"
-    decrypt_with_key_from_region = true
+    decrypt_with_key_from_region = "jupiter-south2"
     secrets = Secrets.new(fake_project_id, fake_infra_region, decrypt_with_key_from_region=decrypt_with_key_from_region)
     expect(secrets.infra_region).to eq(fake_infra_region)
   end
@@ -38,8 +38,8 @@ describe Secrets do
   it "get_decrypt_url uses global when @decrypt_with_key_from_region is set" do
     fake_project_id = "fakeorg-fakecloud-fakeenv-fakeuser"
     fake_infra_region = "mars-north1"
-    fake_decrypt_with_key_from_region = "jupiter-south2"
-    secrets = Secrets.new(fake_project_id, fake_infra_region, decrypt_with_key_from_region=fake_decrypt_with_key_from_region)
+    decrypt_with_key_from_region = "jupiter-south2"
+    secrets = Secrets.new(fake_project_id, fake_infra_region, decrypt_with_key_from_region=decrypt_with_key_from_region)
 
     fake_encryption_key = "fake_encryption_key"
     actual = secrets.get_decrypt_url(fake_encryption_key)
