@@ -209,7 +209,7 @@ These steps are ordered roughly by difficulty and disruptiveness.
 
 If you're at these steps, you probably want to [ask #ops for help](../CONTACTING-OPS.md).
 
-1. `rake destroy_tfstate` - cleans up terraform state files in Google Storage
+1. `rake destroy_hard` - cleans up terraform state files and secrets in Google Storage
    * **NOTE:** This will "orphan" any resources Terraform created for you previously and will be difficult to recover from
 1. Manually delete resources using the GCP Dashboard: Kubernetes PVs and PVCs, Kubernetes Cluster, Disks, Snapshots, Logging Export rules, Logging Exclusion rules, Network stuff, Network services `->` Cloud DNS, Google Storage buckets.
 
