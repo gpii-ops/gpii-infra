@@ -95,8 +95,7 @@ Users who already had an RtF email address/Google account usually have performed
 1. By default you'll use the RtF Organization and Billing Account.
    * You can use a different Organization or Billing Account, e.g. from a GCP Free Trial Account, with `export ORGANIZATION_ID=111111111111` and/or `export BILLING_ID=222222-222222-222222`.
 1. By default your K8s cluster and related resources will be deployed into `us-central1`.
-   * You can use a different GCP region by setting `TF_VAR_infra_region` variable, for example `export TF_VAR_infra_region=us-east1`.
-   * Before changing region you need to destroy all deployed resources, TF state, and secrets with `rake destroy && rake destroy_tfstate && rake destroy_secrets`.
+   * You can use a different GCP region -- see [I want to spin up my dev environment in a different region](README.md#i-want-to-spin-up-my-dev-environment-in-a-different-region).
 1. The [Google Cloud Console](https://console.cloud.google.com) includes [Google Cloud Shell](https://cloud.google.com/shell/docs/) which is an interactive terminal embedded in the GCP dashboard. To use it, click on the icon at the top right of the Console, next to the magnifier icon.
    * Once the shell opens in your browser, execute the following to manage the Kubernetes cluster using the embedded `kubectl` command: 
    1. `gcloud container clusters get-credentials k8s-cluster --zone YOUR_INFRA_REGION`
@@ -174,6 +173,30 @@ If you don't want to deal with gpii-version-updater, you can instead:
 1. `helm --tiller-namespace kube-system list --tls --tls-verify --tls-ca-cert /project/live/dev/secrets/kube-system/helm-tls/ca.cert.pem --tls-cert /project/live/dev/secrets/kube-system/helm-tls/helm.cert.pem  --tls-key /project/live/dev/secrets/kube-system/helm-tls/helm.key.pem`
    * Adjust paths for the environment you're using.
 
+### I want to spin up my dev environment in a different region
+
+1. `cd gpii-infra/gcp/live/dev`
+1. Destroy all deployed resources, Terraform state, and secrets in the old region:
+   * `rake destroy_hard`
+1. If this is your first time spinning up a dev environment in a new region, or if you're sure you've never created a dev environment in the specified region, proceed to [Using a region for the first time](README.md#using-a-region-for-the-first-time).
+1. Check for an existing Keyring:
+   * `rake sh"[gcloud kms keyrings list --location mars-north1]"`
+1. If you see `Listed 0 items`, proceed to [Using a region for the first time](README.md#using-a-region-for-the-first-time).
+1. If you see something like `projects/gpii-gcp-dev-mrtyler/locations/mars-north1/keyRings/keyring`, proceed to [Using a region where you previously had a dev environment](README.md#using-a-region-where-you-previously-had-a-dev-environment).
+
+#### Using a region for the first time
+1. `export TF_VAR_infra_region=mars-north1`
+1. Your environment is ready to re-deploy with `rake`
+1. If you encounter an error like `google_kms_key_ring.key_ring: Error creating KeyRing: googleapi: Error 409: KeyRing projects/gpii-gcp-dev-tyler/locations/us-east4/keyRings/keyring already exists., alreadyExists`, start over: destroy everything, but this time follow the steps for [Using a region where you previously had a dev environment](README.md#using-a-region-where-you-previously-had-a-dev-environment).
+
+#### Using a region where you previously had a dev environment
+1. `export TF_VAR_infra_region=mars-north1`
+1. `rake import_keyring`
+   * This command is experimental and doesn't do a lot of error checking. If this step fails, try running its constituent commands one-by-one.
+1. `rake rotate_secrets_key`
+1. `rake rotate_secrets_key"[gcp-stackdriver-export]"`
+1. Your environment is ready to re-deploy with `rake`
+
 ### My environment is messed up and I want to get rid of it so I can start over
 
 These steps are ordered roughly by difficulty and disruptiveness.
@@ -188,9 +211,11 @@ These steps are ordered roughly by difficulty and disruptiveness.
 
 If you're at these steps, you probably want to [ask #ops for help](../CONTACTING-OPS.md).
 
-1. `rake destroy_tfstate` - cleans up terraform state files in Google Storage
+1. `rake destroy_hard` - cleans up terraform state files and secrets in Google Storage
    * **NOTE:** This will "orphan" any resources Terraform created for you previously and will be difficult to recover from
-1. Manually delete resources using the GCP Dashboard: Kubernetes PVs and PVCs, Kubernetes Cluster, Disks, Snapshots, Logging Export rules, Logging Exclusion rules, Network stuff, Network services `->` Cloud DNS, Google Storage buckets.
+1. Manually delete "ordinary" resources using the GCP Dashboard: Kubernetes Cluster, Disks, Snapshots, Logging Export rules, Logging Exclusion rules
+1. Manually delete "infra" resources using the GCP Dashboard: Network stuff, Network services `->` Cloud DNS, Google Storage buckets.
+   * NOTE: If you delete the `-tfstate` bucket, you will need to ask Ops (or CI) to re-deploy `common-prd`. Unless things are really messed up, you may prefer to leave the bucket itself alone and delete all its contents.
 
 ### I want to work on a different dev cluster
 

@@ -20,6 +20,7 @@ module "gcp-secret-mgmt" {
   encryption_keys    = "${var.encryption_keys}"
   storage_location   = "${var.infra_region}"
   keyring_name       = "${var.keyring_name}"
+  keyring_location   = "${var.infra_region}"
   apply_audit_config = false
 }
 
