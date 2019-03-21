@@ -19,10 +19,10 @@ class Secrets
   attr_reader :infra_region
   attr_reader :project_id
 
-  def initialize(project_id, infra_region, decrypt_with_global_key=false)
+  def initialize(project_id, infra_region, decrypt_with_key_from_region=false)
     @project_id = project_id
     @infra_region = infra_region
-    @decrypt_with_global_key = decrypt_with_global_key
+    @decrypt_with_key_from_region = decrypt_with_key_from_region
   end
 
   def load_secrets_config
@@ -210,8 +210,8 @@ class Secrets
     region = @infra_region
     # I'm adding this to assist with migration for GPII-3707. It can likely be
     # removed afterwards, as we no longer plan to use Keyrings in /global/.
-    if @decrypt_with_global_key
-      region = "global"
+    if @decrypt_with_key_from_region
+      region = @decrypt_with_key_from_region
     end
     decrypt_url = "#{Secrets::GOOGLE_KMS_API}/v1/projects/#{@project_id}/locations/#{region}/keyRings/#{Secrets::KMS_KEYRING_NAME}/cryptoKeys/#{encryption_key}:decrypt"
     return decrypt_url

@@ -16,11 +16,11 @@ describe Secrets do
     expect(secrets.infra_region).to eq(fake_infra_region)
   end
 
-  it "new instance accepts decrypt_with_global_key" do
+  it "new instance accepts decrypt_with_key_from_region" do
     fake_project_id = "fakeorg-fakecloud-fakeenv-fakeuser"
     fake_infra_region = "mars-north1"
-    decrypt_with_global_key = true
-    secrets = Secrets.new(fake_project_id, fake_infra_region, decrypt_with_global_key=decrypt_with_global_key)
+    decrypt_with_key_from_region = true
+    secrets = Secrets.new(fake_project_id, fake_infra_region, decrypt_with_key_from_region=decrypt_with_key_from_region)
     expect(secrets.infra_region).to eq(fake_infra_region)
   end
 
@@ -35,15 +35,15 @@ describe Secrets do
     expect(actual).to eq(expected)
   end
 
-  it "get_decrypt_url uses global when @decrypt_with_global_key is set" do
+  it "get_decrypt_url uses global when @decrypt_with_key_from_region is set" do
     fake_project_id = "fakeorg-fakecloud-fakeenv-fakeuser"
     fake_infra_region = "mars-north1"
-    decrypt_with_global_key = true
-    secrets = Secrets.new(fake_project_id, fake_infra_region, decrypt_with_global_key=decrypt_with_global_key)
+    fake_decrypt_with_key_from_region = "jupiter-south2"
+    secrets = Secrets.new(fake_project_id, fake_infra_region, decrypt_with_key_from_region=fake_decrypt_with_key_from_region)
 
     fake_encryption_key = "fake_encryption_key"
     actual = secrets.get_decrypt_url(fake_encryption_key)
-    expected = "#{Secrets::GOOGLE_KMS_API}/v1/projects/#{fake_project_id}/locations/global/keyRings/#{Secrets::KMS_KEYRING_NAME}/cryptoKeys/#{fake_encryption_key}:decrypt"
+    expected = "#{Secrets::GOOGLE_KMS_API}/v1/projects/#{fake_project_id}/locations/#{decrypt_with_key_from_region}/keyRings/#{Secrets::KMS_KEYRING_NAME}/cryptoKeys/#{fake_encryption_key}:decrypt"
     expect(actual).to eq(expected)
   end
 
