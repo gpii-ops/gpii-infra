@@ -177,7 +177,7 @@ If you don't want to deal with gpii-version-updater, you can instead:
 
 1. `cd gpii-infra/gcp/live/dev`
 1. Destroy all deployed resources, Terraform state, and secrets in the old region:
-   * `rake destroy_ci`
+   * `rake destroy_hard`
 1. If this is your first time spinning up a dev environment in a new region, or if you're sure you've never created a dev environment in the specified region, proceed to [Using a region for the first time](using-a-region-for-the-first-time).
 1. Check for an existing Keyring:
    * `rake sh"[gcloud kms keyrings list --location mars-north1]"`

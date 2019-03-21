@@ -64,7 +64,7 @@ task :configure_serviceaccount_ci_clobber => [:set_vars_ci]  do
 end
 
 desc "[CI ONLY] Run all CI environment destroy steps"
-task :destroy_ci => [:set_vars_ci] do
+task :destroy_hard => [:set_vars_ci] do
   # Try to clean up any previous incarnation of this environment.
   #
   # Only destroy additional resources (e.g. secrets, terraform state) if
@@ -101,14 +101,14 @@ end
 
 desc "[CI ONLY] Run all CI environment destroy and setup steps for ephemeral clusters"
 task :destroy_and_deploy_ci => [:set_vars_ci] do
-  Rake::Task["destroy_ci"].invoke
+  Rake::Task["destroy_hard"].invoke
   begin
     Rake::Task["deploy"].invoke
     Rake::Task["test_preferences"].invoke
     Rake::Task["test_flowmanager"].invoke
     Rake::Task["display_cluster_state"].invoke
-    Rake::Task["destroy_ci"].reenable
-    Rake::Task["destroy_ci"].invoke
+    Rake::Task["destroy_hard"].reenable
+    Rake::Task["destroy_hard"].invoke
   rescue RuntimeError => err
     puts "Deploy step failed:"
     puts err
@@ -117,8 +117,8 @@ task :destroy_and_deploy_ci => [:set_vars_ci] do
   end
   # If everything succeeded, clean up again. (If something failed, don't clean
   # it up; instead, leave it around for further debugging.)
-  Rake::Task["destroy_ci"].reenable
-  Rake::Task["destroy_ci"].invoke
+  Rake::Task["destroy_hard"].reenable
+  Rake::Task["destroy_hard"].invoke
 end
 
 # vim: et ts=2 sw=2:
