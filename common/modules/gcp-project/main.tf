@@ -380,9 +380,12 @@ resource "google_storage_bucket" "project-tfstate" {
   project = "${google_project.project.project_id}"
   name    = "${var.organization_name}-gcp-${var.project_name}-tfstate"
 
-  # Default region ("US") should be fixed in favor of TF_VAR_infra_region for consistency:
+  # Default region "US" should be fixed in favor of TF_VAR_infra_region for consistency:
   # https://issues.gpii.net/browse/GPII-3707
   # location = "${var.infra_region}"
+  location = "US"
+
+  force_destroy = false
 
   versioning = {
     enabled = "true"
