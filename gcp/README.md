@@ -187,6 +187,7 @@ If you don't want to deal with gpii-version-updater, you can instead:
 #### Using a region for the first time
 1. `export TF_VAR_infra_region=mars-north1`
 1. Your environment is ready to re-deploy with `rake`
+1. If you encounter an error like `google_kms_key_ring.key_ring: Error creating KeyRing: googleapi: Error 409: KeyRing projects/gpii-gcp-dev-tyler/locations/us-east4/keyRings/keyring already exists., alreadyExists`, start over by destroying everything.
 
 #### Using a region where you previously had a dev environment
 1. `export TF_VAR_infra_region=mars-north1`
@@ -211,7 +212,9 @@ If you're at these steps, you probably want to [ask #ops for help](../CONTACTING
 
 1. `rake destroy_hard` - cleans up terraform state files and secrets in Google Storage
    * **NOTE:** This will "orphan" any resources Terraform created for you previously and will be difficult to recover from
-1. Manually delete resources using the GCP Dashboard: Kubernetes PVs and PVCs, Kubernetes Cluster, Disks, Snapshots, Logging Export rules, Logging Exclusion rules, Network stuff, Network services `->` Cloud DNS, Google Storage buckets.
+1. Manually delete "ordinary" resources using the GCP Dashboard: Kubernetes Cluster, Disks, Snapshots, Logging Export rules, Logging Exclusion rules
+1. Manually delete "infra" resources using the GCP Dashboard: Network stuff, Network services `->` Cloud DNS, Google Storage buckets.
+   * NOTE: If you delete the `-tfstate` bucket, you will need to ask Ops (or CI) to re-deploy `common-prd`. Unless things are really messed up, you may prefer to leave the bucket itself alone and delete all its contents.
 
 ### I want to work on a different dev cluster
 
