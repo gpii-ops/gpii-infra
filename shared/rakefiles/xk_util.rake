@@ -1,5 +1,5 @@
-desc "[CI ONLY] Run all CI environment destroy steps"
-task :destroy_hard => [:set_vars_ci] do
+desc "Destroy environment, state, and secrets"
+task :destroy_hard => [:set_vars] do
   # Try to clean up any previous incarnation of this environment.
   #
   # Only destroy additional resources (e.g. secrets, terraform state) if
