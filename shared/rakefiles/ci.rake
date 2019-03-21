@@ -64,7 +64,7 @@ task :configure_serviceaccount_ci_clobber => [:set_vars_ci]  do
 end
 
 desc "[CI ONLY] Run all CI environment destroy and setup steps for ephemeral clusters"
-task :destroy_and_deploy_ci => [:set_vars_ci] do
+task :destroy_hard_and_deploy_ci => [:set_vars_ci] do
   Rake::Task["destroy_hard"].invoke
   begin
     Rake::Task["deploy"].invoke

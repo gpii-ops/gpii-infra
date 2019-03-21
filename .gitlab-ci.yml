@@ -132,7 +132,7 @@ common-stg-test-gcp-dev:
     - cd gcp/live/dev
     - rake clobber
     - rake configure_serviceaccount_ci_restore
-    - rake destroy_and_deploy_ci
+    - rake destroy_hard_and_deploy_ci
   after_script:
     - cd gcp/live/dev
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
@@ -208,7 +208,7 @@ gcp-dev:
     - cd gcp/live/dev
     - rake clobber
     - rake configure_serviceaccount_ci_restore
-    - rake destroy_and_deploy_ci
+    - rake destroy_hard_and_deploy_ci
   after_script:
     - cd gcp/live/dev
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
