@@ -1,3 +1,39 @@
+desc "[CI ONLY] Run all CI environment destroy steps"
+task :destroy_hard => [:set_vars_ci] do
+  # Try to clean up any previous incarnation of this environment.
+  #
+  # Only destroy additional resources (e.g. secrets, terraform state) if
+  # previous steps succeeded; see https://issues.gpii.net/browse/GPII-3488.
+  begin
+    Rake::Task["destroy"].reenable
+    Rake::Task["destroy"].invoke
+    Rake::Task["destroy_secrets"].reenable
+    Rake::Task["destroy_secrets"].invoke
+    # Iff destroy and destroy_secrets both succeed, we want to run all of these
+    # destroy_tfstate commands (regardless if any one destroy_tfstate fails).
+    begin
+      Rake::Task["destroy_tfstate"].reenable
+      Rake::Task["destroy_tfstate"].invoke("k8s")
+    rescue RuntimeError => err
+      puts "destroy_tfstate step failed:"
+      puts err
+      puts "Continuing."
+    end
+    begin
+      Rake::Task["destroy_tfstate"].reenable
+      Rake::Task["destroy_tfstate"].invoke("locust")
+    rescue RuntimeError => err
+      puts "destroy_tfstate step failed:"
+      puts err
+      puts "Continuing."
+    end
+  rescue RuntimeError => err
+    puts "Destroy step failed:"
+    puts err
+    puts "Continuing."
+  end
+end
+
 # This task rotates target args[:secret].
 #
 # New value for the secret can be set via env var TF_VAR_secret_name,
