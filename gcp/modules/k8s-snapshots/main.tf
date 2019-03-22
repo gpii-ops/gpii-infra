@@ -5,6 +5,7 @@ terraform {
 variable "secrets_dir" {}
 variable "charts_dir" {}
 variable "project_id" {}
+variable "serviceaccount_key" {}
 
 provider "google" {
   project     = "${var.project_id}"
