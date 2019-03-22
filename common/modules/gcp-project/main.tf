@@ -240,15 +240,6 @@ data "google_iam_policy" "combined" {
   }
 
   binding {
-    role = "roles/storage.objectViewer"
-
-    members = [
-      "serviceAccount:${google_service_account.gke_cluster_node.email}",
-      "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
-    ]
-  }
-
-  binding {
     role = "roles/cloudtrace.agent"
 
     members = [
@@ -257,14 +248,11 @@ data "google_iam_policy" "combined" {
     ]
   }
 
-  # TODO: This is required for k8s snapshots, once Service Assigner is in
-  # k8s-snapshots should get their own dedicated svc account
   binding {
     role = "roles/compute.storageAdmin"
 
     members = [
-      "serviceAccount:${google_service_account.gke_cluster_node.email}",
-      "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_k8s_snapshots.email}",
     ]
   }
 
