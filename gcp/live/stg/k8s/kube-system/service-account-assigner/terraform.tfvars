@@ -1,13 +1,12 @@
 # ↓ Module metadata
 terragrunt = {
   terraform {
-    source = "/project/modules//k8s-snapshots"
+    source = "/project/modules//service-account-assigner"
   }
 
   dependencies {
     paths = [
       "../helm-initializer",
-      "../service-account-assigner",
     ]
   }
 

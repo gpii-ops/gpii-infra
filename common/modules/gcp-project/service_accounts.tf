@@ -11,3 +11,10 @@ resource "google_service_account" "gke_cluster_pod_default" {
   display_name = "gke-cluster-pod-default"
   project      = "${google_project.project.project_id}"
 }
+
+# k8s-snapshots SVC account with access to storage
+resource "google_service_account" "gke_cluster_pod_k8s_snapshots" {
+  account_id   = "gke-cluster-pod-k8s-snapshots"
+  display_name = "gke-cluster-pod-k8s-snapshots"
+  project      = "${google_project.project.project_id}"
+}
