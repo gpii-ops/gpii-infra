@@ -19,7 +19,13 @@ Body of the message:
 * Actual behavior
 * Expected behavior
 
-Please, attach any screenshot, detailed error messages or any other details that are needed to diagnose the problem.
+Please, attach any screenshot, detailed error messages or any other details that you consider useful to diagnose the problem.
+
+In addition to the above, please attach the result of the following checks from the computer with issues when it is doable:
+
+Go to https://flowmanager.prd.gcp.gpii.net/health , can you see a message like "`isHealthy: true`"?
+
+Is it possible to replicate the same behavior on computers close to the problematic one?
 ```
 
 ## There is an operational emergency (production is broken, there's been a security breach, etc.)
