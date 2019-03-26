@@ -108,9 +108,9 @@ task :display_cluster_state => [:configure, :configure_secrets, :set_secrets] do
     "kubectl -n gpii get events -o wide",
     "kubectl -n locust get all -o wide",
     "kubectl -n locust get events -o wide",
-    # The 'default-pool' disks are the root partitions. Filter those out to
-    # reduce some clutter.
-    "gcloud compute disks list --filter 'NOT name:gke-k8s-cluster-default-pool' --format json",
+    # The 'terraform' disks are root partitions. Filter those out to reduce
+    # some clutter.
+    "gcloud compute disks list --filter 'NOT name:gke-k8s-cluster-terraform' --format json",
   ]
   dev_cmds = [
     # Only run this in dev because a) we expect to see weird behavior in
