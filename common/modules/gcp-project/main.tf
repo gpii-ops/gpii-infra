@@ -134,6 +134,14 @@ data "google_iam_policy" "combined" {
   }
 
   binding {
+    role = "roles/iam.serviceAccountUser"
+
+    members = [
+      "${local.service_accounts}",
+    ]
+  }
+
+  binding {
     role = "roles/iam.serviceAccountAdmin"
 
     members = [
