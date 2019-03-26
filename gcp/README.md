@@ -250,6 +250,10 @@ For example: a developer deleted their tfstate bucket in GCS and re-created it w
 ### My deploy is stuck on `Waiting for all CouchDB pods to join the cluster... 1 of 2 pods have joined the cluster`
 
 1. Unfortunately, this is a [known issue](https://issues.gpii.net/browse/GPII-3624) that happens periodically. It is a result of "split brain" -- both couchdb instances think they are the leader of their own cluster.
+   * To find out if you're suffering from this problem:
+      * `rake display_cluster_state`
+      * Look for the `_membership` output
+      * If `couchdb-couchdb-0` only knows about `couchdb-couchdb-0` and `couchdb-couchdb-1` only knows about `couchdb-couchdb-1`, you have split brain
 1. The easiest workaround is to destroy couchdb, then re-run the deployment:
    * `rake destroy_module"[k8s/gpii/couchdb]" && rake`
 1. If you need to, you may be able to repair the split brain manually using [CouchDB Cluster Management commands](https://docs.couchdb.org/en/stable/cluster/nodes.html).
