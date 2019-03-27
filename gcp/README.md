@@ -176,20 +176,22 @@ If you don't want to deal with gpii-version-updater, you can instead:
 ### I want to spin up my dev environment in a different region
 
 1. `cd gpii-infra/gcp/live/dev`
-1. Destroy all deployed resources, Terraform state, and secrets in the old region:
-   * `rake destroy_hard`
-1. If this is your first time spinning up a dev environment in a new region, or if you're sure you've never created a dev environment in the specified region, proceed to [Using a region for the first time](README.md#using-a-region-for-the-first-time).
-1. Check for an existing Keyring:
+1. Check for an existing Keyring in the new region:
    * `rake sh"[gcloud kms keyrings list --location mars-north1]"`
+1. If this is your first time spinning up a dev environment in a new region, or if you're sure you've never created a dev environment in the specified region, proceed to [Using a region for the first time](README.md#using-a-region-for-the-first-time) and skip the Destroy step.
 1. If you see `Listed 0 items`, proceed to [Using a region for the first time](README.md#using-a-region-for-the-first-time).
 1. If you see something like `projects/gpii-gcp-dev-mrtyler/locations/mars-north1/keyRings/keyring`, proceed to [Using a region where you previously had a dev environment](README.md#using-a-region-where-you-previously-had-a-dev-environment).
 
 #### Using a region for the first time
+1. Destroy all deployed resources, Terraform state, and secrets in the old region:
+   * `rake destroy_hard`
 1. `export TF_VAR_infra_region=mars-north1`
 1. Your environment is ready to re-deploy with `rake`
 1. If you encounter an error like `google_kms_key_ring.key_ring: Error creating KeyRing: googleapi: Error 409: KeyRing projects/gpii-gcp-dev-tyler/locations/us-east4/keyRings/keyring already exists., alreadyExists`, start over: destroy everything, but this time follow the steps for [Using a region where you previously had a dev environment](README.md#using-a-region-where-you-previously-had-a-dev-environment).
 
 #### Using a region where you previously had a dev environment
+1. Destroy all deployed resources, Terraform state, and secrets in the old region:
+   * `rake destroy_hard`
 1. `export TF_VAR_infra_region=mars-north1`
 1. `rake import_keyring`
    * This command is experimental and doesn't do a lot of error checking. If this step fails, try running its constituent commands one-by-one.
