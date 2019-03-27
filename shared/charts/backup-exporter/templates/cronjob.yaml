@@ -1,9 +1,9 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: {{ template "backup-exporter.fullname" . }}
+  name: {{ template "backup-exporter.name" . }}
   labels:
-    app: {{ template "backup-exporter.fullname" . }}
+    app: {{ template "backup-exporter.name" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
@@ -13,10 +13,15 @@ spec:
   jobTemplate:
     spec:
       template:
+        metadata:
+          annotations:
+            accounts.google.com/service-account: "{{ .Values.serviceAccountName }}"
+            accounts.google.com/scopes: "https://www.googleapis.com/auth/cloud-platform"
         spec:
           containers:
             - name: backup-container
-              image: google/cloud-sdk
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
               args:
                 - /bin/bash
                 - -x
@@ -25,15 +30,9 @@ spec:
                 - readOnly: true
                   mountPath: /data
                   name: backup-script
-                - readOnly: true
-                  mountPath: /secret
-                  name: service-account
           restartPolicy: OnFailure
           volumes:
             - name: backup-script
               configMap:
-                name: {{ template "backup-exporter.fullname" . }}
-            - name: service-account
-              secret:
-                secretName: {{ template "backup-exporter.fullname" . }}
+                name: {{ template "backup-exporter.name" . }}
 

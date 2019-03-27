@@ -1,7 +1,7 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: {{ template "backup-exporter.fullname" . }}
+  name: {{ template "backup-exporter.name" . }}
   namespace: backup-exporter
   labels:
     app: {{ template "backup-exporter.name" . }}
@@ -10,8 +10,6 @@ metadata:
     heritage: "{{ .Release.Service }}"
 data:
   backup.sh: |
-    export GOOGLE_APPLICATION_CREDENTIALS="/secrets/service-account/gcloud.json"
-    gcloud auth activate-service-account --key-file=/secrets/service-account/gcloud.json
     gcloud config set account {{ .Values.serviceAccountName }}
     gcloud auth list
     SNAPSHOTS=$(gcloud compute snapshots list --sort-by=~creationTimestamp --limit=4 --format="value[separator=';'](name,status)"| tail -n2 | grep READY | cut -f1 -d\;)

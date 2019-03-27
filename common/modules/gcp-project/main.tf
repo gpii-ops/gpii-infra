@@ -339,7 +339,7 @@ locals {
   # (this is instead of current `local.service_account` that is either actual account or empty)
   service_accounts = "${formatlist("serviceAccount:%s", google_service_account.project.*.email)}"
 
-  backup_service_accounts = "${formatlist("serviceAccount:%s", google_service_account.backup.*.email)}"
+  backup_service_accounts = "${formatlist("serviceAccount:%s", google_service_account.backup_exporter.*.email)}"
 
   # Project owners will be empty list if var.project_owner is empty string ""
   project_owners = "${compact(list(var.project_owner))}"
@@ -372,14 +372,6 @@ resource "google_service_account" "project" {
   display_name = "Project owner service account"
   project      = "${google_project.project.project_id}"
   count        = "${local.root_project_iam ? 0 : 1}"
-}
-
-resource "google_service_account" "backup" {
-  account_id   = "backup-exporter"
-  display_name = "backup exporter service account"
-  project      = "${google_project.project.project_id}"
-
-  #  count        = "${local.root_project_iam ? 0 : 1}"
 }
 
 resource "google_dns_managed_zone" "project" {
