@@ -57,7 +57,8 @@ class Secrets
   def collect_secrets()
     unless File.file?(Secrets::SECRETS_CONFIG)
       puts "[secret-mgmt] Secrets config not present, skipping..."
-      return {}
+      @collected_secrets = {}
+      return
     end
 
     ENV['TF_VAR_keyring_name'] = Secrets::KMS_KEYRING_NAME
@@ -118,6 +119,9 @@ class Secrets
   # re-generated and re-uploaded into GS bucket.
   # Use `rake destroy_secrets[KEY_NAME]` to forcefully repopulate secrets for target encryption key.
   def set_secrets(rotate_secrets = false)
+    if @collected_secrets.nil?
+      raise "Called set_secrets() without first calling collect_secrets()"
+    end
     @collected_secrets.each do |encryption_key, secrets|
       decrypted_secrets = fetch_secrets(encryption_key) unless secrets.empty? or rotate_secrets
 

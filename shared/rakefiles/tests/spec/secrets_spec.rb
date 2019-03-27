@@ -47,6 +47,26 @@ describe Secrets do
     expect(actual).to eq(expected)
   end
 
+  it "collect_secrets returns empty hash when SECRETS_CONFIG dne" do
+    fake_project_id = "fakeorg-fakecloud-fakeenv-fakeuser"
+    fake_infra_region = "mars-north1"
+    secrets = Secrets.new(fake_project_id, fake_infra_region)
+
+    allow(File).to receive(:file?).with(Secrets::SECRETS_CONFIG).and_return(false)
+    secrets.collect_secrets()
+    actual = secrets.collected_secrets
+    expected = {}
+    expect(actual).to eq(expected)
+  end
+
+  it "set_secrets raises if collect_secrets not called" do
+    fake_project_id = "fakeorg-fakecloud-fakeenv-fakeuser"
+    fake_infra_region = "mars-north1"
+    secrets = Secrets.new(fake_project_id, fake_infra_region)
+
+    expect { secrets.set_secrets() }.to raise_error(RuntimeError, "Called set_secrets() without first calling collect_secrets()")
+  end
+
 end
 
 
