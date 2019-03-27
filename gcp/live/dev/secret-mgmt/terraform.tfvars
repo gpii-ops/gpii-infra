@@ -12,4 +12,3 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
-storage_location = "us-east1"

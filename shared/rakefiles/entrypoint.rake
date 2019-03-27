@@ -127,6 +127,42 @@ task :destroy => [:set_vars, :check_destroy_allowed, :fetch_helm_certs] do
   sh "#{@exekube_cmd} rake xk[down]"
 end
 
+desc "Destroy environment, state, and secrets"
+task :destroy_hard => [:set_vars] do
+  # Try to clean up any previous incarnation of this environment.
+  #
+  # Only destroy additional resources (e.g. secrets, terraform state) if
+  # previous steps succeeded; see https://issues.gpii.net/browse/GPII-3488.
+  begin
+    Rake::Task["destroy"].reenable
+    Rake::Task["destroy"].invoke
+    Rake::Task["destroy_secrets"].reenable
+    Rake::Task["destroy_secrets"].invoke
+    # Iff destroy and destroy_secrets both succeed, we want to run all of these
+    # destroy_tfstate commands (regardless if any one destroy_tfstate fails).
+    begin
+      Rake::Task["destroy_tfstate"].reenable
+      Rake::Task["destroy_tfstate"].invoke("k8s")
+    rescue RuntimeError => err
+      puts "destroy_tfstate step failed:"
+      puts err
+      puts "Continuing."
+    end
+    begin
+      Rake::Task["destroy_tfstate"].reenable
+      Rake::Task["destroy_tfstate"].invoke("locust")
+    rescue RuntimeError => err
+      puts "destroy_tfstate step failed:"
+      puts err
+      puts "Continuing."
+    end
+  rescue RuntimeError => err
+    puts "Destroy step failed:"
+    puts err
+    puts "Continuing."
+  end
+end
+
 desc "Destroy cluster and low-level infrastructure"
 task :destroy_infra => [:set_vars, :check_destroy_allowed, :destroy] do
   sh "#{@exekube_cmd} rake destroy_infra"
@@ -214,6 +250,11 @@ task :rotate_secrets_key, [:kms_key] => [:set_vars, :check_destroy_allowed] do |
   sh "#{@exekube_cmd} rake rotate_secrets_key['#{kms_key}']"
 end
 
+desc "[EXPERIMENTAL] [ADVANCED] Import an existing KMS keyring, e.g when moving an environment to a new (but previously-used) region"
+task :import_keyring => [:set_vars, :check_destroy_allowed] do
+  sh "#{@exekube_cmd} rake import_keyring"
+end
+
 desc "[ADVANCED] Fetch helm TLS certificates from TF state (only in case they are present)"
 task :fetch_helm_certs => [:set_vars] do
   sh "#{@exekube_cmd} rake fetch_helm_certs"
@@ -258,5 +299,6 @@ desc "[ADMIN ONLY] Revoke owner role to the current user"
 task :revoke_owner_role => [:set_vars] do
   sh "#{@exekube_cmd} rake revoke_owner_role"
 end
+
 
 # vim: et ts=2 sw=2:

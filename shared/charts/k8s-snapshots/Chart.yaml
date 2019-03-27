@@ -1,5 +1,5 @@
 name: k8s-snapshots
-version: 0.0.1
+version: 0.0.2
 appVersion: v2.0
 home: https://github.com/gpii-ops/gpii-infra
 description: Chart for k8s-snapshots – AWS and GCP volume backup utility

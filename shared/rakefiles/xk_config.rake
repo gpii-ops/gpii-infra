@@ -75,11 +75,19 @@ task :configure_extra_tf_vars do
 end
 
 task :configure_secrets do
-  @secrets = Secrets.collect_secrets()
-  Secrets.set_secrets(@secrets)
+  decrypt_with_key_from_region = ENV["TF_VAR_decrypt_with_key_from_region"]
+  @secrets = Secrets.new(
+      ENV["TF_VAR_project_id"],
+      ENV["TF_VAR_infra_region"],
+      decrypt_with_key_from_region=decrypt_with_key_from_region)
+  @secrets.collect_secrets()
 end
 
-task :fetch_helm_certs => [:configure, :configure_secrets] do
+task :set_secrets do
+  @secrets.set_secrets()
+end
+
+task :fetch_helm_certs => [:configure, :configure_secrets, :set_secrets] do
   sh "
     cd /project/live/${ENV}/k8s/kube-system/helm-initializer
     echo \"[helm-initializer] Pulling TF state...\"
@@ -104,5 +112,6 @@ task :configure => [@gcp_creds_file, @app_default_creds_file, @kubectl_creds_fil
   # This is a wrapper configuration task.
   # It does nothing, but it has all dependencies that required for standard rake workflow.
 end
+
 
 # vim: et ts=2 sw=2:

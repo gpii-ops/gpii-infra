@@ -38,6 +38,8 @@ variable "serviceaccount_key" {}
 # Id of the project which owns the credentials used by the provider
 variable "project_id" {}
 
+variable "infra_region" {}
+
 # the ci_dev_project_regex is a regular expression that matches the projects that will
 # be excercised by the CI it will be ephemeral, with the same specs as any other
 # developer project, except for the IAM permissions will be based on a service
@@ -135,6 +137,14 @@ data "google_iam_policy" "combined" {
 
   binding {
     role = "roles/iam.serviceAccountUser"
+
+    members = [
+      "${local.service_accounts}",
+    ]
+  }
+
+  binding {
+    role = "roles/iam.serviceAccountAdmin"
 
     members = [
       "${local.service_accounts}",
@@ -274,15 +284,6 @@ data "google_iam_policy" "combined" {
   }
 
   binding {
-    role = "roles/storage.objectViewer"
-
-    members = [
-      "serviceAccount:${google_service_account.gke_cluster_node.email}",
-      "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
-    ]
-  }
-
-  binding {
     role = "roles/cloudtrace.agent"
 
     members = [
@@ -291,14 +292,11 @@ data "google_iam_policy" "combined" {
     ]
   }
 
-  # TODO: This is required for k8s snapshots, once Service Assigner is in
-  # k8s-snapshots should get their own dedicated svc account
   binding {
     role = "roles/compute.storageAdmin"
 
     members = [
-      "serviceAccount:${google_service_account.gke_cluster_node.email}",
-      "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_k8s_snapshots.email}",
     ]
   }
 
@@ -322,10 +320,7 @@ data "google_iam_policy" "combined" {
 provider "google" {
   credentials = "${var.serviceaccount_key}"
   project     = "${var.project_id}"
-
-  # Hardcoded region should be fixed in favor of TF_VAR_infra_region for consistency:
-  # https://issues.gpii.net/browse/GPII-3707
-  region = "us-central1"
+  region      = "${var.infra_region}"
 }
 
 # The dnsname and the dns domain must be computed for each new project created.
@@ -424,6 +419,13 @@ resource "google_dns_record_set" "ns-root" {
 resource "google_storage_bucket" "project-tfstate" {
   project = "${google_project.project.project_id}"
   name    = "${var.organization_name}-gcp-${var.project_name}-tfstate"
+
+  # Default region "US" should be fixed in favor of TF_VAR_infra_region for consistency:
+  # https://issues.gpii.net/browse/GPII-3707
+  # location = "${var.infra_region}"
+  location = "US"
+
+  force_destroy = false
 
   versioning = {
     enabled = "true"

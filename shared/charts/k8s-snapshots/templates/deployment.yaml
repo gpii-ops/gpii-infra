@@ -9,6 +9,9 @@ spec:
     metadata:
       labels:
         app: {{ template "k8s-snapshots.name" . }}
+      annotations:
+        {{ if .Values.serviceAccount }}accounts.google.com/service-account: {{ .Values.serviceAccount }}{{ end }}
+        {{ if .Values.scopes }}accounts.google.com/scopes: {{ .Values.scopes }}{{ end }}
     spec:
       containers:
       - name: k8s-snapshots
