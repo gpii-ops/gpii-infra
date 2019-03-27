@@ -676,4 +676,8 @@ Couple of lines explaining why this is planned, what is being done, and when
 users can expect the next update. E.g., "The Ops team is currently
 investigating the issue and we will update you once the cause is known/issue is
 resolved/update is done.
+
+[For planned downtime only]
+If this downtime will be disruptive to your work ("We're giving a demo for the
+Prime Minister at that time!"), please let me know immediately.
 ```
