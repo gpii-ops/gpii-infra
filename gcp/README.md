@@ -123,7 +123,13 @@ An "environment" describes a (more-or-less) self-contained cluster of machines r
 
 ### dev-$USER
 
-These are ephemeral environments, generally used by individual developers when working on the `gpii-infra` codebase or on cloud-based GPII components. An early phase of CI creates an ephemeral environment (`dev-gitlab-runner`) for integration testing.
+These are ephemeral environments, generally used by developers working on the `gpii-infra` codebase or on cloud-based GPII components. CI creates some ephemeral environments (`dev-gitlab-runner`, `dev-doe`) for integration testing.
+
+#### Service Level Objective
+
+* No guarantee of service for development environments.
+* Ops team does not receive alerts about problems.
+* Ops team assists developers with operation and debugging when convenient for the team (i.e. do not use emergency or out-of-hours contact methods unless there are extraordinary circumstances).
 
 ### stg
 
@@ -133,11 +139,24 @@ Deploying to `stg` verifies that the gpii-infra code that worked to create a `de
 
 Because `stg` emulates production, it will (in the future) allow us to run realistic end-to-end tests before deploying to `prd`.
 
+#### Service Level Objective
+
+* No guarantee of service for development environments (stg is a development environment).
+* Ops team receives alerts about problems, and addresses them when convenient for the team (i.e. we won't wake up an on-call engineer, but we will investigate during business hours)
+* Ops team makes an effort to keep stg stable and available for ad-hoc testing, but may disrupt the environment at any time for our own testing.
+
 ### prd
 
 This is the production environment which supports actual users of the GPII.
 
 Deploying to `prd` requires a [manual action](https://docs.gitlab.com/ce/ci/yaml/#manual-actions). This enables automated testing (CI) and a consistent deployment process (CD) while providing finer control over when changes are made to production (e.g. on a holiday weekend when no engineers are around).
+
+#### Service Level Objective
+
+* Ops team treats availability of production as highest priority.
+* Ops team receives alerts about problems, and addresses them as soon as possible.
+   * Today we do not have automated 24x7 on-call support. However, a human observing a serious, customer-affecting problem in prd should [contact someone on the Ops team](../CONTACTING-OPS.md), no matter the time or day.
+* Ops team communicates both planned and unplanned downtime to stakeholders via the `outage@RtF` mailing list (see [Downtime procedures](#downtime-procedures).
 
 ## Troubleshooting / FAQ
 
