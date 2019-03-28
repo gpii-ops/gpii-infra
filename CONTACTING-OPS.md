@@ -14,18 +14,16 @@ If there is an emergency -- production is down right before a big demo, an attac
 Subject: [Type here a short description of the issue]
 Body of the message:
 
-* Location of the PC that has issue
-* When it happens
-* Actual behavior
-* Expected behavior
+* Physical location of the PC that is having a problem (e.g. Pilot site in Washington, D.C.; my development laptop on my local cafe's internet)?
 
-Please, attach any screenshot, detailed error messages or any other details that you consider useful to diagnose the problem.
+* Describe the problem. What is happening?
+** Please include any screenshot, detailed error messages, or other details that you think might be helpful.
 
-In addition to the above, please attach the result of the following checks from the computer with issues when it is doable:
+* What did you expect to happen instead?
 
-Go to https://flowmanager.prd.gcp.gpii.net/health , can you see a message like "`isHealthy: true`"?
+* If possible, what happens use a browser on the affected PC and go to https://flowmanager.prd.gcp.gpii.net/health. What does it say?
 
-Is it possible to replicate the same behavior on computers close to the problematic one?
+* If possible, try to reproduce the problem on a nearby computer (e.g. another device in the same lab). Repeat the above check using the nearby computer's browser. Is anything different?
 ```
 
 ## There is an operational emergency (production is broken, there's been a security breach, etc.)
