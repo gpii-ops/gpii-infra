@@ -206,11 +206,14 @@ If you don't want to deal with gpii-version-updater, you can instead:
    * `rake destroy_hard`
 1. `export TF_VAR_infra_region=mars-north1`
 1. Your environment is ready to re-deploy with `rake`
-1. If you encounter an error like `google_kms_key_ring.key_ring: Error creating KeyRing: googleapi: Error 409: KeyRing projects/gpii-gcp-dev-tyler/locations/us-east4/keyRings/keyring already exists., alreadyExists`, start over: destroy everything, but this time follow the steps for [Using a region where you previously had a dev environment](README.md#using-a-region-where-you-previously-had-a-dev-environment).
+1. If you encounter an error like one of the following, proceed to [Using a region where you previously had a dev environment](README.md#using-a-region-where-you-previously-had-a-dev-environment).
+   * `google_kms_key_ring.key_ring: the plan would destroy this resource, but it currently has lifecycle.prevent_destroy set to true.`
+   * `google_kms_key_ring.key_ring: Error creating KeyRing: googleapi: Error 409: KeyRing projects/gpii-gcp-dev-tyler/locations/us-east4/keyRings/keyring already exists., alreadyExists`
 
 #### Using a region where you previously had a dev environment
 1. Destroy all deployed resources, Terraform state, and secrets in the old region:
    * `rake destroy_hard`
+   * If you have run other rake commands since `destroy_hard`, e.g. because you tried the "Using a region for the first time" workflow and encountered an error, run `destroy_hard` again here.
 1. `export TF_VAR_infra_region=mars-north1`
 1. `rake import_keyring`
    * This command is experimental and doesn't do a lot of error checking. If this step fails, try running its constituent commands one-by-one.
