@@ -215,6 +215,7 @@ If you don't want to deal with gpii-version-updater, you can instead:
 1. `rake import_keyring`
    * This command is experimental and doesn't do a lot of error checking. If this step fails, try running its constituent commands one-by-one.
 1. `rake rotate_secrets_key`
+   * These `rotate_` steps are not needed if all the Keys have an enabled primary version. However, rotating is safe either way and prevents some problems so it is the recommended workflow.
 1. `rake rotate_secrets_key"[gcp-stackdriver-export]"`
 1. Your environment is ready to re-deploy with `rake`
 
