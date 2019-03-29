@@ -4,9 +4,9 @@ image:
   repository: ${flowmanager_repository}
   checksum: ${flowmanager_checksum}
 
-issuerRef:
-  name: ${cert_issuer_name}
-  kind: ClusterIssuer
+acme:
+  clouddnsProject: ${project_id}
+  server: "${acme_server}"
 
 dnsNames:
 - flowmanager.${domain_name}
