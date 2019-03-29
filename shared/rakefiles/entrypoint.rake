@@ -292,7 +292,7 @@ task :initialize_registry => [:set_vars] do
 
   # Clean up
   sh "docker rmi #{registry_url}/#{image}" # || true"
-  # We won't remove #{image} in case it existed previously.
+  # We won't remove #{image} in case it existed previously. This is a small leak.
 end
 
 desc "[ADVANCED] Fetch helm TLS certificates from TF state (only in case they are present)"
