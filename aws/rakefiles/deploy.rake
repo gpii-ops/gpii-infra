@@ -63,24 +63,6 @@ task :wait_for_gpii_ready => :configure_kubectl do
   end
 end
 
-desc "Wait until production config tests have been completed"
-task :wait_for_productionConfigTests_complete => :configure_kubectl do
-  Rake::Task["setup_versions"].invoke("../../shared/versions.yml")
-  puts "Waiting for production config tests to complete..."
-  puts "(You can Ctrl-C out of this safely. You may need to re-run :deploy_only afterward.)"
-
-  sh "docker rm -f productionConfigTests || true"
-  flowmanager_hostname = "flowmanager.#{ENV["TF_VAR_cluster_name"]}"
-
-  if ENV["TF_VAR_cluster_name"].start_with?("prd.", "stg.")
-    flowmanager_hostname = "https://#{flowmanager_hostname}"
-  else
-    flowmanager_hostname = "http://#{flowmanager_hostname}"
-  end
-
-  wait_for("docker run --name productionConfigTests -e GPII_CLOUD_URL='#{flowmanager_hostname}' '#{@versions["gpii-flowmanager"]}' node tests/ProductionConfigTests.js")
-end
-
 desc "Display some handy info about the cluster"
 task :display_cluster_info do
   puts
