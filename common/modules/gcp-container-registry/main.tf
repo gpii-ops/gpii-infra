@@ -15,8 +15,8 @@ provider "google" {
 }
 
 locals {
-  # This won't work for the 'asia' multi-region
-  infra_multi_region = "${substr(var.infra_region, 0, 2)}"
+  # Google prescribes the name of this bucket.
+  registry_bucket = "artifacts.${var.project_id}.appspot.com"
 }
 
 resource "google_service_account" "gcr_uploader" {
@@ -24,10 +24,10 @@ resource "google_service_account" "gcr_uploader" {
   display_name = "gcr-uploader"
 }
 
-# GCR stores data in a Google Storage bucket. The name of this bucket is
-# prescribed by Google. However, if we try to create the bucket ourselves (e.g.
-# with a 'google_storage_bucket' resource), we get 'Error 403: The bucket you
-# tried to create requires domain ownership verification.'
+# GCR stores data in a Google Storage bucket. However, if we try to create the
+# bucket ourselves (e.g.  with a 'google_storage_bucket' resource), we get
+# 'Error 403: The bucket you tried to create requires domain ownership
+# verification.'
 #
 # Instead, we must let Google create the bucket for us by pushing to the
 # Registry. We handle this as a manual one-time step -- see XXX.
@@ -36,7 +36,7 @@ resource "google_service_account" "gcr_uploader" {
 # bindings below to control read and write access to the bucket (and hence to
 # the Registry).
 resource "google_storage_bucket_iam_binding" "gcr_uploader" {
-  bucket = "artifacts.${var.project_id}.appspot.com"
+  bucket = "${local.registry_bucket}"
   role   = "roles/storage.admin"
 
   members = [
@@ -45,7 +45,7 @@ resource "google_storage_bucket_iam_binding" "gcr_uploader" {
 }
 
 resource "google_storage_bucket_iam_member" "public_readable" {
-  bucket = "artifacts.${var.project_id}.appspot.com"
+  bucket = "${local.registry_bucket}"
   role   = "roles/storage.objectViewer"
 
   member = "allUsers"
