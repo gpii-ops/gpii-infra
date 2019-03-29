@@ -5,6 +5,7 @@ terraform {
 variable "nonce" {}
 variable "secrets_dir" {}
 variable "charts_dir" {}
+variable "project_id" {}
 
 module "cert-manager" {
   source           = "/exekube-modules/helm-release"
