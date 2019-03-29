@@ -285,7 +285,9 @@ task :initialize_registry => [:set_vars] do
   }.chomp
 
   # Load the auth token into Docker
-  sh "echo '#{token}' | docker login -u oauth2accesstoken --password-stdin https://#{registry_url_base}"
+  # (Use an env var to avoid echoing the token to stdout / the CI logs.)
+  ENV["RAKE_INIT_REGISTRY_TOKEN"] = token
+  sh "echo \"$RAKE_INIT_REGISTRY_TOKEN\" | docker login -u oauth2accesstoken --password-stdin https://#{registry_url_base}"
 
   # Push the local image to our Registry
   sh "docker push #{registry_url}/#{image}"

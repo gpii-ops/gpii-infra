@@ -30,7 +30,7 @@ resource "google_service_account" "gcr_uploader" {
 # verification.'
 #
 # Instead, we must let Google create the bucket for us by pushing to the
-# Registry. We handle this as a manual one-time step -- see XXX.
+# Registry. We handle this as an extra CI step -- see `rake init_registry`.
 #
 # We let Google create the bucket and manage its settings. We use the IAM
 # bindings below to control read and write access to the bucket (and hence to
