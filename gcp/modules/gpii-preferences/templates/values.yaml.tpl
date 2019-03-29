@@ -4,9 +4,9 @@ image:
   repository: ${preferences_repository}
   checksum: ${preferences_checksum}
 
-issuerRef:
-  name: ${cert_issuer_name}
-  kind: ClusterIssuer
+acme:
+  clouddnsProject: ${project_id}
+  server: "${acme_server}"
 
 dnsNames:
 - preferences.${domain_name}
