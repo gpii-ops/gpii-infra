@@ -123,7 +123,13 @@ An "environment" describes a (more-or-less) self-contained cluster of machines r
 
 ### dev-$USER
 
-These are ephemeral environments, generally used by individual developers when working on the `gpii-infra` codebase or on cloud-based GPII components. An early phase of CI creates an ephemeral environment (`dev-gitlab-runner`) for integration testing.
+These are ephemeral environments, generally used by developers working on the `gpii-infra` codebase or on cloud-based GPII components. CI creates some ephemeral environments (`dev-gitlab-runner`, `dev-doe`) for integration testing.
+
+#### Service Level Objective
+
+* No guarantee of service for development environments.
+* Ops team does not receive alerts about problems.
+* Ops team assists developers with operation and debugging when convenient for the team (i.e. do not use emergency or out-of-hours contact methods unless there are extraordinary circumstances).
 
 ### stg
 
@@ -133,11 +139,24 @@ Deploying to `stg` verifies that the gpii-infra code that worked to create a `de
 
 Because `stg` emulates production, it will (in the future) allow us to run realistic end-to-end tests before deploying to `prd`.
 
+#### Service Level Objective
+
+* No guarantee of service for development environments (stg is a development environment).
+* Ops team receives alerts about problems, and addresses them when convenient for the team (i.e. we won't wake up an on-call engineer, but we will investigate during business hours)
+* Ops team makes an effort to keep stg stable and available for ad-hoc testing, but may disrupt the environment at any time for our own testing.
+
 ### prd
 
 This is the production environment which supports actual users of the GPII.
 
 Deploying to `prd` requires a [manual action](https://docs.gitlab.com/ce/ci/yaml/#manual-actions). This enables automated testing (CI) and a consistent deployment process (CD) while providing finer control over when changes are made to production (e.g. on a holiday weekend when no engineers are around).
+
+#### Service Level Objective
+
+* Ops team treats availability of production as highest priority.
+* Ops team receives alerts about problems, and addresses them as soon as possible.
+   * Today we do not have automated 24x7 on-call support. However, a human observing a serious, customer-affecting problem in prd should [contact someone on the Ops team](../CONTACTING-OPS.md), no matter the time or day.
+* Ops team communicates both planned and unplanned downtime to stakeholders via the `outage@RtF` mailing list (see [Downtime procedures](#downtime-procedures).
 
 ## Troubleshooting / FAQ
 
@@ -176,24 +195,30 @@ If you don't want to deal with gpii-version-updater, you can instead:
 ### I want to spin up my dev environment in a different region
 
 1. `cd gpii-infra/gcp/live/dev`
-1. Destroy all deployed resources, Terraform state, and secrets in the old region:
-   * `rake destroy_hard`
-1. If this is your first time spinning up a dev environment in a new region, or if you're sure you've never created a dev environment in the specified region, proceed to [Using a region for the first time](README.md#using-a-region-for-the-first-time).
-1. Check for an existing Keyring:
+1. Check for an existing Keyring in the new region:
    * `rake sh"[gcloud kms keyrings list --location mars-north1]"`
+1. If this is your first time spinning up a dev environment in a new region, or if you're sure you've never created a dev environment in the specified region, proceed to [Using a region for the first time](README.md#using-a-region-for-the-first-time) and skip the Destroy step.
 1. If you see `Listed 0 items`, proceed to [Using a region for the first time](README.md#using-a-region-for-the-first-time).
 1. If you see something like `projects/gpii-gcp-dev-mrtyler/locations/mars-north1/keyRings/keyring`, proceed to [Using a region where you previously had a dev environment](README.md#using-a-region-where-you-previously-had-a-dev-environment).
 
 #### Using a region for the first time
+1. Destroy all deployed resources, Terraform state, and secrets in the old region:
+   * `rake destroy_hard`
 1. `export TF_VAR_infra_region=mars-north1`
 1. Your environment is ready to re-deploy with `rake`
-1. If you encounter an error like `google_kms_key_ring.key_ring: Error creating KeyRing: googleapi: Error 409: KeyRing projects/gpii-gcp-dev-tyler/locations/us-east4/keyRings/keyring already exists., alreadyExists`, start over: destroy everything, but this time follow the steps for [Using a region where you previously had a dev environment](README.md#using-a-region-where-you-previously-had-a-dev-environment).
+1. If you encounter an error like one of the following, proceed to [Using a region where you previously had a dev environment](README.md#using-a-region-where-you-previously-had-a-dev-environment).
+   * `google_kms_key_ring.key_ring: the plan would destroy this resource, but it currently has lifecycle.prevent_destroy set to true.`
+   * `google_kms_key_ring.key_ring: Error creating KeyRing: googleapi: Error 409: KeyRing projects/gpii-gcp-dev-tyler/locations/us-east4/keyRings/keyring already exists., alreadyExists`
 
 #### Using a region where you previously had a dev environment
+1. Destroy all deployed resources, Terraform state, and secrets in the old region:
+   * `rake destroy_hard`
+   * If you have run other rake commands since `destroy_hard`, e.g. because you tried the "Using a region for the first time" workflow and encountered an error, run `destroy_hard` again here.
 1. `export TF_VAR_infra_region=mars-north1`
 1. `rake import_keyring`
    * This command is experimental and doesn't do a lot of error checking. If this step fails, try running its constituent commands one-by-one.
 1. `rake rotate_secrets_key`
+   * These `rotate_` steps are not needed if all the Keys have an enabled primary version. However, rotating is safe either way and prevents some problems so it is the recommended workflow.
 1. `rake rotate_secrets_key"[gcp-stackdriver-export]"`
 1. Your environment is ready to re-deploy with `rake`
 
@@ -655,4 +680,8 @@ Couple of lines explaining why this is planned, what is being done, and when
 users can expect the next update. E.g., "The Ops team is currently
 investigating the issue and we will update you once the cause is known/issue is
 resolved/update is done.
+
+[For planned downtime only]
+If this downtime will be disruptive to your work ("We're giving a demo for the
+Prime Minister at that time!"), please let me know immediately.
 ```
