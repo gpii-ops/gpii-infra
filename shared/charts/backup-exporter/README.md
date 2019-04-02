@@ -1,7 +1,6 @@
 # backup-exporter
 
-backup-exporter is an AWS and GCP volume backup utility.
-Check out more at [project homepage](https://github.com/miracle2k/k8s-snapshots).
+backup-exporter is an GCP volume backup utility.
 
 ## TL;DR;
 

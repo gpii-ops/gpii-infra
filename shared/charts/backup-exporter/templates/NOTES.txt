@@ -1,1 +1,1 @@
-K8s-snapshots has been deployed successfully!
+backup-exporter has been deployed successfully!
