@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 
+require "docker-api"
 require "yaml"
 
 class SyncImages
