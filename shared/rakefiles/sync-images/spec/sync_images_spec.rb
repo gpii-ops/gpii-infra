@@ -13,6 +13,21 @@ describe SyncImages do
     expect(actual).to eq(expected)
   end
 
+  it "process_config calls process_image on each image" do
+    fake_config = {
+      "dataloader" => {
+        "image" => "gpii/universal:latest",
+      },
+      "flowmanager" => {
+        "image" => "gpii/universal:latest",
+      },
+    }
+    allow(SyncImages).to receive(:process_image)
+    SyncImages.process_config(fake_config)
+    expect(SyncImages).to have_received(:process_image).with("dataloader", "gpii/universal:latest")
+    expect(SyncImages).to have_received(:process_image).with("flowmanager", "gpii/universal:latest")
+  end
+
 end
 
 

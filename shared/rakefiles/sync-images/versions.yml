@@ -1,0 +1,4 @@
+dataloader:
+    image: gpii/universal:latest
+flowmanager:
+    image: gpii/universal:latest
