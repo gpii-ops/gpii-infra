@@ -33,11 +33,13 @@ describe SyncImages do
   end
 
   it "process_config writes new config" do
+    # Keys are out of lexical order to test that they get sorted at the end
+    # (and thus get the shas in the right order).
     fake_config = {
-      "dataloader" => {
+      "flowmanager" => {
         "image" => "gpii/universal:latest",
       },
-      "flowmanager" => {
+      "dataloader" => {
         "image" => "gpii/universal:latest",
       },
     }

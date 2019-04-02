@@ -12,7 +12,7 @@ class SyncImages
   end
 
   def self.process_config(config)
-    config.keys.each do |component|
+    config.keys.sort.each do |component|
       image = config[component]["image"]
       sha = self.process_image(component, image)
       config[component]["sha"] = sha
