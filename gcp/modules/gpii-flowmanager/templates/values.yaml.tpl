@@ -7,6 +7,7 @@ image:
 acme:
   clouddnsProject: ${project_id}
   server: "${acme_server}"
+  email: "${acme_email}"
 
 dnsNames:
 - flowmanager.${domain_name}

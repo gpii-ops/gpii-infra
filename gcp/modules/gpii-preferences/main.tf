@@ -4,6 +4,7 @@ terraform {
 
 variable "project_id" {}
 variable "env" {}
+variable "auth_user_email" {}
 
 variable "secrets_dir" {}
 variable "charts_dir" {}
@@ -26,8 +27,14 @@ variable "secret_couchdb_admin_username" {}
 
 variable "secret_couchdb_admin_password" {}
 
+locals {
+  user_email = "${var.auth_user_email != "" ? var.auth_user_email : "dev-null@raisingthefloor.org"}"
+  acme_email = "${var.env == "prd" || var.env == "stg" ? "ops@raisingthefloor.org" : local.user_email}"
+}
+
 data "template_file" "preferences_values" {
   template = "${file("${path.module}/templates/values.yaml.tpl")}"
+
   vars {
     domain_name            = "${var.domain_name}"
     preferences_repository = "${var.preferences_repository}"
@@ -41,6 +48,7 @@ data "template_file" "preferences_values" {
     limits_memory          = "${var.limits_memory}"
     project_id             = "${var.project_id}"
     acme_server            = "${var.env == "prd" || var.env == "stg" ? "https://acme-v02.api.letsencrypt.org/directory" : "https://acme-staging-v02.api.letsencrypt.org/directory"}"
+    acme_email             = "${local.acme_email}"
   }
 }
 
