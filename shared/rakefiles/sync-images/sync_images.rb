@@ -15,7 +15,6 @@ class SyncImages
   def self.process_config(config)
     config.keys.sort.each do |component|
       image_name = config[component]["image"]
-      ###image.info["Config"]["Image"]
       sha = self.process_image(component, image_name)
       config[component]["sha"] = sha
     end
@@ -35,6 +34,12 @@ class SyncImages
     puts "Pulling #{image_name}..."
     image = Docker::Image.create("fromImage" => image_name)
     return image
+  end
+
+  def self.get_sha_from_image(image)
+    sha = image.info["RepoDigests"][0]
+    puts "Got image with sha #{sha}..."
+    return sha
   end
 
   def self.write_new_config(config)

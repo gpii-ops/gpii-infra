@@ -93,6 +93,21 @@ describe SyncImages do
     expect(Docker::Image).to have_received(:create).with({"fromImage" => fake_image_name})
   end
 
+  it "get_sha_from_image gets sha" do
+    class FakeImage
+      attr_accessor :info
+    end
+    fake_sha = "sha256:c0ffee"
+    fake_image = FakeImage.new
+    fake_image.info = {
+      "RepoDigests" => [
+        "sha256:c0ffee",
+      ]
+    }
+    actual = SyncImages.get_sha_from_image(fake_image)
+    expect(actual).to eq(fake_sha)
+  end
+
   # It is not necessary or desirable to test File.write or YAML.dump, but this
   # validates some plumbing.
   it "write_new_config dumps and writes yaml" do
