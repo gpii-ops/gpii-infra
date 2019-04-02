@@ -13,4 +13,4 @@ serviceAccountName: ""
 
 DestinationBucket: ""
 
-schedule: "*/5 * * * *"
+schedule: "0 0 * * *"
