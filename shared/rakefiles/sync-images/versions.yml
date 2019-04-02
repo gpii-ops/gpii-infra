@@ -1,4 +1,6 @@
-dataloader:
-    image: gpii/universal:latest
-flowmanager:
-    image: gpii/universal:latest
+alpine:
+    image: alpine:latest
+###dataloader:
+###    image: gpii/universal:latest
+###flowmanager:
+###    image: gpii/universal:latest

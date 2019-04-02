@@ -14,15 +14,16 @@ class SyncImages
 
   def self.process_config(config)
     config.keys.sort.each do |component|
-      image = config[component]["image"]
-      sha = self.process_image(component, image)
+      image_name = config[component]["image"]
+      ###image.info["Config"]["Image"]
+      sha = self.process_image(component, image_name)
       config[component]["sha"] = sha
     end
     self.write_new_config(config)
   end
 
-  def self.process_image(component, image)
-    self.pull_image(image)
+  def self.process_image(component, image_name)
+    image = self.pull_image(image_name)
     sha = self.get_sha_from_image(image)
     self.retag_image(image)
     self.push_image(image)
@@ -30,8 +31,10 @@ class SyncImages
     return sha
   end
 
-  def self.pull_image(image)
-    puts "pulling #{image}"
+  def self.pull_image(image_name)
+    puts "Pulling #{image_name}..."
+    image = Docker::Image.create("fromImage" => image_name)
+    return image
   end
 
   def self.write_new_config(config)
