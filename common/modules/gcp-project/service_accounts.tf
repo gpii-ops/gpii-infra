@@ -12,7 +12,7 @@ resource "google_service_account" "gke_cluster_pod_default" {
   project      = "${google_project.project.project_id}"
 }
 
-# Default service account for pods
+# Service account for backup exporter cronjob
 resource "google_service_account" "backup_exporter" {
   account_id   = "backup-exporter"
   display_name = "backup-exporter"
