@@ -46,7 +46,7 @@ The following table lists the configurable parameters of the gpii-flowmanager ch
 
 | Parameter                      | Description                                                                              | Default                                                                   |
 | `acme.clouddnsProject`         | required GCP project id to use for CLoudDNS                                              | -                                                                         |
-| `acme.email`                   | optional email to use for registration with certificate issuer                           | `todo@raisingthefloor.org`                                                |
+| `acme.email`                   | optional email to use for registration with certificate issuer                           | `dev-null@raisingthefloor.org`                                                |
 | `acme.server                   | optional ACME server for certificate issuer                                              | `https://acme-staging-v02.api.letsencrypt.org/directory`                  |
 | `datasourceHostname`           | data source hostname for preferences service                                             | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`        |
 | `datasourceListenPort`         | data source port for flowmanager service                                                 | `5984`                                                                    |
