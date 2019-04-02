@@ -22,10 +22,44 @@ describe SyncImages do
         "image" => "gpii/universal:latest",
       },
     }
+
     allow(SyncImages).to receive(:process_image)
+    allow(SyncImages).to receive(:write_new_config)
+
     SyncImages.process_config(fake_config)
+
     expect(SyncImages).to have_received(:process_image).with("dataloader", "gpii/universal:latest")
     expect(SyncImages).to have_received(:process_image).with("flowmanager", "gpii/universal:latest")
+  end
+
+  it "process_config writes new config" do
+    fake_config = {
+      "dataloader" => {
+        "image" => "gpii/universal:latest",
+      },
+      "flowmanager" => {
+        "image" => "gpii/universal:latest",
+      },
+    }
+    fake_sha_1 = "sha256:c0ffee"
+    fake_sha_2 = "sha256:50da"
+    expected_config = {
+      "dataloader" => {
+        "image" => "gpii/universal:latest",
+        "sha" => fake_sha_1,
+      },
+      "flowmanager" => {
+        "image" => "gpii/universal:latest",
+        "sha" => fake_sha_2,
+      },
+    }
+
+    allow(SyncImages).to receive(:process_image).and_return(fake_sha_1, fake_sha_2)
+    allow(SyncImages).to receive(:write_new_config)
+
+    SyncImages.process_config(fake_config)
+
+    expect(SyncImages).to have_received(:write_new_config).with(expected_config)
   end
 
   it "process_image calls helpers on image" do
