@@ -81,6 +81,18 @@ describe SyncImages do
     expect(actual).to eq(fake_sha)
   end
 
+  # It is not necessary or desirable to test File.write or YAML.dump, but this
+  # validates some plumbing.
+  it "write_new_config dumps and writes yaml" do
+    fake_config = {
+      "foo" => "bar",
+    }
+    buffer = StringIO.new()
+    allow(File).to receive(:open).and_yield(buffer)
+    SyncImages.write_new_config(fake_config)
+    expect(buffer.string).to eq("---\nfoo: bar\n")
+  end
+
 end
 
 

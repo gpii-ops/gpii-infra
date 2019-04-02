@@ -33,6 +33,12 @@ class SyncImages
     puts "pulling #{image}"
   end
 
+  def self.write_new_config(config)
+    File.open(CONFIG_FILE, "w") do |f|
+      f.write(YAML.dump(config))
+    end
+  end
+
 end
 
 
