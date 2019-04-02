@@ -29,6 +29,10 @@ class SyncImages
     return sha
   end
 
+  def self.pull_image(image)
+    puts "pulling #{image}"
+  end
+
 end
 
 
