@@ -73,6 +73,7 @@ variable "service_apis" {
     "resourceviews.googleapis.com",
     "servicemanagement.googleapis.com",
     "serviceusage.googleapis.com",
+    "sourcerepo.googleapis.com",
     "stackdriver.googleapis.com",
     "storage-api.googleapis.com",
   ]
@@ -100,6 +101,7 @@ data "google_iam_policy" "combined" {
 
     members = [
       "${local.service_accounts}",
+      "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
     ]
   }
 
@@ -140,6 +142,14 @@ data "google_iam_policy" "combined" {
 
     members = [
       "${local.service_accounts}",
+    ]
+  }
+
+  binding {
+    role = "roles/iam.serviceAccountActor"
+
+    members = [
+      "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
     ]
   }
 
@@ -196,6 +206,7 @@ data "google_iam_policy" "combined" {
 
     members = [
       "${local.backup_service_accounts}",
+      "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
     ]
   }
 
@@ -208,15 +219,7 @@ data "google_iam_policy" "combined" {
   }
 
   binding {
-    role = "roles/compute.storageAdmin"
-
-    members = [
-      "${local.backup_service_accounts}",
-    ]
-  }
-
-  binding {
-    role = "roles/viewer"
+    role = "roles/owner"
 
     members = [
       "${local.backup_service_accounts}",
@@ -293,10 +296,19 @@ data "google_iam_policy" "combined" {
   }
 
   binding {
+    role = "roles/sourcerepo.serviceAgent"
+
+    members = [
+      "serviceAccount:service-${google_project.project.number}@sourcerepo-service-accounts.iam.gserviceaccount.com",
+    ]
+  }
+
+  binding {
     role = "roles/compute.storageAdmin"
 
     members = [
       "serviceAccount:${google_service_account.gke_cluster_pod_k8s_snapshots.email}",
+      "${local.backup_service_accounts}",
     ]
   }
 

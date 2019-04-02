@@ -11,6 +11,10 @@ variable "schedule" {}
 
 # Terragrunt variables
 
+data "google_project" "project" {
+  project_id = "${var.project_id}"
+}
+
 data "template_file" "backup-exporter" {
   template = "${file("values.yaml")}"
 
@@ -37,4 +41,16 @@ module "backup-exporter" {
   release_values_rendered = "${data.template_file.backup-exporter.rendered}"
 
   chart_name = "${var.charts_dir}/backup-exporter"
+}
+
+resource "google_storage_bucket" "backup_daisy_bkt" {
+  project = "${data.google_project.project.project_id}"
+  name    = "${data.google_project.project.name}-daisy-bkt"
+
+  force_destroy = true
+
+  # Default region "US" should be fixed in favor of TF_VAR_infra_region for consistency:
+  # https://issues.gpii.net/browse/GPII-3707
+  # location = "${var.infra_region}"
+  location = "US"
 }

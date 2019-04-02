@@ -17,6 +17,7 @@ resource "google_service_account" "backup_exporter" {
   account_id   = "backup-exporter"
   display_name = "backup-exporter"
   project      = "${google_project.project.project_id}"
+
   #  count        = "${local.root_project_iam ? 0 : 1}"
 }
 
