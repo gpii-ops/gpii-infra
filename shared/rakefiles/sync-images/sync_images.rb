@@ -18,7 +18,12 @@ class SyncImages
   end
 
   def self.process_image(component, image)
-    puts "component: #{component}. image: #{image}."
+    self.pull_image(image)
+    sha = self.get_sha_from_image(image)
+    self.retag_image(image)
+    self.push_image(image)
+
+    return sha
   end
 
 end
