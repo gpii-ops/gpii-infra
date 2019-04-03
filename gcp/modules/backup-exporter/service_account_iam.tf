@@ -23,6 +23,8 @@ resource "google_service_account_iam_policy" "pod_default_iam" {
   policy_data        = "${data.google_iam_policy.backup_exporter.policy_data}"
 }
 
+# We need to add the SA used by the compute API in order to let cloudbuild make
+# changes in the bucket.
 resource "google_storage_bucket_iam_binding" "member" {
   bucket = "${google_storage_bucket.backup_daisy_bkt.name}"
   role   = "roles/storage.objectAdmin"
