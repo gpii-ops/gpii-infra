@@ -219,7 +219,7 @@ data "google_iam_policy" "combined" {
   }
 
   binding {
-    role = "roles/owner"
+    role = "roles/viewer"
 
     members = [
       "${local.backup_service_accounts}",
