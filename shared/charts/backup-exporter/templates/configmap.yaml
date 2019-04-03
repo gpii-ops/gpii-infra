@@ -12,7 +12,7 @@ data:
   backup.sh: |
     gcloud config set account {{ .Values.serviceAccountName }}
     SNAPSHOTS=$(gcloud compute snapshots list --sort-by=~creationTimestamp,STATUS --limit={{ .Values.replicaCount }} --format="value[separator=';'](name,status)" | cut -f1 -d\;)
-    DESTINATION_BUCKET={{ .Values.destinationBucket }}/
+    DESTINATION_BUCKET={{ .Values.destinationBucket }}
     TIMESTAMP=$(date +%s)
     for snapshot in ${SNAPSHOTS}; do
       gcloud -q compute images create image-disk-${snapshot} --source-snapshot ${snapshot}
