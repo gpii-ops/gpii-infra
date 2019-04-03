@@ -5,12 +5,12 @@ backup-exporter is an GCP volume backup utility.
 ## TL;DR;
 
 ```console
-$ helm install path_to_chart/k8s-snapshots
+$ helm install path_to_chart/backup-exporter
 ```
 
 ## Introduction
 
-This chart bootstraps k8s-snapshots deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+This chart bootstraps backup-exporter deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
 ## Prerequisites
   - Kubernetes 1.8+ with Beta APIs enabled
@@ -20,7 +20,7 @@ This chart bootstraps k8s-snapshots deployment on a [Kubernetes](http://kubernet
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install --name my-release path_to_chart/k8s-snapshots
+$ helm install --name my-release path_to_chart/backup-exporter
 ```
 
 The command deploys backup-exporter on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -43,7 +43,9 @@ The following table lists the configurable parameters of the gpii-dataloader cha
 
 Parameter | Description | Default
 --- | --- | ---
-`image.repository` | container image repository | `elsdoerfer/k8s-snapshots`
-`image.tag` | container image tag | `v2.0`
+`image.repository` | container image repository | `google/cloud-sdk`
+`image.tag` | container image tag | `latest`
 `image.pullPolicy` | container image pullPolicy | `IfNotPresent`
-`useClaimName` | If `true`, set USE_CLAIM_NAME environment variable for deployment | `true`
+`serviceAccountName` | service account used to perform all the actions | ``
+`destinationBucket` | destination bucket for storing the backups | ``
+`schedule` | schedule configuration, crontab format | `0 0 * * *`
