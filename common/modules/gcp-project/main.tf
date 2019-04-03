@@ -73,6 +73,7 @@ variable "service_apis" {
     "serviceusage.googleapis.com",
     "stackdriver.googleapis.com",
     "storage-api.googleapis.com",
+    "websecurityscanner.googleapis.com",
   ]
 }
 
@@ -308,7 +309,7 @@ locals {
   # Project owners will be empty list if var.project_owner is empty string ""
   project_owners = "${compact(list(var.project_owner))}"
 
-  # stg, prd, dev, and the projects that matches the ci_dev_project_regex variable are managed 
+  # stg, prd, dev, and the projects that matches the ci_dev_project_regex variable are managed
   # by the CI so they should have the service account and the permissions attached to it
   #
   root_project_iam = "${replace(var.project_name, var.ci_dev_project_regex, "") != "" && replace(var.project_name, "/^dev-.*/", "") == ""}"
