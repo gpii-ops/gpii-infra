@@ -11,6 +11,6 @@ nameOverride: backup-exporter
 
 serviceAccountName: ""
 
-DestinationBucket: ""
+destinationBucket: ""
 
 schedule: "0 0 * * *"

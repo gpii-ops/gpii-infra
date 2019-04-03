@@ -11,6 +11,6 @@ replicaCount: ${replica_count}
 
 serviceAccountName: "${service_account_name}"
 
-DestinationBucket: "${destination_bucket}"
+destinationBucket: "${destination_bucket}"
 
 schedule: "${schedule}"
