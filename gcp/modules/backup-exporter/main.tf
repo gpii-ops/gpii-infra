@@ -19,15 +19,11 @@ data "template_file" "backup-exporter" {
   template = "${file("values.yaml")}"
 
   vars {
-    service_account_name = "${local.service_account_name}"
+    service_account_name = "${data.google_service_account.backup_exporter.name}"
     destination_bucket   = "${var.destination_bucket}"
     replica_count        = "${var.replica_count}"
     schedule             = "${var.schedule}"
   }
-}
-
-locals {
-  service_account_name = "backup-exporter@${var.project_id}.iam.gserviceaccount.com"
 }
 
 module "backup-exporter" {
