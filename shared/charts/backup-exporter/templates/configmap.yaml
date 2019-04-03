@@ -11,7 +11,7 @@ metadata:
 data:
   backup.sh: |
     gcloud config set account {{ .Values.serviceAccountName }}
-    SNAPSHOTS=$(gcloud compute snapshots list --sort-by=~creationTimestamp --limit=4 --format="value[separator=';'](name,status)"| tail -n2 | grep READY | cut -f1 -d\;)
+    SNAPSHOTS=$(gcloud compute snapshots list --sort-by=~creationTimestamp,STATUS --limit={{ .Values.replicaCount }} --format="value[separator=';'](name,status)" | cut -f1 -d\;)
     DESTINATION_BUCKET={{ .Values.destinationBucket }}/
     TIMESTAMP=$(date +%s)
     for snapshot in ${SNAPSHOTS}; do
