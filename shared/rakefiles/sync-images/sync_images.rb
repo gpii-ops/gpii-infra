@@ -7,6 +7,7 @@ require "yaml"
 class SyncImages
 
   CONFIG_FILE = "./versions.yml"
+  REGISTRY_URL = "gcr.io/gpii2test-common-stg"
 
   def self.load_config()
     return YAML.load(File.read(SyncImages::CONFIG_FILE))
@@ -24,7 +25,7 @@ class SyncImages
   def self.process_image(component, image_name)
     image = self.pull_image(image_name)
     sha = self.get_sha_from_image(image)
-    self.retag_image(image)
+    self.retag_image(image, image_name)
     self.push_image(image)
 
     return sha
@@ -40,6 +41,12 @@ class SyncImages
     sha = image.info["RepoDigests"][0]
     puts "Got image with sha #{sha}..."
     return sha
+  end
+
+  def self.retag_image(image, image_name)
+    new_image_name = "#{SyncImages::REGISTRY_URL}/#{image_name}"
+    puts "Retagging #{image_name} as #{new_image_name}..."
+    image.tag("repo" => new_image_name)
   end
 
   def self.write_new_config(config)

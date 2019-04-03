@@ -79,7 +79,7 @@ describe SyncImages do
 
     expect(SyncImages).to have_received(:pull_image).with(fake_image_name)
     expect(SyncImages).to have_received(:get_sha_from_image).with(fake_image)
-    expect(SyncImages).to have_received(:retag_image).with(fake_image)
+    expect(SyncImages).to have_received(:retag_image).with(fake_image, fake_image_name)
     expect(SyncImages).to have_received(:push_image).with(fake_image)
     expect(actual).to eq(fake_sha)
   end
@@ -94,18 +94,23 @@ describe SyncImages do
   end
 
   it "get_sha_from_image gets sha" do
-    class FakeImage
-      attr_accessor :info
-    end
+    fake_image = double(Docker::Image)
     fake_sha = "sha256:c0ffee"
-    fake_image = FakeImage.new
-    fake_image.info = {
+    allow(fake_image).to receive(:info).and_return({
       "RepoDigests" => [
         "sha256:c0ffee",
       ]
-    }
+    })
     actual = SyncImages.get_sha_from_image(fake_image)
     expect(actual).to eq(fake_sha)
+  end
+
+  it "retag_image retags iamge" do
+    fake_image = double(Docker::Image)
+    fake_image_name = "fake_org/fake_img:fake_tag"
+    allow(fake_image).to receive(:tag)
+    SyncImages.retag_image(fake_image, fake_image_name)
+    expect(fake_image).to have_received(:tag).with({"repo" => "#{SyncImages::REGISTRY_URL}/#{fake_image_name}"})
   end
 
   # It is not necessary or desirable to test File.write or YAML.dump, but this
