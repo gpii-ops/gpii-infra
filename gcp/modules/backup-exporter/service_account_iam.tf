@@ -31,12 +31,3 @@ resource "google_storage_bucket_iam_binding" "member" {
     "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com",
   ]
 }
-
-resource "google_storage_bucket_iam_binding" "owner" {
-  bucket = "${google_storage_bucket.backup_daisy_bkt.name}"
-  role   = "roles/storage.admin"
-
-  members = [
-    "user:alfredo@raisingthefloor.org",
-  ]
-}
