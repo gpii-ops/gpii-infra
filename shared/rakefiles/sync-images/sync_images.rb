@@ -7,10 +7,21 @@ require "yaml"
 class SyncImages
 
   CONFIG_FILE = "./versions.yml"
+  CREDS_FILE = "./creds.json"
   REGISTRY_URL = "gcr.io/gpii2test-common-stg"
 
   def self.load_config()
     return YAML.load(File.read(SyncImages::CONFIG_FILE))
+  end
+
+  def self.login()
+    puts "Logging in with credentials from #{SyncImages::CREDS_FILE}..."
+    creds = File.read(SyncImages::CREDS_FILE)
+    Docker.authenticate!(
+      "username" => "_json_key",
+      "password" => creds,
+      "serveraddress" => "https://gcr.io",
+    )
   end
 
   def self.process_config(config)
@@ -33,7 +44,7 @@ class SyncImages
 
   def self.pull_image(image_name)
     puts "Pulling #{image_name}..."
-    image = Docker::Image.create("fromImage" => image_name)
+    image = Docker::Image.create({"fromImage" => image_name}, creds: {})
     return image
   end
 
@@ -66,6 +77,7 @@ end
 
 def main()
   config = SyncImages.load_config()
+  SyncImages.login()
   SyncImages.process_config(config)
 end
 

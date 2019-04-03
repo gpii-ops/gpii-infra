@@ -91,7 +91,7 @@ describe SyncImages do
     allow(Docker::Image).to receive(:create).and_return(fake_image)
     actual = SyncImages.pull_image(fake_image_name)
     expect(actual).to eq(fake_image)
-    expect(Docker::Image).to have_received(:create).with({"fromImage" => fake_image_name})
+    expect(Docker::Image).to have_received(:create).with({"fromImage" => fake_image_name}, creds: {})
   end
 
   it "get_sha_from_image gets sha" do
