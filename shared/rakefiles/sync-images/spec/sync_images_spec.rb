@@ -68,11 +68,12 @@ describe SyncImages do
     fake_component = "fake_component"
     fake_image_name = "fake_org/fake_img:fake_tag"
     fake_image = "fake_org/fake_img:fake_tag"
+    fake_new_image_name = "#{SyncImages::REGISTRY_URL}/#{fake_image_name}"
     fake_sha = "sha256:c0ffee"
 
     allow(SyncImages).to receive(:pull_image).and_return(fake_image)
     allow(SyncImages).to receive(:get_sha_from_image).and_return(fake_sha)
-    allow(SyncImages).to receive(:retag_image)
+    allow(SyncImages).to receive(:retag_image).and_return(fake_new_image_name)
     allow(SyncImages).to receive(:push_image)
 
     actual = SyncImages.process_image(fake_component, fake_image_name)
@@ -80,7 +81,7 @@ describe SyncImages do
     expect(SyncImages).to have_received(:pull_image).with(fake_image_name)
     expect(SyncImages).to have_received(:get_sha_from_image).with(fake_image)
     expect(SyncImages).to have_received(:retag_image).with(fake_image, fake_image_name)
-    expect(SyncImages).to have_received(:push_image).with(fake_image)
+    expect(SyncImages).to have_received(:push_image).with(fake_image, fake_new_image_name)
     expect(actual).to eq(fake_sha)
   end
 
@@ -108,9 +109,20 @@ describe SyncImages do
   it "retag_image retags iamge" do
     fake_image = double(Docker::Image)
     fake_image_name = "fake_org/fake_img:fake_tag"
+    fake_new_image_name = "#{SyncImages::REGISTRY_URL}/#{fake_image_name}"
+
     allow(fake_image).to receive(:tag)
-    SyncImages.retag_image(fake_image, fake_image_name)
-    expect(fake_image).to have_received(:tag).with({"repo" => "#{SyncImages::REGISTRY_URL}/#{fake_image_name}"})
+    actual = SyncImages.retag_image(fake_image, fake_image_name)
+    expect(fake_image).to have_received(:tag).with({"repo" => fake_new_image_name})
+    expect(actual).to eq(fake_new_image_name)
+  end
+
+  it "push_image pushes image" do
+    fake_image = double(Docker::Image)
+    fake_new_image_name = "fake_registry/fake_org/fake_img:fake_tag"
+    allow(fake_image).to receive(:push)
+    SyncImages.push_image(fake_image, fake_new_image_name)
+    expect(fake_image).to have_received(:push).with(nil, {"repo_tag" => fake_new_image_name})
   end
 
   # It is not necessary or desirable to test File.write or YAML.dump, but this

@@ -25,8 +25,8 @@ class SyncImages
   def self.process_image(component, image_name)
     image = self.pull_image(image_name)
     sha = self.get_sha_from_image(image)
-    self.retag_image(image, image_name)
-    self.push_image(image)
+    new_image_name = self.retag_image(image, image_name)
+    self.push_image(image, new_image_name)
 
     return sha
   end
@@ -47,6 +47,12 @@ class SyncImages
     new_image_name = "#{SyncImages::REGISTRY_URL}/#{image_name}"
     puts "Retagging #{image_name} as #{new_image_name}..."
     image.tag("repo" => new_image_name)
+    return new_image_name
+  end
+
+  def self.push_image(image, new_image_name)
+    puts "Pushing #{new_image_name}..."
+    image.push(nil, "repo_tag" => new_image_name)
   end
 
   def self.write_new_config(config)
