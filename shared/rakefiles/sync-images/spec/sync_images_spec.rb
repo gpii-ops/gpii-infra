@@ -108,12 +108,15 @@ describe SyncImages do
     expect(actual).to eq(fake_sha)
   end
 
-  it "get_sha_from_image explodes when RepoDigests is empty" do
+  it "get_sha_from_image explodes when RepoDigests has no sha matching image_name" do
     fake_image = double(Docker::Image)
+    fake_image_name = "fake_org/fake_img:fake_tag"
     allow(fake_image).to receive(:info).and_return({
-      "RepoDigests" => [],
+      "RepoDigests" => [
+        "another_org/another_img@sha256:50da",
+      ]
     })
-    expect { SyncImages.get_sha_from_image(fake_image) }.to raise_error(ArgumentError)
+    expect { SyncImages.get_sha_from_image(fake_image, fake_image_name) }.to raise_error(ArgumentError, /Could not find sha!/)
   end
 
   it "retag_image retags iamge" do
@@ -146,7 +149,7 @@ describe SyncImages do
       '{"errorDetail":{"message":"unauthorized: incorrect username or password"},"error":"unauthorized: incorrect username or password"}',
     ]
     allow(fake_image).to receive(:push).and_yield(fake_output[0]).and_yield(fake_output[1]).and_yield(fake_output[2])
-    expect { SyncImages.push_image(fake_image, fake_new_image_name) }.to raise_error(ArgumentError)
+    expect { SyncImages.push_image(fake_image, fake_new_image_name) }.to raise_error(ArgumentError, /Found error message in output/)
   end
 
   # It is not necessary or desirable to test File.write or YAML.dump, but this
