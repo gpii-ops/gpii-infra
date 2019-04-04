@@ -133,6 +133,20 @@ describe SyncImages do
     expect(fake_image).to have_received(:push).with(nil, "repo_tag": fake_new_image_name)
   end
 
+  it "push_image explodes if push output contains error" do
+    fake_image = double(Docker::Image)
+    fake_new_image_name = "fake_registry/fake_org/fake_img:fake_tag"
+    # Based on real output when I accidentally mismatched credentials and
+    # registry.
+    fake_output = [
+      '{"status":"The push refers to repository [docker.io/library/fake_img]"}',
+      '{"status":"Preparing","progressDetail":{},"id":"123456789abc"}',
+      '{"errorDetail":{"message":"unauthorized: incorrect username or password"},"error":"unauthorized: incorrect username or password"}',
+    ]
+    allow(fake_image).to receive(:push).and_yield(fake_output[0]).and_yield(fake_output[1]).and_yield(fake_output[2])
+    expect { SyncImages.push_image(fake_image, fake_new_image_name) }.to raise_error(ArgumentError)
+  end
+
   # It is not necessary or desirable to test File.write or YAML.dump, but this
   # validates some plumbing.
   it "write_new_config dumps and writes yaml" do

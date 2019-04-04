@@ -66,7 +66,16 @@ class SyncImages
 
   def self.push_image(image, new_image_name)
     puts "Pushing #{new_image_name}..."
-    image.push(nil, repo_tag: new_image_name)
+    # Docker.push collects output from the API call via 'response_block()', a
+    # kind of callback function. Docker.push ignores errors and discards
+    # output, though the output is available to a block passed to Docker.push.
+    # Hence, we use a block to look for errors and explode if we find one.
+    image.push(nil, repo_tag: new_image_name) do |output_line|
+      puts "...output from push: #{output_line}"
+      if output_line.include? '"error":'
+        raise ArgumentError, "Found error message in output (see above)!"
+      end
+    end
   end
 
   def self.write_new_config(config)
