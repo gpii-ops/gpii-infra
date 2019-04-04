@@ -111,8 +111,6 @@ end
 desc "Display gpii/universal image SHA and link to GitHub commit that triggered the build"
 task :display_universal_image_info => [:set_vars] do
   sh "#{@exekube_cmd} sh -c ' \
-    set -e;
-
     UNIVERSAL_CI_URL=\"https://ci.gpii.net\";
     UNIVERSAL_REPO=\"https://github.com/gpii/universal\";
     RELEASE_JOB_URL=\"$UNIVERSAL_CI_URL/job/docker-gpii-universal-master-release\";
