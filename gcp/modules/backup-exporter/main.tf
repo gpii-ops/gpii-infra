@@ -19,7 +19,7 @@ data "template_file" "backup-exporter" {
   template = "${file("values.yaml")}"
 
   vars {
-    service_account_name = "${data.google_service_account.backup_exporter.name}"
+    service_account_name = "${data.google_service_account.backup_exporter.email}"
     destination_bucket   = "${var.destination_bucket}"
     replica_count        = "${var.replica_count}"
     schedule             = "${var.schedule}"
@@ -44,9 +44,4 @@ resource "google_storage_bucket" "backup_daisy_bkt" {
   name    = "${data.google_project.project.name}-daisy-bkt"
 
   force_destroy = true
-
-  # Default region "US" should be fixed in favor of TF_VAR_infra_region for consistency:
-  # https://issues.gpii.net/browse/GPII-3707
-  # location = "${var.infra_region}"
-  location = "US"
 }
