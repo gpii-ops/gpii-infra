@@ -68,9 +68,9 @@ class Vars
   def self.set_versions()
     versions = YAML.load(File.read(Vars::VERSIONS_FILE))
     versions.each do |component, values|
-      next unless values["sha"]
-      ENV["TF_VAR_#{component}_repository"] = values["sha"].split('@')[0]
-      ENV["TF_VAR_#{component}_checksum"] = values["sha"].split('@')[1]
+      next unless (values["image"] and values["sha"])
+      ENV["TF_VAR_#{component}_repository"] = values["image"]
+      ENV["TF_VAR_#{component}_checksum"] = values["sha"]
     end
   end
 end
