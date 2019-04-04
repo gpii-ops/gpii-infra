@@ -63,7 +63,7 @@ class SyncImages
 
   def self.push_image(image, new_image_name)
     puts "Pushing #{new_image_name}..."
-    image.push(nil, "repo_tag" => new_image_name)
+    image.push(nil, repo_tag: new_image_name)
   end
 
   def self.write_new_config(config)

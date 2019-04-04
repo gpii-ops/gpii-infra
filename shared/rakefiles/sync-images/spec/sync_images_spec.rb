@@ -122,7 +122,7 @@ describe SyncImages do
     fake_new_image_name = "fake_registry/fake_org/fake_img:fake_tag"
     allow(fake_image).to receive(:push)
     SyncImages.push_image(fake_image, fake_new_image_name)
-    expect(fake_image).to have_received(:push).with(nil, {"repo_tag" => fake_new_image_name})
+    expect(fake_image).to have_received(:push).with(nil, "repo_tag": fake_new_image_name)
   end
 
   # It is not necessary or desirable to test File.write or YAML.dump, but this
