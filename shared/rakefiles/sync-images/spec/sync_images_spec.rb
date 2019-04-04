@@ -106,6 +106,14 @@ describe SyncImages do
     expect(actual).to eq(fake_sha)
   end
 
+  it "get_sha_from_image explodes when RepoDigests is empty" do
+    fake_image = double(Docker::Image)
+    allow(fake_image).to receive(:info).and_return({
+      "RepoDigests" => [],
+    })
+    expect { SyncImages.get_sha_from_image(fake_image) }.to raise_error(ArgumentError)
+  end
+
   it "retag_image retags iamge" do
     fake_image = double(Docker::Image)
     fake_image_name = "fake_org/fake_img:fake_tag"

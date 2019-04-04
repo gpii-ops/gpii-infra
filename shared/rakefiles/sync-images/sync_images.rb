@@ -50,6 +50,9 @@ class SyncImages
 
   def self.get_sha_from_image(image)
     sha = image.info["RepoDigests"][0]
+    unless sha
+      raise ArgumentError, "Could not find sha! image.info was #{image.info}"
+    end
     puts "Got image with sha #{sha}..."
     return sha
   end
