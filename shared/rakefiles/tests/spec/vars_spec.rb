@@ -147,13 +147,20 @@ describe Vars do
 
   it "set_versions sets TF_VAR_<component>_repository and TF_VAR_<component>_checksum" do
     fake_versions = {
-      "gpii-flowmanager" => "fake_repository@fake_checksum",
+      "flowmanager" => {
+        "image" => "fake_image",
+        "sha" => "fake_image_should_be_modified@sha256:c0ffee",
+      },
+      "component_without_sha" => {
+        "image" => "another_fake_image",
+      },
     }
     allow(File).to receive(:read)
     allow(YAML).to receive(:load).and_return(fake_versions)
     Vars.set_versions()
-    expect(ENV).to have_received(:[]=).with("TF_VAR_flowmanager_repository", "fake_repository")
-    expect(ENV).to have_received(:[]=).with("TF_VAR_flowmanager_checksum", "fake_checksum")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_flowmanager_repository", "fake_image_should_be_modified")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_flowmanager_checksum", "sha256:c0ffee")
+    expect(ENV).not_to have_received(:[]=).with("TF_VAR_component_without_sha_repository", any_args)
   end
 end
 
