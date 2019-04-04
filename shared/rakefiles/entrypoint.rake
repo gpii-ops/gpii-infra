@@ -111,10 +111,12 @@ end
 desc "Display gpii/universal image SHA and link to GitHub commit that triggered the build"
 task :display_universal_image_info => [:set_vars] do
   sh "#{@exekube_cmd} sh -c ' \
-    UNIVERSAL_CI_URL=\"https://ci.gpii.net/\";
+    set -e;
+
+    UNIVERSAL_CI_URL=\"https://ci.gpii.net\";
     UNIVERSAL_REPO=\"https://github.com/gpii/universal\";
     RELEASE_JOB_URL=\"$UNIVERSAL_CI_URL/job/docker-gpii-universal-master-release\";
-    BUILD_JOB_URL=\"$UNIVERSAL_CI_URL/job/docker-gpii-universal-master\";
+    UPSTREAM_JOB_URL=\"$UNIVERSAL_CI_URL/job/docker-gpii-universal-master\";
     LOOKUP_BUILDS=\"20\";
 
     PREFERENCES_IMAGE_SHA=$(kubectl -n gpii get deployment preferences -o=json 2> /dev/null | jq -r \".spec.template.spec.containers[0].image\" | grep -o \"sha256:.*\");
@@ -134,10 +136,16 @@ task :display_universal_image_info => [:set_vars] do
     RELEASE_BUILD=$(curl $RELEASE_JOB_URL/lastBuild/api/json 2> /dev/null | jq -r \".id\");
     RELEASE_BUILD_LIMIT=$(($RELEASE_BUILD-$LOOKUP_BUILDS));
     while [ \"$RELEASE_BUILD\" != \"\" ] && [ \"$RELEASE_BUILD\" -gt \"$RELEASE_BUILD_LIMIT\" ]; do
-      SHA_FOUND=$(curl $RELEASE_JOB_URL/$RELEASE_BUILD/consoleText 2> /dev/null | grep -so \"$PREFERENCES_IMAGE_SHA\");
+      SHA_FOUND=$(curl $RELEASE_JOB_URL/$RELEASE_BUILD/consoleText 2> /dev/null | grep -so \"$PREFERENCES_IMAGE_SHA\" || true);
       if [ \"$SHA_FOUND\" == \"$PREFERENCES_IMAGE_SHA\" ]; then
-        BUILD_JOB_DATA=$(curl $BUILD_JOB_URL/$RELEASE_BUILD/api/json 2> /dev/null);
-        GITHUB_LINK=\"$UNIVERSAL_REPO/commit/$(echo $BUILD_JOB_DATA | jq -r \".actions[] | select (.lastBuiltRevision.SHA1 != null) | .lastBuiltRevision.SHA1\")\";
+        UPSTREAM_JOB_NUMBER=$(curl $RELEASE_JOB_URL/$RELEASE_BUILD/api/json 2> /dev/null | jq -r \".actions[] | select (.causes[0].upstreamBuild != null) | .causes[0].upstreamBuild\");
+        GITHUB_LINK=\"$UNIVERSAL_REPO/commit/$(curl $UPSTREAM_JOB_URL/$UPSTREAM_JOB_NUMBER/api/json 2> /dev/null | jq -r \".actions[] | select (.lastBuiltRevision.SHA1 != null) | .lastBuiltRevision.SHA1\")\";
+        echo
+        echo \"Release job that built deployed image:\";
+        echo \"$RELEASE_JOB_URL/$RELEASE_BUILD\";
+        echo
+        echo \"Upstream job:\";
+        echo \"$UPSTREAM_JOB_URL/$UPSTREAM_JOB_NUMBER\";
         RELEASE_BUILD=1;
       fi
       RELEASE_BUILD=$(($RELEASE_BUILD-1));
