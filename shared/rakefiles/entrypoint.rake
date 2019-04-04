@@ -108,6 +108,53 @@ task :display_cluster_info => [:set_vars] do
   puts
 end
 
+desc "Display gpii/universal image SHA and link to GitHub commit that triggered the build"
+task :display_universal_image_info => [:set_vars] do
+  sh "#{@exekube_cmd} sh -c ' \
+    UNIVERSAL_CI_URL=\"https://ci.gpii.net/\"; \
+    UNIVERSAL_REPO=\"https://github.com/gpii/universal\";
+    RELEASE_JOB_URL=\"$UNIVERSAL_CI_URL/job/docker-gpii-universal-master-release\"; \
+    BUILD_JOB_URL=\"$UNIVERSAL_CI_URL/job/docker-gpii-universal-master\"; \
+    LOOKUP_MAX_BUILDS=\"20\"
+
+    PREFERENCES_IMAGE_SHA=$(kubectl -n gpii get deployment preferences -o=json 2> /dev/null | jq -r \".spec.template.spec.containers[0].image\" | grep -o \"sha256:.*\"); \
+    if [ \"$?\" != \"0\" ]; then
+      echo
+      echo \"Unable to retrieve data from K8s cluster!\"; \
+      echo \"Try running \\\`rake display_cluster_state\\\` for debug info.\"; \
+      echo
+      exit 1;
+    fi
+
+    echo
+    echo \"Deployed gpii/universal image SHA:\"; \
+    echo \"$PREFERENCES_IMAGE_SHA\"; \
+    RELEASE_BUILD=$(curl $RELEASE_JOB_URL/lastBuild/api/json 2> /dev/null | jq -r \".id\"); \
+    RELEASE_BUILD_LIMIT=$(($RELEASE_BUILD-$LOOKUP_MAX_BUILDS)); \
+    while [ \"$RELEASE_BUILD\" != \"\" ] && [ \"$RELEASE_BUILD\" -gt \"$RELEASE_BUILD_LIMIT\" ]; do \
+      SHA_FOUND=$(curl $RELEASE_JOB_URL/$RELEASE_BUILD/consoleText 2> /dev/null | grep -so \"$PREFERENCES_IMAGE_SHA\"); \
+      if [ \"$SHA_FOUND\" == \"$PREFERENCES_IMAGE_SHA\" ]; then \
+        BUILD_JOB_DATA=$(curl $BUILD_JOB_URL/$RELEASE_BUILD/api/json 2> /dev/null); \
+        GITHUB_LINK=\"$UNIVERSAL_REPO/commit/$(echo $BUILD_JOB_DATA | jq -r \".actions[] | select (.lastBuiltRevision.SHA1 != null) | .lastBuiltRevision.SHA1\")\"; \
+        RELEASE_BUILD=1;
+      fi
+      RELEASE_BUILD=$(($RELEASE_BUILD-1)); \
+    done \
+
+    if [ \"$GITHUB_LINK\" == \"\" ]; then
+      echo
+      echo \"Unable to get CI data for target image SHA in last $LOOKUP_MAX_BUILDS builds!\"; \
+      echo
+      exit 1;
+    fi
+
+    echo
+    echo \"Commit to gpii/universal that triggered image build:\"; \
+    echo \"$GITHUB_LINK\"; \
+    echo
+  '"
+end
+
 desc "Display debugging info about the current state of the cluster"
 task :display_cluster_state => [:set_vars] do
   sh "#{@exekube_cmd} rake display_cluster_state"
