@@ -35,8 +35,8 @@ class SyncImages
 
   def self.process_image(component, image_name)
     image = self.pull_image(image_name)
-    sha = self.get_sha_from_image(image)
     new_image_name = self.retag_image(image, image_name)
+    sha = self.get_sha_from_image(image, new_image_name)
     self.push_image(image, new_image_name)
 
     return sha
@@ -48,8 +48,16 @@ class SyncImages
     return image
   end
 
-  def self.get_sha_from_image(image)
-    sha = image.info["RepoDigests"][0]
+  def self.get_sha_from_image(image, image_name)
+    sha = nil
+    image_name_without_tag, _ = Docker::Util.parse_repo_tag(image_name)
+    image.info["RepoDigests"].each do |digest|
+      digest_image, digest_sha = digest.split('@')
+      if digest_image == image_name_without_tag
+        sha = digest_sha
+        break
+      end
+    end
     unless sha
       raise ArgumentError, "Could not find sha! image.info was #{image.info}"
     end
