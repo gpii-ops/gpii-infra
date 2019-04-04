@@ -143,6 +143,18 @@ describe Vars do
     Vars.set_vars(env, project_type)
     expect(ENV).to have_received(:[]=).with("TF_VAR_nonce", a_value)
   end
+
+
+  it "set_versions sets TF_VAR_<component>_repository and TF_VAR_<component>_checksum" do
+    fake_versions = {
+      "gpii-flowmanager" => "fake_repository@fake_checksum",
+    }
+    allow(File).to receive(:read)
+    allow(YAML).to receive(:load).and_return(fake_versions)
+    Vars.set_versions()
+    expect(ENV).to have_received(:[]=).with("TF_VAR_flowmanager_repository", "fake_repository")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_flowmanager_checksum", "fake_checksum")
+  end
 end
 
 
