@@ -26,8 +26,9 @@ class SyncImages
 
   def self.process_config(config)
     config.keys.sort.each do |component|
-      image_name = config[component]["image"]
-      sha = self.process_image(component, image_name)
+      image_name = config[component]["upstream_image"]
+      (new_image_name, sha) = self.process_image(component, image_name)
+      config[component]["image"] = new_image_name
       config[component]["sha"] = sha
     end
     self.write_new_config(config)
@@ -39,7 +40,7 @@ class SyncImages
     sha = self.get_sha_from_image(image, new_image_name)
     self.push_image(image, new_image_name)
 
-    return sha
+    return [new_image_name, sha]
   end
 
   def self.pull_image(image_name)
