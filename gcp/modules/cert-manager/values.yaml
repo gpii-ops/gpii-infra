@@ -1,4 +1,0 @@
-createCustomResource: true
-useCrdInstallHook: false
-webhook:
-  enabled: false

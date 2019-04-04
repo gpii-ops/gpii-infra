@@ -44,22 +44,23 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the gpii-preferences chart and their default values.
 
-Parameter | Description | Default
---- | --- | ---
-`replicaCount` | desired number of controller pods | `1`
-`svcListenPort` | ClusterIP service port | `80`
-`preferencesListenPort` | port for preferences service to listen on | `8081`
-`datasourceListenPort` | data source port for preferences service | `5984`
-`datasourceHostname` | data source hostname for preferences service | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`
-`nodeEnv` | preferences node env | `gpii.config.preferencesServer.standalone.production`
-`enableStackdriverTrace` | enable [GCP Stackdriver Trace](https://cloud.google.com/trace/) | `false`
-`issuerRef.name` | name of the cert-manager issuer | `letsencrypt-production`
-`issuerRef.kind` | kind of the cert-manager issuer | `Issuer`
-`dnsNames` | list of host names for nginx-ingress controller | `preferences.test.local`
-`disableSslRedirect` | disable nginx-ingress redirection to HTTPS | `false`
-`image.repository` | container image repository | `gpii/universal`
-`image.checksum` | container image checksum | `sha256:f279c6ab7fa1c19e5f358a6a3d87a970eaf8d615c8b6181851fa086b6229b3a1`
-`image.pullPolicy` | container image pullPolicy | `IfNotPresent`
-`rollingUpdate.maxSurge` | maximum number of pods that can be created over the desired number during rolling update | `25%`
-`rollingUpdate.maxUnavailable` | maximum number of pods that can become unavailable during rolling update | `0`
-`resources` | optional resource requests and limits for deployment | `{}`
+| Parameter                      | Description                                                                              | Default                                                                   |
+| `acme.clouddnsProject`         | required GCP project id to use for CLoudDNS                                              | -                                                                         |
+| `acme.email`                   | optional email to use for registration with certificate issuer                           | `dev-null@raisingthefloor.org`                                                |
+| `acme.server                   | optional ACME server for certificate issuer                                              | `https://acme-staging-v02.api.letsencrypt.org/directory`                  |
+| `datasourceHostname`           | data source hostname for preferences service                                             | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`        |
+| `datasourceListenPort`         | data source port for preferences service                                                 | `5984`                                                                    |
+| `disableSslRedirect`           | disable nginx-ingress redirection to HTTPS                                               | `false`                                                                   |
+| `dnsNames`                     | list of host names for nginx-ingress controller                                          | `preferences.test.local`                                                  |
+| `enableStackdriverTrace`       | enable [GCP Stackdriver Trace](https://cloud.google.com/trace/)                          | `false`                                                                   |
+| `image.checksum`               | container image checksum                                                                 | `sha256:f279c6ab7fa1c19e5f358a6a3d87a970eaf8d615c8b6181851fa086b6229b3a1` |
+| `image.pullPolicy`             | container image pullPolicy                                                               | `IfNotPresent`                                                            |
+| `image.repository`             | container image repository                                                               | `gpii/universal`                                                          |
+| `nodeEnv`                      | preferences node env                                                                     | `gpii.config.preferencesServer.standalone.production`                     |
+| `preferencesListenPort`        | port for preferences service to listen on                                                | `8081`                                                                    |
+| `replicaCount`                 | desired number of controller pods                                                        | `1`                                                                       |
+| `resources`                    | optional resource requests and limits for deployment                                     | `{}`                                                                      |
+| `rollingUpdate.maxSurge`       | maximum number of pods that can be created over the desired number during rolling update | `25%`                                                                     |
+| `rollingUpdate.maxUnavailable` | maximum number of pods that can become unavailable during rolling update                 | `0`                                                                       |
+| `svcListenPort`                | ClusterIP service port                                                                   | `80`                                                                      |
+|--------------------------------|------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|

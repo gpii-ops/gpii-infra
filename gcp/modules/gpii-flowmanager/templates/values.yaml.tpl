@@ -1,15 +1,16 @@
 replicaCount: ${replica_count}
 
 image:
-  repository: ${preferences_repository}
-  checksum: ${preferences_checksum}
+  repository: ${flowmanager_repository}
+  checksum: ${flowmanager_checksum}
 
-issuerRef:
-  name: ${cert_issuer_name}
-  kind: ClusterIssuer
+acme:
+  clouddnsProject: ${project_id}
+  server: "${acme_server}"
+  email: "${acme_email}"
 
 dnsNames:
-- preferences.${domain_name}
+- flowmanager.${domain_name}
 
 datasourceHostname: "http://${couchdb_admin_username}:${couchdb_admin_password}@couchdb-svc-couchdb.gpii.svc.cluster.local"
 
