@@ -37,10 +37,11 @@ class SyncImages
   def self.process_image(component, image_name)
     image = self.pull_image(image_name)
     new_image_name = self.retag_image(image, image_name)
-    sha = self.get_sha_from_image(image, new_image_name)
+    new_image_name_without_tag, _ = Docker::Util.parse_repo_tag(new_image_name)
+    sha = self.get_sha_from_image(image, new_image_name_without_tag)
     self.push_image(image, new_image_name)
 
-    return [new_image_name, sha]
+    return [new_image_name_without_tag, sha]
   end
 
   def self.pull_image(image_name)
@@ -49,9 +50,8 @@ class SyncImages
     return image
   end
 
-  def self.get_sha_from_image(image, image_name)
+  def self.get_sha_from_image(image, image_name_without_tag)
     sha = nil
-    image_name_without_tag, _ = Docker::Util.parse_repo_tag(image_name)
     image.info["RepoDigests"].each do |digest|
       digest_image, digest_sha = digest.split('@')
       if digest_image == image_name_without_tag

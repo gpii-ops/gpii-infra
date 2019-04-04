@@ -72,9 +72,10 @@ describe SyncImages do
 
   it "process_image calls helpers on image" do
     fake_component = "fake_component"
-    fake_image_name = "fake_org/fake_img:fake_tag"
     fake_image = "fake Docker::Image object"
-    fake_new_image_name = "#{SyncImages::REGISTRY_URL}/fake_org/fake_img"
+    fake_image_name = "fake_org/fake_img:fake_tag"
+    fake_new_image_name = "#{SyncImages::REGISTRY_URL}/#{fake_image_name}"
+    fake_new_image_name_without_tag = "#{SyncImages::REGISTRY_URL}/fake_org/fake_img"
     fake_sha = "sha256:c0ffee"
 
     allow(SyncImages).to receive(:pull_image).and_return(fake_image)
@@ -86,9 +87,9 @@ describe SyncImages do
 
     expect(SyncImages).to have_received(:pull_image).with(fake_image_name)
     expect(SyncImages).to have_received(:retag_image).with(fake_image, fake_image_name)
-    expect(SyncImages).to have_received(:get_sha_from_image).with(fake_image, fake_new_image_name)
+    expect(SyncImages).to have_received(:get_sha_from_image).with(fake_image, fake_new_image_name_without_tag)
     expect(SyncImages).to have_received(:push_image).with(fake_image, fake_new_image_name)
-    expect(actual).to eq([fake_new_image_name, fake_sha])
+    expect(actual).to eq([fake_new_image_name_without_tag, fake_sha])
   end
 
   it "pull_image pulls image" do
@@ -102,7 +103,7 @@ describe SyncImages do
 
   it "get_sha_from_image gets sha" do
     fake_image = double(Docker::Image)
-    fake_image_name = "fake_org/fake_img:fake_tag"
+    fake_image_name_without_tag = "fake_org/fake_img"
     fake_sha = "sha256:c0ffee"
     allow(fake_image).to receive(:info).and_return({
       "RepoDigests" => [
@@ -110,7 +111,7 @@ describe SyncImages do
         "fake_org/fake_img@#{fake_sha}",
       ]
     })
-    actual = SyncImages.get_sha_from_image(fake_image, fake_image_name)
+    actual = SyncImages.get_sha_from_image(fake_image, fake_image_name_without_tag)
     expect(actual).to eq(fake_sha)
   end
 
