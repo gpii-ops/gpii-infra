@@ -162,7 +162,7 @@ task :display_universal_image_info => [:set_vars] do
     echo \"Commit to gpii/universal that triggered image build:\";
     echo \"$GITHUB_LINK\";
     echo
-  '"
+  '", verbose: false
 end
 
 desc "Display debugging info about the current state of the cluster"
