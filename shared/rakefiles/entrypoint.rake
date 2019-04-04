@@ -121,7 +121,9 @@ task :display_universal_image_info => [:set_vars] do
     if [ \"$?\" != \"0\" ]; then
       echo
       echo \"Unable to retrieve data from K8s cluster!\";
-      echo \"Try running \\\`rake display_cluster_state\\\` for debug info.\";
+      echo \"This is most likely because you are not authenticated!\";
+      echo \"Try running \\\`rake sh[\\\"rake configure_kubectl\\\"]\\\` and then try again.\";
+      echo \"You can also run \\\`rake display_cluster_state\\\` for debug info.\";
       echo
       exit 1;
     fi
