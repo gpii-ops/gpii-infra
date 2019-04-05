@@ -6,7 +6,7 @@ require "yaml"
 
 class SyncImages
 
-  CONFIG_FILE = "./versions.yml"
+  CONFIG_FILE = "../../versions.yml"
   CREDS_FILE = "./creds.json"
   REGISTRY_URL = "gcr.io/gpii2test-common-stg"
 

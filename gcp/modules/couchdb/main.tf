@@ -5,6 +5,10 @@ terraform {
 variable "secrets_dir" {}
 variable "charts_dir" {}
 variable "nonce" {}
+variable "couchdb_helper_repository" {}
+variable "couchdb_helper_tag" {}
+variable "couchdb_repository" {}
+variable "couchdb_tag" {}
 
 # Terragrunt variables
 
@@ -33,17 +37,21 @@ data "template_file" "couchdb_values" {
   template   = "${file("values.yaml")}"
 
   vars {
-    couchdb_admin_username = "${var.secret_couchdb_admin_username}"
-    couchdb_admin_password = "${var.secret_couchdb_admin_password}"
-    couchdb_auth_cookie    = "${var.secret_couchdb_auth_cookie}"
-    replica_count          = "${var.replica_count}"
-    requests_cpu           = "${var.requests_cpu}"
-    requests_memory        = "${var.requests_memory}"
-    limits_cpu             = "${var.limits_cpu}"
-    limits_memory          = "${var.limits_memory}"
-    pv_capacity            = "${var.pv_capacity}"
-    pv_storage_class       = "${var.pv_storage_class}"
-    pv_provisioner         = "${var.pv_provisioner}"
+    couchdb_admin_username    = "${var.secret_couchdb_admin_username}"
+    couchdb_admin_password    = "${var.secret_couchdb_admin_password}"
+    couchdb_auth_cookie       = "${var.secret_couchdb_auth_cookie}"
+    couchdb_helper_repository = "${var.couchdb_helper_repository}"
+    couchdb_helper_tag        = "${var.couchdb_helper_tag}"
+    couchdb_repository        = "${var.couchdb_repository}"
+    couchdb_tag               = "${var.couchdb_tag}"
+    replica_count             = "${var.replica_count}"
+    requests_cpu              = "${var.requests_cpu}"
+    requests_memory           = "${var.requests_memory}"
+    limits_cpu                = "${var.limits_cpu}"
+    limits_memory             = "${var.limits_memory}"
+    pv_capacity               = "${var.pv_capacity}"
+    pv_storage_class          = "${var.pv_storage_class}"
+    pv_provisioner            = "${var.pv_provisioner}"
   }
 }
 
