@@ -91,7 +91,7 @@ describe SyncImages do
 
     expect(SyncImages).to have_received(:pull_image).with(fake_image_name)
     expect(SyncImages).to have_received(:retag_image).with(fake_image, fake_image_name)
-    expect(SyncImages).to have_received(:get_sha_from_image).with(fake_image, fake_new_image_name_without_tag)
+    expect(SyncImages).to have_received(:get_sha_from_image).with(fake_image)
     expect(SyncImages).to have_received(:push_image).with(fake_image, fake_new_image_name)
     expect(actual).to eq([fake_new_image_name_without_tag, fake_sha, fake_tag])
   end
@@ -107,27 +107,23 @@ describe SyncImages do
 
   it "get_sha_from_image gets sha" do
     fake_image = double(Docker::Image)
-    fake_image_name_without_tag = "fake_org/fake_img"
     fake_sha = "sha256:c0ffee"
     allow(fake_image).to receive(:info).and_return({
       "RepoDigests" => [
-        "another_org/another_img@sha256:50da",
         "fake_org/fake_img@#{fake_sha}",
+        "another_org/another_img@sha256:50da",
       ]
     })
-    actual = SyncImages.get_sha_from_image(fake_image, fake_image_name_without_tag)
+    actual = SyncImages.get_sha_from_image(fake_image)
     expect(actual).to eq(fake_sha)
   end
 
-  it "get_sha_from_image explodes when RepoDigests has no sha matching image_name" do
+  it "get_sha_from_image explodes when RepoDigests is empty" do
     fake_image = double(Docker::Image)
-    fake_image_name = "fake_org/fake_img:fake_tag"
     allow(fake_image).to receive(:info).and_return({
-      "RepoDigests" => [
-        "another_org/another_img@sha256:50da",
-      ]
+      "RepoDigests" => [],
     })
-    expect { SyncImages.get_sha_from_image(fake_image, fake_image_name) }.to raise_error(ArgumentError, /Could not find sha!/)
+    expect { SyncImages.get_sha_from_image(fake_image) }.to raise_error(ArgumentError, /Could not find sha!/)
   end
 
   it "retag_image retags iamge" do
