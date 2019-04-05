@@ -27,9 +27,10 @@ class SyncImages
   def self.process_config(config)
     config.keys.sort.each do |component|
       image_name = config[component]["upstream_image"]
-      (new_image_name, sha) = self.process_image(component, image_name)
+      (new_image_name, sha, tag) = self.process_image(component, image_name)
       config[component]["image"] = new_image_name
       config[component]["sha"] = sha
+      config[component]["tag"] = tag
     end
     self.write_new_config(config)
   end
@@ -37,11 +38,11 @@ class SyncImages
   def self.process_image(component, image_name)
     image = self.pull_image(image_name)
     new_image_name = self.retag_image(image, image_name)
-    new_image_name_without_tag, _ = Docker::Util.parse_repo_tag(new_image_name)
+    new_image_name_without_tag, tag = Docker::Util.parse_repo_tag(new_image_name)
     sha = self.get_sha_from_image(image, new_image_name_without_tag)
     self.push_image(image, new_image_name)
 
-    return [new_image_name_without_tag, sha]
+    return [new_image_name_without_tag, sha, tag]
   end
 
   def self.pull_image(image_name)

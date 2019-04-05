@@ -46,22 +46,25 @@ describe SyncImages do
     fake_new_image_name = "#{SyncImages::REGISTRY_URL}/gpii/universal"
     fake_sha_1 = "sha256:c0ffee"
     fake_sha_2 = "sha256:50da"
+    fake_tag = "latest"
     expected_config = {
       "dataloader" => {
         "upstream_image" => "gpii/universal:latest",
         "image" => fake_new_image_name,
         "sha" => fake_sha_1,
+        "tag" => fake_tag,
       },
       "flowmanager" => {
         "upstream_image" => "gpii/universal:latest",
         "image" => fake_new_image_name,
         "sha" => fake_sha_2,
+        "tag" => fake_tag,
       },
     }
 
     allow(SyncImages).to receive(:process_image).and_return(
-      [fake_new_image_name, fake_sha_1],
-      [fake_new_image_name, fake_sha_2],
+      [fake_new_image_name, fake_sha_1, fake_tag],
+      [fake_new_image_name, fake_sha_2, fake_tag],
     )
     allow(SyncImages).to receive(:write_new_config)
 
@@ -77,6 +80,7 @@ describe SyncImages do
     fake_new_image_name = "#{SyncImages::REGISTRY_URL}/#{fake_image_name}"
     fake_new_image_name_without_tag = "#{SyncImages::REGISTRY_URL}/fake_org/fake_img"
     fake_sha = "sha256:c0ffee"
+    fake_tag = "fake_tag"
 
     allow(SyncImages).to receive(:pull_image).and_return(fake_image)
     allow(SyncImages).to receive(:retag_image).and_return(fake_new_image_name)
@@ -89,7 +93,7 @@ describe SyncImages do
     expect(SyncImages).to have_received(:retag_image).with(fake_image, fake_image_name)
     expect(SyncImages).to have_received(:get_sha_from_image).with(fake_image, fake_new_image_name_without_tag)
     expect(SyncImages).to have_received(:push_image).with(fake_image, fake_new_image_name)
-    expect(actual).to eq([fake_new_image_name_without_tag, fake_sha])
+    expect(actual).to eq([fake_new_image_name_without_tag, fake_sha, fake_tag])
   end
 
   it "pull_image pulls image" do
