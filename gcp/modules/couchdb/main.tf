@@ -7,6 +7,8 @@ variable "charts_dir" {}
 variable "nonce" {}
 variable "couchdb_helper_repository" {}
 variable "couchdb_helper_tag" {}
+variable "couchdb_init_repository" {}
+variable "couchdb_init_tag" {}
 variable "couchdb_repository" {}
 variable "couchdb_tag" {}
 
@@ -42,6 +44,8 @@ data "template_file" "couchdb_values" {
     couchdb_auth_cookie       = "${var.secret_couchdb_auth_cookie}"
     couchdb_helper_repository = "${var.couchdb_helper_repository}"
     couchdb_helper_tag        = "${var.couchdb_helper_tag}"
+    couchdb_init_repository   = "${var.couchdb_init_repository}"
+    couchdb_init_tag          = "${var.couchdb_init_tag}"
     couchdb_repository        = "${var.couchdb_repository}"
     couchdb_tag               = "${var.couchdb_tag}"
     replica_count             = "${var.replica_count}"

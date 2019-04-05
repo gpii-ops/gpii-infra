@@ -110,6 +110,8 @@ A variety of other parameters are also configurable. See the comments in the
 | `helperImage.repository`        | kocolosk/couchdb-statefulset-assembler |
 | `helperImage.tag`               | 1.1.0                                  |
 | `helperImage.pullPolicy`        | IfNotPresent                           |
+| `initImage.repository`          | busybox                                |
+| `initImage.tag`                 | latest                                 |
 | `image.repository`              | couchdb                                |
 | `image.tag`                     | 2.2.0                                  |
 | `image.pullPolicy`              | IfNotPresent                           |

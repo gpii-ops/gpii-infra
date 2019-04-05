@@ -4,6 +4,11 @@ couchdb_helper:
   image: gcr.io/gpii2test-common-stg/kocolosk/couchdb-statefulset-assembler
   sha: sha256:a689a5cde2c19b7767c79fc2d265844bbc5913f10f5516480d7e06e2292f234e
   tag: 1.1.0
+couchdb_init:
+  upstream_image: busybox:latest
+  image: gcr.io/gpii2test-common-stg/busybox
+  sha: sha256:954e1f01e80ce09d0887ff6ea10b13a812cb01932a0781d6b0cc23f743a874fd
+  tag: latest
 couchdb_prometheus_exporter:
   upstream_image: gesellix/couchdb-prometheus-exporter:22
   image: gcr.io/gpii2test-common-stg/gesellix/couchdb-prometheus-exporter
