@@ -10,6 +10,7 @@ metadata:
     heritage: "{{ .Release.Service }}"
 data:
   backup.sh: |
+    set -e
     gcloud config set account {{ .Values.serviceAccountName }}
     SNAPSHOTS=$(gcloud compute snapshots list --sort-by=~creationTimestamp,STATUS --limit={{ .Values.replicaCount }} --format="value[separator=';'](name,status)" | cut -f1 -d\;)
     DESTINATION_BUCKET={{ .Values.destinationBucket }}
