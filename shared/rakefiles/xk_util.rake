@@ -145,8 +145,8 @@ task :display_universal_image_info => [:configure] do
     fi
 
     echo
-    echo \"Preferences image:\";
-    echo \"https://hub.docker.com/r/gpii/universal/$PREFERENCES_IMAGE_SHA\";
+    echo \"Preferences image SHA:\";
+    echo \"$PREFERENCES_IMAGE_SHA\";
     RELEASE_BUILD=$(curl $RELEASE_JOB_URL/lastBuild/api/json 2> /dev/null | jq -r \".id\");
     RELEASE_BUILD_LIMIT=$(($RELEASE_BUILD-$LOOKUP_BUILDS));
     while [ \"$RELEASE_BUILD\" != \"\" ] && [ \"$RELEASE_BUILD\" -gt \"$RELEASE_BUILD_LIMIT\" ]; do
