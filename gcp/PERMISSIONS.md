@@ -18,6 +18,7 @@ Accounts and permissions
   1. Billing Account Administrator
   1. Support Account Administrator
   1. Organization Policy Administrator
+  1. Security Center Administrator
   1. Viewer
   1. Owner (not attached by default)
 
@@ -41,7 +42,7 @@ Accounts and permissions
 
   *Note that the `projectowner@gpii-common-prd.iam.gserviceaccount.com` is the owner of the gpii-common-prd project*
 
-### [PROJECT_NUMBER]-compute@developer.gserviceaccount.com   
+### [PROJECT_NUMBER]-compute@developer.gserviceaccount.com
 
   Compute Engine default service account
 
@@ -54,20 +55,20 @@ Accounts and permissions
   1. Editor
 
 ### service-[PROJECT_NUMBER]@compute-system.iam.gserviceaccount.com (Google-managed service account)
-  
+
   Google-managed service account used to access the APIs of Google Cloud Platform services.
 
   1. Compute Engine Service Agent
-  
+
 ### service-[PROJECT_NUMBER]@container-engine-robot.iam.gserviceaccount.com (Google-managed service account)
-  
-  Google-managed service account used to access the APIs of Google Cloud Platform services. 
+
+  Google-managed service account used to access the APIs of Google Cloud Platform services.
 
   1. Kubernetes Engine Service Agent
 
 ### service-[PROJECT_NUMBER]@containerregistry.iam.gserviceaccount.com (Google-managed service account)
 
-  Google-managed service account used to access the APIs of Google Cloud Platform services. 
+  Google-managed service account used to access the APIs of Google Cloud Platform services.
 
   1. Editor
 
