@@ -1,4 +1,9 @@
 ---
+cert_manager:
+  upstream_image: quay.io/jetstack/cert-manager-controller:v0.6.1
+  image: gcr.io/gpii2test-common-stg/quay.io/jetstack/cert-manager-controller
+  sha: sha256:999053d9e6d3975d2a262fcedd30896195a3023334ca546b705846b8ff809ea7
+  tag: v0.6.1
 couchdb_helper:
   upstream_image: kocolosk/couchdb-statefulset-assembler:1.1.0
   image: gcr.io/gpii2test-common-stg/kocolosk/couchdb-statefulset-assembler
