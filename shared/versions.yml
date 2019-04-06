@@ -39,6 +39,11 @@ k8s_snapshots:
   image: gcr.io/gpii2test-common-stg/elsdoerfer/k8s-snapshots
   sha: sha256:8723828551f49970389ed024e3073fd1c5425d1bd2eacb286925a67d381ec828
   tag: v2.0
+locust:
+  upstream_image: gpii/locust:0.9.0-gpii.2
+  image: gcr.io/gpii2test-common-stg/gpii/locust
+  sha: sha256:e526da4f2243d7d0a330230f3c94be04ed558d0ed8946484faf7fce02ba95657
+  tag: 0.9.0-gpii.2
 preferences:
   upstream_image: gpii/universal:latest
   sha: sha256:eab9307f4b1549077c97646848e54b49fc6ceed42d98185882e2258b409f0770
