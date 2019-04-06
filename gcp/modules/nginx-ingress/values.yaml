@@ -1,4 +1,7 @@
 controller:
+  image:
+    repository: ${nginx_ingress_repository}
+    tag: ${nginx_ingress_tag}
   config:
     server-tokens: "false"
   service:
