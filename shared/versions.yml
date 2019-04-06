@@ -47,10 +47,15 @@ locust:
 nginx_ingress:
   upstream_image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.15.0
   image: gcr.io/gpii2test-common-stg/quay.io/kubernetes-ingress-controller/nginx-ingress-controller
-  sha: sha256:7b79e1bc6437e6376dadf558e012adde6395bb28dee4a38ce08c7e5c9f220178
+  sha: sha256:0489cd1c6f0755f532d4b8204d5dabea038d4b2be8ec6efc2da584ff3f5aba61
   tag: 0.15.0
 preferences:
   upstream_image: gpii/universal:latest
   sha: sha256:eab9307f4b1549077c97646848e54b49fc6ceed42d98185882e2258b409f0770
   image: gcr.io/gpii2test-common-stg/gpii/universal
   tag: latest
+service_account_assigner:
+  upstream_image: gpii/service-account-assigner:0.0.2-gpii.0
+  image: gcr.io/gpii2test-common-stg/gpii/service-account-assigner
+  sha: sha256:c464aceecdb83363ee8d339cfdcc6877210b881be1e8fa020ffaddf25a3c83bd
+  tag: 0.0.2-gpii.0
