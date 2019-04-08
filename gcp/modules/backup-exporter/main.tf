@@ -19,7 +19,7 @@ data "template_file" "backup-exporter" {
   template = "${file("values.yaml")}"
 
   vars {
-    service_account_name = "${data.google_service_account.backup_exporter.email}"
+    service_account_name = "${data.google_service_account.gke_cluster_pod_backup_exporter.email}"
     destination_bucket   = "${var.destination_bucket}"
     replica_count        = "${var.replica_count}"
     schedule             = "${var.schedule}"

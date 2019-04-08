@@ -353,7 +353,7 @@ locals {
   # (this is instead of current `local.service_account` that is either actual account or empty)
   service_accounts = "${formatlist("serviceAccount:%s", google_service_account.project.*.email)}"
 
-  backup_service_accounts = "${formatlist("serviceAccount:%s", google_service_account.backup_exporter.*.email)}"
+  backup_service_accounts = "${formatlist("serviceAccount:%s", google_service_account.gke_cluster_pod_backup_exporter.*.email)}"
 
   # Project owners will be empty list if var.project_owner is empty string ""
   project_owners = "${compact(list(var.project_owner))}"

@@ -3,12 +3,12 @@ data "google_service_account" "gke_cluster_node" {
   project    = "${var.project_id}"
 }
 
-data "google_service_account" "backup_exporter" {
-  account_id = "backup-exporter"
+data "google_service_account" "gke_cluster_pod_backup_exporter" {
+  account_id = "gke-cluster-pod-bckp-exporter"
   project    = "${var.project_id}"
 }
 
-data "google_iam_policy" "backup_exporter" {
+data "google_iam_policy" "gke_cluster_pod_backup_exporter" {
   binding {
     role = "roles/iam.serviceAccountTokenCreator"
 
@@ -19,8 +19,8 @@ data "google_iam_policy" "backup_exporter" {
 }
 
 resource "google_service_account_iam_policy" "pod_default_iam" {
-  service_account_id = "${data.google_service_account.backup_exporter.name}"
-  policy_data        = "${data.google_iam_policy.backup_exporter.policy_data}"
+  service_account_id = "${data.google_service_account.gke_cluster_pod_backup_exporter.name}"
+  policy_data        = "${data.google_iam_policy.gke_cluster_pod_backup_exporter.policy_data}"
 }
 
 # We need to add the SA used by the compute API in order to let cloudbuild make
