@@ -7,11 +7,6 @@ variable "secrets_dir" {}
 variable "charts_dir" {}
 variable "project_id" {}
 
-provider "google" {
-  project     = "${var.project_id}"
-  credentials = "${var.serviceaccount_key}"
-}
-
 data "template_file" "release_values" {
   template = "${file("${path.module}/templates/values.yaml.tpl")}"
 
