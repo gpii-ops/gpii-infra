@@ -44,24 +44,23 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the gpii-flowmanager chart and their default values.
 
-| Parameter                      | Description                                                                              | Default                                                                   |
-| `acme.clouddnsProject`         | required GCP project id to use for CLoudDNS                                              | -                                                                         |
-| `acme.email`                   | optional email to use for registration with certificate issuer                           | `dev-null@raisingthefloor.org`                                                |
-| `acme.server                   | optional ACME server for certificate issuer                                              | `https://acme-staging-v02.api.letsencrypt.org/directory`                  |
-| `datasourceHostname`           | data source hostname for preferences service                                             | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`        |
-| `datasourceListenPort`         | data source port for flowmanager service                                                 | `5984`                                                                    |
-| `disableSslRedirect`           | disable nginx-ingress redirection to HTTPS                                               | `false`                                                                   |
-| `dnsNames`                     | list of host names for nginx-ingress controller                                          | `flowmanager.test.local`                                                  |
-| `enableStackdriverTrace`       | enable [GCP Stackdriver Trace](https://cloud.google.com/trace/)                          | `false`                                                                   |
-| `flowmanagerListenPort`        | port for flowmanager service to listen on                                                | `8081`                                                                    |
-| `image.checksum`               | container image checksum                                                                 | `sha256:8547f22ae8e86d7b4b09e10d9ec87b1605b47dc37904171c84555a55462f161e` |
-| `image.pullPolicy`             | container image pullPolicy                                                               | `IfNotPresent`                                                            |
-| `image.repository`             | container image repository                                                               | `gpii/universal`                                                          |
-| `nodeEnv`                      | flowmanager node env                                                                     | `gpii.config.cloudBased.flowManager.production`                           |
-| `preferencesUrl`               | preferences service url                                                                  | `http://preferences.gpii.svc.cluster.local`                               |
-| `replicaCount`                 | desired number of controller pods                                                        | `1`                                                                       |
-| `resources`                    | optional resource requests and limits for deployment                                     | `{}`                                                                      |
-| `rollingUpdate.maxSurge`       | maximum number of pods that can be created over the desired number during rolling update | `25%`                                                                     |
-| `rollingUpdate.maxUnavailable` | maximum number of pods that can become unavailable during rolling update                 | `0`                                                                       |
-| `svcListenPort`                | ClusterIP service port                                                                   | `80`                                                                      |
-|--------------------------------|------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+Parameter | Description | Default
+--- | --- | ---
+`replicaCount` | desired number of controller pods | `1`
+`svcListenPort` | ClusterIP service port | `80`
+`flowmanagerListenPort` | port for flowmanager service to listen on | `8081`
+`datasourceListenPort` | data source port for flowmanager service | `5984`
+`datasourceHostname` | data source hostname for preferences service | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`
+`nodeEnv` | flowmanager node env | `gpii.config.cloudBased.flowManager.production`
+`preferencesUrl` | preferences service url | `http://preferences.gpii.svc.cluster.local`
+`enableStackdriverTrace` | enable [GCP Stackdriver Trace](https://cloud.google.com/trace/) | `false`
+`issuerRef.name` | name of the cert-manager issuer | `letsencrypt-production`
+`issuerRef.kind` | kind of the cert-manager issuer | `Issuer`
+`dnsNames` | list of host names for nginx-ingress controller | `flowmanager.test.local`
+`disableSslRedirect` | disable nginx-ingress redirection to HTTPS | `false`
+`image.repository` | container image repository | `gpii/universal`
+`image.checksum` | container image checksum | `sha256:8547f22ae8e86d7b4b09e10d9ec87b1605b47dc37904171c84555a55462f161e`
+`image.pullPolicy` | container image pullPolicy | `IfNotPresent`
+`rollingUpdate.maxSurge` | maximum number of pods that can be created over the desired number during rolling update | `25%`
+`rollingUpdate.maxUnavailable` | maximum number of pods that can become unavailable during rolling update | `0`
+`resources` | optional resource requests and limits for deployment | `{}`
