@@ -4,7 +4,7 @@
 
 image:
   repository: google/cloud-sdk
-  tag: latest
+  tag: 241.0.0-alpine
   pullPolicy: IfNotPresent
 
 replicaCount: ${replica_count}
