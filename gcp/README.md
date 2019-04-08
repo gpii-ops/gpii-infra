@@ -97,7 +97,7 @@ Users who already had an RtF email address/Google account usually have performed
 1. By default your K8s cluster and related resources will be deployed into `us-central1`.
    * You can use a different GCP region -- see [I want to spin up my dev environment in a different region](README.md#i-want-to-spin-up-my-dev-environment-in-a-different-region).
 1. The [Google Cloud Console](https://console.cloud.google.com) includes [Google Cloud Shell](https://cloud.google.com/shell/docs/) which is an interactive terminal embedded in the GCP dashboard. To use it, click on the icon at the top right of the Console, next to the magnifier icon.
-   * Once the shell opens in your browser, execute the following to manage the Kubernetes cluster using the embedded `kubectl` command: 
+   * Once the shell opens in your browser, execute the following to manage the Kubernetes cluster using the embedded `kubectl` command:
    1. `gcloud container clusters get-credentials k8s-cluster --zone YOUR_INFRA_REGION`
    1. `kubectl -n gpii get pods`
 
@@ -112,6 +112,24 @@ Users who already had an RtF email address/Google account usually have performed
 1. There's no automation for destroying the Project and starting over. I usually use the GCP Dashboard.
    * Note that "deleting" a Project really marks it for deletion in 30 days. You can't create a new Project with the same name until the old one is culled.
    * See also [Shutting down a project](https://github.com/gpii-ops/gpii-infra/tree/master/common#shutting-down-a-project) and [Removing a dev project](https://github.com/gpii-ops/gpii-infra/tree/master/common#removing-a-dev-project).
+
+### Configuring web security scans for an environment public endpoints
+
+To automatically scan publicly exposed endpointst for common vulnerabilities (XSS, Flash injection, HTTP in HTTPS, outdated/insecure libraries, etc):
+
+1. Go to [Cloud Web Security Scanner](https://console.cloud.google.com/security/web-scanner/scanConfigs), you will be asked to select the project if needed.
+1. Click "New Scan".
+1. Enter endpoint URL into the "Name" field (e.g. `flowmanager.prd.gcp.gpii.net` or `preferences.prd.gcp.gpii.net`).
+1. As a "Starting URL" you can enter something like (replace `prd.gcp.gpii.net` with your environment's domain):
+   * https://flowmanager.prd.gcp.gpii.net/health for Flowmanager endpoint.
+   * https://preferences.prd.gcp.gpii.net/preferences/carla for Preferences endpoint.
+1. You can add more URLs if needed using "Add a URL" link.
+1. You can also exclude certain URLs from scanning if needed.
+1. For long-lived environments:
+   * Set "Schedule" to "Weekly".
+   * Set "Next run" to any weekday of the following week.
+   * Set "Export to Cloud Security Command Center" option to enable scan results propagation to Cloud Security Command Center findings (which will be reviewed by Ops team as part of weekly infra metrics review).
+1. Click "Save".
 
 ## Contacting the Ops team
 
