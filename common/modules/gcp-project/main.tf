@@ -123,7 +123,6 @@ data "google_iam_policy" "combined" {
 
     members = [
       "${local.service_accounts}",
-      "serviceAccount:${google_service_account.gke_cluster_pod_cert_manager.email}",
     ]
   }
 
