@@ -18,6 +18,7 @@ Accounts and permissions
   1. Billing Account Administrator
   1. Support Account Administrator
   1. Organization Policy Administrator
+  1. Service Account Administrator
   1. Security Center Administrator
   1. Viewer
   1. Owner (not attached by default)

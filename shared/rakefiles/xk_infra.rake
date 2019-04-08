@@ -14,6 +14,7 @@ cloud_admin_organization_permissions = [
   "roles/cloudsupport.admin",
   "roles/orgpolicy.policyAdmin",
   "roles/resourcemanager.organizationAdmin",
+  "roles/iam.serviceAccountAdmin",
   "roles/securitycenter.admin",
   "roles/viewer"
 ]
