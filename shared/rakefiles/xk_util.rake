@@ -147,13 +147,13 @@ task :display_universal_image_info => [:configure] do
     echo
     echo \"Preferences image SHA:\";
     echo \"$PREFERENCES_IMAGE_SHA\";
-    RELEASE_BUILD=$(curl $RELEASE_JOB_URL/lastBuild/api/json 2> /dev/null | jq -r \".id\");
-    RELEASE_BUILD_LIMIT=$(($RELEASE_BUILD-$LOOKUP_BUILDS));
+    RELEASE_BUILD=$(curl -f \"$RELEASE_JOB_URL/lastBuild/api/json\" 2> /dev/null | jq -r \".id\");
+    RELEASE_BUILD_LIMIT=$((RELEASE_BUILD - LOOKUP_BUILDS));
     while [ \"$RELEASE_BUILD\" != \"\" ] && [ \"$RELEASE_BUILD\" -gt \"$RELEASE_BUILD_LIMIT\" ]; do
-      SHA_FOUND=$(curl $RELEASE_JOB_URL/$RELEASE_BUILD/consoleText 2> /dev/null | grep -so \"$PREFERENCES_IMAGE_SHA\" || true);
+      SHA_FOUND=$(curl -f \"$RELEASE_JOB_URL/$RELEASE_BUILD/consoleText\" 2> /dev/null | grep -so \"$PREFERENCES_IMAGE_SHA\" || true);
       if [ \"$SHA_FOUND\" == \"$PREFERENCES_IMAGE_SHA\" ]; then
-        UPSTREAM_JOB_NUMBER=$(curl $RELEASE_JOB_URL/$RELEASE_BUILD/api/json 2> /dev/null | jq -r \".actions[] | select (.causes[0].upstreamBuild != null) | .causes[0].upstreamBuild\");
-        GITHUB_LINK=\"$UNIVERSAL_REPO/commit/$(curl $UPSTREAM_JOB_URL/$UPSTREAM_JOB_NUMBER/api/json 2> /dev/null | jq -r \".actions[] | select (.lastBuiltRevision.SHA1 != null) | .lastBuiltRevision.SHA1\")\";
+        UPSTREAM_JOB_NUMBER=$(curl -f \"$RELEASE_JOB_URL/$RELEASE_BUILD/api/json\" 2> /dev/null | jq -r \".actions[] | select (.causes[0].upstreamBuild != null) | .causes[0].upstreamBuild\");
+        GITHUB_LINK=\"$UNIVERSAL_REPO/commit/$(curl -f \"$UPSTREAM_JOB_URL/$UPSTREAM_JOB_NUMBER/api/json\" 2> /dev/null | jq -r \".actions[] | select (.lastBuiltRevision.SHA1 != null) | .lastBuiltRevision.SHA1\")\";
         echo
         echo \"Release job that built the image:\";
         echo \"$RELEASE_JOB_URL/$RELEASE_BUILD\";
@@ -162,7 +162,7 @@ task :display_universal_image_info => [:configure] do
         echo \"$UPSTREAM_JOB_URL/$UPSTREAM_JOB_NUMBER\";
         RELEASE_BUILD=1;
       fi
-      RELEASE_BUILD=$(($RELEASE_BUILD-1));
+      RELEASE_BUILD=$((RELEASE_BUILD - 1));
     done
 
     if [ \"$GITHUB_LINK\" == \"\" ]; then
