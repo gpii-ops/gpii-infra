@@ -113,24 +113,6 @@ Users who already had an RtF email address/Google account usually have performed
    * Note that "deleting" a Project really marks it for deletion in 30 days. You can't create a new Project with the same name until the old one is culled.
    * See also [Shutting down a project](https://github.com/gpii-ops/gpii-infra/tree/master/common#shutting-down-a-project) and [Removing a dev project](https://github.com/gpii-ops/gpii-infra/tree/master/common#removing-a-dev-project).
 
-### Configuring web security scans for an environment public endpoints
-
-To automatically scan publicly exposed endpointst for common vulnerabilities (XSS, Flash injection, HTTP in HTTPS, outdated/insecure libraries, etc):
-
-1. Go to [Cloud Web Security Scanner](https://console.cloud.google.com/security/web-scanner/scanConfigs), you will be asked to select the project if needed.
-1. Click "New Scan".
-1. Enter endpoint URL into the "Name" field (e.g. `flowmanager.prd.gcp.gpii.net` or `preferences.prd.gcp.gpii.net`).
-1. As a "Starting URL" you can enter something like (replace `prd.gcp.gpii.net` with your environment's domain):
-   * https://flowmanager.prd.gcp.gpii.net/health for Flowmanager endpoint.
-   * https://preferences.prd.gcp.gpii.net/preferences/carla for Preferences endpoint.
-1. You can add more URLs if needed using "Add a URL" link.
-1. You can also exclude certain URLs from scanning if needed.
-1. For long-lived environments:
-   * Set "Schedule" to "Weekly".
-   * Set "Next run" to any weekday of the following week.
-   * Set "Export to Cloud Security Command Center" option to enable scan results propagation to Cloud Security Command Center findings (which will be reviewed by Ops team as part of weekly infra metrics review).
-1. Click "Save".
-
 ## Contacting the Ops team
 
 Want help with your cluster? Is production down, or is there some other kind of operational emergency? See [CONTACTING-OPS.md](../CONTACTING-OPS.md).
