@@ -73,6 +73,7 @@ Users who already had an RtF email address/Google account usually have performed
 
 1. `rake display_cluster_info` shows some helpful links.
 1. `rake display_cluster_state` shows debugging info about the current state of the cluster. This output can be helpful when asking for help.
+1. `rake display_universal_image_info` shows currently deployed [gpii/universal](https://github.com/GPII/universal) image SHA and link to GitHub commit that triggered the build.
 1. `rake sh` opens an interactive shell inside a container on the local host that is configured to communicate with your cluster (e.g. via `kubectl` commands).
    * `rake sh` has some issues with interactive commands (e.g. `less` and `vi`) -- see https://issues.gpii.net/browse/GPII-3407.
 1. `rake plain_sh` is like `rake sh`, but not all configuration is performed. This can be helpful for debugging (e.g. when `rake sh` does not work) and with interactive commands.
@@ -97,7 +98,7 @@ Users who already had an RtF email address/Google account usually have performed
 1. By default your K8s cluster and related resources will be deployed into `us-central1`.
    * You can use a different GCP region -- see [I want to spin up my dev environment in a different region](README.md#i-want-to-spin-up-my-dev-environment-in-a-different-region).
 1. The [Google Cloud Console](https://console.cloud.google.com) includes [Google Cloud Shell](https://cloud.google.com/shell/docs/) which is an interactive terminal embedded in the GCP dashboard. To use it, click on the icon at the top right of the Console, next to the magnifier icon.
-   * Once the shell opens in your browser, execute the following to manage the Kubernetes cluster using the embedded `kubectl` command: 
+   * Once the shell opens in your browser, execute the following to manage the Kubernetes cluster using the embedded `kubectl` command:
    1. `gcloud container clusters get-credentials k8s-cluster --zone YOUR_INFRA_REGION`
    1. `kubectl -n gpii get pods`
 
