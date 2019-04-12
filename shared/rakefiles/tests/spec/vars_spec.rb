@@ -149,24 +149,35 @@ describe Vars do
     fake_versions = {
       "flowmanager" => {
         "upstream_image" => "fake_image:fake_tag",
-        "image" => "gcr.io/some-project/fake_image",
-        "sha" => "sha256:c0ffee",
-        "tag" => "fake_tag",
+        "generated" => {
+          "image" => "gcr.io/some-project/fake_image",
+          "sha" => "sha256:c0ffee",
+          "tag" => "fake_tag",
+        },
+      },
+      "component_without_generated" => {
+        "upstream_image" => "another_fake_image",
       },
       "component_without_image" => {
         "upstream_image" => "another_fake_image",
-        "sha" => "sha256:50da",
-        "tag" => "fake_tag",
+        "generated" => {
+          "sha" => "sha256:50da",
+          "tag" => "fake_tag",
+        },
       },
       "component_without_sha" => {
         "upstream_image" => "another_fake_image",
-        "image" => "gcr.io/some-project/another_fake_image",
-        "tag" => "fake_tag",
+        "generated" => {
+          "image" => "gcr.io/some-project/another_fake_image",
+          "tag" => "fake_tag",
+        },
       },
       "component_without_tag" => {
         "upstream_image" => "another_fake_image",
-        "image" => "gcr.io/some-project/another_fake_image",
-        "sha" => "sha256:50da",
+        "generated" => {
+          "image" => "gcr.io/some-project/another_fake_image",
+          "sha" => "sha256:50da",
+        },
       },
     }
     allow(File).to receive(:read)
