@@ -7,126 +7,84 @@
 ---
 cert_manager:
   upstream_image: quay.io/jetstack/cert-manager-controller:v0.6.1
-  image: gcr.io/gpii2test-common-stg/quay.io/jetstack/cert-manager-controller
-  sha: sha256:e995152afc1f609e91343122aff8af56b192eee102ffbe5a8350bb37b68fde7f
-  tag: v0.6.1
   generated:
     image: gcr.io/gpii2test-common-stg/quay.io/jetstack/cert-manager-controller
-    sha: sha256:999053d9e6d3975d2a262fcedd30896195a3023334ca546b705846b8ff809ea7
+    sha: sha256:e995152afc1f609e91343122aff8af56b192eee102ffbe5a8350bb37b68fde7f
     tag: v0.6.1
 certmerge_operator:
   upstream_image: gpii/certmerge-operator:0.0.3-gpii.0
-  image: gcr.io/gpii2test-common-stg/gpii/certmerge-operator
-  sha: sha256:96c435ee42bae821210e91430c18c0fd1cbe8cd33216175a77fbdc7622f5d535
-  tag: 0.0.3-gpii.0
   generated:
     image: gcr.io/gpii2test-common-stg/gpii/certmerge-operator
     sha: sha256:96c435ee42bae821210e91430c18c0fd1cbe8cd33216175a77fbdc7622f5d535
     tag: 0.0.3-gpii.0
 couchdb_helper:
   upstream_image: kocolosk/couchdb-statefulset-assembler:1.1.0
-  image: gcr.io/gpii2test-common-stg/kocolosk/couchdb-statefulset-assembler
-  sha: sha256:a689a5cde2c19b7767c79fc2d265844bbc5913f10f5516480d7e06e2292f234e
-  tag: 1.1.0
   generated:
     image: gcr.io/gpii2test-common-stg/kocolosk/couchdb-statefulset-assembler
     sha: sha256:a689a5cde2c19b7767c79fc2d265844bbc5913f10f5516480d7e06e2292f234e
     tag: 1.1.0
 couchdb_init:
   upstream_image: busybox:latest
-  image: gcr.io/gpii2test-common-stg/busybox
-  sha: sha256:954e1f01e80ce09d0887ff6ea10b13a812cb01932a0781d6b0cc23f743a874fd
-  tag: latest
   generated:
     image: gcr.io/gpii2test-common-stg/busybox
     sha: sha256:954e1f01e80ce09d0887ff6ea10b13a812cb01932a0781d6b0cc23f743a874fd
     tag: latest
 couchdb_prometheus_exporter:
   upstream_image: gesellix/couchdb-prometheus-exporter:22
-  image: gcr.io/gpii2test-common-stg/gesellix/couchdb-prometheus-exporter
-  sha: sha256:8184086713d28fc19f3d2ecd5eabd0cce23c21bd0daa9f8921fa0ce4acb912f6
-  tag: '22'
   generated:
     image: gcr.io/gpii2test-common-stg/gesellix/couchdb-prometheus-exporter
     sha: sha256:8184086713d28fc19f3d2ecd5eabd0cce23c21bd0daa9f8921fa0ce4acb912f6
     tag: '22'
 couchdb_prometheus_exporter_p2sd:
   upstream_image: gcr.io/google-containers/prometheus-to-sd:v0.3.2
-  image: gcr.io/gpii2test-common-stg/gcr.io/google-containers/prometheus-to-sd
-  sha: sha256:7f7e424211b64a77b5ee2e8a3085048b54c1676217ee8830dc4112df6111b8a2
-  tag: v0.3.2
   generated:
     image: gcr.io/gpii2test-common-stg/gcr.io/google-containers/prometheus-to-sd
     sha: sha256:7f7e424211b64a77b5ee2e8a3085048b54c1676217ee8830dc4112df6111b8a2
     tag: v0.3.2
 couchdb:
   upstream_image: couchdb:2.2.0
-  image: gcr.io/gpii2test-common-stg/couchdb
-  sha: sha256:7d60986a0b43015711121909c50b94dd6a1a6520f8f4bc72f52109b9ea8a17ad
-  tag: 2.2.0
   generated:
     image: gcr.io/gpii2test-common-stg/couchdb
     sha: sha256:7d60986a0b43015711121909c50b94dd6a1a6520f8f4bc72f52109b9ea8a17ad
     tag: 2.2.0
 dataloader:
   upstream_image: gpii/universal:latest
-  sha: sha256:eab9307f4b1549077c97646848e54b49fc6ceed42d98185882e2258b409f0770
-  image: gcr.io/gpii2test-common-stg/gpii/universal
-  tag: latest
   generated:
     image: gcr.io/gpii2test-common-stg/gpii/universal
     sha: sha256:eab9307f4b1549077c97646848e54b49fc6ceed42d98185882e2258b409f0770
     tag: latest
 flowmanager:
   upstream_image: gpii/universal:latest
-  sha: sha256:eab9307f4b1549077c97646848e54b49fc6ceed42d98185882e2258b409f0770
-  image: gcr.io/gpii2test-common-stg/gpii/universal
-  tag: latest
   generated:
     image: gcr.io/gpii2test-common-stg/gpii/universal
     sha: sha256:eab9307f4b1549077c97646848e54b49fc6ceed42d98185882e2258b409f0770
     tag: latest
 k8s_snapshots:
   upstream_image: elsdoerfer/k8s-snapshots:v2.0
-  image: gcr.io/gpii2test-common-stg/elsdoerfer/k8s-snapshots
-  sha: sha256:8723828551f49970389ed024e3073fd1c5425d1bd2eacb286925a67d381ec828
-  tag: v2.0
   generated:
     image: gcr.io/gpii2test-common-stg/elsdoerfer/k8s-snapshots
     sha: sha256:8723828551f49970389ed024e3073fd1c5425d1bd2eacb286925a67d381ec828
     tag: v2.0
 locust:
   upstream_image: gpii/locust:0.9.0-gpii.2
-  image: gcr.io/gpii2test-common-stg/gpii/locust
-  sha: sha256:e526da4f2243d7d0a330230f3c94be04ed558d0ed8946484faf7fce02ba95657
-  tag: 0.9.0-gpii.2
   generated:
     image: gcr.io/gpii2test-common-stg/gpii/locust
     sha: sha256:e526da4f2243d7d0a330230f3c94be04ed558d0ed8946484faf7fce02ba95657
     tag: 0.9.0-gpii.2
 nginx_ingress:
   upstream_image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.15.0
-  image: gcr.io/gpii2test-common-stg/quay.io/kubernetes-ingress-controller/nginx-ingress-controller
-  sha: sha256:0489cd1c6f0755f532d4b8204d5dabea038d4b2be8ec6efc2da584ff3f5aba61
-  tag: 0.15.0
   generated:
     image: gcr.io/gpii2test-common-stg/quay.io/kubernetes-ingress-controller/nginx-ingress-controller
-    sha: sha256:7b79e1bc6437e6376dadf558e012adde6395bb28dee4a38ce08c7e5c9f220178
+    sha: sha256:0489cd1c6f0755f532d4b8204d5dabea038d4b2be8ec6efc2da584ff3f5aba61
     tag: 0.15.0
 preferences:
   upstream_image: gpii/universal:latest
-  sha: sha256:eab9307f4b1549077c97646848e54b49fc6ceed42d98185882e2258b409f0770
-  image: gcr.io/gpii2test-common-stg/gpii/universal
-  tag: latest
   generated:
     image: gcr.io/gpii2test-common-stg/gpii/universal
     sha: sha256:eab9307f4b1549077c97646848e54b49fc6ceed42d98185882e2258b409f0770
     tag: latest
 service_account_assigner:
   upstream_image: gpii/service-account-assigner:0.0.2-gpii.0
-  image: gcr.io/gpii2test-common-stg/gpii/service-account-assigner
-  sha: sha256:c464aceecdb83363ee8d339cfdcc6877210b881be1e8fa020ffaddf25a3c83bd
-  tag: 0.0.2-gpii.0
   generated:
     image: gcr.io/gpii2test-common-stg/gpii/service-account-assigner
     sha: sha256:c464aceecdb83363ee8d339cfdcc6877210b881be1e8fa020ffaddf25a3c83bd
