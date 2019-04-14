@@ -113,6 +113,11 @@ task :display_cluster_state => [:set_vars] do
   sh "#{@exekube_cmd} rake display_cluster_state"
 end
 
+desc "Display gpii/universal image SHA, CI job links, and link to GitHub commit that triggered the image build"
+task :display_universal_image_info => [:set_vars] do
+  sh "#{@exekube_cmd} rake display_universal_image_info"
+end
+
 task :check_destroy_allowed do
   if ["prd"].include?(@env)
     if ENV["RAKE_REALLY_DESTROY_IN_PRD"].nil?

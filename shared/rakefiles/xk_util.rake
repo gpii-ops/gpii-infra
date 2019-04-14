@@ -127,6 +127,58 @@ task :display_cluster_state => [:configure, :configure_secrets, :set_secrets] do
   end
 end
 
+task :display_universal_image_info => [:configure] do
+  sh "#{@exekube_cmd} sh -c ' \
+    UNIVERSAL_CI_URL=\"https://ci.gpii.net\";
+    UNIVERSAL_REPO=\"https://github.com/gpii/universal\";
+    RELEASE_JOB_URL=\"$UNIVERSAL_CI_URL/job/docker-gpii-universal-master-release\";
+    UPSTREAM_JOB_URL=\"$UNIVERSAL_CI_URL/job/docker-gpii-universal-master\";
+    LOOKUP_BUILDS=\"20\";
+
+    PREFERENCES_IMAGE_SHA=$(kubectl -n gpii get deployment preferences -o json 2> /dev/null | jq -r \".spec.template.spec.containers[0].image\" | grep -o \"sha256:.*\");
+    if [ \"$?\" != \"0\" ]; then
+      echo
+      echo \"Unable to retrieve data from K8s cluster!\";
+      echo \"Try running \\\`rake display_cluster_state\\\` for debug info.\";
+      echo
+      exit 1;
+    fi
+
+    echo
+    echo \"Preferences image SHA:\";
+    echo \"$PREFERENCES_IMAGE_SHA\";
+    RELEASE_BUILD=$(curl -f \"$RELEASE_JOB_URL/lastBuild/api/json\" 2> /dev/null | jq -r \".id\");
+    RELEASE_BUILD_LIMIT=$((RELEASE_BUILD - LOOKUP_BUILDS));
+    while [ \"$RELEASE_BUILD\" != \"\" ] && [ \"$RELEASE_BUILD\" -gt \"$RELEASE_BUILD_LIMIT\" ]; do
+      SHA_FOUND=$(curl -f \"$RELEASE_JOB_URL/$RELEASE_BUILD/consoleText\" 2> /dev/null | grep -so \"$PREFERENCES_IMAGE_SHA\" || true);
+      if [ \"$SHA_FOUND\" == \"$PREFERENCES_IMAGE_SHA\" ]; then
+        UPSTREAM_JOB_NUMBER=$(curl -f \"$RELEASE_JOB_URL/$RELEASE_BUILD/api/json\" 2> /dev/null | jq -r \".actions[] | select (.causes[0].upstreamBuild != null) | .causes[0].upstreamBuild\");
+        GITHUB_LINK=\"$UNIVERSAL_REPO/commit/$(curl -f \"$UPSTREAM_JOB_URL/$UPSTREAM_JOB_NUMBER/api/json\" 2> /dev/null | jq -r \".actions[] | select (.lastBuiltRevision.SHA1 != null) | .lastBuiltRevision.SHA1\")\";
+        echo
+        echo \"Release job that built the image:\";
+        echo \"$RELEASE_JOB_URL/$RELEASE_BUILD\";
+        echo
+        echo \"Upstream job:\";
+        echo \"$UPSTREAM_JOB_URL/$UPSTREAM_JOB_NUMBER\";
+        RELEASE_BUILD=1;
+      fi
+      RELEASE_BUILD=$((RELEASE_BUILD - 1));
+    done
+
+    if [ \"$GITHUB_LINK\" == \"\" ]; then
+      echo
+      echo \"Unable to get CI data for target image SHA in last $LOOKUP_BUILDS builds!\";
+      echo
+      exit 1;
+    fi
+
+    echo
+    echo \"Commit to gpii/universal that triggered image build:\";
+    echo \"$GITHUB_LINK\";
+    echo
+  '", verbose: false
+end
+
 # This task attaches the owner role to the current user
 task :grant_owner_role => [@gcp_creds_file, :configure_extra_tf_vars] do
   sh "

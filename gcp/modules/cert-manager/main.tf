@@ -5,8 +5,15 @@ terraform {
 variable "nonce" {}
 variable "secrets_dir" {}
 variable "charts_dir" {}
+variable "project_id" {}
+variable "serviceaccount_key" {}
 variable "cert_manager_repository" {}
 variable "cert_manager_tag" {}
+
+provider "google" {
+  project     = "${var.project_id}"
+  credentials = "${var.serviceaccount_key}"
+}
 
 data "template_file" "cert_manager_values" {
   template = "${file("values.yaml")}"
