@@ -14,3 +14,5 @@ serviceAccountName: "${service_account_name}"
 destinationBucket: "${destination_bucket}"
 
 schedule: "${schedule}"
+
+logBucket: "${log_bucket}"

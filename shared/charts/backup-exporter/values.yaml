@@ -16,3 +16,5 @@ destinationBucket: ""
 replicaCount: 2
 
 schedule: "0 0 * * *"
+
+logBucket: ""

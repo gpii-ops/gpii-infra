@@ -22,6 +22,7 @@ data "template_file" "backup-exporter" {
     service_account_name = "${data.google_service_account.gke_cluster_pod_backup_exporter.email}"
     destination_bucket   = "${var.destination_bucket}"
     replica_count        = "${var.replica_count}"
+    log_bucket           = "gs://${google_storage_bucket.backup_daisy_bkt.name}/logs"
     schedule             = "${var.schedule}"
   }
 }
