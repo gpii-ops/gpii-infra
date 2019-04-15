@@ -341,6 +341,7 @@ data "google_iam_policy" "combined" {
       "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
     ]
   }
+
   audit_config {
     service = "allServices"
 
