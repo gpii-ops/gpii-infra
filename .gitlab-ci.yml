@@ -103,8 +103,8 @@ common-stg:
     - cd common/live/stg
     - rake clobber
     - rake configure_serviceaccount_ci_restore
-    - rake init_registry
     - rake apply_common_infra
+    - rake init_registry
     - rake apply_infra
   after_script:
     - cd common/live/stg
@@ -169,8 +169,8 @@ common-prd:
     - cd common/live/prd
     - rake clobber
     - rake configure_serviceaccount_ci_restore
-    - rake init_registry
     - rake apply_common_infra
+    - rake init_registry
     - rake apply_infra
   after_script:
     - cd common/live/prd
