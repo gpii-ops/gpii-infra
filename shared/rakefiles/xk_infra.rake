@@ -98,9 +98,11 @@ task :apply_common_infra => [@gcp_creds_file] do
 
   ["cloudresourcemanager.googleapis.com",
    "cloudbilling.googleapis.com",
+   "containerregistry.googleapis.com",
    "iam.googleapis.com",
    "dns.googleapis.com",
-   "compute.googleapis.com"].each do |service|
+   "compute.googleapis.com",
+   "securitycenter.googleapis.com"].each do |service|
      sh "#{@exekube_cmd} gcloud services enable #{service}" unless services_list.any? { |s| s['serviceName'] == service }
   end
 

@@ -39,6 +39,24 @@ This document describes manual steps needed for initial configuration when using
    * @mrtyler requested a quota bump to 100 Projects.
       * He only authorized his own email for now, to see what it did. But it's possible other Ops team members will need to go through this step.
 
+## Web security scans for an environment public endpoints
+
+To automatically scan publicly exposed endpointst for common vulnerabilities (XSS, Flash injection, HTTP in HTTPS, outdated/insecure libraries, etc):
+
+1. Go to [Cloud Web Security Scanner](https://console.cloud.google.com/security/web-scanner/scanConfigs), you will be asked to select the project if needed.
+1. Click "New Scan".
+1. Enter endpoint URL into the "Name" field (e.g. `flowmanager.prd.gcp.gpii.net` or `preferences.prd.gcp.gpii.net`).
+1. As a "Starting URL" you can enter something like (replace `prd.gcp.gpii.net` with your environment's domain):
+   * https://flowmanager.prd.gcp.gpii.net/health for Flowmanager endpoint.
+   * https://preferences.prd.gcp.gpii.net/preferences/carla for Preferences endpoint.
+1. You can add more URLs if needed using "Add a URL" link.
+1. You can also exclude certain URLs from scanning if needed.
+1. For long-lived environments:
+   * Set "Schedule" to "Weekly".
+   * Set "Next run" to any weekday of the following week.
+   * Set "Export to Cloud Security Command Center" option to enable scan results propagation to Cloud Security Command Center findings (which will be reviewed by Ops team as part of [weekly infra metrics review](https://pad.gpii.net/mypads/?/mypads/group/gpii-infrastructure-standups-lix4njm/pad/view/key-metrics-for-infrastructure-pc1g4nnd)).
+1. Click "Save".
+
 ## CI
 
 See [CI-CD One-time setup steps](./CI-CD.md#one-time-setup-steps).

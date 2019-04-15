@@ -5,6 +5,13 @@ terraform {
 variable "nonce" {}
 variable "secrets_dir" {}
 variable "charts_dir" {}
+variable "project_id" {}
+variable "serviceaccount_key" {}
+
+provider "google" {
+  project     = "${var.project_id}"
+  credentials = "${var.serviceaccount_key}"
+}
 
 module "cert-manager" {
   source           = "/exekube-modules/helm-release"
