@@ -12,7 +12,7 @@ data:
   backup.sh: |
     set -e
     gcloud config set account {{ .Values.serviceAccountName }}
-    SNAPSHOTS=$(gcloud compute snapshots list --sort-by=~creationTimestamp,STATUS --limit={{ .Values.replicaCount }} --format="value[separator=';'](name,status)" | cut -f1 -d\;)
+    SNAPSHOTS=$(for i in `seq 0 $(({{ .Values.replicaCount }}-1))`; do gcloud compute snapshots list --sort-by=~creationTimestamp,STATUS --limit=1 --format="value[separator=';'](name,status)" --filter="name~'pv-database-storage-couchdb-couchdb-$i-*'" | cut -f1 -d\; ; done)
     DESTINATION_BUCKET={{ .Values.destinationBucket }}
     TIMESTAMP=$(date +%s)
     for snapshot in ${SNAPSHOTS}; do
