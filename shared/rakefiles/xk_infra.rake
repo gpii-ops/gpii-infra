@@ -96,6 +96,7 @@ task :apply_common_infra => [@gcp_creds_file] do
 
   ["cloudresourcemanager.googleapis.com",
    "cloudbilling.googleapis.com",
+   "containeranalysis.googleapis.com",
    "containerregistry.googleapis.com",
    "iam.googleapis.com",
    "dns.googleapis.com",
