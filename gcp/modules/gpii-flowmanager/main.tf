@@ -2,6 +2,10 @@ terraform {
   backend "gcs" {}
 }
 
+variable "env" {}
+variable "serviceaccount_key" {}
+variable "project_id" {}
+
 variable "secrets_dir" {}
 variable "charts_dir" {}
 variable "domain_name" {}
