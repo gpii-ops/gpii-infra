@@ -630,16 +630,13 @@ Note that we assume that you are going to perform these steps into an already up
 The process:
 
 1. Go into the corresponding folder with the cluster name where you want to perform the process, "stg", "prd" or "dev". In this case We are going to perform the process in "dev": `cd gpii-infra/gcp/live/dev`.
-1. Set up the env you are going to deal with: rake configure_kubectl
-1. Optional, re-run the current dataloader to be sure that it's using the original dbData, run `helm delete --purge dataloader && rake deploy`. Note that if you are going to perform this step in either "prd" or "stg" environments, take into account that the same CouchDB credentials usded in "stg"/"prd" must be set in the _secrets.yml_ to avoid authentication failures. For that, you will need to ask an Op for such credentials which are set in the CI configuration.
-1. Open a port forwarding between the cluster's couchdb host:port and your local machine: `kubectl --namespace gpii port-forward couchdb-0 5984`
-
-The port forwarding will be there until you hit _Ctrl-C_, so leave it running until we are done loading the preferences sets.
+1. Set up the env you are going to deal with: `rake sh`
 __Note__ that if you are going to perform this in production (prd) you should do it from the _prd_ folder and remember to use the _RAKE_REALLY_RUN_IN_PRD=true_ variable when issuing the commands against the production cluster.
+1. Open a port forwarding between the cluster's couchdb host:port and your local machine: `kubectl --namespace gpii port-forward couchdb-couchdb-0 5984 &`
+1. Get the current credentials for connecting to the couchdb from a flowmanager pod: `eval $(kubectl -n gpii exec flowmanager-[POD_ID] env | grep ^GPII_DATASOURCE_HOSTNAME | cut -f1 -d@)`
 
 Let's load the data, go back to the folder _testData/myDbData_ and run:
-1. `curl -d @gpiiKeys.json -H "Content-type: application/json" -X POST http://localhost:5984/gpii/_bulk_docs`
-1. `curl -d @.json -H "Content-type: application/json" -X POST http://localhost:5984/gpii/_bulk_docs`
+1. `curl -d @gpiiKeys.json -H "Content-type: application/json" -X POST $GPII_DATASOURCE_HOSTNAME@localhost:5984/gpii/_bulk_docs`
 
 Unless you get errors, that's all. Now you can close the port forwarding as mentioned earlier.
 
