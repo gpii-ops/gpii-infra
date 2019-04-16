@@ -7,6 +7,8 @@ variable "serviceaccount_key" {}
 variable "project_id" {}
 variable "secrets_dir" {}
 variable "charts_dir" {}
+variable "nginx_ingress_repository" {}
+variable "nginx_ingress_tag" {}
 
 data "terraform_remote_state" "network" {
   backend = "gcs"
@@ -22,15 +24,27 @@ data "terraform_remote_state" "network" {
   }
 }
 
+data "template_file" "nginx_ingress_values" {
+  template = "${file("values.yaml")}"
+
+  vars {
+    nginx_ingress_repository = "${var.nginx_ingress_repository}"
+    nginx_ingress_tag        = "${var.nginx_ingress_tag}"
+    load_balancer_ip         = "${data.terraform_remote_state.network.static_ip_address}"
+  }
+}
+
 module "nginx-ingress" {
   source           = "/exekube-modules/helm-release"
   tiller_namespace = "kube-system"
   client_auth      = "${var.secrets_dir}/kube-system/helm-tls"
 
-  release_name      = "nginx-ingress"
-  release_namespace = "gpii"
+  release_name            = "nginx-ingress"
+  release_namespace       = "gpii"
+  release_values          = ""
+  release_values_rendered = "${data.template_file.nginx_ingress_values.rendered}"
 
   chart_name = "${var.charts_dir}/nginx-ingress"
 
-  load_balancer_ip = "${data.terraform_remote_state.network.static_ip_address}"
+  load_balancer_ip = "${data.template_file.nginx_ingress_values.rendered.load_balancer_ip}"
 }

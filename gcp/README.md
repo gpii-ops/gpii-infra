@@ -167,6 +167,8 @@ See [CI-CD.md#running-in-non-dev-environments](../CI-CD.md#running-manually-in-n
 
 ### I want to test my local changes to GPII components in my cluster
 
+*NOTE:* This workflow is outdated until https://issues.gpii.net/browse/GPII-3861 is completed.
+
 1. Build a local Docker image containing your changes.
 1. Push your image to Docker Hub under your user account.
 1. Clone https://github.com/gpii-ops/gpii-version-updater/.
