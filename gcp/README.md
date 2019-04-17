@@ -633,10 +633,9 @@ The process:
 1. Set up the env you are going to deal with: `rake sh`
 __Note__ that if you are going to perform this in production (prd) you should do it from the _prd_ folder and remember to use the _RAKE_REALLY_RUN_IN_PRD=true_ variable when issuing the commands against the production cluster.
 1. Open a port forwarding between the cluster's couchdb host:port and your local machine: `kubectl --namespace gpii port-forward couchdb-couchdb-0 5984 &`
-1. Get the current credentials for connecting to the couchdb from a flowmanager pod: `eval $(kubectl -n gpii exec flowmanager-[POD_ID] env | grep ^GPII_DATASOURCE_HOSTNAME | cut -f1 -d@)`
 
 Let's load the data, go back to the folder _testData/myDbData_ and run:
-1. `curl -d @gpiiKeys.json -H "Content-type: application/json" -X POST $GPII_DATASOURCE_HOSTNAME@localhost:5984/gpii/_bulk_docs`
+1. `curl -d @gpiiKeys.json -H "Content-type: application/json" -X POST http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@localhost:5984/gpii/_bulk_docs`
 
 Unless you get errors, that's all. Now you can close the port forwarding as mentioned earlier.
 
