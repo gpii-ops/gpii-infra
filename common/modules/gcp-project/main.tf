@@ -53,6 +53,7 @@ variable "service_apis" {
   default = [
     "bigquery-json.googleapis.com",
     "cloudbilling.googleapis.com",
+    "cloudbuild.googleapis.com",
     "cloudkms.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "cloudtrace.googleapis.com",
@@ -70,7 +71,9 @@ variable "service_apis" {
     "replicapool.googleapis.com",
     "replicapoolupdater.googleapis.com",
     "resourceviews.googleapis.com",
+    "servicemanagement.googleapis.com",
     "serviceusage.googleapis.com",
+    "sourcerepo.googleapis.com",
     "stackdriver.googleapis.com",
     "storage-api.googleapis.com",
     "websecurityscanner.googleapis.com",
@@ -99,6 +102,7 @@ data "google_iam_policy" "combined" {
 
     members = [
       "${local.service_accounts}",
+      "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
     ]
   }
 
@@ -140,6 +144,14 @@ data "google_iam_policy" "combined" {
 
     members = [
       "${local.service_accounts}",
+    ]
+  }
+
+  binding {
+    role = "roles/iam.serviceAccountActor"
+
+    members = [
+      "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
     ]
   }
 
@@ -192,6 +204,23 @@ data "google_iam_policy" "combined" {
   }
 
   binding {
+    role = "roles/cloudbuild.builds.builder"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+      "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
+    ]
+  }
+
+  binding {
+    role = "roles/cloudbuild.builds.editor"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+    ]
+  }
+
+  binding {
     role = "roles/compute.serviceAgent"
 
     members = [
@@ -230,6 +259,7 @@ data "google_iam_policy" "combined" {
     members = [
       "serviceAccount:${google_service_account.gke_cluster_node.email}",
       "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
     ]
   }
 
@@ -239,6 +269,7 @@ data "google_iam_policy" "combined" {
     members = [
       "serviceAccount:${google_service_account.gke_cluster_node.email}",
       "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
     ]
   }
 
@@ -248,6 +279,7 @@ data "google_iam_policy" "combined" {
     members = [
       "serviceAccount:${google_service_account.gke_cluster_node.email}",
       "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
     ]
   }
 
@@ -257,6 +289,15 @@ data "google_iam_policy" "combined" {
     members = [
       "serviceAccount:${google_service_account.gke_cluster_node.email}",
       "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/sourcerepo.serviceAgent"
+
+    members = [
+      "serviceAccount:service-${google_project.project.number}@sourcerepo-service-accounts.iam.gserviceaccount.com",
     ]
   }
 
@@ -265,6 +306,39 @@ data "google_iam_policy" "combined" {
 
     members = [
       "serviceAccount:${google_service_account.gke_cluster_pod_k8s_snapshots.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/compute.viewer"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/iam.roleViewer"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/serviceusage.serviceUsageConsumer"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/storage.objectViewer"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
     ]
   }
 
