@@ -73,6 +73,7 @@ Users who already had an RtF email address/Google account usually have performed
 
 1. `rake display_cluster_info` shows some helpful links.
 1. `rake display_cluster_state` shows debugging info about the current state of the cluster. This output can be helpful when asking for help.
+1. `rake display_universal_image_info` shows currently deployed [gpii/universal](https://github.com/GPII/universal) image SHA and link to GitHub commit that triggered the build.
 1. `rake sh` opens an interactive shell inside a container on the local host that is configured to communicate with your cluster (e.g. via `kubectl` commands).
    * `rake sh` has some issues with interactive commands (e.g. `less` and `vi`) -- see https://issues.gpii.net/browse/GPII-3407.
 1. `rake plain_sh` is like `rake sh`, but not all configuration is performed. This can be helpful for debugging (e.g. when `rake sh` does not work) and with interactive commands.
@@ -97,7 +98,7 @@ Users who already had an RtF email address/Google account usually have performed
 1. By default your K8s cluster and related resources will be deployed into `us-central1`.
    * You can use a different GCP region -- see [I want to spin up my dev environment in a different region](README.md#i-want-to-spin-up-my-dev-environment-in-a-different-region).
 1. The [Google Cloud Console](https://console.cloud.google.com) includes [Google Cloud Shell](https://cloud.google.com/shell/docs/) which is an interactive terminal embedded in the GCP dashboard. To use it, click on the icon at the top right of the Console, next to the magnifier icon.
-   * Once the shell opens in your browser, execute the following to manage the Kubernetes cluster using the embedded `kubectl` command: 
+   * Once the shell opens in your browser, execute the following to manage the Kubernetes cluster using the embedded `kubectl` command:
    1. `gcloud container clusters get-credentials k8s-cluster --zone YOUR_INFRA_REGION`
    1. `kubectl -n gpii get pods`
 
@@ -165,6 +166,8 @@ Deploying to `prd` requires a [manual action](https://docs.gitlab.com/ce/ci/yaml
 See [CI-CD.md#running-in-non-dev-environments](../CI-CD.md#running-manually-in-non-dev-environments-stg-prd)
 
 ### I want to test my local changes to GPII components in my cluster
+
+*NOTE:* This workflow is outdated until https://issues.gpii.net/browse/GPII-3861 is completed.
 
 1. Build a local Docker image containing your changes.
 1. Push your image to Docker Hub under your user account.
@@ -627,16 +630,12 @@ Note that we assume that you are going to perform these steps into an already up
 The process:
 
 1. Go into the corresponding folder with the cluster name where you want to perform the process, "stg", "prd" or "dev". In this case We are going to perform the process in "dev": `cd gpii-infra/gcp/live/dev`.
-1. Set up the env you are going to deal with: rake configure_kubectl
-1. Optional, re-run the current dataloader to be sure that it's using the original dbData, run `helm delete --purge dataloader && rake deploy`. Note that if you are going to perform this step in either "prd" or "stg" environments, take into account that the same CouchDB credentials usded in "stg"/"prd" must be set in the _secrets.yml_ to avoid authentication failures. For that, you will need to ask an Op for such credentials which are set in the CI configuration.
-1. Open a port forwarding between the cluster's couchdb host:port and your local machine: `kubectl --namespace gpii port-forward couchdb-0 5984`
-
-The port forwarding will be there until you hit _Ctrl-C_, so leave it running until we are done loading the preferences sets.
+1. Set up the env you are going to deal with: `rake sh`
 __Note__ that if you are going to perform this in production (prd) you should do it from the _prd_ folder and remember to use the _RAKE_REALLY_RUN_IN_PRD=true_ variable when issuing the commands against the production cluster.
+1. Open a port forwarding between the cluster's couchdb host:port and your local machine: `kubectl --namespace gpii port-forward couchdb-couchdb-0 5984 &`
 
 Let's load the data, go back to the folder _testData/myDbData_ and run:
-1. `curl -d @gpiiKeys.json -H "Content-type: application/json" -X POST http://localhost:5984/gpii/_bulk_docs`
-1. `curl -d @.json -H "Content-type: application/json" -X POST http://localhost:5984/gpii/_bulk_docs`
+1. `curl -d @gpiiKeys.json -H "Content-type: application/json" -X POST http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@localhost:5984/gpii/_bulk_docs`
 
 Unless you get errors, that's all. Now you can close the port forwarding as mentioned earlier.
 

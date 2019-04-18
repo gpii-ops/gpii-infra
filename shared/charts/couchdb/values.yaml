@@ -55,6 +55,11 @@ helperImage:
   tag: 1.1.0
   pullPolicy: IfNotPresent
 
+## Init container for placing config files
+initImage:
+  repository: busybox
+  tag: latest
+
 ## CouchDB is happy to spin up cluster nodes in parallel, but if you encounter
 ## problems you can try setting podManagementPolicy to the StatefulSet default
 ## `OrderedReady`

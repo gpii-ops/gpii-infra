@@ -207,7 +207,7 @@ data "google_iam_policy" "combined" {
     role = "roles/cloudbuild.builds.builder"
 
     members = [
-      "${local.backup_service_accounts}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
       "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
     ]
   }
@@ -216,15 +216,7 @@ data "google_iam_policy" "combined" {
     role = "roles/cloudbuild.builds.editor"
 
     members = [
-      "${local.backup_service_accounts}",
-    ]
-  }
-
-  binding {
-    role = "roles/viewer"
-
-    members = [
-      "${local.backup_service_accounts}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
     ]
   }
 
@@ -267,6 +259,7 @@ data "google_iam_policy" "combined" {
     members = [
       "serviceAccount:${google_service_account.gke_cluster_node.email}",
       "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
     ]
   }
 
@@ -276,6 +269,7 @@ data "google_iam_policy" "combined" {
     members = [
       "serviceAccount:${google_service_account.gke_cluster_node.email}",
       "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
     ]
   }
 
@@ -285,6 +279,7 @@ data "google_iam_policy" "combined" {
     members = [
       "serviceAccount:${google_service_account.gke_cluster_node.email}",
       "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
     ]
   }
 
@@ -294,6 +289,7 @@ data "google_iam_policy" "combined" {
     members = [
       "serviceAccount:${google_service_account.gke_cluster_node.email}",
       "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
     ]
   }
 
@@ -310,7 +306,39 @@ data "google_iam_policy" "combined" {
 
     members = [
       "serviceAccount:${google_service_account.gke_cluster_pod_k8s_snapshots.email}",
-      "${local.backup_service_accounts}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/compute.viewer"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/iam.roleViewer"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/serviceusage.serviceUsageConsumer"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/storage.objectViewer"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
     ]
   }
 
@@ -352,8 +380,6 @@ locals {
   # Service accounts will be empty list in case there's no google_service_account.project created
   # (this is instead of current `local.service_account` that is either actual account or empty)
   service_accounts = "${formatlist("serviceAccount:%s", google_service_account.project.*.email)}"
-
-  backup_service_accounts = "${formatlist("serviceAccount:%s", google_service_account.backup_exporter.*.email)}"
 
   # Project owners will be empty list if var.project_owner is empty string ""
   project_owners = "${compact(list(var.project_owner))}"

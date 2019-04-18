@@ -2,9 +2,9 @@ terraform {
   backend "gcs" {}
 }
 
-variable "project_id" {}
 variable "env" {}
-variable "auth_user_email" {}
+variable "serviceaccount_key" {}
+variable "project_id" {}
 
 variable "secrets_dir" {}
 variable "charts_dir" {}
@@ -12,6 +12,9 @@ variable "domain_name" {}
 
 variable "flowmanager_repository" {}
 variable "flowmanager_checksum" {}
+
+# Terragrunt variables
+variable "cert_issuer_name" {}
 
 variable "replica_count" {}
 variable "requests_cpu" {}
@@ -24,13 +27,13 @@ variable "secret_couchdb_admin_username" {}
 
 variable "secret_couchdb_admin_password" {}
 
-locals {
-  user_email = "${var.auth_user_email != "" ? var.auth_user_email : "dev-null@raisingthefloor.org"}"
-  acme_email = "${var.env == "prd" || var.env == "stg" ? "ops@raisingthefloor.org" : local.user_email}"
+provider "google" {
+  project     = "${var.project_id}"
+  credentials = "${var.serviceaccount_key}"
 }
 
 data "template_file" "flowmanager_values" {
-  template = "${file("${path.module}/templates/values.yaml.tpl")}"
+  template = "${file("values.yaml")}"
 
   vars {
     domain_name            = "${var.domain_name}"
@@ -38,14 +41,12 @@ data "template_file" "flowmanager_values" {
     flowmanager_checksum   = "${var.flowmanager_checksum}"
     couchdb_admin_username = "${var.secret_couchdb_admin_username}"
     couchdb_admin_password = "${var.secret_couchdb_admin_password}"
+    cert_issuer_name       = "${var.cert_issuer_name}"
     replica_count          = "${var.replica_count}"
     requests_cpu           = "${var.requests_cpu}"
     requests_memory        = "${var.requests_memory}"
     limits_cpu             = "${var.limits_cpu}"
     limits_memory          = "${var.limits_memory}"
-    project_id             = "${var.project_id}"
-    acme_server            = "${var.env == "prd" || var.env == "stg" ? "https://acme-v02.api.letsencrypt.org/directory" : "https://acme-staging-v02.api.letsencrypt.org/directory"}"
-    acme_email             = "${local.acme_email}"
   }
 }
 

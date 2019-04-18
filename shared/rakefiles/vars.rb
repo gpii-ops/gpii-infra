@@ -67,10 +67,14 @@ class Vars
 
   def self.set_versions()
     versions = YAML.load(File.read(Vars::VERSIONS_FILE))
-    ['flowmanager', 'preferences', 'dataloader'].each do |component|
-      next unless versions["gpii-#{component}"]
-      ENV["TF_VAR_#{component}_repository"] = versions["gpii-#{component}"].split('@')[0]
-      ENV["TF_VAR_#{component}_checksum"] = versions["gpii-#{component}"].split('@')[1]
+    versions.each do |component, values|
+      next unless (values["generated"] and
+                   values["generated"]["image"] and
+                   values["generated"]["sha"] and
+                   values["generated"]["tag"])
+      ENV["TF_VAR_#{component}_repository"] = values["generated"]["image"]
+      ENV["TF_VAR_#{component}_checksum"] = values["generated"]["sha"]
+      ENV["TF_VAR_#{component}_tag"] = values["generated"]["tag"]
     end
   end
 end

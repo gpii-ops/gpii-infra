@@ -1,0 +1,8 @@
+image:
+  repository: ${cert_manager_repository}
+  tag: ${cert_manager_tag}
+
+createCustomResource: true
+useCrdInstallHook: false
+webhook:
+  enabled: false
