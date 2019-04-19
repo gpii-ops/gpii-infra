@@ -337,14 +337,14 @@ task :destroy_module, [:module] => [:set_vars, :check_destroy_allowed, :fetch_he
   sh "#{@exekube_cmd} rake xk['destroy live/#{@env}/#{args[:module]}',skip_secret_mgmt]"
 end
 
-desc "[ADMIN ONLY] Grant owner role to the current user"
-task :grant_owner_role => [:set_vars] do
-  sh "#{@exekube_cmd} rake grant_owner_role"
+desc "[ADMIN ONLY] Grant super powers to the current user"
+task :grant_super_powers => [:set_vars] do
+  sh "#{@exekube_cmd} rake grant_super_powers"
 end
 
-desc "[ADMIN ONLY] Revoke owner role to the current user"
-task :revoke_owner_role => [:set_vars] do
-  sh "#{@exekube_cmd} rake revoke_owner_role"
+desc "[ADMIN ONLY] Revoke super powers from the current user"
+task :revoke_super_powers => [:set_vars] do
+  sh "#{@exekube_cmd} rake revoke_super_powers"
 end
 
 

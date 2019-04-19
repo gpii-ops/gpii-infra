@@ -1,3 +1,8 @@
+organization_super_user_roles = [
+  "roles/iam.serviceAccountAdmin",
+  "roles/securitycenter.admin"
+]
+
 # This task rotates target args[:secret].
 #
 # New value for the secret can be set via env var TF_VAR_secret_name,
@@ -179,18 +184,34 @@ task :display_universal_image_info => [:configure] do
   '", verbose: false
 end
 
-# This task attaches the owner role to the current user
-task :grant_owner_role => [@gcp_creds_file, :configure_extra_tf_vars] do
+# This task grants the owner role in the current project
+# and organization roles declared in organization_super_user_roles to the current user
+task :grant_super_powers => [@gcp_creds_file, :configure_extra_tf_vars] do
   sh "
-    gcloud projects add-iam-policy-binding \"$TF_VAR_project_id\" --member user:\"$TF_VAR_auth_user_email\" --role roles/owner
+    gcloud projects add-iam-policy-binding \"$TF_VAR_project_id\" \
+      --member user:\"$TF_VAR_auth_user_email\" \
+      --role roles/owner
   "
+  organization_super_user_roles.each do |role|
+    sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
+      --member user:\"$TF_VAR_auth_user_email\" \
+      --role #{role}"
+  end
 end
 
-# This task removes the owner role to the current user
-task :revoke_owner_role => [@gcp_creds_file, :configure_extra_tf_vars] do
+# This task revokes the owner role in the current project
+# and organization roles declared in organization_super_user_roles from the current user
+task :revoke_super_powers => [@gcp_creds_file, :configure_extra_tf_vars] do
   sh "
-    gcloud projects remove-iam-policy-binding \"$TF_VAR_project_id\" --member user:\"$TF_VAR_auth_user_email\" --role roles/owner
+    gcloud projects remove-iam-policy-binding \"$TF_VAR_project_id\" \
+      --member user:\"$TF_VAR_auth_user_email\" \
+      --role roles/owner
   "
+  organization_super_user_roles.each do |role|
+    sh "#{@exekube_cmd} gcloud organizations remove-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
+      --member user:\"$TF_VAR_auth_user_email\" \
+      --role #{role}"
+  end
 end
 
 
