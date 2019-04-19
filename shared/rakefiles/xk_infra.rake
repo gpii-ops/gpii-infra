@@ -112,11 +112,11 @@ task :apply_common_infra => [@gcp_creds_file] do
 end
 
 task :set_organization_permissions => [@gcp_creds_file] do
+  # Enforce org-level roles for cloud-admin and common SA
   members = {
     "group:cloud-admin@raisingthefloor.org" => cloud_admin_organization_roles,
     "serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com" => common_sa_organization_roles
   }
-
   members.each do |member, expected_roles|
     existing_roles = %x{
       #{@exekube_cmd} gcloud organizations get-iam-policy #{ENV["ORGANIZATION_ID"]} \
@@ -136,6 +136,24 @@ task :set_organization_permissions => [@gcp_creds_file] do
     existing_roles.each do |role|
       sh "#{@exekube_cmd} gcloud organizations remove-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
         --member #{member} \
+        --role #{role}"
+    end
+  end
+  # Remove org-level roles from individual user accounts if found
+  user_roles = %x{
+    #{@exekube_cmd} gcloud organizations get-iam-policy #{ENV["ORGANIZATION_ID"]} \
+    --filter bindings.members:user:* \
+    --flatten="bindings[].members" \
+    --format json | jq -r ".[].bindings.members"
+  }.split.uniq.each do |user|
+    existing_user_roles = %x{
+      #{@exekube_cmd} gcloud organizations get-iam-policy #{ENV["ORGANIZATION_ID"]} \
+      --filter bindings.members:#{user} \
+      --flatten="bindings[].members" \
+      --format json | jq -r ".[].bindings.role"
+    }.split.each do |role|
+      sh "#{@exekube_cmd} gcloud organizations remove-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
+        --member #{user} \
         --role #{role}"
     end
   end
