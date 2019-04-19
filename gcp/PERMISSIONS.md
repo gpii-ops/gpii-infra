@@ -41,7 +41,7 @@ Accounts and permissions
 
   *Note that the `projectowner@gpii-common-prd.iam.gserviceaccount.com` is the owner of the gpii-common-prd project*
 
-### [PROJECT_NUMBER]-compute@developer.gserviceaccount.com   
+### [PROJECT_NUMBER]-compute@developer.gserviceaccount.com
 
   Compute Engine default service account
 
@@ -54,34 +54,38 @@ Accounts and permissions
   1. Editor
 
 ### service-[PROJECT_NUMBER]@compute-system.iam.gserviceaccount.com (Google-managed service account)
-  
+
   Google-managed service account used to access the APIs of Google Cloud Platform services.
 
   1. Compute Engine Service Agent
-  
+
 ### service-[PROJECT_NUMBER]@container-engine-robot.iam.gserviceaccount.com (Google-managed service account)
-  
-  Google-managed service account used to access the APIs of Google Cloud Platform services. 
+
+  Google-managed service account used to access the APIs of Google Cloud Platform services.
 
   1. Kubernetes Engine Service Agent
 
 ### service-[PROJECT_NUMBER]@containerregistry.iam.gserviceaccount.com (Google-managed service account)
 
-  Google-managed service account used to access the APIs of Google Cloud Platform services. 
+  Google-managed service account used to access the APIs of Google Cloud Platform services.
 
   1. Editor
 
 Privilege escalation
 ====================
 
-If you are an operator and you need to assign new permissions to your user in order to make changes in a cluster you will need to attach some IAM roles to your user.
+If you are an operator and you need to assign new permissions to your user in order to make changes in a cluster or if you want to manage Security Command Center settings or security sources, you will need to attach the following IAM roles to your user:
 
-Rake commands:
+* `roles/owner` in the current project.
+* `roles/iam.serviceAccountAdmin` in the current organization.
+* `roles/securitycenter.admin` in the current organization.
 
-  * `rake grant_owner_role` Attaches the owner role to the current user account
-  * `rake revoke_owner_role` Removes the owner role from the current user account
+This can be done with the following rake commands:
 
-  In the case of a developer's dev project:
+* `rake grant_super_powers` attaches the owner role in the current project and organization-level super user roles to the current user account.
+* `rake revoke_super_powers` removes the owner role in the current project and organization-level super user roles from the current user account.
 
-  * `USER=<developer_user> rake grant_owner_role`
-  * `USER=<developer_user> rake revoke_owner_role`
+Or if you working with other developer's dev project:
+
+* `USER=<developer_user> rake grant_super_powers`
+* `USER=<developer_user> rake revoke_super_powers`
