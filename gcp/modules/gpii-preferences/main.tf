@@ -5,6 +5,7 @@ terraform {
 variable "env" {}
 variable "serviceaccount_key" {}
 variable "project_id" {}
+variable "auth_user_email" {}
 
 variable "secrets_dir" {}
 variable "charts_dir" {}
@@ -32,8 +33,13 @@ provider "google" {
   credentials = "${var.serviceaccount_key}"
 }
 
+locals {
+  user_email = "${var.auth_user_email != "" ? var.auth_user_email : "dev-null@raisingthefloor.org"}"
+  acme_email = "${var.env == "prd" || var.env == "stg" ? "ops@raisingthefloor.org" : local.user_email}"
+}
+
 data "template_file" "preferences_values" {
-  template = "${file("values.yaml")}"
+  template = "${file("${path.module}/templates/values.yaml.tpl")}"
 
   vars {
     domain_name            = "${var.domain_name}"
@@ -41,12 +47,14 @@ data "template_file" "preferences_values" {
     preferences_checksum   = "${var.preferences_checksum}"
     couchdb_admin_username = "${var.secret_couchdb_admin_username}"
     couchdb_admin_password = "${var.secret_couchdb_admin_password}"
-    cert_issuer_name       = "${var.cert_issuer_name}"
     replica_count          = "${var.replica_count}"
     requests_cpu           = "${var.requests_cpu}"
     requests_memory        = "${var.requests_memory}"
     limits_cpu             = "${var.limits_cpu}"
     limits_memory          = "${var.limits_memory}"
+    project_id             = "${var.project_id}"
+    acme_server            = "${var.env == "prd" || var.env == "stg" ? "https://acme-v02.api.letsencrypt.org/directory" : "https://acme-staging-v02.api.letsencrypt.org/directory"}"
+    acme_email             = "${local.acme_email}"
   }
 }
 
