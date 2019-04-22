@@ -69,8 +69,8 @@ locust:
   upstream_image: gpii/locust:0.9.0-gpii.4
   generated:
     image: gcr.io/gpii-common-prd/gpii/locust
-    sha: sha256:e526da4f2243d7d0a330230f3c94be04ed558d0ed8946484faf7fce02ba95657
-    tag: 0.9.0-gpii.2
+    sha: sha256:6fc15400ca231ac2636879d45fa3aa89a86bf1a9cf50c5285d2bb4faf248e482
+    tag: 0.9.0-gpii.4
 nginx_ingress:
   upstream_image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.15.0
   generated:
