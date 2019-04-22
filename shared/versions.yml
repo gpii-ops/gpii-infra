@@ -66,7 +66,7 @@ k8s_snapshots:
     sha: sha256:c787dc6fa1812c97ac96f46b4ff6dc1485e06c458839d4aa129aaf62201309e9
     tag: v2.0
 locust:
-  upstream_image: gpii/locust:0.9.0-gpii.2
+  upstream_image: gpii/locust:0.9.0-gpii.4
   generated:
     image: gcr.io/gpii-common-prd/gpii/locust
     sha: sha256:e526da4f2243d7d0a330230f3c94be04ed558d0ed8946484faf7fce02ba95657
