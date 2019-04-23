@@ -338,28 +338,28 @@ task :destroy_module, [:module] => [:set_vars, :check_destroy_allowed, :fetch_he
 end
 
 desc "[ADMIN ONLY] Grant owner role in the current project to the current user"
-task :grant_owner_role => [:set_vars] do
-  sh "#{@exekube_cmd} rake grant_owner_role"
+task :grant_project_admin => [:set_vars] do
+  sh "#{@exekube_cmd} rake grant_project_admin"
 end
 
 desc "[ADMIN ONLY] Revoke owner role in the current project from the current user"
-task :revoke_owner_role, [:force] => [:set_vars] do |taskname, args|
+task :revoke_project_admin, [:force] => [:set_vars] do |taskname, args|
   if !args[:force] and ENV['TF_VAR_project_id'].match("dev-#{ENV['USER']}")
-    puts "  ERROR: You can not revoke owner role from yourself in your own dev project!"
-    puts "         Run `rake revoke_owner_role[true]` to do this anyway."
+    puts "  ERROR: You can not revoke project admin role from yourself in your own dev project!"
+    puts "         Run `rake revoke_project_admin[true]` to do this anyway."
     exit 1
   end
-  sh "#{@exekube_cmd} rake revoke_owner_role"
+  sh "#{@exekube_cmd} rake revoke_project_admin"
 end
 
-desc "[ADMIN ONLY] Grant org-level super powers to the current user"
-task :grant_super_powers => [:set_vars] do
-  sh "#{@exekube_cmd} rake grant_super_powers"
+desc "[ADMIN ONLY] Grant org-level admin roles to the current user"
+task :grant_org_admin => [:set_vars] do
+  sh "#{@exekube_cmd} rake grant_org_admin"
 end
 
-desc "[ADMIN ONLY] Revoke org-level super powers from the current user"
-task :revoke_super_powers => [:set_vars] do
-  sh "#{@exekube_cmd} rake revoke_super_powers"
+desc "[ADMIN ONLY] Revoke org-level admin roles from the current user"
+task :revoke_org_admin => [:set_vars] do
+  sh "#{@exekube_cmd} rake revoke_org_admin"
 end
 
 # vim: et ts=2 sw=2:

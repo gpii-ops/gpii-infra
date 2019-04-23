@@ -1,6 +1,6 @@
-organization_super_user_roles = [
+org_admin_roles = [
   "roles/iam.serviceAccountAdmin",
-  "roles/securitycenter.admin"
+  "roles/securitycenter.admin",
 ]
 
 # This task rotates target args[:secret].
@@ -185,7 +185,7 @@ task :display_universal_image_info => [:configure] do
 end
 
 # This task grants the owner role in the current project to the current user
-task :grant_owner_role => [@gcp_creds_file, :configure_extra_tf_vars] do
+task :grant_project_admin => [@gcp_creds_file, :configure_extra_tf_vars] do
   sh "
     gcloud projects add-iam-policy-binding \"$TF_VAR_project_id\" \
       --member user:\"$TF_VAR_auth_user_email\" \
@@ -194,7 +194,7 @@ task :grant_owner_role => [@gcp_creds_file, :configure_extra_tf_vars] do
 end
 
 # This task revokes the owner role in the current project from the current user
-task :revoke_owner_role => [@gcp_creds_file, :configure_extra_tf_vars] do
+task :revoke_project_admin => [@gcp_creds_file, :configure_extra_tf_vars] do
   sh "
     gcloud projects remove-iam-policy-binding \"$TF_VAR_project_id\" \
       --member user:\"$TF_VAR_auth_user_email\" \
@@ -202,18 +202,18 @@ task :revoke_owner_role => [@gcp_creds_file, :configure_extra_tf_vars] do
   "
 end
 
-# This task grants organization roles declared in organization_super_user_roles to the current user
-task :grant_super_powers => [@gcp_creds_file, :configure_extra_tf_vars] do
-  organization_super_user_roles.each do |role|
+# This task grants organization roles declared in org_admin_roles to the current user
+task :grant_org_admin => [@gcp_creds_file, :configure_extra_tf_vars] do
+  org_admin_roles.each do |role|
     sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
       --member user:\"$TF_VAR_auth_user_email\" \
       --role #{role}"
   end
 end
 
-# This task revokes organization roles declared in organization_super_user_roles from the current user
-task :revoke_super_powers => [@gcp_creds_file, :configure_extra_tf_vars] do
-  organization_super_user_roles.each do |role|
+# This task revokes organization roles declared in org_admin_roles from the current user
+task :revoke_org_admin => [@gcp_creds_file, :configure_extra_tf_vars] do
+  org_admin_roles.each do |role|
     sh "#{@exekube_cmd} gcloud organizations remove-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
       --member user:\"$TF_VAR_auth_user_email\" \
       --role #{role}"
