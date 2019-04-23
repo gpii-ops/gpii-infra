@@ -25,7 +25,7 @@ data "template_file" "couchdb_prometheus_exporter_values" {
     couchdb_admin_username                      = "${var.secret_couchdb_admin_username}"
     couchdb_admin_password                      = "${var.secret_couchdb_admin_password}"
     couchdb_prometheus_exporter_repository      = "${var.couchdb_prometheus_exporter_repository}"
-    couchdb_prometheus_exporter_tag        = "${var.couchdb_prometheus_exporter_tag}"
+    couchdb_prometheus_exporter_tag             = "${var.couchdb_prometheus_exporter_tag}"
     couchdb_prometheus_exporter_p2sd_repository = "${var.couchdb_prometheus_exporter_p2sd_repository}"
     couchdb_prometheus_exporter_p2sd_tag        = "${var.couchdb_prometheus_exporter_p2sd_tag}"
     replica_count                               = "${var.replica_count}"
