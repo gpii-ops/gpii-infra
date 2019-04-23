@@ -12,7 +12,7 @@ couchdbDatabases: _all_dbs
 
 image:
   repository: gesellix/couchdb-prometheus-exporter
-  checksum: sha256:77a019a7707f581f70239783d0b76500ba25b9382d9ee0702452b0381d5722c2
+  tag: 22
   pullPolicy: IfNotPresent
 
 prometheusToSdExporter:

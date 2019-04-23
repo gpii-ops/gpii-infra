@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
       - name: couchdb-prometheus-exporter
-        image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         args:
         - -logtostderr
