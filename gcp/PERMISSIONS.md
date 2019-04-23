@@ -24,7 +24,7 @@ Accounts and permissions
 
 ### [DEV_USER]@raisingthefloor.org
 
-  The developers can have their own development cluster managed by this account. This account only exists in the _dev_ projects, where a particular user is the owner of the whole project. In the case of the STG and PRD projects there is not a particular owner.
+  Developers can have their own development cluster managed by this account. This account only exists in their dev projects, where a particular user is the owner of the whole project. There is no particular owner in staging or production projects.
 
   1. Owner
 
@@ -75,14 +75,20 @@ Accounts and permissions
 Privilege escalation
 ====================
 
-If you are an operator and you need to assign new permissions to your user in order to make changes in a cluster you will need to attach some IAM roles to your user.
+If you are an operator and you need to assign new permissions to your user in order to make changes in a cluster or if you want to manage Security Command Center settings or security sources, you will need to attach the following IAM roles to your user:
 
-Rake commands:
+* `roles/owner` in the current project.
+* `roles/iam.serviceAccountAdmin` in the current organization.
+* `roles/securitycenter.admin` in the current organization.
 
-  * `rake grant_owner_role` Attaches the owner role to the current user account
-  * `rake revoke_owner_role` Removes the owner role from the current user account
+This can be done with the following rake commands:
 
-  In the case of a developer's dev project:
+* `rake grant_project_admin` attaches the owner role in the current project to the current user account.
+* `rake revoke_project_admin` removes the owner role in the current project from the current user account.
+* `rake grant_org_admin` attaches organization-level super user roles to the current user account.
+* `rake revoke_org_admin` removes organization-level super user roles from the current user account.
 
-  * `USER=<developer_user> rake grant_owner_role`
-  * `USER=<developer_user> rake revoke_owner_role`
+Or if you working with other developer's dev project:
+
+* `USER=<developer_user> rake grant_project_admin`
+* `USER=<developer_user> rake revoke_project_admin`
