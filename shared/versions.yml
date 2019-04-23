@@ -51,13 +51,13 @@ dataloader:
   upstream_image: gpii/universal:latest
   generated:
     image: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:eab9307f4b1549077c97646848e54b49fc6ceed42d98185882e2258b409f0770
+    sha: sha256:39804331bf843374b653973e4d8e44d8d712e3b4aa6774b43b82c4ea934240ff
     tag: latest
 flowmanager:
   upstream_image: gpii/universal:latest
   generated:
     image: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:eab9307f4b1549077c97646848e54b49fc6ceed42d98185882e2258b409f0770
+    sha: sha256:39804331bf843374b653973e4d8e44d8d712e3b4aa6774b43b82c4ea934240ff
     tag: latest
 k8s_snapshots:
   upstream_image: elsdoerfer/k8s-snapshots:v2.0
@@ -66,11 +66,11 @@ k8s_snapshots:
     sha: sha256:c787dc6fa1812c97ac96f46b4ff6dc1485e06c458839d4aa129aaf62201309e9
     tag: v2.0
 locust:
-  upstream_image: gpii/locust:0.9.0-gpii.2
+  upstream_image: gpii/locust:0.9.0-gpii.4
   generated:
     image: gcr.io/gpii-common-prd/gpii/locust
-    sha: sha256:e526da4f2243d7d0a330230f3c94be04ed558d0ed8946484faf7fce02ba95657
-    tag: 0.9.0-gpii.2
+    sha: sha256:6fc15400ca231ac2636879d45fa3aa89a86bf1a9cf50c5285d2bb4faf248e482
+    tag: 0.9.0-gpii.4
 nginx_ingress:
   upstream_image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.15.0
   generated:
@@ -81,7 +81,7 @@ preferences:
   upstream_image: gpii/universal:latest
   generated:
     image: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:eab9307f4b1549077c97646848e54b49fc6ceed42d98185882e2258b409f0770
+    sha: sha256:39804331bf843374b653973e4d8e44d8d712e3b4aa6774b43b82c4ea934240ff
     tag: latest
 service_account_assigner:
   upstream_image: gpii/service-account-assigner:0.0.2-gpii.0
