@@ -96,7 +96,7 @@ locust:
 nginx_ingress:
   upstream:
     repository: quay.io/kubernetes-ingress-controller/nginx-ingress-controller
-    tag: 0.15.0
+    tag: 0.24.1
   generated:
     image: gcr.io/gpii-common-prd/quay.io/kubernetes-ingress-controller/nginx-ingress-controller
     sha: sha256:0489cd1c6f0755f532d4b8204d5dabea038d4b2be8ec6efc2da584ff3f5aba61
