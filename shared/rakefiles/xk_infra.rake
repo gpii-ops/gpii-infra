@@ -19,6 +19,17 @@ cloud_admin_org_roles = [
   "roles/viewer",
 ]
 
+project_services = [
+  "cloudresourcemanager.googleapis.com",
+  "cloudbilling.googleapis.com",
+  "containeranalysis.googleapis.com",
+  "containerregistry.googleapis.com",
+  "iam.googleapis.com",
+  "dns.googleapis.com",
+  "compute.googleapis.com",
+  "securitycenter.googleapis.com",
+]
+
 task :refresh_common_infra, [:project_type] => [@gcp_creds_file, @app_default_creds_file, :configure_extra_tf_vars] do | taskname, args|
 
   next if args[:project_type] == "common"
@@ -92,14 +103,7 @@ task :apply_common_infra => [@gcp_creds_file] do
   }
   services_list = JSON.parse(services_list)
 
-  ["cloudresourcemanager.googleapis.com",
-   "cloudbilling.googleapis.com",
-   "containeranalysis.googleapis.com",
-   "containerregistry.googleapis.com",
-   "iam.googleapis.com",
-   "dns.googleapis.com",
-   "compute.googleapis.com",
-   "securitycenter.googleapis.com"].each do |service|
+  project_services.each do |service|
      sh "#{@exekube_cmd} gcloud services enable #{service}" unless services_list.any? { |s| s['serviceName'] == service }
   end
 
