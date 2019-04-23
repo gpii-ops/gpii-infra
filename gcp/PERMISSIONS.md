@@ -83,12 +83,12 @@ If you are an operator and you need to assign new permissions to your user in or
 
 This can be done with the following rake commands:
 
-* `rake grant_owner_role` attaches the owner role in the current project to the current user account.
-* `rake revoke_owner_role` removes the owner role in the current project from the current user account.
-* `rake grant_super_powers` attaches organization-level super user roles to the current user account.
-* `rake revoke_super_powers` removes organization-level super user roles from the current user account.
+* `rake grant_project_admin` attaches the owner role in the current project to the current user account.
+* `rake revoke_project_admin` removes the owner role in the current project from the current user account.
+* `rake grant_org_admin` attaches organization-level super user roles to the current user account.
+* `rake revoke_org_admin` removes organization-level super user roles from the current user account.
 
 Or if you working with other developer's dev project:
 
-* `USER=<developer_user> rake grant_owner_role`
-* `USER=<developer_user> rake revoke_owner_role`
+* `USER=<developer_user> rake grant_project_admin`
+* `USER=<developer_user> rake revoke_project_admin`
