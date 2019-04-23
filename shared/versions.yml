@@ -51,13 +51,13 @@ dataloader:
   upstream_image: gpii/universal:latest
   generated:
     image: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:eab9307f4b1549077c97646848e54b49fc6ceed42d98185882e2258b409f0770
+    sha: sha256:39804331bf843374b653973e4d8e44d8d712e3b4aa6774b43b82c4ea934240ff
     tag: latest
 flowmanager:
   upstream_image: gpii/universal:latest
   generated:
     image: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:eab9307f4b1549077c97646848e54b49fc6ceed42d98185882e2258b409f0770
+    sha: sha256:39804331bf843374b653973e4d8e44d8d712e3b4aa6774b43b82c4ea934240ff
     tag: latest
 k8s_snapshots:
   upstream_image: elsdoerfer/k8s-snapshots:v2.0
@@ -81,7 +81,7 @@ preferences:
   upstream_image: gpii/universal:latest
   generated:
     image: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:eab9307f4b1549077c97646848e54b49fc6ceed42d98185882e2258b409f0770
+    sha: sha256:39804331bf843374b653973e4d8e44d8d712e3b4aa6774b43b82c4ea934240ff
     tag: latest
 service_account_assigner:
   upstream_image: gpii/service-account-assigner:0.0.2-gpii.0
