@@ -200,6 +200,30 @@ describe Vars do
     expect(ENV).not_to have_received(:[]=).with("TF_VAR_component_without_sha_repository", any_args)
     expect(ENV).not_to have_received(:[]=).with("TF_VAR_component_without_tag_repository", any_args)
   end
+
+  it "set_versions handles tags that look like floats" do
+    # Usually, the yaml library can deduce that a tag is a string. However, if
+    # the tag is a valid float it is imported as such. Then,
+    # ENV[component_tag]= raises "TypeError: no implicit conversion of Float
+    # into String".
+    fake_tag = 3.9
+    fake_versions = {
+      "flowmanager" => {
+        "upstream" => {
+          "repository" => "fake_repository:fake_tag",
+        },
+        "generated" => {
+          "repository" => "gcr.io/some-project/fake_repository",
+          "sha" => "sha256:c0ffee",
+          "tag" => fake_tag,
+        },
+      },
+    }
+    allow(File).to receive(:read)
+    allow(YAML).to receive(:load).and_return(fake_versions)
+    Vars.set_versions()
+    expect(ENV).to have_received(:[]=).with("TF_VAR_flowmanager_tag", "#{fake_tag}")
+  end
 end
 
 
