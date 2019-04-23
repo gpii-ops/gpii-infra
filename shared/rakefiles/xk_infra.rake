@@ -1,4 +1,4 @@
-common_sa_organization_roles = [
+common_sa_org_roles = [
   "roles/dns.admin",
   "roles/iam.organizationRoleViewer",
   "roles/iam.serviceAccountAdmin",
@@ -7,16 +7,16 @@ common_sa_organization_roles = [
   "roles/resourcemanager.projectCreator",
   "roles/serviceusage.serviceUsageAdmin",
   "roles/storage.admin",
-  "roles/viewer"
+  "roles/viewer",
 ]
 
-cloud_admin_organization_roles = [
+cloud_admin_org_roles = [
   "roles/billing.admin",
   "roles/cloudsupport.admin",
   "roles/orgpolicy.policyAdmin",
   "roles/resourcemanager.organizationAdmin",
   "roles/securitycenter.viewer",
-  "roles/viewer"
+  "roles/viewer",
 ]
 
 task :refresh_common_infra, [:project_type] => [@gcp_creds_file, @app_default_creds_file, :configure_extra_tf_vars] do | taskname, args|
@@ -85,7 +85,7 @@ task :apply_common_infra => [@gcp_creds_file] do
   end
 
   Rake::Task[:configure_serviceaccount].invoke
-  Rake::Task[:set_organization_permissions].invoke
+  Rake::Task[:set_org_perms].invoke
 
   services_list = %x{
     #{@exekube_cmd} gcloud services list --format='json'
@@ -112,35 +112,9 @@ task :apply_common_infra => [@gcp_creds_file] do
   end
 end
 
-task :set_organization_permissions => [@gcp_creds_file] do
-  # Enforce org-level roles for cloud-admin and common SA
-  members = {
-    "group:cloud-admin@raisingthefloor.org" => cloud_admin_organization_roles,
-    "serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com" => common_sa_organization_roles
-  }
-  members.each do |member, expected_roles|
-    existing_roles = %x{
-      #{@exekube_cmd} gcloud organizations get-iam-policy #{ENV["ORGANIZATION_ID"]} \
-      --filter bindings.members:#{member} \
-      --flatten="bindings[].members" \
-      --format json | jq -r ".[].bindings.role"
-    }.split
-    expected_roles.each do |role|
-      unless existing_roles.index(role)
-        sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
-          --member #{member} \
-          --role #{role}"
-      else
-        existing_roles.delete_at(existing_roles.index(role))
-      end
-    end
-    existing_roles.each do |role|
-      sh "#{@exekube_cmd} gcloud organizations remove-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
-        --member #{member} \
-        --role #{role}"
-    end
-  end
-  # Remove org-level roles from individual user accounts if found
+task :set_org_perms => [@gcp_creds_file] do
+  # Remove org-level roles from individual user accounts if found,
+  # to forcefully revoke all org-level permissions granted by :grant_org_admin
   user_roles = %x{
     #{@exekube_cmd} gcloud organizations get-iam-policy #{ENV["ORGANIZATION_ID"]} \
     --filter bindings.members:user:* \
@@ -155,6 +129,34 @@ task :set_organization_permissions => [@gcp_creds_file] do
     }.split.each do |role|
       sh "#{@exekube_cmd} gcloud organizations remove-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
         --member #{user} \
+        --role #{role}"
+    end
+  end
+  # Enforce org-level roles for cloud-admin, common SA, and Eugene's account
+  members = {
+    "group:cloud-admin@raisingthefloor.org" => cloud_admin_org_roles,
+    "serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com" => common_sa_org_roles,
+    "user:eugene@raisingthefloor.org" => ["roles/billing.admin"]
+  }
+  members.each do |member, expected_roles|
+    existing_roles = %x{
+      #{@exekube_cmd} gcloud organizations get-iam-policy #{ENV["ORGANIZATION_ID"]} \
+      --filter bindings.members:#{member} \
+      --flatten="bindings[].members" \
+      --format json | jq -r ".[].bindings.role"
+    }.split
+
+    roles_to_add = expected_roles - existing_roles
+    roles_to_remove = existing_roles - expected_roles
+
+    roles_to_add.each do |role|
+      sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
+        --member #{member} \
+        --role #{role}"
+    end
+    roles_to_remove.each do |role|
+      sh "#{@exekube_cmd} gcloud organizations remove-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
+        --member #{member} \
         --role #{role}"
     end
   end
