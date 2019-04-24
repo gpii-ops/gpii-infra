@@ -10,7 +10,7 @@ cert_manager:
     repository: quay.io/jetstack/cert-manager-controller
     tag: v0.6.1
   generated:
-    image: gcr.io/gpii-common-prd/quay.io/jetstack/cert-manager-controller
+    repository: gcr.io/gpii-common-prd/quay.io/jetstack/cert-manager-controller
     sha: sha256:e995152afc1f609e91343122aff8af56b192eee102ffbe5a8350bb37b68fde7f
     tag: v0.6.1
 certmerge_operator:
@@ -18,7 +18,7 @@ certmerge_operator:
     repository: gpii/certmerge-operator
     tag: 0.0.3-gpii.0
   generated:
-    image: gcr.io/gpii-common-prd/gpii/certmerge-operator
+    repository: gcr.io/gpii-common-prd/gpii/certmerge-operator
     sha: sha256:96c435ee42bae821210e91430c18c0fd1cbe8cd33216175a77fbdc7622f5d535
     tag: 0.0.3-gpii.0
 couchdb_helper:
@@ -26,7 +26,7 @@ couchdb_helper:
     repository: kocolosk/couchdb-statefulset-assembler
     tag: 1.1.0
   generated:
-    image: gcr.io/gpii-common-prd/kocolosk/couchdb-statefulset-assembler
+    repository: gcr.io/gpii-common-prd/kocolosk/couchdb-statefulset-assembler
     sha: sha256:a689a5cde2c19b7767c79fc2d265844bbc5913f10f5516480d7e06e2292f234e
     tag: 1.1.0
 couchdb_init:
@@ -34,7 +34,7 @@ couchdb_init:
     repository: busybox
     tag: latest
   generated:
-    image: gcr.io/gpii-common-prd/busybox
+    repository: gcr.io/gpii-common-prd/busybox
     sha: sha256:f79f7a10302c402c052973e3fa42be0344ae6453245669783a9e16da3d56d5b4
     tag: latest
 couchdb_prometheus_exporter:
@@ -42,15 +42,15 @@ couchdb_prometheus_exporter:
     repository: gesellix/couchdb-prometheus-exporter
     tag: 22
   generated:
-    image: gcr.io/gpii-common-prd/gesellix/couchdb-prometheus-exporter
+    repository: gcr.io/gpii-common-prd/gesellix/couchdb-prometheus-exporter
     sha: sha256:8184086713d28fc19f3d2ecd5eabd0cce23c21bd0daa9f8921fa0ce4acb912f6
-    tag: '22'
+    tag: 22
 couchdb_prometheus_exporter_p2sd:
   upstream:
     repository: gcr.io/google-containers/prometheus-to-sd
     tag: v0.3.2
   generated:
-    image: gcr.io/gpii-common-prd/gcr.io/google-containers/prometheus-to-sd
+    repository: gcr.io/gpii-common-prd/gcr.io/google-containers/prometheus-to-sd
     sha: sha256:7f7e424211b64a77b5ee2e8a3085048b54c1676217ee8830dc4112df6111b8a2
     tag: v0.3.2
 couchdb:
@@ -58,7 +58,7 @@ couchdb:
     repository: couchdb
     tag: 2.2.0
   generated:
-    image: gcr.io/gpii-common-prd/couchdb
+    repository: gcr.io/gpii-common-prd/couchdb
     sha: sha256:d1535416e14602ad6f061500fdfb4c3a862cf0a552961fb37a4325d65470e7af
     tag: 2.2.0
 dataloader:
@@ -66,7 +66,7 @@ dataloader:
     repository: gpii/universal
     tag: latest
   generated:
-    image: gcr.io/gpii-common-prd/gpii/universal
+    repository: gcr.io/gpii-common-prd/gpii/universal
     sha: sha256:39804331bf843374b653973e4d8e44d8d712e3b4aa6774b43b82c4ea934240ff
     tag: latest
 flowmanager:
@@ -74,7 +74,7 @@ flowmanager:
     repository: gpii/universal
     tag: latest
   generated:
-    image: gcr.io/gpii-common-prd/gpii/universal
+    repository: gcr.io/gpii-common-prd/gpii/universal
     sha: sha256:39804331bf843374b653973e4d8e44d8d712e3b4aa6774b43b82c4ea934240ff
     tag: latest
 k8s_snapshots:
@@ -82,7 +82,7 @@ k8s_snapshots:
     repository: elsdoerfer/k8s-snapshots
     tag: v2.0
   generated:
-    image: gcr.io/gpii-common-prd/elsdoerfer/k8s-snapshots
+    repository: gcr.io/gpii-common-prd/elsdoerfer/k8s-snapshots
     sha: sha256:c787dc6fa1812c97ac96f46b4ff6dc1485e06c458839d4aa129aaf62201309e9
     tag: v2.0
 locust:
@@ -90,7 +90,7 @@ locust:
     repository: gpii/locust
     tag: 0.9.0-gpii.5
   generated:
-    image: gcr.io/gpii-common-prd/gpii/locust
+    repository: gcr.io/gpii-common-prd/gpii/locust
     sha: sha256:92f89becdc6039f97baf61173cd53b3cac7183679df728ec8514ce67e3afff16
     tag: 0.9.0-gpii.5
 nginx_ingress:
@@ -98,7 +98,7 @@ nginx_ingress:
     repository: quay.io/kubernetes-ingress-controller/nginx-ingress-controller
     tag: 0.15.0
   generated:
-    image: gcr.io/gpii-common-prd/quay.io/kubernetes-ingress-controller/nginx-ingress-controller
+    repository: gcr.io/gpii-common-prd/quay.io/kubernetes-ingress-controller/nginx-ingress-controller
     sha: sha256:0489cd1c6f0755f532d4b8204d5dabea038d4b2be8ec6efc2da584ff3f5aba61
     tag: 0.15.0
 preferences:
@@ -106,7 +106,7 @@ preferences:
     repository: gpii/universal
     tag: latest
   generated:
-    image: gcr.io/gpii-common-prd/gpii/universal
+    repository: gcr.io/gpii-common-prd/gpii/universal
     sha: sha256:39804331bf843374b653973e4d8e44d8d712e3b4aa6774b43b82c4ea934240ff
     tag: latest
 service_account_assigner:
@@ -114,6 +114,6 @@ service_account_assigner:
     repository: gpii/service-account-assigner
     tag: 0.0.2-gpii.0
   generated:
-    image: gcr.io/gpii-common-prd/gpii/service-account-assigner
+    repository: gcr.io/gpii-common-prd/gpii/service-account-assigner
     sha: sha256:c464aceecdb83363ee8d339cfdcc6877210b881be1e8fa020ffaddf25a3c83bd
     tag: 0.0.2-gpii.0
