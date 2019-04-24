@@ -56,11 +56,11 @@ couchdb_prometheus_exporter_p2sd:
 couchdb:
   upstream:
     repository: couchdb
-    tag: 2.2.0
+    tag: 2.3.0
   generated:
     repository: gcr.io/gpii2test-common-stg/couchdb
-    sha: sha256:d1535416e14602ad6f061500fdfb4c3a862cf0a552961fb37a4325d65470e7af
-    tag: 2.2.0
+    sha: sha256:d1bf43a8484a1728a897f20d9d223f71076a91cd9f73e6f5070ce2f3e22b37fe
+    tag: 2.3.0
 dataloader:
   upstream:
     repository: gpii/universal
