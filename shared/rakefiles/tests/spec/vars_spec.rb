@@ -148,34 +148,44 @@ describe Vars do
   it "set_versions sets TF_VAR_<component>_(repository|checksum|tag)" do
     fake_versions = {
       "flowmanager" => {
-        "upstream_image" => "fake_image:fake_tag",
+        "upstream" => {
+          "repository" => "fake_repository:fake_tag",
+        },
         "generated" => {
-          "image" => "gcr.io/some-project/fake_image",
+          "repository" => "gcr.io/some-project/fake_repository",
           "sha" => "sha256:c0ffee",
           "tag" => "fake_tag",
         },
       },
       "component_without_generated" => {
-        "upstream_image" => "another_fake_image",
+        "upstream" => {
+          "repository" => "another_fake_repository",
+        },
       },
-      "component_without_image" => {
-        "upstream_image" => "another_fake_image",
+      "component_without_repository" => {
+        "upstream" => {
+          "repository" => "another_fake_repository",
+        },
         "generated" => {
           "sha" => "sha256:50da",
           "tag" => "fake_tag",
         },
       },
       "component_without_sha" => {
-        "upstream_image" => "another_fake_image",
+        "upstream" => {
+          "repository" => "another_fake_repository",
+        },
         "generated" => {
-          "image" => "gcr.io/some-project/another_fake_image",
+          "repository" => "gcr.io/some-project/another_fake_repository",
           "tag" => "fake_tag",
         },
       },
       "component_without_tag" => {
-        "upstream_image" => "another_fake_image",
+        "upstream" => {
+          "repository" => "another_fake_repository",
+        },
         "generated" => {
-          "image" => "gcr.io/some-project/another_fake_image",
+          "repository" => "gcr.io/some-project/another_fake_repository",
           "sha" => "sha256:50da",
         },
       },
@@ -183,10 +193,10 @@ describe Vars do
     allow(File).to receive(:read)
     allow(YAML).to receive(:load).and_return(fake_versions)
     Vars.set_versions()
-    expect(ENV).to have_received(:[]=).with("TF_VAR_flowmanager_repository", "gcr.io/some-project/fake_image")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_flowmanager_repository", "gcr.io/some-project/fake_repository")
     expect(ENV).to have_received(:[]=).with("TF_VAR_flowmanager_checksum", "sha256:c0ffee")
     expect(ENV).to have_received(:[]=).with("TF_VAR_flowmanager_tag", "fake_tag")
-    expect(ENV).not_to have_received(:[]=).with("TF_VAR_component_without_image_repository", any_args)
+    expect(ENV).not_to have_received(:[]=).with("TF_VAR_component_without_repository_repository", any_args)
     expect(ENV).not_to have_received(:[]=).with("TF_VAR_component_without_sha_repository", any_args)
     expect(ENV).not_to have_received(:[]=).with("TF_VAR_component_without_tag_repository", any_args)
   end
