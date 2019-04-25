@@ -1,4 +1,4 @@
-common_sa_org_roles = [
+common_sa_organization_permissions = [
   "roles/dns.admin",
   "roles/iam.organizationRoleViewer",
   "roles/iam.serviceAccountAdmin",
@@ -6,28 +6,16 @@ common_sa_org_roles = [
   "roles/resourcemanager.projectIamAdmin",
   "roles/resourcemanager.projectCreator",
   "roles/serviceusage.serviceUsageAdmin",
-  "roles/storage.admin",
-  "roles/viewer",
+  "roles/storage.admin"
 ]
 
-cloud_admin_org_roles = [
+cloud_admin_organization_permissions = [
   "roles/billing.admin",
   "roles/cloudsupport.admin",
   "roles/orgpolicy.policyAdmin",
   "roles/resourcemanager.organizationAdmin",
   "roles/securitycenter.viewer",
-  "roles/viewer",
-]
-
-project_services = [
-  "cloudresourcemanager.googleapis.com",
-  "cloudbilling.googleapis.com",
-  "containeranalysis.googleapis.com",
-  "containerregistry.googleapis.com",
-  "iam.googleapis.com",
-  "dns.googleapis.com",
-  "compute.googleapis.com",
-  "securitycenter.googleapis.com",
+  "roles/viewer"
 ]
 
 task :refresh_common_infra, [:project_type] => [@gcp_creds_file, @app_default_creds_file, :configure_extra_tf_vars] do | taskname, args|
@@ -39,7 +27,7 @@ task :refresh_common_infra, [:project_type] => [@gcp_creds_file, @app_default_cr
   # DNS zone.
 
   dns_zone_found = %x{
-    sh -c " \
+    #{@exekube_cmd} sh -c " \
     terragrunt state show module.gke_network.google_dns_managed_zone.dns_zones \
     --terragrunt-working-dir /project/live/#{@env}/infra/network 2>/dev/null \
   "}
@@ -47,14 +35,14 @@ task :refresh_common_infra, [:project_type] => [@gcp_creds_file, @app_default_cr
   if dns_zone_found.empty?
     # The DNS zone is not in the TF state file, we need to add it
     puts "DNS zone #{ENV["TF_VAR_domain_name"].tr('.','-')} not found in TF state, importing..."
-    sh "sh -c ' \
+    sh "#{@exekube_cmd} sh -c ' \
       terragrunt import module.gke_network.google_dns_managed_zone.dns_zones #{ENV["TF_VAR_domain_name"].tr('.','-')} \
       --terragrunt-working-dir /project/live/#{@env}/infra/network \
     '"
   else
     # The DNS zone is in the TF state file, we will refresh it just in case
     puts "DNS zone #{ENV["TF_VAR_domain_name"].tr('.','-')} found in TF state, refreshing..."
-    sh "sh -c ' \
+    sh "#{@exekube_cmd} sh -c ' \
       terragrunt refresh \
       --terragrunt-working-dir /project/live/#{@env}/infra/network \
     '"
@@ -71,108 +59,96 @@ task :apply_common_infra => [@gcp_creds_file] do
   # administrator of the organization can run this task.
 
   projects_list = %x{
-    gcloud projects list --format='json' --filter='name:#{ENV["TF_VAR_project_id"]}'
+    #{@exekube_cmd} gcloud projects list --format='json' --filter='name:#{ENV["TF_VAR_project_id"]}'
   }
   projects_list = JSON.parse(projects_list)
   if projects_list.empty?
     puts "#{ENV["TF_VAR_project_id"]} not found, I'll create a new one"
-    sh "gcloud projects create #{ENV["TF_VAR_project_id"]} \
+    sh "#{@exekube_cmd} gcloud projects create #{ENV["TF_VAR_project_id"]} \
       --organization #{ENV["ORGANIZATION_ID"]} \
       --set-as-default"
   end
 
-  Rake::Task[:configure_current_project].invoke
-
-  sh "gcloud beta billing projects link #{ENV["TF_VAR_project_id"]} \
+  sh "#{@exekube_cmd} gcloud beta billing projects link #{ENV["TF_VAR_project_id"]} \
     --billing-account #{ENV["BILLING_ID"]}"
 
   sa_list = %x{
-    gcloud iam service-accounts list --format='json' \
+    #{@exekube_cmd} gcloud iam service-accounts list --format='json' \
     --filter='email:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com'
   }
   sa_list = JSON.parse(sa_list)
   if sa_list.empty?
-    sh "gcloud iam service-accounts create projectowner --display-name 'CI account'"
+    sh "#{@exekube_cmd} gcloud iam service-accounts create projectowner --display-name 'CI account'"
   end
 
   Rake::Task[:configure_serviceaccount].invoke
-  Rake::Task[:set_org_perms].invoke
+  Rake::Task[:configure_current_project].invoke
+
+  ["roles/viewer", "roles/storage.admin", "roles/dns.admin"].each do |role|
+    sh "#{@exekube_cmd} gcloud projects add-iam-policy-binding #{ENV["TF_VAR_project_id"]} \
+      --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com \
+      --role #{role}"
+  end
 
   services_list = %x{
-    gcloud services list --format='json'
+    #{@exekube_cmd} gcloud services list --format='json'
   }
   services_list = JSON.parse(services_list)
 
-  project_services.each do |service|
-     sh "gcloud services enable #{service}" unless services_list.any? { |s| s['serviceName'] == service }
+  ["cloudresourcemanager.googleapis.com",
+   "cloudbilling.googleapis.com",
+   "containeranalysis.googleapis.com",
+   "containerregistry.googleapis.com",
+   "iam.googleapis.com",
+   "dns.googleapis.com",
+   "compute.googleapis.com",
+   "securitycenter.googleapis.com"].each do |service|
+     sh "#{@exekube_cmd} gcloud services enable #{service}" unless services_list.any? { |s| s['serviceName'] == service }
   end
 
+  permissions_list_json = %x{
+    #{@exekube_cmd} gcloud organizations get-iam-policy #{ENV["ORGANIZATION_ID"]} --format=json
+  }
+  permissions_list = JSON.parse(permissions_list_json)["bindings"]
+  service_account = "serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com"
+  permissions_list.each do |permission|
+    common_sa_organization_permissions.delete(permission["role"]) if common_sa_organization_permissions.include?(permission["role"]) and permission["members"].include?(service_account)
+    cloud_admin_organization_permissions.delete(permission["role"]) if cloud_admin_organization_permissions.include?(permission["role"]) and permission["members"].include?("group:cloud-admin@raisingthefloor.org")
+  end
+
+  raise "The common Service Account #{service_account} or the cloud-admin group don't have the proper permissions.
+
+  An operator with admin privileges on the organization must run the following command: rake fix_organization_permissions.
+  The gcloud commands executed by the operator must use the credentials of an admin account, avoiding the use of any Service Account credentials.
+  To check the credentials in use run the command: rake sh[\"gcloud auth list\"]\n\n" unless (common_sa_organization_permissions.empty? or cloud_admin_organization_permissions.empty?)
+
   tfstate_bucket = %x{
-    gsutil ls | grep 'gs://#{ENV["TF_VAR_project_id"]}-tfstate'
+    #{@exekube_cmd} gsutil ls | grep 'gs://#{ENV["TF_VAR_project_id"]}-tfstate'
   }
   unless tfstate_bucket
-    sh "gsutil mb gs://#{ENV["TF_VAR_project_id"]}-tfstate"
-    sh "gsutil versioning set on gs://#{ENV["TF_VAR_project_id"]}-tfstate"
+    sh "#{@exekube_cmd} gsutil mb gs://#{ENV["TF_VAR_project_id"]}-tfstate"
+    sh "#{@exekube_cmd} gsutil versioning set on gs://#{ENV["TF_VAR_project_id"]}-tfstate"
   end
 end
 
-task :set_org_perms => [@gcp_creds_file] do
-  # Remove org-level roles from individual user accounts if found,
-  # to forcefully revoke all org-level permissions granted by :grant_org_admin
-  user_roles = %x{
-    gcloud organizations get-iam-policy #{ENV["ORGANIZATION_ID"]} \
-    --filter bindings.members:user:* \
-    --flatten="bindings[].members" \
-    --format json | jq -r ".[].bindings.members"
-  }.split.uniq.each do |user|
-    existing_user_roles = %x{
-      gcloud organizations get-iam-policy #{ENV["ORGANIZATION_ID"]} \
-      --filter bindings.members:#{user} \
-      --flatten="bindings[].members" \
-      --format json | jq -r ".[].bindings.role"
-    }.split.each do |role|
-      sh "gcloud organizations remove-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
-        --member #{user} \
-        --role #{role}"
-    end
+task :fix_organization_permissions => [@gcp_creds_file] do
+  cloud_admin_organization_permissions.each do |role|
+    sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
+      --member group:cloud-admin@raisingthefloor.org --role #{role}"
   end
-  # Enforce org-level roles for cloud-admin, common SA, and Eugene's account
-  members = {
-    "group:cloud-admin@raisingthefloor.org" => cloud_admin_org_roles,
-    "serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com" => common_sa_org_roles,
-    "user:eugene@raisingthefloor.org" => ["roles/billing.admin"]
-  }
-  members.each do |member, expected_roles|
-    existing_roles = %x{
-      gcloud organizations get-iam-policy #{ENV["ORGANIZATION_ID"]} \
-      --filter bindings.members:#{member} \
-      --flatten="bindings[].members" \
-      --format json | jq -r ".[].bindings.role"
-    }.split
-
-    roles_to_add = expected_roles - existing_roles
-    roles_to_remove = existing_roles - expected_roles
-
-    roles_to_add.each do |role|
-      sh "gcloud organizations add-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
-        --member #{member} \
-        --role #{role}"
-    end
-    roles_to_remove.each do |role|
-      sh "gcloud organizations remove-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
-        --member #{member} \
-        --role #{role}"
-    end
+  common_sa_organization_permissions.each do |role|
+    sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
+      --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com --role #{role}"
   end
+
   # The billing account is owned by the organization 247149361674
   # (raisingthefloor.org), that means that the permissions are inherited from
   # such organization. All the SA that need a billing permission must be in this
   # organization IAM settings.
   # Go to the https://console.cloud.google.com/billing/ to see the permissions
   # granted to which SA for using billing services.
-  sh "gcloud organizations add-iam-policy-binding 247149361674 \
-    --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com \
-    --role roles/billing.user"
+  sh "#{@exekube_cmd} gcloud organizations add-iam-policy-binding 247149361674 \
+    --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com --role roles/billing.user"
 end
 
 task :plan_infra => [@gcp_creds_file, @app_default_creds_file, :configure_extra_tf_vars] do
