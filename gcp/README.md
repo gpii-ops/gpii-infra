@@ -167,25 +167,15 @@ See [CI-CD.md#running-in-non-dev-environments](../CI-CD.md#running-manually-in-n
 
 ### I want to test my local changes to GPII components in my cluster
 
-*NOTE:* This workflow is outdated until https://issues.gpii.net/browse/GPII-3861 is completed.
-
 1. Build a local Docker image containing your changes.
-1. Push your image to Docker Hub under your user account.
-1. Clone https://github.com/gpii-ops/gpii-version-updater/.
-1. Edit `components.conf`. Find your component and edit the `image` field to point to your Docker Hub user account.
+1. Push your image to Docker Hub under your user account (e.g. `docker build -t mrtyler/universal . && docker push mrtyler/universal`).
+1. Edit `gpii-infra/shared/versions.yml`. Find your component and edit the `upstream.repository` field to point to your Docker Hub user account.
    * E.g., `gpii/universal -> mrtyler/universal`
-1. Run `./update-version versions.yml`. It will generate a `versions.yml` in the current directory.
-1. `cp versions.yml ../gpii-infra/shared`
-1. `cd ../gpii-infra/gcp/live/dev && rake`
-
-#### Can't I just edit `versions.yml` by hand?
-
-gpii-infra uses explicit SHAs to refer to specific Docker images for GPII components. This has a number of advantages (repeatability, auditability) but the main thing you care about is that changing the SHA forces Kubernetes to re-deploy a component.
-
-If you don't want to deal with gpii-version-updater, you can instead:
-1. Edit `shared/versions.yml`. Find your component and replace the entire image value (path and SHA) with your Docker Hub user account.
-   * E.g., `flowmanager: "gpii/universal@sha256:4b3...64f" -> flowmanager: "mrtyler/universal"`
-1. Manually delete the component via Kubernetes Dashboard or with `kubectl delete`.
+1. Clone https://github.com/gpii-ops/gpii-version-updater/ in the same directory as your gpii-infra clone.
+   * The `gpii-version-updater` clone and the `gpii-infra` clone should be siblings in the same directory (there are some references to `../gpii-infra`).
+1. `cd gpii-version-updater`
+1. Follow the steps at [gpii-version-updater: Installing on host](https://github.com/gpii-ops/gpii-version-updater/#installing-on-host) (or [gpii-version-updater: Running in a container](https://github.com/gpii-ops/gpii-version-updater/#running-in-a-container).
+1. `rake sync`
 1. `cd ../gpii-infra/gcp/live/dev && rake`
 
 ### I need to interact with Helm directly, e.g. because a Helm deployment was orphaned due to an error while running `rake`

@@ -55,6 +55,7 @@ Examples of things that get credentials this way include: CouchDB, Alertmanager.
    * Add the contents of the Key file to `vault.yml`.
    * Apply the ansible role [ansible-gpii-version-updater](https://github.com/idi-ops/ansible-gpii-version-updater) to the build node.
       * The [internal ansible repo](https://github.com/inclusive-design/ops) has a playbook to do this: `config_host_gpii_version_updater.yml`.
+      * You'll need the ssh key you [configured with Github](#configure-github).
 
 ### Configure AWS (DEPRECATED)
 
