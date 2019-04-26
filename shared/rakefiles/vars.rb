@@ -69,12 +69,16 @@ class Vars
     versions = YAML.load(File.read(Vars::VERSIONS_FILE))
     versions.each do |component, values|
       next unless (values["generated"] and
-                   values["generated"]["image"] and
+                   values["generated"]["repository"] and
                    values["generated"]["sha"] and
                    values["generated"]["tag"])
-      ENV["TF_VAR_#{component}_repository"] = values["generated"]["image"]
+      ENV["TF_VAR_#{component}_repository"] = values["generated"]["repository"]
       ENV["TF_VAR_#{component}_checksum"] = values["generated"]["sha"]
-      ENV["TF_VAR_#{component}_tag"] = values["generated"]["tag"]
+      # Usually, the yaml library can deduce that a tag is a string. However, if
+      # the tag is a valid float it is imported as such. Then,
+      # ENV[component_tag]= raises "TypeError: no implicit conversion of Float
+      # into String".
+      ENV["TF_VAR_#{component}_tag"] = values["generated"]["tag"].to_s
     end
   end
 end
