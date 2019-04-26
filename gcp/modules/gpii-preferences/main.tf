@@ -10,6 +10,7 @@ variable "preferences_checksum" {}
 
 # Terragrunt variables
 variable "replica_count" {}
+
 variable "requests_cpu" {}
 variable "requests_memory" {}
 variable "limits_cpu" {}
