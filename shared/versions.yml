@@ -45,7 +45,7 @@ couchdb_prometheus_exporter:
     repository: gcr.io/gpii-common-prd/gesellix/couchdb-prometheus-exporter
     sha: sha256:8184086713d28fc19f3d2ecd5eabd0cce23c21bd0daa9f8921fa0ce4acb912f6
     tag: 22
-couchdb_prometheus_exporter_p2sd:
+prometheus_to_sd:
   upstream:
     repository: gcr.io/google-containers/prometheus-to-sd
     tag: v0.3.2
