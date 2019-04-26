@@ -3,8 +3,7 @@ common_sa_org_roles = [
   "roles/iam.organizationRoleViewer",
   "roles/iam.serviceAccountAdmin",
   "roles/iam.serviceAccountKeyAdmin",
-  "roles/resourcemanager.projectIamAdmin",
-  "roles/resourcemanager.projectCreator",
+  "roles/resourcemanager.organizationAdmin",
   "roles/serviceusage.serviceUsageAdmin",
   "roles/storage.admin",
   "roles/viewer",
@@ -164,15 +163,13 @@ task :set_org_perms => [@gcp_creds_file] do
         --role #{role}"
     end
   end
-  # The billing account is owned by the organization 247149361674
-  # (raisingthefloor.org), that means that the permissions are inherited from
-  # such organization. All the SA that need a billing permission must be in this
-  # organization IAM settings.
-  # Go to the https://console.cloud.google.com/billing/ to see the permissions
-  # granted to which SA for using billing services.
-  sh "gcloud organizations add-iam-policy-binding 247149361674 \
+end
+
+task :set_billing_org_perms => [@gcp_creds_file] do
+  sh "gcloud organizations add-iam-policy-binding #{ENV["BILLING_ORGANIZATION_ID"]} \
     --member serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com \
-    --role roles/billing.user"
+    --role roles/billing.user
+  "
 end
 
 task :plan_infra => [@gcp_creds_file, @app_default_creds_file, :configure_extra_tf_vars] do
