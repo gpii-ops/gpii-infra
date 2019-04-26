@@ -25,6 +25,8 @@ class Vars
     ENV["BILLING_ID"] = "01A0E1-B0B31F-349F4F" if ENV["BILLING_ID"].nil? # RtF Billing Account
     ENV["TF_VAR_billing_id"] = ENV["BILLING_ID"]
 
+    ENV["BILLING_ORGANIZATION_ID"] = "247149361674" if ENV["BILLING_ORGANIZATION_ID"].nil? # RtF Organization that own Billing Account
+
     ENV["TF_VAR_infra_region"] = "us-central1" if ENV["TF_VAR_infra_region"].nil? # GCP region to deploy cluster and other resources
 
     @domain_name = "#{env}.gcp.#{ENV["TF_VAR_organization_domain"]}"
