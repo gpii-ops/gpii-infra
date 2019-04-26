@@ -32,9 +32,9 @@ data "template_file" "nginx_ingress_values" {
   vars {
     nginx_ingress_repository    = "${var.nginx_ingress_repository}"
     nginx_ingress_tag           = "${var.nginx_ingress_tag}"
-    load_balancer_ip            = "${data.terraform_remote_state.network.static_ip_address}"
     prometheus_to_sd_repository = "${var.prometheus_to_sd_repository}"
     prometheus_to_sd_tag        = "${var.prometheus_to_sd_tag}"
+    load_balancer_ip            = "${data.terraform_remote_state.network.static_ip_address}"
   }
 }
 
