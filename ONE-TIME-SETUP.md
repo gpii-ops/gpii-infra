@@ -45,10 +45,9 @@ To automatically scan publicly exposed endpointst for common vulnerabilities (XS
 
 1. Go to [Cloud Web Security Scanner](https://console.cloud.google.com/security/web-scanner/scanConfigs), you will be asked to select the project if needed.
 1. Click "New Scan".
-1. Enter endpoint URL into the "Name" field (e.g. `flowmanager.prd.gcp.gpii.net` or `preferences.prd.gcp.gpii.net`).
+1. Enter endpoint URL into the "Name" field (e.g. `flowmanager.prd.gcp.gpii.net`).
 1. As a "Starting URL" you can enter something like (replace `prd.gcp.gpii.net` with your environment's domain):
    * https://flowmanager.prd.gcp.gpii.net/health for Flowmanager endpoint.
-   * https://preferences.prd.gcp.gpii.net/preferences/carla for Preferences endpoint.
 1. You can add more URLs if needed using "Add a URL" link.
 1. You can also exclude certain URLs from scanning if needed.
 1. For long-lived environments:
