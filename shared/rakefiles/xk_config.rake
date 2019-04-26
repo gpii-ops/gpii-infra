@@ -29,6 +29,18 @@ task :configure_serviceaccount => [@gcp_creds_file] do
         --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com
     "
   end
+  Rake::Task[:activate_serviceaccount].invoke
+end
+
+# We need separate task to activate service account from key file
+# so we can call it directly after restoring saved
+# @serviceaccount_key_file in :configure_serviceaccount_ci_restore
+task :activate_serviceaccount => [@serviceaccount_key_file] do
+  sh "
+    gcloud auth activate-service-account \
+      --key-file #{@serviceaccount_key_file} \
+      --project $TF_VAR_project_id
+  "
 end
 
 @app_default_creds_file = "/root/.config/gcloud/application_default_credentials.json"
