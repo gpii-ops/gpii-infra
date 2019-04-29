@@ -48,7 +48,7 @@ couchdb_prometheus_exporter:
 prometheus_to_sd:
   upstream:
     repository: gcr.io/google-containers/prometheus-to-sd
-    tag: v0.3.2
+    tag: v0.5.1
   generated:
     repository: gcr.io/gpii-common-prd/gcr.io/google-containers/prometheus-to-sd
     sha: sha256:7f7e424211b64a77b5ee2e8a3085048b54c1676217ee8830dc4112df6111b8a2
@@ -96,7 +96,7 @@ locust:
 nginx_ingress:
   upstream:
     repository: quay.io/kubernetes-ingress-controller/nginx-ingress-controller
-    tag: 0.15.0
+    tag: 0.24.1
   generated:
     repository: gcr.io/gpii-common-prd/quay.io/kubernetes-ingress-controller/nginx-ingress-controller
     sha: sha256:0489cd1c6f0755f532d4b8204d5dabea038d4b2be8ec6efc2da584ff3f5aba61
