@@ -35,7 +35,7 @@ couchdb_init:
     tag: 3.9
   generated:
     repository: gcr.io/gpii-common-prd/alpine
-    sha: sha256:28ef97b8686a0b5399129e9b763d5b7e5ff03576aa5580d6f4182a49c5fe1913
+    sha: sha256:5c40b3c27b9f13c873fefb2139765c56ce97fd50230f1f2d5c91e55dec171907
     tag: 3.9
 couchdb_prometheus_exporter:
   upstream:
@@ -59,7 +59,7 @@ couchdb:
     tag: 2.3.0
   generated:
     repository: gcr.io/gpii-common-prd/couchdb
-    sha: sha256:d1bf43a8484a1728a897f20d9d223f71076a91cd9f73e6f5070ce2f3e22b37fe
+    sha: sha256:3c64af8ea296e20ac92a496aa9fb49287c9d99e91b39291fd54489c22379d01f
     tag: 2.3.0
 dataloader:
   upstream:
@@ -99,7 +99,7 @@ nginx_ingress:
     tag: 0.24.1
   generated:
     repository: gcr.io/gpii-common-prd/quay.io/kubernetes-ingress-controller/nginx-ingress-controller
-    sha: sha256:76861d167e4e3db18f2672fd3435396aaa898ddf4d1128375d7c93b91c59f87f
+    sha: sha256:a805454d5fdc799d28011752b7da5bfa52a4b12dccef735f09c4b18f8598c488
     tag: 0.24.1
 preferences:
   upstream:
