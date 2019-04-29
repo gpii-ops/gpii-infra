@@ -27,16 +27,16 @@ couchdb_helper:
     tag: 1.2.0
   generated:
     repository: gcr.io/gpii-common-prd/kocolosk/couchdb-statefulset-assembler
-    sha: sha256:a689a5cde2c19b7767c79fc2d265844bbc5913f10f5516480d7e06e2292f234e
-    tag: 1.1.0
+    sha: sha256:6effb982154ed2d480a8ea49f9aad0cd5fded721d024012165638991c71b1f97
+    tag: 1.2.0
 couchdb_init:
   upstream:
     repository: alpine
     tag: 3.9
   generated:
-    repository: gcr.io/gpii-common-prd/busybox
-    sha: sha256:f79f7a10302c402c052973e3fa42be0344ae6453245669783a9e16da3d56d5b4
-    tag: latest
+    repository: gcr.io/gpii-common-prd/alpine
+    sha: sha256:28ef97b8686a0b5399129e9b763d5b7e5ff03576aa5580d6f4182a49c5fe1913
+    tag: 3.9
 couchdb_prometheus_exporter:
   upstream:
     repository: gesellix/couchdb-prometheus-exporter
@@ -51,16 +51,16 @@ prometheus_to_sd:
     tag: v0.5.1
   generated:
     repository: gcr.io/gpii-common-prd/gcr.io/google-containers/prometheus-to-sd
-    sha: sha256:7f7e424211b64a77b5ee2e8a3085048b54c1676217ee8830dc4112df6111b8a2
-    tag: v0.3.2
+    sha: sha256:8e3679a6e059d1806daae335ab08b304fd1d8d35cdff457baded7306b5af9ba5
+    tag: v0.5.1
 couchdb:
   upstream:
     repository: couchdb
     tag: 2.3.0
   generated:
     repository: gcr.io/gpii-common-prd/couchdb
-    sha: sha256:d1535416e14602ad6f061500fdfb4c3a862cf0a552961fb37a4325d65470e7af
-    tag: 2.2.0
+    sha: sha256:d1bf43a8484a1728a897f20d9d223f71076a91cd9f73e6f5070ce2f3e22b37fe
+    tag: 2.3.0
 dataloader:
   upstream:
     repository: gpii/universal
@@ -99,8 +99,8 @@ nginx_ingress:
     tag: 0.24.1
   generated:
     repository: gcr.io/gpii-common-prd/quay.io/kubernetes-ingress-controller/nginx-ingress-controller
-    sha: sha256:0489cd1c6f0755f532d4b8204d5dabea038d4b2be8ec6efc2da584ff3f5aba61
-    tag: 0.15.0
+    sha: sha256:76861d167e4e3db18f2672fd3435396aaa898ddf4d1128375d7c93b91c59f87f
+    tag: 0.24.1
 preferences:
   upstream:
     repository: gpii/universal
