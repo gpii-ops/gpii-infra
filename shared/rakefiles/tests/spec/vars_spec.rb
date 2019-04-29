@@ -143,6 +143,87 @@ describe Vars do
     Vars.set_vars(env, project_type)
     expect(ENV).to have_received(:[]=).with("TF_VAR_nonce", a_value)
   end
+
+
+  it "set_versions sets TF_VAR_<component>_(repository|checksum|tag)" do
+    fake_versions = {
+      "flowmanager" => {
+        "upstream" => {
+          "repository" => "fake_repository:fake_tag",
+        },
+        "generated" => {
+          "repository" => "gcr.io/some-project/fake_repository",
+          "sha" => "sha256:c0ffee",
+          "tag" => "fake_tag",
+        },
+      },
+      "component_without_generated" => {
+        "upstream" => {
+          "repository" => "another_fake_repository",
+        },
+      },
+      "component_without_repository" => {
+        "upstream" => {
+          "repository" => "another_fake_repository",
+        },
+        "generated" => {
+          "sha" => "sha256:50da",
+          "tag" => "fake_tag",
+        },
+      },
+      "component_without_sha" => {
+        "upstream" => {
+          "repository" => "another_fake_repository",
+        },
+        "generated" => {
+          "repository" => "gcr.io/some-project/another_fake_repository",
+          "tag" => "fake_tag",
+        },
+      },
+      "component_without_tag" => {
+        "upstream" => {
+          "repository" => "another_fake_repository",
+        },
+        "generated" => {
+          "repository" => "gcr.io/some-project/another_fake_repository",
+          "sha" => "sha256:50da",
+        },
+      },
+    }
+    allow(File).to receive(:read)
+    allow(YAML).to receive(:load).and_return(fake_versions)
+    Vars.set_versions()
+    expect(ENV).to have_received(:[]=).with("TF_VAR_flowmanager_repository", "gcr.io/some-project/fake_repository")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_flowmanager_checksum", "sha256:c0ffee")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_flowmanager_tag", "fake_tag")
+    expect(ENV).not_to have_received(:[]=).with("TF_VAR_component_without_repository_repository", any_args)
+    expect(ENV).not_to have_received(:[]=).with("TF_VAR_component_without_sha_repository", any_args)
+    expect(ENV).not_to have_received(:[]=).with("TF_VAR_component_without_tag_repository", any_args)
+  end
+
+  it "set_versions handles tags that look like floats" do
+    # Usually, the yaml library can deduce that a tag is a string. However, if
+    # the tag is a valid float it is imported as such. Then,
+    # ENV[component_tag]= raises "TypeError: no implicit conversion of Float
+    # into String".
+    fake_tag = 3.9
+    fake_versions = {
+      "flowmanager" => {
+        "upstream" => {
+          "repository" => "fake_repository:fake_tag",
+        },
+        "generated" => {
+          "repository" => "gcr.io/some-project/fake_repository",
+          "sha" => "sha256:c0ffee",
+          "tag" => fake_tag,
+        },
+      },
+    }
+    allow(File).to receive(:read)
+    allow(YAML).to receive(:load).and_return(fake_versions)
+    Vars.set_versions()
+    expect(ENV).to have_received(:[]=).with("TF_VAR_flowmanager_tag", "#{fake_tag}")
+  end
 end
 
 

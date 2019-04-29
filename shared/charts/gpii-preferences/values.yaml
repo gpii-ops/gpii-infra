@@ -21,9 +21,10 @@ rollingUpdate:
   maxSurge: 25%
   maxUnavailable: 25%
 
-issuerRef:
-  name: letsencrypt-production
-  kind: Issuer
+acme:
+  server: https://acme-staging-v02.api.letsencrypt.org/directory
+  email: dev-null@raisingthefloor.org
+  clouddnsProject:
 
 dnsNames:
 - preferences.test.local

@@ -67,10 +67,18 @@ class Vars
 
   def self.set_versions()
     versions = YAML.load(File.read(Vars::VERSIONS_FILE))
-    ['flowmanager', 'preferences', 'dataloader'].each do |component|
-      next unless versions["gpii-#{component}"]
-      ENV["TF_VAR_#{component}_repository"] = versions["gpii-#{component}"].split('@')[0]
-      ENV["TF_VAR_#{component}_checksum"] = versions["gpii-#{component}"].split('@')[1]
+    versions.each do |component, values|
+      next unless (values["generated"] and
+                   values["generated"]["repository"] and
+                   values["generated"]["sha"] and
+                   values["generated"]["tag"])
+      ENV["TF_VAR_#{component}_repository"] = values["generated"]["repository"]
+      ENV["TF_VAR_#{component}_checksum"] = values["generated"]["sha"]
+      # Usually, the yaml library can deduce that a tag is a string. However, if
+      # the tag is a valid float it is imported as such. Then,
+      # ENV[component_tag]= raises "TypeError: no implicit conversion of Float
+      # into String".
+      ENV["TF_VAR_#{component}_tag"] = values["generated"]["tag"].to_s
     end
   end
 end

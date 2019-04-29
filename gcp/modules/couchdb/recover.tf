@@ -11,13 +11,13 @@ resource "null_resource" "couchdb_recover_pvcs" {
 
   provisioner "local-exec" {
     command = <<EOF
-      for DISK in $(gcloud compute disks list --filter description:couchdb --format json | jq -c .[]); do
+      for DISK in $(gcloud compute disks list --filter description:database-storage-couchdb --format json | jq -c .[]); do
         PD_NAME=$(echo $DISK | jq -r .name)
         PD_DESC=$(echo $DISK | jq -r .description)
         PV_NAME=$(echo $PD_DESC | jq -r '.["kubernetes.io/created-for/pv/name"]')
         PVC_NAME=$(echo $PD_DESC | jq -r '.["kubernetes.io/created-for/pvc/name"]')
         if [ "$(kubectl -n gpii get pvc $PVC_NAME -o json 2>/dev/null | jq -r .metadata.name)" != "$PVC_NAME" ]; then
-          jq -n \
+          MANIFEST=$(jq -n \
             --arg pd_name "$PD_NAME" \
             --arg pv_name "$PV_NAME" \
             --arg pvc_name "$PVC_NAME" \
@@ -77,7 +77,10 @@ resource "null_resource" "couchdb_recover_pvcs" {
                 }
               }
             ],
-          "kind": "List"}' | kubectl apply -f -
+          "kind": "List"}')
+          echo "Applying this manifest to update PVs and PVCs:"
+          echo "$MANIFEST"
+          echo "$MANIFEST" | kubectl apply -f -
         fi
       done
     EOF
