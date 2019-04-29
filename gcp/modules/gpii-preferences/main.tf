@@ -2,22 +2,15 @@ terraform {
   backend "gcs" {}
 }
 
-variable "env" {}
-variable "serviceaccount_key" {}
-variable "project_id" {}
-variable "auth_user_email" {}
-
 variable "secrets_dir" {}
 variable "charts_dir" {}
-variable "domain_name" {}
 
 variable "preferences_repository" {}
 variable "preferences_checksum" {}
 
 # Terragrunt variables
-variable "cert_issuer_name" {}
-
 variable "replica_count" {}
+
 variable "requests_cpu" {}
 variable "requests_memory" {}
 variable "limits_cpu" {}
@@ -28,21 +21,10 @@ variable "secret_couchdb_admin_username" {}
 
 variable "secret_couchdb_admin_password" {}
 
-provider "google" {
-  project     = "${var.project_id}"
-  credentials = "${var.serviceaccount_key}"
-}
-
-locals {
-  user_email = "${var.auth_user_email != "" ? var.auth_user_email : "dev-null@raisingthefloor.org"}"
-  acme_email = "${var.env == "prd" || var.env == "stg" ? "ops@raisingthefloor.org" : local.user_email}"
-}
-
 data "template_file" "preferences_values" {
   template = "${file("${path.module}/templates/values.yaml.tpl")}"
 
   vars {
-    domain_name            = "${var.domain_name}"
     preferences_repository = "${var.preferences_repository}"
     preferences_checksum   = "${var.preferences_checksum}"
     couchdb_admin_username = "${var.secret_couchdb_admin_username}"
@@ -52,9 +34,6 @@ data "template_file" "preferences_values" {
     requests_memory        = "${var.requests_memory}"
     limits_cpu             = "${var.limits_cpu}"
     limits_memory          = "${var.limits_memory}"
-    project_id             = "${var.project_id}"
-    acme_server            = "${var.env == "prd" || var.env == "stg" ? "https://acme-v02.api.letsencrypt.org/directory" : "https://acme-staging-v02.api.letsencrypt.org/directory"}"
-    acme_email             = "${local.acme_email}"
   }
 }
 
