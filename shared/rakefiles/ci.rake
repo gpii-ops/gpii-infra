@@ -34,12 +34,8 @@ task :configure_serviceaccount_ci_restore => [:set_vars_ci] do
   # service account key file.
   sh "#{@exekube_cmd_with_backups} sh -c '\
     mkdir -p $(dirname #{@serviceaccount_key_file}) && \
-    cp -av #{@serviceaccount_key_file_in_backups} #{@serviceaccount_key_file} \
-  '"
-  sh "#{@exekube_cmd} sh -c '\
-    gcloud auth activate-service-account \
-      --key-file #{@serviceaccount_key_file} \
-      --project $TF_VAR_project_id \
+    cp -av #{@serviceaccount_key_file_in_backups} #{@serviceaccount_key_file} && \
+    rake activate_serviceaccount
   '"
 end
 
