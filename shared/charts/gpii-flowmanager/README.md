@@ -50,7 +50,6 @@ The following table lists the configurable parameters of the gpii-flowmanager ch
 | `acme.server                   | optional ACME server for certificate issuer                                              | `https://acme-staging-v02.api.letsencrypt.org/directory`                  |
 | `datasourceHostname`           | data source hostname for preferences service                                             | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`        |
 | `datasourceListenPort`         | data source port for flowmanager service                                                 | `5984`                                                                    |
-| `disableSslRedirect`           | disable nginx-ingress redirection to HTTPS                                               | `false`                                                                   |
 | `dnsNames`                     | list of host names for nginx-ingress controller                                          | `flowmanager.test.local`                                                  |
 | `enableStackdriverTrace`       | enable [GCP Stackdriver Trace](https://cloud.google.com/trace/)                          | `false`                                                                   |
 | `flowmanagerListenPort`        | port for flowmanager service to listen on                                                | `8081`                                                                    |
