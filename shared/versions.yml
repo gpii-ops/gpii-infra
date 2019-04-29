@@ -63,19 +63,27 @@ couchdb:
     tag: 2.2.0
 dataloader:
   upstream:
-    repository: gpii/universal
+    repository: herrclown/vagrant-universal
     tag: latest
   generated:
-    repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:fa26b6d96f5b5cc5d9584d4c81b4e3f3e058dcad87fbb11e21e3aad8375862d5
+    repository: herrclown/vagrant-universal
+    sha: sha256:04933c1f74216fb3d32ad98d9a9b7fd4be9d3bcf76258b48a48aa6fbc5309b09
+    tag: latest
+flushtokens:
+  upstream:
+    repository: herrclown/vagrant-universal
+    tag: latest
+  generated:
+    repository: herrclown/vagrant-universal
+    sha: sha256:04933c1f74216fb3d32ad98d9a9b7fd4be9d3bcf76258b48a48aa6fbc5309b09
     tag: latest
 flowmanager:
   upstream:
-    repository: gpii/universal
+    repository: herrclown/vagrant-universal
     tag: latest
   generated:
-    repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:fa26b6d96f5b5cc5d9584d4c81b4e3f3e058dcad87fbb11e21e3aad8375862d5
+    repository: herrclown/vagrant-universal
+    sha: sha256:04933c1f74216fb3d32ad98d9a9b7fd4be9d3bcf76258b48a48aa6fbc5309b09
     tag: latest
 k8s_snapshots:
   upstream:
@@ -103,11 +111,11 @@ nginx_ingress:
     tag: 0.15.0
 preferences:
   upstream:
-    repository: gpii/universal
+    repository: herrclown/vagrant-universal
     tag: latest
   generated:
-    repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:fa26b6d96f5b5cc5d9584d4c81b4e3f3e058dcad87fbb11e21e3aad8375862d5
+    repository: herrclown/vagrant-universal
+    sha: sha256:04933c1f74216fb3d32ad98d9a9b7fd4be9d3bcf76258b48a48aa6fbc5309b09
     tag: latest
 service_account_assigner:
   upstream:

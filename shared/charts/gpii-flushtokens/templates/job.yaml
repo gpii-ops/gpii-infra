@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  namespace: {{ .Release.Namespace | quote }}
+  name: {{ template "flushtokens.name" . }}
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ template "flushtokens.name" . }}
+    spec:
+      containers:
+      - name: gpii-flushtokens
+        image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
+        command: [ '/app/scripts/dockerDeleteExpiredAccessTokens.sh' ]
+        env:
+        - name: GPII_COUCHDB_URL
+          value: '{{ .Values.couchdbUrl }}'
+        - name: DELETE_ALL_FLAG
+          value: ''
+      restartPolicy: OnFailure
