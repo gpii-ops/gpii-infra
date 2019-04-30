@@ -21,6 +21,14 @@ variable "secret_couchdb_admin_username" {}
 
 variable "secret_couchdb_admin_password" {}
 
+variable "serviceaccount_key" {}
+variable "project_id" {}
+
+provider "google" {
+  project     = "${var.project_id}"
+  credentials = "${var.serviceaccount_key}"
+}
+
 data "template_file" "preferences_values" {
   template = "${file("${path.module}/templates/values.yaml.tpl")}"
 
