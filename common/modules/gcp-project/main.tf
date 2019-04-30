@@ -38,6 +38,8 @@ variable "serviceaccount_key" {}
 # Id of the project which owns the credentials used by the provider
 variable "project_id" {}
 
+variable "infra_region" {}
+
 # the ci_dev_project_regex is a regular expression that matches the projects that will
 # be excercised by the CI it will be ephemeral, with the same specs as any other
 # developer project, except for the IAM permissions will be based on a service
@@ -51,6 +53,7 @@ variable "service_apis" {
   default = [
     "bigquery-json.googleapis.com",
     "cloudbilling.googleapis.com",
+    "cloudbuild.googleapis.com",
     "cloudkms.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "cloudtrace.googleapis.com",
@@ -68,9 +71,12 @@ variable "service_apis" {
     "replicapool.googleapis.com",
     "replicapoolupdater.googleapis.com",
     "resourceviews.googleapis.com",
+    "servicemanagement.googleapis.com",
     "serviceusage.googleapis.com",
+    "sourcerepo.googleapis.com",
     "stackdriver.googleapis.com",
     "storage-api.googleapis.com",
+    "websecurityscanner.googleapis.com",
   ]
 }
 
@@ -96,6 +102,7 @@ data "google_iam_policy" "combined" {
 
     members = [
       "${local.service_accounts}",
+      "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
     ]
   }
 
@@ -120,6 +127,7 @@ data "google_iam_policy" "combined" {
 
     members = [
       "${local.service_accounts}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_cert_manager.email}",
     ]
   }
 
@@ -133,6 +141,22 @@ data "google_iam_policy" "combined" {
 
   binding {
     role = "roles/iam.serviceAccountUser"
+
+    members = [
+      "${local.service_accounts}",
+    ]
+  }
+
+  binding {
+    role = "roles/iam.serviceAccountActor"
+
+    members = [
+      "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
+    ]
+  }
+
+  binding {
+    role = "roles/iam.serviceAccountAdmin"
 
     members = [
       "${local.service_accounts}",
@@ -180,6 +204,23 @@ data "google_iam_policy" "combined" {
   }
 
   binding {
+    role = "roles/cloudbuild.builds.builder"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+      "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
+    ]
+  }
+
+  binding {
+    role = "roles/cloudbuild.builds.editor"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+    ]
+  }
+
+  binding {
     role = "roles/compute.serviceAgent"
 
     members = [
@@ -199,7 +240,6 @@ data "google_iam_policy" "combined" {
     role = "roles/editor"
 
     members = [
-      "serviceAccount:${google_project.project.number}-compute@developer.gserviceaccount.com",
       "serviceAccount:${google_project.project.number}@cloudservices.gserviceaccount.com",
       "serviceAccount:service-${google_project.project.number}@containerregistry.iam.gserviceaccount.com",
     ]
@@ -210,6 +250,95 @@ data "google_iam_policy" "combined" {
 
     members = [
       "${local.project_owners}",
+    ]
+  }
+
+  binding {
+    role = "roles/logging.logWriter"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_node.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/monitoring.metricWriter"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_node.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/monitoring.viewer"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_node.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/cloudtrace.agent"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_node.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/sourcerepo.serviceAgent"
+
+    members = [
+      "serviceAccount:service-${google_project.project.number}@sourcerepo-service-accounts.iam.gserviceaccount.com",
+    ]
+  }
+
+  binding {
+    role = "roles/compute.storageAdmin"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_pod_k8s_snapshots.email}",
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/compute.viewer"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/iam.roleViewer"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/serviceusage.serviceUsageConsumer"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/storage.objectViewer"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
     ]
   }
 
@@ -233,10 +362,7 @@ data "google_iam_policy" "combined" {
 provider "google" {
   credentials = "${var.serviceaccount_key}"
   project     = "${var.project_id}"
-
-  # Hardcoded region should be fixed in favor of TF_VAR_infra_region for consistency:
-  # https://issues.gpii.net/browse/GPII-3707
-  region = "us-central1"
+  region      = "${var.infra_region}"
 }
 
 # The dnsname and the dns domain must be computed for each new project created.
@@ -258,7 +384,7 @@ locals {
   # Project owners will be empty list if var.project_owner is empty string ""
   project_owners = "${compact(list(var.project_owner))}"
 
-  # stg, prd, dev, and the projects that matches the ci_dev_project_regex variable are managed 
+  # stg, prd, dev, and the projects that matches the ci_dev_project_regex variable are managed
   # by the CI so they should have the service account and the permissions attached to it
   #
   root_project_iam = "${replace(var.project_name, var.ci_dev_project_regex, "") != "" && replace(var.project_name, "/^dev-.*/", "") == ""}"
@@ -325,6 +451,13 @@ resource "google_dns_record_set" "ns-root" {
 resource "google_storage_bucket" "project-tfstate" {
   project = "${google_project.project.project_id}"
   name    = "${var.organization_name}-gcp-${var.project_name}-tfstate"
+
+  # Default region "US" should be fixed in favor of TF_VAR_infra_region for consistency:
+  # https://issues.gpii.net/browse/GPII-3707
+  # location = "${var.infra_region}"
+  location = "US"
+
+  force_destroy = false
 
   versioning = {
     enabled = "true"

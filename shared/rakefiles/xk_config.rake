@@ -29,6 +29,18 @@ task :configure_serviceaccount => [@gcp_creds_file] do
         --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com
     "
   end
+  Rake::Task[:activate_serviceaccount].invoke
+end
+
+# We need separate task to activate service account from key file
+# so we can call it directly after restoring saved
+# @serviceaccount_key_file in :configure_serviceaccount_ci_restore
+task :activate_serviceaccount => [@serviceaccount_key_file] do
+  sh "
+    gcloud auth activate-service-account \
+      --key-file #{@serviceaccount_key_file} \
+      --project $TF_VAR_project_id
+  "
 end
 
 @app_default_creds_file = "/root/.config/gcloud/application_default_credentials.json"
@@ -74,9 +86,20 @@ task :configure_extra_tf_vars do
   end
 end
 
-task :fetch_helm_certs => [:configure_extra_tf_vars] do
-  @secrets = Secrets.collect_secrets()
-  Secrets.set_secrets(@secrets)
+task :configure_secrets do
+  decrypt_with_key_from_region = ENV["TF_VAR_decrypt_with_key_from_region"]
+  @secrets = Secrets.new(
+      ENV["TF_VAR_project_id"],
+      ENV["TF_VAR_infra_region"],
+      decrypt_with_key_from_region=decrypt_with_key_from_region)
+  @secrets.collect_secrets()
+end
+
+task :set_secrets do
+  @secrets.set_secrets()
+end
+
+task :fetch_helm_certs => [:configure, :configure_secrets, :set_secrets] do
   sh "
     cd /project/live/${ENV}/k8s/kube-system/helm-initializer
     echo \"[helm-initializer] Pulling TF state...\"
@@ -88,8 +111,12 @@ task :fetch_helm_certs => [:configure_extra_tf_vars] do
         echo \"[helm-initializer] Populating ${filename}...\"
         mkdir -p $(dirname \"${filename}\")
         echo \"${content}\" > \"${filename}\"
+      else
+        echo \"[helm-initializer] Could not find data for ${filename}. Skipping...\"
       fi
     done
+    echo \"[helm-initializer] Here are the certs I fetched:\"
+    find \"/project/live/${ENV}/secrets\" -type f | sort | xargs ls -l
   "
 end
 
@@ -97,3 +124,6 @@ task :configure => [@gcp_creds_file, @app_default_creds_file, @kubectl_creds_fil
   # This is a wrapper configuration task.
   # It does nothing, but it has all dependencies that required for standard rake workflow.
 end
+
+
+# vim: et ts=2 sw=2:

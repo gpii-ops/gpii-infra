@@ -21,13 +21,6 @@ rollingUpdate:
   maxSurge: 25%
   maxUnavailable: 25%
 
-issuerRef:
-  name: letsencrypt-production
-  kind: Issuer
-
-dnsNames:
-- preferences.test.local
-
 nameOverride: preferences
 
 ## Optional resource requests and limits for deployment

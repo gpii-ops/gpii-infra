@@ -5,6 +5,12 @@ terraform {
 variable "secrets_dir" {}
 variable "charts_dir" {}
 variable "nonce" {}
+variable "couchdb_helper_repository" {}
+variable "couchdb_helper_tag" {}
+variable "couchdb_init_repository" {}
+variable "couchdb_init_tag" {}
+variable "couchdb_repository" {}
+variable "couchdb_tag" {}
 
 # Terragrunt variables
 
@@ -33,17 +39,23 @@ data "template_file" "couchdb_values" {
   template   = "${file("values.yaml")}"
 
   vars {
-    couchdb_admin_username = "${var.secret_couchdb_admin_username}"
-    couchdb_admin_password = "${var.secret_couchdb_admin_password}"
-    couchdb_auth_cookie    = "${var.secret_couchdb_auth_cookie}"
-    replica_count          = "${var.replica_count}"
-    requests_cpu           = "${var.requests_cpu}"
-    requests_memory        = "${var.requests_memory}"
-    limits_cpu             = "${var.limits_cpu}"
-    limits_memory          = "${var.limits_memory}"
-    pv_capacity            = "${var.pv_capacity}"
-    pv_storage_class       = "${var.pv_storage_class}"
-    pv_provisioner         = "${var.pv_provisioner}"
+    couchdb_admin_username    = "${var.secret_couchdb_admin_username}"
+    couchdb_admin_password    = "${var.secret_couchdb_admin_password}"
+    couchdb_auth_cookie       = "${var.secret_couchdb_auth_cookie}"
+    couchdb_helper_repository = "${var.couchdb_helper_repository}"
+    couchdb_helper_tag        = "${var.couchdb_helper_tag}"
+    couchdb_init_repository   = "${var.couchdb_init_repository}"
+    couchdb_init_tag          = "${var.couchdb_init_tag}"
+    couchdb_repository        = "${var.couchdb_repository}"
+    couchdb_tag               = "${var.couchdb_tag}"
+    replica_count             = "${var.replica_count}"
+    requests_cpu              = "${var.requests_cpu}"
+    requests_memory           = "${var.requests_memory}"
+    limits_cpu                = "${var.limits_cpu}"
+    limits_memory             = "${var.limits_memory}"
+    pv_capacity               = "${var.pv_capacity}"
+    pv_storage_class          = "${var.pv_storage_class}"
+    pv_provisioner            = "${var.pv_provisioner}"
   }
 }
 
@@ -79,7 +91,9 @@ resource "null_resource" "couchdb_finish_cluster" {
       RETRY_COUNT=1
       while [ "$CLUSTER_READY" != "true" ]; do
         echo "[Try $RETRY_COUNT of $RETRIES] Waiting for all CouchDB pods to join the cluster..."
-        CLUSTER_MEMBERS_COUNT=$(curl -s $COUCHDB_URL/_membership 2>/dev/null | jq -r .cluster_nodes[] | grep -c .)
+        MEMBERSHIP_OUTPUT=$(curl -s $COUCHDB_URL/_membership 2>/dev/null)
+        CLUSTER_MEMBERS_COUNT=$(echo $MEMBERSHIP_OUTPUT | jq -r .cluster_nodes[] | grep -c .)
+        echo "/_membership returned: $MEMBERSHIP_OUTPUT"
         echo "$CLUSTER_MEMBERS_COUNT of ${var.replica_count} pods have joined the cluster."
         if [ "$CLUSTER_MEMBERS_COUNT" == "${var.replica_count}" ]; then
           CLUSTER_READY="true"
