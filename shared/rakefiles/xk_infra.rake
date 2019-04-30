@@ -1,4 +1,5 @@
 common_sa_org_roles = [
+  "roles/billing.user",
   "roles/dns.admin",
   "roles/iam.organizationRoleViewer",
   "roles/iam.serviceAccountAdmin",
