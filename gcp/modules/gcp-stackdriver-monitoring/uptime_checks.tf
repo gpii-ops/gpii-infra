@@ -1,5 +1,5 @@
 locals {
-  uptime_checks = ["flowmanager", "preferences"]
+  uptime_checks = ["flowmanager"]
 }
 
 resource "google_monitoring_uptime_check_config" "this" {

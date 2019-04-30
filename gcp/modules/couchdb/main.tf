@@ -84,13 +84,26 @@ resource "null_resource" "couchdb_finish_cluster" {
       COUCHDB_URL="http://${var.secret_couchdb_admin_username}:${var.secret_couchdb_admin_password}@127.0.0.1:5984"
       PORT_FORWARD_CMD="kubectl -n ${var.release_namespace} port-forward statefulset/couchdb-couchdb 5984:5984"
 
-      $PORT_FORWARD_CMD </dev/null &>/dev/null &
-      sleep 5
+      start_forwarding_port() {
+        sleep_secs=5
+        echo "...starting port forward (and sleeping $sleep_secs)..."
+        $PORT_FORWARD_CMD </dev/null &>/dev/null &
+        sleep $sleep_secs
+      }
+
+      stop_forwarding_port() {
+        sleep_secs=1
+        echo "...stopping port forward (and sleeping $sleep_secs)..."
+        kill $(pgrep -f "^$PORT_FORWARD_CMD")
+        sleep $sleep_secs
+      }
 
       RETRIES=15
       RETRY_COUNT=1
       while [ "$CLUSTER_READY" != "true" ]; do
         echo "[Try $RETRY_COUNT of $RETRIES] Waiting for all CouchDB pods to join the cluster..."
+        stop_forwarding_port
+        start_forwarding_port
         MEMBERSHIP_OUTPUT=$(curl -s $COUCHDB_URL/_membership 2>/dev/null)
         CLUSTER_MEMBERS_COUNT=$(echo $MEMBERSHIP_OUTPUT | jq -r .cluster_nodes[] | grep -c .)
         echo "/_membership returned: $MEMBERSHIP_OUTPUT"
@@ -100,7 +113,7 @@ resource "null_resource" "couchdb_finish_cluster" {
         fi
         if [ "$RETRY_COUNT" == "$RETRIES" ] && [ "$CLUSTER_READY" != "true" ]; then
           echo "Retry limit reached, giving up!"
-          kill $(pgrep -f "^$PORT_FORWARD_CMD")
+          stop_forwarding_port
           exit 1
         fi
         if [ "$CLUSTER_READY" != "true" ]; then
@@ -118,7 +131,7 @@ resource "null_resource" "couchdb_finish_cluster" {
         STATUS=$(echo $RESULT | jq ".reason")
         if [ "$RETRY_COUNT" == "$RETRIES" ] && [ "$STATUS" != '"Cluster is already finished"' ]; then
           echo "Retry limit reached, giving up!"
-          kill $(pgrep -f "^$PORT_FORWARD_CMD")
+          stop_forwarding_port
           exit 1
         fi
         if [ "$STATUS" != '"Cluster is already finished"' ]; then
@@ -127,7 +140,7 @@ resource "null_resource" "couchdb_finish_cluster" {
         RETRY_COUNT=$(($RETRY_COUNT+1))
       done
 
-      kill $(pgrep -f "^$PORT_FORWARD_CMD")
+      stop_forwarding_port
     EOF
   }
 }

@@ -58,7 +58,6 @@ Users who already had an RtF email address/Google account usually have performed
    * The first time you deploy a GPII Cloud (or after you run `rake clobber`), you will be prompted to authenticate **twice**. Follow the instructions in the prompts.
    * If your browser is configured with multiple Google accounts (e.g. a personal Gmail account as well as an RtF Gmail account), make sure to choose the right one when authenticating.
 1. Once `rake` finishes, GPII Cloud endpoints should be available at `https://<service>.<your cluster name>.dev.gcp.gpii.net/`
-   * e.g. https://preferences.alfredo.dev.gcp.gpii.net/preferences/carla
    * e.g. https://flowmanager.alfredo.dev.gcp.gpii.net
 1. Lots of information about your GPII Cloud is available through the [Google Cloud Console](https://console.cloud.google.com). Some common links:
    * [Kubernetes clusters](https://console.cloud.google.com/kubernetes/list)
