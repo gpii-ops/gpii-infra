@@ -38,7 +38,7 @@ This document describes manual steps needed for initial configuration when using
 * https://support.google.com/code/contact/billing_quota_increase
    * @mrtyler requested a quota bump to 100 Projects.
       * He only authorized his own email for now, to see what it did. But it's possible other Ops team members will need to go through this step.
-* When configuring additional organizations (i.e. test1.gpii.net), it is important to grant common SA of target organization Billing Account User permissions on the organization that owns main billing account. This can be done by running `rake :set_billing_org_perms` in target environment Terragrunt folder (`common/live/stg` in case of test1.gpii.net), authenticated as member of cloud-admin group.
+* When configuring additional organizations (i.e. test1.gpii.net), it is important to grant common SA of target organization Billing Account User permissions on the organization that owns main billing account. This can be done by running `rake set_billing_org_perms` in target environment Terragrunt folder (`common/live/stg` in case of test1.gpii.net), authenticated as member of cloud-admin group.
 
 ## Web security scans for an environment public endpoints
 
