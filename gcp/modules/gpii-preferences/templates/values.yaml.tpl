@@ -4,14 +4,6 @@ image:
   repository: ${preferences_repository}
   checksum: ${preferences_checksum}
 
-acme:
-  clouddnsProject: ${project_id}
-  server: "${acme_server}"
-  email: "${acme_email}"
-
-dnsNames:
-- preferences.${domain_name}
-
 datasourceHostname: "http://${couchdb_admin_username}:${couchdb_admin_password}@couchdb-svc-couchdb.gpii.svc.cluster.local"
 
 enableStackdriverTrace: true

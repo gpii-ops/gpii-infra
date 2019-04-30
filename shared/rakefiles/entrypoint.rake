@@ -95,9 +95,6 @@ task :display_cluster_info => [:set_vars] do
   puts "Stackdriver Monitoring Dashboard:"
   puts "  https://app.google.stackdriver.com/?project=#{ ENV["TF_VAR_project_id"] }"
   puts
-  puts "Preferences endpoint:"
-  puts "  curl -k https://preferences.#{ENV["TF_VAR_domain_name"] }/preferences/carla"
-  puts
   puts "Flowmanager endpoint:"
   puts "  curl -k https://flowmanager.#{ENV["TF_VAR_domain_name"] }"
   puts
