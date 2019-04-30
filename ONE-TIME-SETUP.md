@@ -8,7 +8,7 @@ This document describes manual steps needed for initial configuration when using
    * From the [G Suite Admin Organizational Units page](https://admin.google.com/u/1/ac/orgunits), add a new Organizational Unit
 * Disable unneeded G Suite Services
    * From the [G Suite Admin Apps page](https://admin.google.com/u/1/ac/appslist/core), select all Services, and select Off
-   * From the [G Suite Admin Additional Services page](https://admin.google.com/u/1/ac/appslist/additional), select all Services **EXCEPT** Google Groups, and select Off
+   * From the [G Suite Admin Additional Services page](https://admin.google.com/u/1/ac/appslist/additional), select all Services **EXCEPT** "Groups for Business", and select Off
 * Create a public Group "cloud-developers"
    * From the [G Suite Admin Groups page](https://admin.google.com/raisingthefloor.org/AdminHome?hl=en&fc=true#GroupList:), add a new Group
    * Set it so that anyone can view or post, but only Managers and Owners can invite members
