@@ -82,7 +82,7 @@ k8s_snapshots:
     repository: elsdoerfer/k8s-snapshots
     tag: v2.0
   generated:
-    repository: gcr.io/gpii-common-prd/elsdoerfer/k8s-snapshots
+    repository: gcr.io/gpii2test-common-stg/elsdoerfer/k8s-snapshots
     sha: sha256:c787dc6fa1812c97ac96f46b4ff6dc1485e06c458839d4aa129aaf62201309e9
     tag: v2.0
 locust:
@@ -90,7 +90,7 @@ locust:
     repository: gpii/locust
     tag: 0.9.0-gpii.5
   generated:
-    repository: gcr.io/gpii-common-prd/gpii/locust
+    repository: gcr.io/gpii2test-common-stg/gpii/locust
     sha: sha256:92f89becdc6039f97baf61173cd53b3cac7183679df728ec8514ce67e3afff16
     tag: 0.9.0-gpii.5
 nginx_ingress:
