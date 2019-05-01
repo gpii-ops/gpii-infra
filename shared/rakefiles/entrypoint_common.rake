@@ -7,12 +7,25 @@ task :apply_common_infra => [:set_vars, :configure_aws_restore] do
   sh "#{@exekube_cmd} rake apply_common_infra"
 end
 
-desc "[ONLY ADMIN] Fix the permissions for admin accounts in the organization"
-task :fix_organization_permissions => [:set_vars] do
+desc "[ONLY ADMIN] Set required permissions for the accounts in the current organization"
+task :set_org_perms => [:set_vars] do
   # This task sets the permissions in the organization for creating the
   # projects and for setting the IAMs needed to manage such projects.
   #
   # Due to the needed permissions for setting such permissions, only an
   # administrator of the organization must run this task.
-  sh "#{@exekube_cmd} rake fix_organization_permissions"
+  sh "#{@exekube_cmd} rake set_org_perms"
+end
+
+desc "[ONLY ADMIN] Set required permissions for the accounts in the organization that owns billing account"
+task :set_billing_org_perms => [:set_vars] do
+  # We need to grant Billing User role in the organization that owns
+  # Billing Account to the projectowner SA of current organization, otherwise it will
+  # fail to create new projects.
+  #
+  # WARNING: You need to run this code authenticated under your main (member of cloud-admin group) account.
+  #          It will not work in CI or if you are using projectowner SA.
+  #
+  # Go to the https://console.cloud.google.com/billing/ to see the permissions granted.
+  sh "#{@exekube_cmd} rake set_billing_org_perms"
 end
