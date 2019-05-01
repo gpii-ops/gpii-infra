@@ -9,10 +9,10 @@ spec:
     name: letsencrypt-{{ template "flowmanager.name" . }}
     kind: Issuer
   dnsNames:
-  {{ toYaml .Values.dnsNames | indent 2 }}
+  {{ toYaml .Values.dnsNames | indent 2 | trim }}
   acme:
     config:
     - dns01:
         provider: default
       domains:
-      {{ toYaml .Values.dnsNames | indent 6 }}
+      {{ toYaml .Values.dnsNames | indent 6 | trim }}

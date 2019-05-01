@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: {{ template "flowmanager.name" . }}-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 443
+      name: https-{{ template "flowmanager.name" . }}
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      serverCertificate: /etc/istio/ingressgateway-certs/flowmanager-tls.crt
+      privateKey: /etc/istio/ingressgateway-certs/flowmanager-tls.key
+    hosts:
+    {{ toYaml .Values.dnsNames | indent 4 | trim }}

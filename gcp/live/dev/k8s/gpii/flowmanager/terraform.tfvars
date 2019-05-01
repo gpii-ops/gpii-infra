@@ -9,6 +9,7 @@ terragrunt = {
       "../../kube-system/cert-manager",
       "../nginx-ingress",
       "../couchdb",
+      "../istio",
     ]
   }
 

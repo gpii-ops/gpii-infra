@@ -1,13 +1,11 @@
 # ↓ Module metadata
 terragrunt = {
   terraform {
-    source = "/project/modules//gpii-dataloader"
+    source = "/project/modules//gpii-istio"
   }
 
   dependencies {
     paths = [
-      "../couchdb",
-      "../istio",
     ]
   }
 
@@ -17,4 +15,3 @@ terragrunt = {
 }
 
 # ↓ Module configuration (empty means all default)
-
