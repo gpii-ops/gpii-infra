@@ -91,8 +91,8 @@ locust:
     tag: 0.9.0-gpii.6
   generated:
     repository: gcr.io/gpii-common-prd/gpii/locust
-    sha: sha256:92f89becdc6039f97baf61173cd53b3cac7183679df728ec8514ce67e3afff16
-    tag: 0.9.0-gpii.5
+    sha: sha256:a6b8d742092af90248c379ba20755ebe9e980d753b1f3010841d133e9ff93b27
+    tag: 0.9.0-gpii.6
 nginx_ingress:
   upstream:
     repository: quay.io/kubernetes-ingress-controller/nginx-ingress-controller
