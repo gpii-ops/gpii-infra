@@ -11,7 +11,7 @@ $ helm install path_to_chart/gpii-flushtokens
 
 ## Introduction
 
-This chart bootstraps a GPII Dataloader deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+This chart bootstraps a deployment of GPII Flushtokesn on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
 ## Prerequisites
   - Kubernetes 1.8+ with Beta APIs enabled
@@ -24,7 +24,7 @@ To install the chart with the release name `my-release`:
 $ helm install --name my-release path_to_chart/gpii-flushtokens
 ```
 
-The command deploys gpii-dataloader on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
+The command deploys gpii-flushtokens on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
 
 > **Tip**: List all releases using `helm list`
 
