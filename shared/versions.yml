@@ -88,7 +88,7 @@ k8s_snapshots:
 locust:
   upstream:
     repository: gpii/locust
-    tag: 0.9.0-gpii.5
+    tag: 0.9.0-gpii.6
   generated:
     repository: gcr.io/gpii-common-prd/gpii/locust
     sha: sha256:92f89becdc6039f97baf61173cd53b3cac7183679df728ec8514ce67e3afff16
