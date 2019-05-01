@@ -90,7 +90,7 @@ locust:
     repository: gpii/locust
     tag: 0.9.0-gpii.5
   generated:
-    repository: gcr.io/gpii-common-prd/gpii/locust
+    repository: gcr.io/gpii2test-common-stg/gpii/locust
     sha: sha256:92f89becdc6039f97baf61173cd53b3cac7183679df728ec8514ce67e3afff16
     tag: 0.9.0-gpii.5
 nginx_ingress:
