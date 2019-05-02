@@ -17,6 +17,21 @@ task :xk, [:cmd, :skip_secret_mgmt, :preserve_stderr] => [:configure, :configure
 
   Rake::Task["set_secrets"].invoke
 
+  # This is temporary task to handle updates of existing clusters to Istio (GPII-3671)
+  sh_filter "sh -c '
+    # if there is no kubernetes_namespace resource in TF state
+    terragrunt state pull --terragrunt-working-dir \"live/#{@env}/k8s/gpii/istio\" | jq -er \".modules[].resources[\\\"kubernetes_namespace.gpii\\\"]\" >/dev/null
+    if [ \"$?\" -ne 0 ]; then
+
+      # and if gpii namespace exists
+      kubectl get ns gpii --request-timeout=\"5s\"
+      if [ \"$?\" -eq 0 ]; then
+
+        # import it to TF state
+        terragrunt import kubernetes_namespace.gpii gpii --terragrunt-working-dir \"live/#{@env}/k8s/gpii/istio\"
+      fi
+    fi'"
+
   sh_filter "#{@exekube_cmd} #{args[:cmd]}", !args[:preserve_stderr].nil? if args[:cmd]
 end
 

@@ -47,7 +47,6 @@ The following table lists the configurable parameters of the gpii-preferences ch
 | Parameter                      | Description                                                                              | Default                                                                   |
 | `datasourceHostname`           | data source hostname for preferences service                                             | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`        |
 | `datasourceListenPort`         | data source port for preferences service                                                 | `5984`                                                                    |
-| `disableSslRedirect`           | disable nginx-ingress redirection to HTTPS                                               | `false`                                                                   |
 | `enableStackdriverTrace`       | enable [GCP Stackdriver Trace](https://cloud.google.com/trace/)                          | `false`                                                                   |
 | `image.checksum`               | container image checksum                                                                 | `sha256:f279c6ab7fa1c19e5f358a6a3d87a970eaf8d615c8b6181851fa086b6229b3a1` |
 | `image.pullPolicy`             | container image pullPolicy                                                               | `IfNotPresent`                                                            |

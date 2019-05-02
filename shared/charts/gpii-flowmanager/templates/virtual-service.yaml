@@ -1,0 +1,13 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ template "flowmanager.name" . }}-vs
+spec:
+  hosts:
+  {{ toYaml .Values.dnsNames | indent 2 | trim }}
+  gateways:
+  - {{ template "flowmanager.name" . }}-gateway
+  http:
+  - route:
+    - destination:
+        host: {{ template "flowmanager.name" . }}

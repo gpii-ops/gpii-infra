@@ -33,14 +33,20 @@ spec:
         {{- if .Values.enableStackdriverTrace }}
         - name: GPII_ENABLE_STACKDRIVER_TRACE
           value: 'true'
-        {{- end}}
+        {{- end }}
+        {{- if .Values.resources }}
         resources:
-{{ toYaml .Values.resources | indent 10 }}
+        {{ toYaml .Values.resources | indent 8 | trim }}
+        {{- end }}
         livenessProbe:
-          httpGet:
-            path: /health
-            port: {{ .Values.preferencesListenPort }}
+          exec:
+            command:
+            - '/usr/bin/curl'
+            - '-f'
+            - 'http://localhost:{{ .Values.preferencesListenPort }}/health'
         readinessProbe:
-          httpGet:
-            path: /ready
-            port: {{ .Values.preferencesListenPort }}
+          exec:
+            command:
+            - '/usr/bin/curl'
+            - '-f'
+            - 'http://localhost:{{ .Values.preferencesListenPort }}/ready'

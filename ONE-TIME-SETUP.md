@@ -8,7 +8,7 @@ This document describes manual steps needed for initial configuration when using
    * From the [G Suite Admin Organizational Units page](https://admin.google.com/u/1/ac/orgunits), add a new Organizational Unit
 * Disable unneeded G Suite Services
    * From the [G Suite Admin Apps page](https://admin.google.com/u/1/ac/appslist/core), select all Services, and select Off
-   * From the [G Suite Admin Additional Services page](https://admin.google.com/u/1/ac/appslist/additional), select all Services **EXCEPT** Google Groups, and select Off
+   * From the [G Suite Admin Additional Services page](https://admin.google.com/u/1/ac/appslist/additional), select all Services **EXCEPT** "Groups for Business", and select Off
 * Create a public Group "cloud-developers"
    * From the [G Suite Admin Groups page](https://admin.google.com/raisingthefloor.org/AdminHome?hl=en&fc=true#GroupList:), add a new Group
    * Set it so that anyone can view or post, but only Managers and Owners can invite members
@@ -38,6 +38,7 @@ This document describes manual steps needed for initial configuration when using
 * https://support.google.com/code/contact/billing_quota_increase
    * @mrtyler requested a quota bump to 100 Projects.
       * He only authorized his own email for now, to see what it did. But it's possible other Ops team members will need to go through this step.
+* When configuring additional organizations (i.e. test1.gpii.net), it is important to grant common SA of target organization Billing Account User permissions on the organization that owns main billing account. This can be done by running `rake set_billing_org_perms` in target environment Terragrunt folder (`common/live/stg` in case of test1.gpii.net), authenticated as member of cloud-admin group.
 
 ## Web security scans for an environment public endpoints
 

@@ -19,6 +19,8 @@ controller:
     limits:
       cpu: 200m
       memory: 256Mi
+  podAnnotations:
+    sidecar.istio.io/inject: "false"
   metrics:
     enabled: true
   stats:
@@ -52,6 +54,8 @@ defaultBackend:
     limits:
       cpu: 100m
       memory: 128Mi
+  podAnnotations:
+    sidecar.istio.io/inject: "false"
 
 rbac:
   create: true
