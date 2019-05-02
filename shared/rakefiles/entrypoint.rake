@@ -257,48 +257,6 @@ task :import_keyring => [:set_vars, :check_destroy_allowed] do
   sh "#{@exekube_cmd} rake import_keyring"
 end
 
-# We need Google to create the Container Registry for us (see
-# common/modules/gcp-container-registry/main.tf). This task pushes an image to
-# the Registry, which creates the Registry if it does not exist (or does
-# basically nothing if it already exists).
-task :init_registry => [:set_vars] do
-  # I've chosen the current exekube base image (alpine:3.8) because it is small
-  # and because it will end up in the Registry anyway. Note that this
-  # duplicates information in exekube/dockerfiles, i.e. there is coupling
-  # without cohesion.
-  image = "alpine:3.8"
-  registry_url_base = "gcr.io"
-  registry_url = "#{registry_url_base}/#{ENV["TF_VAR_project_id"]}"
-
-  # Pull the image to localhost
-  sh "docker pull #{image}"
-
-  # Tag the local image with our Registry
-  sh "docker tag #{image} #{registry_url}/#{image}"
-
-  # Authenticate with gcloud if we haven't already (the task that does this
-  # must run inside the exekube container, so we can't include it as a
-  # dependency to this task).
-  sh "#{@exekube_cmd} rake configure_login"
-
-  # Get an auth token using our gcloud credentials
-  token = %x{
-    #{@exekube_cmd} gcloud auth print-access-token
-  }.chomp
-
-  # Load the auth token into Docker
-  # (Use an env var to avoid echoing the token to stdout / the CI logs.)
-  ENV["RAKE_INIT_REGISTRY_TOKEN"] = token
-  sh "echo \"$RAKE_INIT_REGISTRY_TOKEN\" | docker login -u oauth2accesstoken --password-stdin https://#{registry_url_base}"
-
-  # Push the local image to our Registry
-  sh "docker push #{registry_url}/#{image}"
-
-  # Clean up
-  sh "docker rmi #{registry_url}/#{image}" # || true"
-  # We won't remove #{image} in case it existed previously. This is a small leak.
-end
-
 desc "[ADVANCED] Fetch helm TLS certificates from TF state (only in case they are present)"
 task :fetch_helm_certs => [:set_vars] do
   sh "#{@exekube_cmd} rake fetch_helm_certs"
