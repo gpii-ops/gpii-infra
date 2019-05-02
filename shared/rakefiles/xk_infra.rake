@@ -16,6 +16,7 @@ cloud_admin_org_roles = [
   "roles/orgpolicy.policyAdmin",
   "roles/resourcemanager.organizationAdmin",
   "roles/securitycenter.viewer",
+  "roles/cloudsecurityscanner.runner",
   "roles/viewer",
 ]
 
