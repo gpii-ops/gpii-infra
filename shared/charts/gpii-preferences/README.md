@@ -45,13 +45,8 @@ The command removes all the Kubernetes components associated with the chart and 
 The following table lists the configurable parameters of the gpii-preferences chart and their default values.
 
 | Parameter                      | Description                                                                              | Default                                                                   |
-| `acme.clouddnsProject`         | required GCP project id to use for CLoudDNS                                              | -                                                                         |
-| `acme.email`                   | optional email to use for registration with certificate issuer                           | `dev-null@raisingthefloor.org`                                                |
-| `acme.server                   | optional ACME server for certificate issuer                                              | `https://acme-staging-v02.api.letsencrypt.org/directory`                  |
 | `datasourceHostname`           | data source hostname for preferences service                                             | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`        |
 | `datasourceListenPort`         | data source port for preferences service                                                 | `5984`                                                                    |
-| `disableSslRedirect`           | disable nginx-ingress redirection to HTTPS                                               | `false`                                                                   |
-| `dnsNames`                     | list of host names for nginx-ingress controller                                          | `preferences.test.local`                                                  |
 | `enableStackdriverTrace`       | enable [GCP Stackdriver Trace](https://cloud.google.com/trace/)                          | `false`                                                                   |
 | `image.checksum`               | container image checksum                                                                 | `sha256:f279c6ab7fa1c19e5f358a6a3d87a970eaf8d615c8b6181851fa086b6229b3a1` |
 | `image.pullPolicy`             | container image pullPolicy                                                               | `IfNotPresent`                                                            |

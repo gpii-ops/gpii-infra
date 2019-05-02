@@ -9,6 +9,8 @@ variable "secrets_dir" {}
 variable "charts_dir" {}
 variable "nginx_ingress_repository" {}
 variable "nginx_ingress_tag" {}
+variable "prometheus_to_sd_repository" {}
+variable "prometheus_to_sd_tag" {}
 
 data "terraform_remote_state" "network" {
   backend = "gcs"
@@ -28,9 +30,11 @@ data "template_file" "nginx_ingress_values" {
   template = "${file("values.yaml")}"
 
   vars {
-    nginx_ingress_repository = "${var.nginx_ingress_repository}"
-    nginx_ingress_tag        = "${var.nginx_ingress_tag}"
-    load_balancer_ip         = "${data.terraform_remote_state.network.static_ip_address}"
+    nginx_ingress_repository    = "${var.nginx_ingress_repository}"
+    nginx_ingress_tag           = "${var.nginx_ingress_tag}"
+    prometheus_to_sd_repository = "${var.prometheus_to_sd_repository}"
+    prometheus_to_sd_tag        = "${var.prometheus_to_sd_tag}"
+    load_balancer_ip            = "${data.terraform_remote_state.network.static_ip_address}"
   }
 }
 

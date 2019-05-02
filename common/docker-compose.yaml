@@ -9,6 +9,7 @@ services:
       ENV: ${ENV:?err}
       ORGANIZATION_ID:
       BILLING_ID:
+      BILLING_ORGANIZATION_ID:
 
       TF_INPUT: "0"
       TF_LOG:

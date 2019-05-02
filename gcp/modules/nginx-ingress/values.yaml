@@ -19,6 +19,31 @@ controller:
     limits:
       cpu: 200m
       memory: 256Mi
+  podAnnotations:
+    sidecar.istio.io/inject: "false"
+  metrics:
+    enabled: true
+  stats:
+    enabled: true
+  extraContainers:
+    - name: prometheus-to-sd
+      image: "${prometheus_to_sd_repository}:${prometheus_to_sd_tag}"
+      imagePullPolicy: IfNotPresent
+      command:
+        - /monitor
+        - --stackdriver-prefix=custom.googleapis.com
+        - --source=nginx-ingress:http://localhost:10254
+        - --pod-id=$(POD_NAME)
+        - --namespace-id=$(POD_NAMESPACE)
+      env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
 
 defaultBackend:
   replicaCount: 2
@@ -29,6 +54,8 @@ defaultBackend:
     limits:
       cpu: 100m
       memory: 128Mi
+  podAnnotations:
+    sidecar.istio.io/inject: "false"
 
 rbac:
   create: true

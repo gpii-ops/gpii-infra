@@ -100,6 +100,7 @@ describe Vars do
     expect(ENV).to have_received(:[]=).with("ENV", env)
     expect(ENV).to have_received(:[]=).with("TF_VAR_env", env)
     expect(ENV).to have_received(:[]=).with("ORGANIZATION_ID", "247149361674")
+    expect(ENV).to have_received(:[]=).with("BILLING_ORGANIZATION_ID", "247149361674")
     expect(ENV).to have_received(:[]=).with("BILLING_ID", "01A0E1-B0B31F-349F4F")
     expect(ENV).to have_received(:[]=).with("TF_VAR_organization_name", "gpii")
     expect(ENV).to have_received(:[]=).with("TF_VAR_organization_domain", "gpii.net")
@@ -110,6 +111,7 @@ describe Vars do
     allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
     allow(ENV).to receive(:[]).with("ORGANIZATION_ID").and_return("fake-organization-id")
+    allow(ENV).to receive(:[]).with("BILLING_ORGANIZATION_ID").and_return("fake-billing-organization-id")
     allow(ENV).to receive(:[]).with("BILLING_ID").and_return("fake-billing-id")
     env = "fake-env"
     project_type = "fake-project-type"
@@ -121,6 +123,7 @@ describe Vars do
   it "set_vars doesn't clobber vars that are already set (even when env=stg)" do
     allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
     allow(ENV).to receive(:[]).with("ORGANIZATION_ID").and_return("fake-organization-id")
+    allow(ENV).to receive(:[]).with("BILLING_ORGANIZATION_ID").and_return("fake-billing-organization-id")
     allow(ENV).to receive(:[]).with("BILLING_ID").and_return("fake-billing-id")
     allow(ENV).to receive(:[]).with("TF_VAR_organization_name").and_return("fakecorp")
     allow(ENV).to receive(:[]).with("TF_VAR_organization_domain").and_return("fake.org")
@@ -130,6 +133,7 @@ describe Vars do
     Vars.set_vars(env, project_type)
     expect(ENV).not_to have_received(:[]=).with("TF_VAR_project_id", any_args)
     expect(ENV).not_to have_received(:[]=).with("ORGANIZATION_ID", any_args)
+    expect(ENV).not_to have_received(:[]=).with("BILLING_ORGANIZATION_ID", any_args)
     expect(ENV).not_to have_received(:[]=).with("BILLING_ID", any_args)
     expect(ENV).not_to have_received(:[]=).with("TF_VAR_organization_name", any_args)
     expect(ENV).not_to have_received(:[]=).with("TF_VAR_organization_domain", any_args)
