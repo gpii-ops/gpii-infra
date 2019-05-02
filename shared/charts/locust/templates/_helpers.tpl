@@ -25,3 +25,11 @@ Create fully qualified configmap name.
 {{- define "locust.worker-configmap" -}}
 {{- printf "%s-%s" .Release.Name "worker" -}}
 {{- end -}}
+
+{{/*
+Get DNS from target-host
+*/}}
+{{- define "locust.host" -}}
+{{- $match := index .Values.master.config "target-host" | toString | regexFind "//.*[^:]" -}}
+{{- $match | trimAll "/" -}}
+{{- end -}}
