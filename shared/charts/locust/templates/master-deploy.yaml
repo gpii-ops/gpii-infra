@@ -55,15 +55,17 @@ spec:
           - name: locust-tasks
             mountPath: /locust-tasks/
         livenessProbe:
-          periodSeconds: 30
-          httpGet:
-            path: /
-            port: {{ .Values.service.internalPort }}
+          exec:
+            command:
+            - '/usr/bin/curl'
+            - '-f'
+            - 'http://localhost:{{ .Values.service.internalPort }}/'
         readinessProbe:
-          periodSeconds: 30
-          httpGet:
-            path: /
-            port: {{ .Values.service.internalPort }}
+          exec:
+            command:
+            - '/usr/bin/curl'
+            - '-f'
+            - 'http://localhost:{{ .Values.service.internalPort }}/'
       volumes:
       - name: "locust-tasks"
         configMap:
