@@ -220,4 +220,33 @@ task :revoke_org_admin => [@gcp_creds_file, :configure_extra_tf_vars] do
   end
 end
 
+task :restore_snapshot_from_image_file, [:snapshot_files] => [@gcp_creds_file, :configure_extra_tf_vars] do |taskname, args|
+
+  snapshot_files = args[:snapshot_files].split ' '
+  snapshot_files.each do |snapshot_file|
+    sh "#{@exekube_cmd} sh -c ' \
+      gsutil ls #{snapshot_file}
+    '", verbose: false
+    snapshot_name = snapshot_file[/pv-database-storage-couchdb-couchdb-\d-\d+-\d+/, 0]
+    sh "#{@exekube_cmd} sh -c ' \
+      gcloud compute snapshots list --filter=\"name=( \'#{snapshot_name}\')\"
+    '", verbose: false
+  end
+
+  [ "roles/iam.serviceAccountUser", "roles/compute.admin" ].each do |role|
+    sh "gcloud projects add-iam-policy-binding \"#{ENV["TF_VAR_project_id"]}\" \
+      --member serviceAccount:\"$(gcloud projects list --filter=\"#{ENV["TF_VAR_project_id"]}\" --format=\"value(PROJECT_NUMBER)\")-compute@developer.gserviceaccount.com \" \
+      --role '#{role}'"
+  end
+
+  snapshot_files.each do |snapshot_file|
+    snapshot_name = snapshot_file[/pv-database-storage-couchdb-couchdb-\d-\d+-\d+/, 0]
+    sh "#{@exekube_cmd} sh -c ' \
+    gcloud compute images import image-disk-#{snapshot_name} --data-disk --source-file=#{snapshot_file}
+    gcloud compute disks create disk-#{snapshot_name} --zone=#{ENV["TF_VAR_infra_region"]}-a --image=image-disk-#{snapshot_name}
+    gcloud compute disks snapshot disk-#{snapshot_name} --zone=#{ENV["TF_VAR_infra_region"]}-a --snapshot-names #{snapshot_name}-external
+    '", verbose: false
+  end
+
+end
 # vim: et ts=2 sw=2:
