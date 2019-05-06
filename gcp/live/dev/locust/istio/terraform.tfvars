@@ -1,8 +1,7 @@
 # ↓ Module metadata
-
 terragrunt = {
   terraform {
-    source = "/project/modules//locust"
+    source = "/project/modules//locust-istio"
   }
 
   include = {
@@ -11,4 +10,3 @@ terragrunt = {
 }
 
 # ↓ Module configuration (empty means all default)
-

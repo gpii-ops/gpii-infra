@@ -34,12 +34,8 @@ task :configure_serviceaccount_ci_restore => [:set_vars_ci] do
   # service account key file.
   sh "#{@exekube_cmd_with_backups} sh -c '\
     mkdir -p $(dirname #{@serviceaccount_key_file}) && \
-    cp -av #{@serviceaccount_key_file_in_backups} #{@serviceaccount_key_file} \
-  '"
-  sh "#{@exekube_cmd} sh -c '\
-    gcloud auth activate-service-account \
-      --key-file #{@serviceaccount_key_file} \
-      --project $TF_VAR_project_id \
+    cp -av #{@serviceaccount_key_file_in_backups} #{@serviceaccount_key_file} && \
+    rake activate_serviceaccount
   '"
 end
 
@@ -63,52 +59,16 @@ task :configure_serviceaccount_ci_clobber => [:set_vars_ci]  do
   sh "docker volume rm -f -- #{@secrets_backup_volume}"
 end
 
-desc "[CI ONLY] Run all CI environment destroy steps"
-task :destroy_ci => [:set_vars_ci] do
-  # Try to clean up any previous incarnation of this environment.
-  #
-  # Only destroy additional resources (e.g. secrets, terraform state) if
-  # previous steps succeeded; see https://issues.gpii.net/browse/GPII-3488.
-  begin
-    Rake::Task["destroy"].reenable
-    Rake::Task["destroy"].invoke
-    Rake::Task["destroy_secrets"].reenable
-    Rake::Task["destroy_secrets"].invoke
-    # Iff destroy and destroy_secrets both succeed, we want to run all of these
-    # destroy_tfstate commands (regardless if any one destroy_tfstate fails).
-    begin
-      Rake::Task["destroy_tfstate"].reenable
-      Rake::Task["destroy_tfstate"].invoke("k8s")
-    rescue RuntimeError => err
-      puts "destroy_tfstate step failed:"
-      puts err
-      puts "Continuing."
-    end
-    begin
-      Rake::Task["destroy_tfstate"].reenable
-      Rake::Task["destroy_tfstate"].invoke("locust")
-    rescue RuntimeError => err
-      puts "destroy_tfstate step failed:"
-      puts err
-      puts "Continuing."
-    end
-  rescue RuntimeError => err
-    puts "Destroy step failed:"
-    puts err
-    puts "Continuing."
-  end
-end
-
 desc "[CI ONLY] Run all CI environment destroy and setup steps for ephemeral clusters"
-task :destroy_and_deploy_ci => [:set_vars_ci] do
-  Rake::Task["destroy_ci"].invoke
+task :destroy_hard_and_deploy_ci => [:set_vars_ci] do
+  Rake::Task["destroy_hard"].invoke
   begin
     Rake::Task["deploy"].invoke
     Rake::Task["test_preferences"].invoke
     Rake::Task["test_flowmanager"].invoke
     Rake::Task["display_cluster_state"].invoke
-    Rake::Task["destroy_ci"].reenable
-    Rake::Task["destroy_ci"].invoke
+    Rake::Task["destroy_hard"].reenable
+    Rake::Task["destroy_hard"].invoke
   rescue RuntimeError => err
     puts "Deploy step failed:"
     puts err
@@ -117,8 +77,8 @@ task :destroy_and_deploy_ci => [:set_vars_ci] do
   end
   # If everything succeeded, clean up again. (If something failed, don't clean
   # it up; instead, leave it around for further debugging.)
-  Rake::Task["destroy_ci"].reenable
-  Rake::Task["destroy_ci"].invoke
+  Rake::Task["destroy_hard"].reenable
+  Rake::Task["destroy_hard"].invoke
 end
 
 # vim: et ts=2 sw=2:

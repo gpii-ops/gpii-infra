@@ -43,11 +43,19 @@ Examples of things that get credentials this way include: CouchDB, Alertmanager.
 
    * Add the Gitlab Project and Registration Token from [Configure Gitlab](CI-CD.md#configure-gitlab) to `vault.yml`.
    * Apply the ansible role [ansible-gpii-ci-worker](https://github.com/idi-ops/ansible-gpii-ci-worker) to the build node.
-      * The [internal ansible repo](https://github.com/inclusive-design/ops) has a playbook to do this: `config_host_gpii_ci_worker.yml`.
+      * The [internal ansible repo](https://github.com/inclusive-design/ops-shared) has a playbook to do this: `config_host_gpii_ci_worker.yml`.
 
-### gpii-version-updater
+### Configure gpii-version-updater
 
-   * There is a standalone system for managing the versions of GPII components running on this infrastructure, via [shared/versions.yml](shared/versions.yml). See the [gpii-version-updater repo](https://github.com/gpii-ops/gpii-version-updater).
+   * There's a bit of back-and-forth here during initial deployment.
+      * First, gpii-infra must create the Google Container Registry instance and associated IAMs.
+      * Then, gpii-version-updater must run to sync images to the GCR instance.
+      * Finally, gpii-infra can deploy environments using the images pushed to the GCR instance.
+   * Create a Key for the gcr-uploader Service Account and download it.
+   * Add the contents of the Key file to `vault.yml`.
+   * Apply the ansible role [ansible-gpii-version-updater](https://github.com/idi-ops/ansible-gpii-version-updater) to the build node.
+      * The [internal ansible repo](https://github.com/inclusive-design/ops) has a playbook to do this: `config_host_gpii_version_updater.yml`.
+      * You'll need the ssh key you [configured with Github](#configure-github).
 
 ### Configure AWS (DEPRECATED)
 

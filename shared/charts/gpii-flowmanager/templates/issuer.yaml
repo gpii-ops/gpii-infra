@@ -1,0 +1,17 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Issuer
+metadata:
+  name: letsencrypt-{{ template "flowmanager.name" . }}
+  labels:
+    app: {{ template "flowmanager.name" . }}
+spec:
+  acme:
+    server: {{ .Values.acme.server }}
+    email: {{ .Values.acme.email }}
+    privateKeySecretRef:
+      name: letsencrypt-{{ template "flowmanager.name" . }}
+    dns01:
+      providers:
+      - name: default
+        clouddns:
+          project: {{ required "A valid GCP Project id required for acme.clouddnsProject!" .Values.acme.clouddnsProject }}

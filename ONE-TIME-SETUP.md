@@ -8,7 +8,7 @@ This document describes manual steps needed for initial configuration when using
    * From the [G Suite Admin Organizational Units page](https://admin.google.com/u/1/ac/orgunits), add a new Organizational Unit
 * Disable unneeded G Suite Services
    * From the [G Suite Admin Apps page](https://admin.google.com/u/1/ac/appslist/core), select all Services, and select Off
-   * From the [G Suite Admin Additional Services page](https://admin.google.com/u/1/ac/appslist/additional), select all Services **EXCEPT** Google Groups, and select Off
+   * From the [G Suite Admin Additional Services page](https://admin.google.com/u/1/ac/appslist/additional), select all Services **EXCEPT** "Groups for Business", and select Off
 * Create a public Group "cloud-developers"
    * From the [G Suite Admin Groups page](https://admin.google.com/raisingthefloor.org/AdminHome?hl=en&fc=true#GroupList:), add a new Group
    * Set it so that anyone can view or post, but only Managers and Owners can invite members
@@ -38,6 +38,24 @@ This document describes manual steps needed for initial configuration when using
 * https://support.google.com/code/contact/billing_quota_increase
    * @mrtyler requested a quota bump to 100 Projects.
       * He only authorized his own email for now, to see what it did. But it's possible other Ops team members will need to go through this step.
+* When configuring additional organizations (i.e. test1.gpii.net), it is important to grant common SA of target organization Billing Account User permissions on the organization that owns main billing account. This can be done by running `rake set_billing_org_perms` in target environment Terragrunt folder (`common/live/stg` in case of test1.gpii.net), authenticated as member of cloud-admin group.
+
+## Web security scans for an environment public endpoints
+
+To automatically scan publicly exposed endpointst for common vulnerabilities (XSS, Flash injection, HTTP in HTTPS, outdated/insecure libraries, etc):
+
+1. Go to [Cloud Web Security Scanner](https://console.cloud.google.com/security/web-scanner/scanConfigs), you will be asked to select the project if needed.
+1. Click "New Scan".
+1. Enter endpoint URL into the "Name" field (e.g. `flowmanager.prd.gcp.gpii.net`).
+1. As a "Starting URL" you can enter something like (replace `prd.gcp.gpii.net` with your environment's domain):
+   * https://flowmanager.prd.gcp.gpii.net/health for Flowmanager endpoint.
+1. You can add more URLs if needed using "Add a URL" link.
+1. You can also exclude certain URLs from scanning if needed.
+1. For long-lived environments:
+   * Set "Schedule" to "Weekly".
+   * Set "Next run" to any weekday of the following week.
+   * Set "Export to Cloud Security Command Center" option to enable scan results propagation to Cloud Security Command Center findings (which will be reviewed by Ops team as part of [weekly infra metrics review](https://pad.gpii.net/mypads/?/mypads/group/gpii-infrastructure-standups-lix4njm/pad/view/key-metrics-for-infrastructure-pc1g4nnd)).
+1. Click "Save".
 
 ## CI
 

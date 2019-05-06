@@ -25,7 +25,7 @@ spec:
     spec:
       initContainers:
         - name: init-copy
-          image: busybox
+          image: "{{ .Values.initImage.repository }}:{{ .Values.initImage.tag }}"
           command: ['sh','-c','cp /tmp/chart.ini /default.d; ls -lrt /default.d;']
           volumeMounts:
           - name: config

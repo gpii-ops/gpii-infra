@@ -20,7 +20,7 @@ end
 
 desc "[TEST] Run Locust swarm against Preferences service in current cluster"
 task :test_preferences => [:set_vars, :check_destroy_allowed] do
-  ENV["TF_VAR_locust_target_host"] = "https://preferences.#{ENV["TF_VAR_domain_name"]}"
+  ENV["TF_VAR_locust_target_host"] = "http://preferences.gpii.svc.cluster.local"
   ENV["TF_VAR_locust_target_app"] = "preferences"
   ENV["TF_VAR_locust_script"] = "preferences.py"
   ENV["TF_VAR_locust_desired_median_response_time"] = "300"

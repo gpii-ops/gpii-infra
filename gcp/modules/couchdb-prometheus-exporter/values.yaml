@@ -3,3 +3,10 @@ replicaCount: ${replica_count}
 couchdbUri: http://couchdb-svc-couchdb.gpii.svc.cluster.local:5984
 couchdbUsername: ${couchdb_admin_username}
 couchdbPassword: ${couchdb_admin_password}
+
+image:
+  repository: ${couchdb_prometheus_exporter_repository}
+  tag: ${couchdb_prometheus_exporter_tag}
+  prometheusToSdExporter:
+    repository: ${prometheus_to_sd_repository}
+    tag: ${prometheus_to_sd_tag}

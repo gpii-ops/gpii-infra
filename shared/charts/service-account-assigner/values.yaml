@@ -1,0 +1,10 @@
+# Default values for certmerge-operator
+image:
+  repository: gpii/service-account-assigner
+  tag: 0.0.2-gpii.0
+  pullPolicy: IfNotPresent
+
+defaultServiceAccount: default
+# See https://cloud.google.com/sdk/gcloud/reference/beta/compute/instances/set-scopes
+defaultScopes:
+- https://www.googleapis.com/auth/cloud-platform
