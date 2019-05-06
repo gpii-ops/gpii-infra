@@ -32,6 +32,21 @@ task :xk, [:cmd, :skip_secret_mgmt, :preserve_stderr] => [:configure, :configure
       fi
     fi'"
 
+  # This is temporary task to handle updates of existing clusters to Istio - for locust namespace
+  sh_filter "sh -c '
+    # if there is no kubernetes_namespace resource in TF state
+    terragrunt state pull --terragrunt-working-dir \"live/#{@env}/locust/istio\" | jq -er \".modules[].resources[\\\"kubernetes_namespace.locust\\\"]\" >/dev/null
+    if [ \"$?\" -ne 0 ]; then
+
+      # and if locust namespace exists
+      kubectl get ns locust --request-timeout=\"5s\"
+      if [ \"$?\" -eq 0 ]; then
+
+        # import it to TF state
+        terragrunt import -config=\"\" kubernetes_namespace.locust locust --terragrunt-working-dir \"live/#{@env}/locust/istio\"
+      fi
+    fi'"
+
   sh_filter "#{@exekube_cmd} #{args[:cmd]}", !args[:preserve_stderr].nil? if args[:cmd]
 end
 
