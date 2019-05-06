@@ -4,8 +4,6 @@ terraform {
 
 variable "secrets_dir" {}
 variable "charts_dir" {}
-variable "domain_name" {}
-variable "project_id" {}
 
 variable "preferences_repository" {}
 variable "preferences_checksum" {}
