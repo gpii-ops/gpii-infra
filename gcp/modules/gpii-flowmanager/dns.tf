@@ -1,7 +1,11 @@
-data "kubernetes_service" "istio-ingressgateway" {
-  metadata {
-    name      = "istio-ingressgateway"
-    namespace = "istio-system"
+data "terraform_remote_state" "network" {
+  backend = "gcs"
+
+  config {
+    credentials    = "${var.serviceaccount_key}"
+    bucket         = "${var.project_id}-tfstate"
+    prefix         = "${var.env}/infra/network"
+    encryption_key = "/dev/null"
   }
 }
 
@@ -12,5 +16,5 @@ resource "google_dns_record_set" "flowmanager-dns" {
 
   type    = "A"
   ttl     = 300
-  rrdatas = ["${data.kubernetes_service.istio-ingressgateway.load_balancer_ingress.0.ip}"]
+  rrdatas = ["${data.terraform_remote_state.network.static_ip_address}"]
 }
