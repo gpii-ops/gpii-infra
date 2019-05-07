@@ -4,8 +4,9 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: {{ template "flushtokens.name" . }}
 spec:
-  schedule: "*/1 * * * *"
-  concurrencyPolicy: Forbid
+  schedule: "*/2 * * * *"
+  concurrencyPolicy: Allow
+  startingDeadlineSeconds: 200
   jobTemplate:
     spec:
       template:
