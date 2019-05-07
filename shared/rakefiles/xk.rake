@@ -43,7 +43,7 @@ task :xk, [:cmd, :skip_secret_mgmt, :preserve_stderr] => [:configure, :configure
       if [ \"$?\" -eq 0 ]; then
 
         # import it to TF state
-        terragrunt import -config=\"\" kubernetes_namespace.locust locust --terragrunt-working-dir \"live/#{@env}/locust/istio\"
+        terragrunt import kubernetes_namespace.locust locust --terragrunt-working-dir \"live/#{@env}/locust/istio\"
       fi
     fi'"
 
