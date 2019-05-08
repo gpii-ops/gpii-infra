@@ -4,7 +4,7 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: {{ template "flushtokens.name" . }}
 spec:
-  schedule: "*/2 * * * *"
+  schedule: "*/15 * * * *"
   concurrencyPolicy: Allow
   startingDeadlineSeconds: 200
   jobTemplate:
@@ -21,6 +21,6 @@ spec:
             env:
             - name: GPII_COUCHDB_URL
               value: '{{ .Values.couchdbUrl }}'
-            - name: DELETE_ALL_FLAG
+            - name: DELETE_ALL
               value: ''
           restartPolicy: OnFailure
