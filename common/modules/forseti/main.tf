@@ -10,6 +10,7 @@ variable "organization_id" {}
 variable "domain_name" {}
 variable "server_grpc_allow_ranges" {}
 variable "cscc_source_id" {}
+variable "forseti_version" {}
 
 provider "google" {
   credentials = "${var.serviceaccount_key}"
@@ -19,7 +20,7 @@ provider "google" {
 
 module "forseti" {
   source  = "terraform-google-modules/forseti/google"
-  version = "~> 1.4.1"
+  version = "${var.forseti_version}"
 
   gsuite_admin_email = "${var.auth_user_email}"
   domain             = "${var.domain_name}"

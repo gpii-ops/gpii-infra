@@ -14,5 +14,6 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
+forseti_version = "~> 1.4.1"
 server_grpc_allow_ranges = "10.11.0.0/16"
 cscc_source_id = "organizations/247149361674/sources/8182570756213435894"
