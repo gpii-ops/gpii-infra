@@ -231,12 +231,6 @@ task :restore_snapshot_from_image_file, [:snapshot_files] => [@gcp_creds_file, :
     '", verbose: false
   end
 
-  [ "roles/iam.serviceAccountUser", "roles/compute.admin" ].each do |role|
-    sh "gcloud projects add-iam-policy-binding \"#{ENV["TF_VAR_project_id"]}\" \
-      --member serviceAccount:\"$(gcloud projects list --filter=\"#{ENV["TF_VAR_project_id"]}\" --format=\"value(PROJECT_NUMBER)\")-compute@developer.gserviceaccount.com\" \
-      --role '#{role}'"
-  end
-
   snapshot_files.each do |snapshot_file|
     snapshot_name = snapshot_file[/pv-database-storage-couchdb-couchdb-\d-\d+-\d+/, 0]
     sh "#{@exekube_cmd} sh -c ' \
