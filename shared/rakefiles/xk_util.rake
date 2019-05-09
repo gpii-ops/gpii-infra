@@ -243,7 +243,8 @@ task :restore_snapshot_from_image_file, [:snapshot_files] => [@gcp_creds_file, :
     gcloud compute images create image-disk-#{snapshot_name} --source-uri=#{snapshot_file}
     gcloud compute disks create disk-#{snapshot_name} --zone=#{ENV["TF_VAR_infra_region"]}-a --image=image-disk-#{snapshot_name}
     gcloud compute disks snapshot disk-#{snapshot_name} --zone=#{ENV["TF_VAR_infra_region"]}-a --snapshot-names external-#{snapshot_name}
-    gcloud compute disks delete disk-#{snapshot_name}
+    gcloud -q compute images delete image-disk-#{snapshot_name}
+    gcloud -q compute disks delete disk-#{snapshot_name} --zone=#{ENV["TF_VAR_infra_region"]}-a
     '", verbose: false
   end
 
