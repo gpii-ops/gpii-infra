@@ -24,7 +24,6 @@ common-setup:
     - aws --version
     - docker version
     - docker-compose version
-    - pushd gcp/live/dev/ && rake update_exekube && popd
     - docker images | grep exekube
     - ruby --version
     - bundle version
@@ -57,7 +56,6 @@ gcp-setup:
   script:
     - docker version
     - docker-compose version
-    - pushd gcp/live/dev/ && rake update_exekube && popd
     - docker images | grep exekube
     - ruby --version
     - bundle version
