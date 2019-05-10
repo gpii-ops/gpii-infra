@@ -32,6 +32,10 @@ variable "prevent_destroy_cluster" {
   default = false
 }
 
+variable "enable_binary_authorization" {
+  default = false
+}
+
 data "google_service_account" "gke_cluster_node" {
   account_id = "gke-cluster-node"
   project    = "${var.project_id}"
@@ -91,6 +95,8 @@ module "gke_cluster" {
   primary_pool_machine_type       = "${var.node_type}"
   primary_pool_oauth_scopes       = ["cloud-platform"]
   primary_pool_service_account    = "${data.google_service_account.gke_cluster_node.email}"
+
+  enable_binary_authorization = "${var.enable_binary_authorization}"
 }
 
 # Workaround from

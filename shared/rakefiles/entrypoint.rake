@@ -20,11 +20,6 @@ end
 
 @exekube_cmd = "docker-compose run --rm xk"
 
-desc "Pull the current exekube container from the Docker hub"
-task :update_exekube => :set_vars do
-  sh "docker-compose pull"
-end
-
 task :clean_volumes => :set_vars do
   ["helm", "kube", "locust_tasks"].each do |app|
     sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-#{app}"
