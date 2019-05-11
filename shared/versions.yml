@@ -35,7 +35,7 @@ couchdb_init:
     tag: 3.9
   generated:
     repository: gcr.io/gpii-common-prd/alpine
-    sha: sha256:61c9dc58e1ee6f23c77674965efda54d4624f767c90e05d441ae49adcb291ebd
+    sha: sha256:bf1684a6e3676389ec861c602e97f27b03f14178e5bc3f70dce198f9f160cce9
     tag: 3.9
 couchdb_prometheus_exporter:
   upstream:
