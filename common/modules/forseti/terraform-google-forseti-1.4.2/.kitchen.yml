@@ -1,0 +1,175 @@
+# Copyright 2018 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+platforms:
+  - name: local
+
+provisioner:
+  name: terraform
+
+suites:
+  - name: simple_example
+    driver:
+      name: terraform
+      root_module_directory: test/fixtures/simple_example
+      command_timeout: 1800
+    verifier:
+      name: terraform
+      color: false
+      systems:
+        - name: gcp
+          backend: gcp
+          controls:
+            - forseti
+
+        - name: server
+          backend: ssh
+          controls:
+            - server
+          hosts_output: forseti-server-vm-public-ip
+          user: ubuntu
+          key_files:
+            - test/fixtures/simple_example/sshkey
+          shell: true
+          shell_options: "--login"
+
+        - name: forseti-client
+          backend: ssh
+          controls:
+            - client
+          hosts_output: forseti-client-vm-public-ip
+          user: ubuntu
+          key_files:
+            - test/fixtures/simple_example/sshkey
+          shell: true
+          shell_options: "--login"
+
+        - name: org-iam
+          backend: local
+          controls:
+            - forseti-org-iam
+
+      provisioner:
+        name: terraform
+
+  - name: shared_vpc
+    driver:
+      name: terraform
+      command_timeout: 1800
+      root_module_directory: test/fixtures/shared_vpc
+    verifier:
+      name: terraform
+      color: false
+      systems:
+        - name: shared_vpc
+          backend: gcp
+          shell: true
+          controls:
+            - forseti-service-project
+            - forseti-shared-project
+            - forseti-server
+            - forseti-client
+            - forseti-shared-firewall
+            - forseti
+        - name: gcloud
+          backend: local
+          controls:
+            - forseti-subnetwork
+            - forseti-org-iam
+        - name: server
+          backend: ssh
+          controls:
+            - forseti-command-server
+            - server
+          hosts_output: forseti-server-vm-public-ip
+          user: ubuntu
+          key_files:
+            - test/fixtures/shared_vpc/sshkey
+          shell: true
+          shell_options: "--login"
+        - name: forseti-client
+          backend: ssh
+          controls:
+            - forseti-command-client
+            - client
+          hosts_output: forseti-client-vm-public-ip
+          user: ubuntu
+          key_files:
+            - test/fixtures/shared_vpc/sshkey
+          shell: true
+          shell_options: "--login"
+    provisioner:
+      name: terraform
+
+  - name: real_time_enforcer_roles
+    driver:
+      name: terraform
+      root_module_directory: test/fixtures/real_time_enforcer_roles
+      command_timeout: 1800
+    verifier:
+      name: terraform
+      color: false
+      systems:
+        - name: local
+          backend: local
+
+  - name: real_time_enforcer
+    lifecycle:
+      pre_verify:
+        - local: test/fixtures/real_time_enforcer/modules/enforcer_target/helpers/create-enforcer-fixtures.sh
+      post_verify:
+        - local: test/fixtures/real_time_enforcer/modules/enforcer_target/helpers/destroy-enforcer-fixtures.sh
+      pre_destroy:
+        - local: test/fixtures/real_time_enforcer/modules/enforcer_target/helpers/destroy-enforcer-fixtures.sh
+    driver:
+      name: terraform
+      root_module_directory: test/fixtures/real_time_enforcer
+      command_timeout: 1800
+    verifier:
+      name: terraform
+      color: false
+      systems:
+        - name: gcp
+          backend: gcp
+          controls:
+            - real-time-enforcer-gcp
+            - real-time-enforcer-target-gcp
+
+        - name: real-time-enforcer-host
+          backend: ssh
+          controls:
+            - real-time-enforcer-host
+          hosts_output: forseti-rt-enforcer-vm-public-ip
+          user: ubuntu
+          key_files:
+            - test/fixtures/real_time_enforcer/sshkey
+          shell: true
+          shell_options: "--login"
+
+        - name: gcloud
+          backend: local
+          controls:
+            - real-time-enforcer-gcloud
+
+  - name: real_time_enforcer_sinks
+    driver:
+      name: terraform
+      command_timeout: 1800
+      root_module_directory: test/fixtures/real_time_enforcer_sinks
+    verifier:
+      name: terraform
+      color: false
+      systems:
+        - name: gcloud
+          backend: local
