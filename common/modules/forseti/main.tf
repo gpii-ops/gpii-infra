@@ -19,7 +19,7 @@ provider "google" {
 }
 
 module "forseti" {
-  source  = "./terraform-google-forseti-1.4.2"
+  source  = "./terraform-google-forseti-1.5.1"
 
   gsuite_admin_email = "${var.auth_user_email}"
   domain             = "${var.domain_name}"
