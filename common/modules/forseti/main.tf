@@ -10,7 +10,7 @@ variable "organization_id" {}
 variable "domain_name" {}
 variable "server_grpc_allow_ranges" {}
 variable "cscc_source_id" {}
-variable "forseti_version" {}
+variable "client_type" {}
 
 provider "google" {
   credentials = "${var.serviceaccount_key}"
@@ -19,8 +19,7 @@ provider "google" {
 }
 
 module "forseti" {
-  source  = "terraform-google-modules/forseti/google"
-  version = "${var.forseti_version}"
+  source  = "./terraform-google-forseti-1.4.2"
 
   gsuite_admin_email = "${var.auth_user_email}"
   domain             = "${var.domain_name}"
@@ -31,6 +30,8 @@ module "forseti" {
 
   composite_root_resources = ["organizations/${var.organization_id}"]
   server_grpc_allow_ranges = ["${var.server_grpc_allow_ranges}"]
+
+  client_type = "${var.client_type}"
 
   cscc_violations_enabled = true
   cscc_source_id          = "${var.cscc_source_id}"
