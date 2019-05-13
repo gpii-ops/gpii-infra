@@ -67,7 +67,7 @@ dataloader:
     tag: latest
   generated:
     repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:2137c00bab7c4bc25f7c87f35553ffac6830f50b3a358a5ef26f1ff91166e983
+    sha: sha256:d9c34816a7691feb3f987aa089a790476edb040921f95ca79620c4bf1a8beae4
     tag: latest
 flowmanager:
   upstream:
@@ -75,7 +75,7 @@ flowmanager:
     tag: latest
   generated:
     repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:2137c00bab7c4bc25f7c87f35553ffac6830f50b3a358a5ef26f1ff91166e983
+    sha: sha256:d9c34816a7691feb3f987aa089a790476edb040921f95ca79620c4bf1a8beae4
     tag: latest
 k8s_snapshots:
   upstream:
@@ -107,7 +107,7 @@ preferences:
     tag: latest
   generated:
     repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:2137c00bab7c4bc25f7c87f35553ffac6830f50b3a358a5ef26f1ff91166e983
+    sha: sha256:d9c34816a7691feb3f987aa089a790476edb040921f95ca79620c4bf1a8beae4
     tag: latest
 service_account_assigner:
   upstream:
