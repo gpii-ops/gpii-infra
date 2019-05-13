@@ -10,7 +10,7 @@ source 'https://rubygems.org'
 # gems.
 group :use_gem_installed_in_exekube do
   gem "google-cloud-monitoring", "0.29.2"
-  gem "grpc", "1.17.1"
+  gem "grpc", "1.20.0"
 end
 
 gem "rake"

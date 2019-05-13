@@ -53,7 +53,6 @@ Users who already had an RtF email address/Google account usually have performed
 
 1. Clone this repo (or update to the tip of gpii-ops/master).
 1. `cd gpii-infra/gcp/live/dev`
-1. `rake update_exekube`
 1. `rake`
    * The first time you deploy a GPII Cloud (or after you run `rake clobber`), you will be prompted to authenticate **twice**. Follow the instructions in the prompts.
    * If your browser is configured with multiple Google accounts (e.g. a personal Gmail account as well as an RtF Gmail account), make sure to choose the right one when authenticating.
