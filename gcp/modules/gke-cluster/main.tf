@@ -68,7 +68,9 @@ module "gke_cluster" {
   project_id         = "${var.project_id}"
   serviceaccount_key = "${var.serviceaccount_key}"
 
-  kubernetes_version = "${data.external.gke_version_assert.result.version}"
+  # TODO once 1.12 is default, this should be changed back
+  # kubernetes_version = "${data.external.gke_version_assert.result.version}"
+  kubernetes_version = "1.12.7-gke.10"
 
   region = "${var.infra_region}"
 
