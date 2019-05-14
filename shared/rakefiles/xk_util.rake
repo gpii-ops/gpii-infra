@@ -220,8 +220,7 @@ task :revoke_org_admin => [@gcp_creds_file, :configure_extra_tf_vars] do
   end
 end
 
-# This task restores a list of images in snapshots. All the snapshots are stored
-# in the actual region of the project in the zone A.
+# This task restores a list of images in snapshots. 
 task :restore_snapshot_from_image_file, [:snapshot_files] => [@gcp_creds_file, :configure_extra_tf_vars] do |taskname, args|
   require 'csv'
 
