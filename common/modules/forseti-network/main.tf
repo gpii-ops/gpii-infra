@@ -5,7 +5,10 @@ terraform {
 variable "serviceaccount_key" {}
 variable "project_id" {}
 variable "infra_region" {}
-variable "ip_cidr_range" {}
+
+variable "ip_cidr_range" {
+  default = "10.11.0.0/16"
+}
 
 provider "google" {
   credentials = "${var.serviceaccount_key}"
