@@ -14,6 +14,4 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
-server_grpc_allow_ranges = "10.11.0.0/16"
-client_type = "n1-standard-1"
 cscc_source_id = "organizations/327626828918/sources/4225144863199177855"

@@ -10,5 +10,3 @@ terragrunt = {
 }
 
 # ↓ Module configuration (empty means all default)
-
-ip_cidr_range = "10.11.0.0/16"
