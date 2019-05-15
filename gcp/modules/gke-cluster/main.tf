@@ -47,21 +47,22 @@ data "google_container_engine_versions" "this" {
   region   = "${var.infra_region}"
 }
 
-data "external" "gke_version_assert" {
-  program = [
-    "bash",
-    "-c",
-    <<EOF
-      if [[ '${data.google_container_engine_versions.this.default_cluster_version}' == ${var.expected_gke_version_prefix}* ]]; then
-        echo '{"version": "${data.google_container_engine_versions.this.default_cluster_version}"}'
-      else
-        echo 'Default GKE version is ${data.google_container_engine_versions.this.default_cluster_version}, this would mean minor version upgrade!' >&2
-        false
-      fi
-EOF
-    ,
-  ]
-}
+# TODO re-enable this once Google rolls-out 1.12 as default version properly
+# data "external" "gke_version_assert" {
+#   program = [
+#     "bash",
+#     "-c",
+#     <<EOF
+#       if [[ '${data.google_container_engine_versions.this.default_cluster_version}' == ${var.expected_gke_version_prefix}* ]]; then
+#         echo '{"version": "${data.google_container_engine_versions.this.default_cluster_version}"}'
+#       else
+#         echo 'Default GKE version is ${data.google_container_engine_versions.this.default_cluster_version}, this would mean minor version upgrade!' >&2
+#         false
+#       fi
+# EOF
+#     ,
+#   ]
+# }
 
 module "gke_cluster" {
   source             = "/exekube-modules/gke-cluster"
