@@ -12,12 +12,10 @@ require_relative "./sh_filter.rb"
 # This task is being called from entrypoint.rake and runs inside exekube container.
 # It applies secret-mgmt, sets secrets, and then executes arbitrary command from args[:cmd].
 # You should not invoke this task directly!
-task :xk, [:cmd, :skip_secret_mgmt, :preserve_stderr] => [:configure] do |taskname, args|
-  @secrets = Secrets.collect_secrets()
-
+task :xk, [:cmd, :skip_secret_mgmt, :preserve_stderr] => [:configure, :configure_secrets] do |taskname, args|
   sh "#{@exekube_cmd} up live/#{@env}/secret-mgmt" unless args[:skip_secret_mgmt]
 
-  Secrets.set_secrets(@secrets)
+  Rake::Task["set_secrets"].invoke
 
   # This is temporary task to handle updates of existing clusters to Istio (GPII-3671)
   sh_filter "sh -c '
@@ -31,6 +29,21 @@ task :xk, [:cmd, :skip_secret_mgmt, :preserve_stderr] => [:configure] do |taskna
 
         # import it to TF state
         terragrunt import kubernetes_namespace.gpii gpii --terragrunt-working-dir \"live/#{@env}/k8s/gpii/istio\"
+      fi
+    fi'"
+
+  # This is temporary task to handle updates of existing clusters to Istio - for locust namespace
+  sh_filter "sh -c '
+    # if there is no kubernetes_namespace resource in TF state
+    terragrunt state pull --terragrunt-working-dir \"live/#{@env}/locust/istio\" | jq -er \".modules[].resources[\\\"kubernetes_namespace.locust\\\"]\" >/dev/null
+    if [ \"$?\" -ne 0 ]; then
+
+      # and if locust namespace exists
+      kubectl get ns locust --request-timeout=\"5s\"
+      if [ \"$?\" -eq 0 ]; then
+
+        # import it to TF state
+        terragrunt import kubernetes_namespace.locust locust --terragrunt-working-dir \"live/#{@env}/locust/istio\"
       fi
     fi'"
 

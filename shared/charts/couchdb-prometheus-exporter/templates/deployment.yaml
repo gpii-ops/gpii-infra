@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: couchdb-prometheus-exporter
-        image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         args:
         - -logtostderr
@@ -36,7 +36,7 @@ spec:
         resources:
 {{ toYaml .Values.resources | indent 10 }}
       - name: prometheus-to-sd
-        image: "{{ .Values.prometheusToSdExporter.image.repository }}:{{ .Values.prometheusToSdExporter.image.tag }}"
+        image: "{{ .Values.image.prometheusToSdExporter.repository }}:{{ .Values.image.prometheusToSdExporter.tag }}"
         imagePullPolicy: {{ .Values.prometheusToSdExporter.image.pullPolicy }}
         command:
           - /monitor

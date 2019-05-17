@@ -6,8 +6,7 @@ require "yaml"
 
 class Secrets
 
-  KMS_KEYRING  = "keyring"
-  KMS_LOCATION = "global"
+  KMS_KEYRING_NAME = "keyring"
 
   SECRETS_DIR    = "secrets"
   SECRETS_FILE   = "secrets.yaml"
@@ -15,6 +14,20 @@ class Secrets
 
   GOOGLE_CLOUD_API = "https://www.googleapis.com"
   GOOGLE_KMS_API   = "https://cloudkms.googleapis.com"
+
+  attr_reader :collected_secrets
+  attr_reader :infra_region
+  attr_reader :project_id
+
+  def initialize(project_id, infra_region, decrypt_with_key_from_region=false)
+    @project_id = project_id
+    @infra_region = infra_region
+    @decrypt_with_key_from_region = decrypt_with_key_from_region
+  end
+
+  def load_secrets_config
+    return YAML.load(File.read(Secrets::SECRETS_CONFIG))
+  end
 
   # This method is looking for SECRETS_FILE files in module directories (modules/*), which should have the following structure:
   #
@@ -41,13 +54,14 @@ class Secrets
   #
   # We also advice to add module name to each secret's name (e.g. "secret_couchdb_admin_password" instead of just "secret_admin_password")
   # to avoid naming collisions, since secrets scope is global
-  def self.collect_secrets()
+  def collect_secrets()
     unless File.file?(Secrets::SECRETS_CONFIG)
       puts "[secret-mgmt] Secrets config not present, skipping..."
-      return {}
+      @collected_secrets = {}
+      return
     end
 
-    ENV['TF_VAR_keyring_name'] = Secrets::KMS_KEYRING
+    ENV['TF_VAR_keyring_name'] = Secrets::KMS_KEYRING_NAME
 
     collected_secrets = {}
     secrets_to_modules = {}
@@ -77,7 +91,7 @@ class Secrets
     end
 
     encryption_keys = {}
-    secrets_config = YAML.load(File.read(Secrets::SECRETS_CONFIG))
+    secrets_config = load_secrets_config()
     secrets_config["encryption_keys"].each do |encryption_key|
       encryption_keys[encryption_key] = %Q|"#{encryption_key}"|
     end
@@ -91,9 +105,8 @@ class Secrets
 
     ENV["TF_VAR_encryption_keys"] = %Q|[ #{encryption_keys.values.join(", ")} ]|
 
-    return collected_secrets
+    @collected_secrets = collected_secrets
   end
-
 
   # This method is setting secret ENV variables collected from modules
   #
@@ -105,8 +118,11 @@ class Secrets
   # When `rotate_secrets` is set to true, secrets will be set from env vars, encrypted secret file will be
   # re-generated and re-uploaded into GS bucket.
   # Use `rake destroy_secrets[KEY_NAME]` to forcefully repopulate secrets for target encryption key.
-  def self.set_secrets(collected_secrets, rotate_secrets = false)
-    collected_secrets.each do |encryption_key, secrets|
+  def set_secrets(rotate_secrets = false)
+    if @collected_secrets.nil?
+      raise "Called set_secrets() without first calling collect_secrets()"
+    end
+    @collected_secrets.each do |encryption_key, secrets|
       decrypted_secrets = fetch_secrets(encryption_key) unless secrets.empty? or rotate_secrets
 
       if decrypted_secrets
@@ -141,8 +157,8 @@ class Secrets
     ENV['GOOGLE_ENCRYPTION_KEY'] = ENV['TF_VAR_key_tfstate_encryption_key']
   end
 
-  def self.push_secrets(secrets, encryption_key)
-    gs_bucket = "#{ENV['TF_VAR_project_id']}-#{encryption_key}-secrets"
+  def push_secrets(secrets, encryption_key)
+    gs_bucket = "#{@project_id}-#{encryption_key}-secrets"
     encoded_secrets = Base64.encode64(secrets.to_json).delete!("\n")
 
     puts "[secret-mgmt] Retrieving primary key version for key '#{encryption_key}'..."
@@ -150,7 +166,7 @@ class Secrets
       curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
       -H \"Content-Type:application/json\" \
-      -X GET \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{ENV['TF_VAR_project_id']}/locations/#{Secrets::KMS_LOCATION}/keyRings/#{Secrets::KMS_KEYRING}/cryptoKeys/#{encryption_key}\"
+      -X GET \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{@project_id}/locations/#{@infra_region}/keyRings/#{Secrets::KMS_KEYRING_NAME}/cryptoKeys/#{encryption_key}\"
     }
 
     begin
@@ -166,7 +182,7 @@ class Secrets
       curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
       -H \"Content-Type:application/json\" \
-      -X POST \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{ENV['TF_VAR_project_id']}/locations/#{Secrets::KMS_LOCATION}/keyRings/#{Secrets::KMS_KEYRING}/cryptoKeys/#{encryption_key}/cryptoKeyVersions/#{encryption_key_version}:encrypt\" \
+      -X POST \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{@project_id}/locations/#{@infra_region}/keyRings/#{Secrets::KMS_KEYRING_NAME}/cryptoKeys/#{encryption_key}/cryptoKeyVersions/#{encryption_key_version}:encrypt\" \
       -d \"{\\\"plaintext\\\":\\\"#{encoded_secrets}\\\"}\"
     }
 
@@ -194,11 +210,22 @@ class Secrets
     end
   end
 
-  def self.fetch_secrets(encryption_key)
-    gs_bucket = "#{ENV['TF_VAR_project_id']}-#{encryption_key}-secrets"
+  def get_decrypt_url(encryption_key)
+    region = @infra_region
+    # I'm adding this to assist with migration for GPII-3707. It can likely be
+    # removed afterwards, as we no longer plan to use Keyrings in /global/.
+    if @decrypt_with_key_from_region
+      region = @decrypt_with_key_from_region
+    end
+    decrypt_url = "#{Secrets::GOOGLE_KMS_API}/v1/projects/#{@project_id}/locations/#{region}/keyRings/#{Secrets::KMS_KEYRING_NAME}/cryptoKeys/#{encryption_key}:decrypt"
+    return decrypt_url
+  end
+
+  def fetch_secrets(encryption_key)
+    gs_bucket = "#{@project_id}-#{encryption_key}-secrets"
     gs_secrets_file = "#{gs_bucket}/o/#{Secrets::SECRETS_FILE}"
 
-    puts "[secret-mgmt] Checking if secrets file for key '#{encryption_key}' is present in GS bucket..."
+    puts "[secret-mgmt] Checking if secrets file for key '#{encryption_key}' is present in GS bucket #{gs_bucket}..."
     api_call_data = %x{
       curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
@@ -225,17 +252,21 @@ class Secrets
     }
 
     gs_secrets = JSON.parse(Base64.decode64(api_call_data))
-    if !gs_secrets['ciphertext']
+    unless gs_secrets['ciphertext']
       debug_output "ERROR: Unable to extract ciphertext from YAML data for key '#{encryption_key}', terminating!"
+      if gs_secrets['error']
+        puts gs_secrets['error']
+      end
       raise
     end
 
-    puts "[secret-mgmt] Decrypting secrets for key '#{encryption_key}' with KMS key version #{get_crypto_key_version(gs_secrets['name'])}..."
+    decrypt_url = get_decrypt_url(encryption_key)
+    puts "[secret-mgmt] Decrypting secrets for key '#{encryption_key}' with KMS key #{decrypt_url}..."
     decrypted_secrets = %x{
       curl -s \
       -H \"Authorization:Bearer $(gcloud auth print-access-token)\" \
       -H \"Content-Type:application/json\" \
-      -X POST \"#{Secrets::GOOGLE_KMS_API}/v1/projects/#{ENV['TF_VAR_project_id']}/locations/#{Secrets::KMS_LOCATION}/keyRings/#{Secrets::KMS_KEYRING}/cryptoKeys/#{encryption_key}:decrypt\" \
+      -X POST \"#{decrypt_url}\" \
       -d \"{\\\"ciphertext\\\":\\\"#{gs_secrets['ciphertext']}\\\"}\"
     }
 
@@ -257,12 +288,12 @@ class Secrets
   end
 
   # This method creates new primary version for target encryption_key
-  def self.create_key_version(encryption_key)
+  def create_key_version(encryption_key)
     puts "[secret-mgmt] Creating new primary version for key '#{encryption_key}'..."
     new_version = %x{
       gcloud kms keys versions create \
-      --location #{Secrets::KMS_LOCATION} \
-      --keyring #{Secrets::KMS_KEYRING} \
+      --location #{@infra_region} \
+      --keyring #{Secrets::KMS_KEYRING_NAME} \
       --key #{encryption_key} \
       --primary --format json
     }
@@ -279,12 +310,12 @@ class Secrets
   end
 
   # This method disables all versions except primary for target encryption_key
-  def self.disable_non_primary_key_versions(encryption_key, primary_version_id)
+  def disable_non_primary_key_versions(encryption_key, primary_version_id)
     puts "[secret-mgmt] Retrieving versions for key '#{encryption_key}'..."
     key_versions = %x{
       gcloud kms keys versions list \
-      --location #{Secrets::KMS_LOCATION} \
-      --keyring #{Secrets::KMS_KEYRING} \
+      --location #{@infra_region} \
+      --keyring #{Secrets::KMS_KEYRING_NAME} \
       --key #{encryption_key} \
       --format json
     }
@@ -303,8 +334,8 @@ class Secrets
       puts "[secret-mgmt] Disabling version #{version_id} for key '#{encryption_key}'..."
       version_disabled = %x{
         gcloud kms keys versions disable #{version_id} \
-        --location #{Secrets::KMS_LOCATION} \
-        --keyring #{Secrets::KMS_KEYRING} \
+        --location #{@infra_region} \
+        --keyring #{Secrets::KMS_KEYRING_NAME} \
         --key #{encryption_key} \
         --format json
       }
@@ -321,12 +352,12 @@ class Secrets
 
   # This method returns KMS key version number from path:
   # PATH: `projects/gpii-gcp-dev-tyler/locations/global/keyRings/keyring/cryptoKeys/default/cryptoKeyVersions/1`
-  def self.get_crypto_key_version(path)
+  def get_crypto_key_version(path)
     return path.match(/\/([0-9]+)$/)[1]
   end
 
   # This method outputs error message and api response
-  def self.debug_output(message, api_response = '')
+  def debug_output(message, api_response = '')
     puts
     puts message
     puts
@@ -337,5 +368,6 @@ class Secrets
     end
   end
 end
+
 
 # vim: et ts=2 sw=2:

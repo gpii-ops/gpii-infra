@@ -2,7 +2,5 @@ secretLists:
 - name: istio-ingressgateway-certs
   namespace: istio-system
   secretlist:
-  - name: preferences-tls
-    namespace: gpii
   - name: flowmanager-tls
     namespace: gpii

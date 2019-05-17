@@ -28,7 +28,7 @@ resource "null_resource" "locust_swarm_session" {
       WORKERS_READY=0
       while [ "$WORKERS_READY" -lt "${var.locust_workers}" ]; do
         echo "[Try $RETRY_COUNT of $RETRIES] Waiting for all Locust workers to join the master..."
-        WORKERS_READY=$(kubectl -n locust logs deployment/locust-master --tail 1 | grep -oE "Currently \d+ clients" | grep -oE "\d+")
+        WORKERS_READY=$(kubectl -n locust logs deployment/locust-master -c locust --tail 1 | grep -oE "Currently \d+ clients" | grep -oE "\d+")
         if [ "$WORKERS_READY" == "" ]; then
           WORKERS_READY=0
         fi

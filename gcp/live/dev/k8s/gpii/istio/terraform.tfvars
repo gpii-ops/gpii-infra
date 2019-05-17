@@ -6,6 +6,7 @@ terragrunt = {
 
   dependencies {
     paths = [
+      "../../cluster",
     ]
   }
 

@@ -4,6 +4,18 @@ adminUsername: ${couchdb_admin_username}
 adminPassword: ${couchdb_admin_password}
 cookieAuthSecret: ${couchdb_auth_cookie}
 
+helperImage:
+  repository: ${couchdb_helper_repository}
+  tag: ${couchdb_helper_tag}
+
+initImage:
+  repository: ${couchdb_init_repository}
+  tag: ${couchdb_init_tag}
+
+image:
+  repository: ${couchdb_repository}
+  tag: ${couchdb_tag}
+
 persistentVolume:
   enabled: true
   accessModes:

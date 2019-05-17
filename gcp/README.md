@@ -53,12 +53,10 @@ Users who already had an RtF email address/Google account usually have performed
 
 1. Clone this repo (or update to the tip of gpii-ops/master).
 1. `cd gpii-infra/gcp/live/dev`
-1. `rake update_exekube`
 1. `rake`
    * The first time you deploy a GPII Cloud (or after you run `rake clobber`), you will be prompted to authenticate **twice**. Follow the instructions in the prompts.
    * If your browser is configured with multiple Google accounts (e.g. a personal Gmail account as well as an RtF Gmail account), make sure to choose the right one when authenticating.
 1. Once `rake` finishes, GPII Cloud endpoints should be available at `https://<service>.<your cluster name>.dev.gcp.gpii.net/`
-   * e.g. https://preferences.alfredo.dev.gcp.gpii.net/preferences/carla
    * e.g. https://flowmanager.alfredo.dev.gcp.gpii.net
 1. Lots of information about your GPII Cloud is available through the [Google Cloud Console](https://console.cloud.google.com). Some common links:
    * [Kubernetes clusters](https://console.cloud.google.com/kubernetes/list)
@@ -73,6 +71,7 @@ Users who already had an RtF email address/Google account usually have performed
 
 1. `rake display_cluster_info` shows some helpful links.
 1. `rake display_cluster_state` shows debugging info about the current state of the cluster. This output can be helpful when asking for help.
+1. `rake display_universal_image_info` shows currently deployed [gpii/universal](https://github.com/GPII/universal) image SHA and link to GitHub commit that triggered the build.
 1. `rake sh` opens an interactive shell inside a container on the local host that is configured to communicate with your cluster (e.g. via `kubectl` commands).
    * `rake sh` has some issues with interactive commands (e.g. `less` and `vi`) -- see https://issues.gpii.net/browse/GPII-3407.
 1. `rake plain_sh` is like `rake sh`, but not all configuration is performed. This can be helpful for debugging (e.g. when `rake sh` does not work) and with interactive commands.
@@ -95,10 +94,9 @@ Users who already had an RtF email address/Google account usually have performed
 1. By default you'll use the RtF Organization and Billing Account.
    * You can use a different Organization or Billing Account, e.g. from a GCP Free Trial Account, with `export ORGANIZATION_ID=111111111111` and/or `export BILLING_ID=222222-222222-222222`.
 1. By default your K8s cluster and related resources will be deployed into `us-central1`.
-   * You can use a different GCP region by setting `TF_VAR_infra_region` variable, for example `export TF_VAR_infra_region=us-east1`.
-   * Before changing region you need to destroy all deployed resources, TF state, and secrets with `rake destroy && rake destroy_tfstate && rake destroy_secrets`.
+   * You can use a different GCP region -- see [I want to spin up my dev environment in a different region](README.md#i-want-to-spin-up-my-dev-environment-in-a-different-region).
 1. The [Google Cloud Console](https://console.cloud.google.com) includes [Google Cloud Shell](https://cloud.google.com/shell/docs/) which is an interactive terminal embedded in the GCP dashboard. To use it, click on the icon at the top right of the Console, next to the magnifier icon.
-   * Once the shell opens in your browser, execute the following to manage the Kubernetes cluster using the embedded `kubectl` command: 
+   * Once the shell opens in your browser, execute the following to manage the Kubernetes cluster using the embedded `kubectl` command:
    1. `gcloud container clusters get-credentials k8s-cluster --zone YOUR_INFRA_REGION`
    1. `kubectl -n gpii get pods`
 
@@ -124,7 +122,13 @@ An "environment" describes a (more-or-less) self-contained cluster of machines r
 
 ### dev-$USER
 
-These are ephemeral environments, generally used by individual developers when working on the `gpii-infra` codebase or on cloud-based GPII components. An early phase of CI creates an ephemeral environment (`dev-gitlab-runner`) for integration testing.
+These are ephemeral environments, generally used by developers working on the `gpii-infra` codebase or on cloud-based GPII components. CI creates some ephemeral environments (`dev-gitlab-runner`, `dev-doe`) for integration testing.
+
+#### Service Level Objective
+
+* No guarantee of service for development environments.
+* Ops team does not receive alerts about problems.
+* Ops team assists developers with operation and debugging when convenient for the team (i.e. do not use emergency or out-of-hours contact methods unless there are extraordinary circumstances).
 
 ### stg
 
@@ -134,11 +138,24 @@ Deploying to `stg` verifies that the gpii-infra code that worked to create a `de
 
 Because `stg` emulates production, it will (in the future) allow us to run realistic end-to-end tests before deploying to `prd`.
 
+#### Service Level Objective
+
+* No guarantee of service for development environments (stg is a development environment).
+* Ops team receives alerts about problems, and addresses them when convenient for the team (i.e. we won't wake up an on-call engineer, but we will investigate during business hours)
+* Ops team makes an effort to keep stg stable and available for ad-hoc testing, but may disrupt the environment at any time for our own testing.
+
 ### prd
 
 This is the production environment which supports actual users of the GPII.
 
 Deploying to `prd` requires a [manual action](https://docs.gitlab.com/ce/ci/yaml/#manual-actions). This enables automated testing (CI) and a consistent deployment process (CD) while providing finer control over when changes are made to production (e.g. on a holiday weekend when no engineers are around).
+
+#### Service Level Objective
+
+* Ops team treats availability of production as highest priority.
+* Ops team receives alerts about problems, and addresses them as soon as possible.
+   * Today we do not have automated 24x7 on-call support. However, a human observing a serious, customer-affecting problem in prd should [contact someone on the Ops team](../CONTACTING-OPS.md), no matter the time or day.
+* Ops team communicates both planned and unplanned downtime to stakeholders via the `outage@RtF` mailing list (see [Downtime procedures](#downtime-procedures).
 
 ## Troubleshooting / FAQ
 
@@ -149,23 +166,52 @@ See [CI-CD.md#running-in-non-dev-environments](../CI-CD.md#running-manually-in-n
 ### I want to test my local changes to GPII components in my cluster
 
 1. Build a local Docker image containing your changes.
-1. Push your image to Docker Hub under your user account.
-1. Clone https://github.com/gpii-ops/gpii-version-updater/.
-1. Edit `components.conf`. Find your component and edit the `image` field to point to your Docker Hub user account.
+1. Push your image to Docker Hub under your user account (e.g. `docker build -t mrtyler/universal . && docker push mrtyler/universal`).
+1. Edit `gpii-infra/shared/versions.yml`. Find your component and edit the `upstream.repository` field to point to your Docker Hub user account.
    * E.g., `gpii/universal -> mrtyler/universal`
-1. Run `./update-version versions.yml`. It will generate a `versions.yml` in the current directory.
-1. `cp versions.yml ../gpii-infra/shared`
+1. Clone https://github.com/gpii-ops/gpii-version-updater/ in the same directory as your gpii-infra clone.
+   * The `gpii-version-updater` clone and the `gpii-infra` clone should be siblings in the same directory (there are some references to `../gpii-infra`).
+1. `cd gpii-version-updater`
+1. Follow the steps at [gpii-version-updater: Installing on host](https://github.com/gpii-ops/gpii-version-updater/#installing-on-host) (or [gpii-version-updater: Running in a container](https://github.com/gpii-ops/gpii-version-updater/#running-in-a-container).
+1. `rake sync`
 1. `cd ../gpii-infra/gcp/live/dev && rake`
 
-#### Can't I just edit `versions.yml` by hand?
+### I need to interact with Helm directly, e.g. because a Helm deployment was orphaned due to an error while running `rake`
 
-gpii-infra uses explicit SHAs to refer to specific Docker images for GPII components. This has a number of advantages (repeatability, auditability) but the main thing you care about is that changing the SHA forces Kubernetes to re-deploy a component.
+1. `cd gcp/live/dev` (or another environment)
+1. `rake sh`
+1. `helm --tiller-namespace kube-system list --tls --tls-verify --tls-ca-cert /project/live/dev/secrets/kube-system/helm-tls/ca.cert.pem --tls-cert /project/live/dev/secrets/kube-system/helm-tls/helm.cert.pem  --tls-key /project/live/dev/secrets/kube-system/helm-tls/helm.key.pem`
+   * Adjust paths for the environment you're using.
 
-If you don't want to deal with gpii-version-updater, you can instead:
-1. Edit `shared/versions.yml`. Find your component and replace the entire image value (path and SHA) with your Docker Hub user account.
-   * E.g., `flowmanager: "gpii/universal@sha256:4b3...64f" -> flowmanager: "mrtyler/universal"`
-1. Manually delete the component via Kubernetes Dashboard or with `kubectl delete`.
-1. `cd ../gpii-infra/gcp/live/dev && rake`
+### I want to spin up my dev environment in a different region
+
+1. `cd gpii-infra/gcp/live/dev`
+1. Check for an existing Keyring in the new region:
+   * `rake sh"[gcloud kms keyrings list --location mars-north1]"`
+1. If this is your first time spinning up a dev environment in a new region, or if you're sure you've never created a dev environment in the specified region, proceed to [Using a region for the first time](README.md#using-a-region-for-the-first-time) and skip the Destroy step.
+1. If you see `Listed 0 items`, proceed to [Using a region for the first time](README.md#using-a-region-for-the-first-time).
+1. If you see something like `projects/gpii-gcp-dev-mrtyler/locations/mars-north1/keyRings/keyring`, proceed to [Using a region where you previously had a dev environment](README.md#using-a-region-where-you-previously-had-a-dev-environment).
+
+#### Using a region for the first time
+1. Destroy all deployed resources, Terraform state, and secrets in the old region:
+   * `rake destroy_hard`
+1. `export TF_VAR_infra_region=mars-north1`
+1. Your environment is ready to re-deploy with `rake`
+1. If you encounter an error like one of the following, proceed to [Using a region where you previously had a dev environment](README.md#using-a-region-where-you-previously-had-a-dev-environment).
+   * `google_kms_key_ring.key_ring: the plan would destroy this resource, but it currently has lifecycle.prevent_destroy set to true.`
+   * `google_kms_key_ring.key_ring: Error creating KeyRing: googleapi: Error 409: KeyRing projects/gpii-gcp-dev-tyler/locations/us-east4/keyRings/keyring already exists., alreadyExists`
+
+#### Using a region where you previously had a dev environment
+1. Destroy all deployed resources, Terraform state, and secrets in the old region:
+   * `rake destroy_hard`
+   * If you have run other rake commands since `destroy_hard`, e.g. because you tried the "Using a region for the first time" workflow and encountered an error, run `destroy_hard` again here.
+1. `export TF_VAR_infra_region=mars-north1`
+1. `rake import_keyring`
+   * This command is experimental and doesn't do a lot of error checking. If this step fails, try running its constituent commands one-by-one.
+1. `rake rotate_secrets_key`
+   * These `rotate_` steps are not needed if all the Keys have an enabled primary version. However, rotating is safe either way and prevents some problems so it is the recommended workflow.
+1. `rake rotate_secrets_key"[gcp-stackdriver-export]"`
+1. Your environment is ready to re-deploy with `rake`
 
 ### My environment is messed up and I want to get rid of it so I can start over
 
@@ -181,9 +227,11 @@ These steps are ordered roughly by difficulty and disruptiveness.
 
 If you're at these steps, you probably want to [ask #ops for help](../CONTACTING-OPS.md).
 
-1. `rake destroy_tfstate` - cleans up terraform state files in Google Storage
+1. `rake destroy_hard` - cleans up terraform state files and secrets in Google Storage
    * **NOTE:** This will "orphan" any resources Terraform created for you previously and will be difficult to recover from
-1. Manually delete resources using the GCP Dashboard: Kubernetes PVs and PVCs, Kubernetes Cluster, Disks, Snapshots, Logging Export rules, Logging Exclusion rules, Network stuff, Network services `->` Cloud DNS, Google Storage buckets.
+1. Manually delete "ordinary" resources using the GCP Dashboard: Kubernetes Cluster, Disks, Snapshots, Logging Export rules, Logging Exclusion rules
+1. Manually delete "infra" resources using the GCP Dashboard: Network stuff, Network services `->` Cloud DNS, Google Storage buckets.
+   * NOTE: If you delete the `-tfstate` bucket, you will need to ask Ops (or CI) to re-deploy `common-prd`. Unless things are really messed up, you may prefer to leave the bucket itself alone and delete all its contents.
 
 ### I want to work on a different dev cluster
 
@@ -214,6 +262,17 @@ For example: a developer deleted their tfstate bucket in GCS and re-created it w
    * `gustil ...`
 4. The tfstate bucket contains entities with *both kinds* of encryption. When reconstructing the bucket, you must use (or not use, i.e. move out of the way) the custom `.boto` file described above.
 5. Some Google documentation for context, [Using Encryption Keys](https://cloud.google.com/storage/docs/gsutil/addlhelp/UsingEncryptionKeys).
+
+### My deploy is stuck on `Waiting for all CouchDB pods to join the cluster... 1 of 2 pods have joined the cluster`
+
+1. Unfortunately, this is a [known issue](https://issues.gpii.net/browse/GPII-3624) that happens periodically. It is a result of "split brain" -- both couchdb instances think they are the leader of their own cluster.
+   * To find out if you're suffering from this problem:
+      * `rake display_cluster_state`
+      * Look for the `_membership` output
+      * If `couchdb-couchdb-0` only knows about `couchdb-couchdb-0` and `couchdb-couchdb-1` only knows about `couchdb-couchdb-1`, you have split brain
+1. The easiest workaround is to destroy couchdb, then re-run the deployment:
+   * `rake destroy_module"[k8s/gpii/couchdb]" && rake`
+1. If you need to, you may be able to repair the split brain manually using [CouchDB Cluster Management commands](https://docs.couchdb.org/en/stable/cluster/nodes.html).
 
 ### Errors trying to enable/disable Google Cloud APIs
 
@@ -341,48 +400,94 @@ See [Getting started: One-time Stackdriver Workspace setup](README.md#one-time-s
 1. Enter channel name including "#". Click "Test Connection" and then "Save".
 1. Now you can use new notification channel in `gcp-stackdriver-monitoring` module. Here is example json: `{"type":"slack","labels":{"channel_name":"#alerts"},"user_labels":{},"enabled":{"value":true},"immutable":{"value":true}}`.
 
-## Restoring CouchDB data
+## Working with CouchDB data
 
-We are considering number of probable failure scenarios for our GCP infrastructure.
-You can run all `kubectl` commands mentioned below inside of interactive shell started with `rake sh`.
+You can run all `kubectl` commands mentioned below inside of an interactive shell started with `rake sh`.
 
 ### Data corruption on a single CouchDB replica
 
 In this scenario we rely on CouchDB ability to recover from loss of one or more replicas (our current production CouchDB settings allow us to lose up to 2 random nodes and still keep data integrity). The best course of action as follows:
 
-* Make sure that you figured affected CouchDB pod properly
-* There is a PVC object, associated with affected CouchDB pod. Let's say affected pod is `couchdb-couchdb-1`, then corresponding PVC is `database-storage-couchdb-couchdb-1`, located in the same namespace.
-* Delete associated PVC and then affected pod. For our example case:
+1. Make sure that you figured affected CouchDB pod properly
+1. There is a PVC object, associated with affected CouchDB pod. Let's say affected pod is `couchdb-couchdb-1`, then corresponding PVC is `database-storage-couchdb-couchdb-1`, located in the same namespace.
+1. Delete associated PVC and then affected pod. For our example case:
    * `kubectl --namespace gpii delete pvc database-storage-couchdb-couchdb-1`
    * `kubectl --namespace gpii delete pod couchdb-couchdb-1`
-* After target pod is terminated, Persistent Disk that was mounted into it thru corresponding PVC will be destroyed as well.
-* When new pod is created to replace deleted one, corresponding PVC will be created as well, and, thru it, new PV object for new GCE PD.
-* Run `rake deploy_module[couchdb]` to patch newly created PV with annotations for `k8s-snapshots`.
-* CouchDB cluster will replicate data to recreated node automatically.
-* Corrupted node is now recovered.
+1. After target pod is terminated, Persistent Disk that was mounted into it thru corresponding PVC will be destroyed as well.
+1. When new pod is created to replace deleted one, corresponding PVC will be created as well, and, thru it, new PV object for new GCE PD.
+1. Run `rake deploy_module[couchdb]` to patch newly created PV with annotations for `k8s-snapshots`.
+1. CouchDB cluster will replicate data to recreated node automatically.
+1. Corrupted node is now recovered.
    * You can check DB status on recovered node with `kubectl exec --namespace gpii -it couchdb-couchdb-N -c couchdb -- curl -s http://$TF_VAR_couchdb_admin_username:$TF_VAR_couchdb_admin_password@127.0.0.1:5984/gpii/`, where N is node index.
+
+### The CouchDB cluster won't converge because one of its disks is in the wrong zone
+
+Consider this scenario:
+* A Kubernetes cluster has 3 Nodes, one each in us-central1-a, us-central1-b, and us-central1-c.
+* On this Kubernetes cluster runs a CouchDB cluster with 3 replicas, one on each Node (and thus one in each Zone).
+* Each CouchDB replica is attached to a Persistent Volume, which is tied to a specific Zone.
+* A change is deployed which requires the Kubernetes cluster to be destroyed and re-created. The new Kubernetes cluster has 3 Nodes, but now they are in us-central1-a, us-central1-b, and us-central1-f (i.e. no Nodes in us-central1-c).
+* CouchDB is deployed. The replicas in us-central1-a and us-central1-b are scheduled so that they can re-attach to the Persistent Volumes containing their data.
+* But the replica that wants to re-attach to the PV in us-central1-c cannot do so, because there is no Node in us-central1-c on which to run.
+   * You'll know you're in this state if one CouchDB Pod can't start at all (`0/2 Pending`), and there are messages about `0/3 nodes are available: 3 node(s) had no available volume zone` in the output of `rake display_cluster_state`.
+
+The workaround is to manually move the Persistent Disk that backs the Persistent Volume into a Zone where it can be attached by a CouchDB replica:
+1. Find a destination Zone that has a Node with no CouchDB Pod running on it. Note this for later.
+1. Find the un-attached Persistent Disk used by CouchDB.
+   * Usually this will be the one with an empty "In use by" column in the GCP Dashboard.
+1. Move the un-attached Disk to the destination Zone
+   * `gcloud compute disks move gke-k8s-cluster-000000-pvc-11111111-2222-3333-4444-555555555555 --zone us-central1-AAA --destination-zone us-central1-ZZZ`
+1. Edit the PVC associated with the un-attached Disk.
+   * `kubectl -n gpii edit pv pvc-11111111-2222-3333-4444-555555555555`
+   * Find all mentions of the old Zone and replace them with the destination Zone.
+1. Kubernetes should run the CouchDB Pod in the correct Zone, and CouchDB should attach to the Persistent Disk. Verify this with e.g. `kubectl -n gpii get pods` or the GKE Dashboard.
+   * You may need to deploy the couchdb module again (`rake deploy_module"[k8s/gpii/couchdb]"`), nudge the Pod (`kubectl -n gpii delete pod couchdb-couchdb-NNN`), or destroy and re-create the couchdb module (`rake redeploy_module"[k8s/gpii/couchdb]"`).
+1. When you are sure the CouchDB cluster is healthy, delete any new Snapshots you created (k8s-snapshots manages its own Snapshots).
+
+An alternative workaround is to do a snapshot-restore cycle to move the Persistent Disk to a better Zone:
+1. Find a Zone that has a Node with no CouchDB Pod running on it. Note this for later.
+1. Open Google Cloud console, go to "Compute Engine" -> "Disks".
+1. Find the un-attached Persistent Disk used by CouchDB.
+   * Usually this will be the one with an empty "In use by" column.
+   * Save the Disk's name, type, size, zone and description.
+1. Select this Disk, then "Create Snapshot". Give the Snapshot a meaningful name.
+   * If you are certain the latest Snapshot created by k8s-snapshots is up-to-date (e.g. because you shut down all services that talk to CouchDB before the latest Snapshot was created), you may skip this step and use that Snapshot instead.
+1. `rake destroy_module"[k8s/gpii/couchdb]"`
+   * This is a disruptive action! But if you're in this situation, the environment was probably down anyway. :)
+   * You may need to manually delete the CouchDB StatefulSet, due to the Helm deployment failing and the StatefulSet becoming orphaned: `kubectl -n gpii delete statefulset couchdb-couchdb`
+1. Manually remove the PVC associated with the Disk you noted earlier, e.g.: `kubectl -n gpii delete pvc pvc-11111111-2222-3333-4444-555555555555`
+   * Kubernetes will reap the PV eventually.
+   * Wait until both the PV and PVC are gone: `kubectl -n gpii get pv ; kubectl -n gpii get pvc`
+1. Using the CouchDB disk you identified above:
+   * Make sure you saved the disk name, type, size, zone and description.
+   * Delete the PD in the old (wrong) zone, if it hasn't already been reaped.
+   * Create a new PD from the Snapshot you identified earlier.
+      * Use the same name, type, size, and description, but the new (correct) Zone you noted earlier.
+1. `rake deploy_module"[k8s/gpii/couchdb]"`
+1. Kubernetes should run the CouchDB Pod in the correct Zone, and CouchDB should attach to the Persistent Disk. Verify this with e.g. `kubectl -n gpii get pods` or the GKE Dashboard.
+1. When you are sure the CouchDB cluster is healthy, delete any new Snapshots you created (k8s-snapshots manages its own Snapshots).
 
 ### Data corruption on all replicas of CouchDB cluster
 
 There may be a situation, when we want to roll back entire DB data set to another point in the past. Current solution is disruptive, requires bringing entire CouchDB cluster down and some manual actions (we'll most likely automate this in future):
 
-* Choose a snapshot set that you want to restore, make sure that snapshots are present for all disks that are currently in use by CouchDB cluster.
-* Collect CouchDB disk names from PVCs with `kubectl --namespace gpii get pvc -l app=couchdb -o json | jq -r .items[].spec.volumeName`.
-* Get current number of CouchDB stateful set replicas with `kubectl --namespace gpii get statefulset couchdb-couchdb -o jsonpath="{.status.replicas}"`.
-* Scale CouchDB stateful set to 0 replicas with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=0`. This will cause K8s to terminate all CouchDB pods, all PDs that were mounted into them will be released. **This will prevent flowmanager and preferences services from processing customer requests!**
+1. Choose a snapshot set that you want to restore, make sure that snapshots are present for all disks that are currently in use by CouchDB cluster.
+1. Collect CouchDB disk names from PVCs with `kubectl --namespace gpii get pvc -l app=couchdb -o json | jq -r .items[].spec.volumeName`.
+1. Get current number of CouchDB stateful set replicas with `kubectl --namespace gpii get statefulset couchdb-couchdb -o jsonpath="{.status.replicas}"`.
+1. Scale CouchDB stateful set to 0 replicas with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=0`. This will cause K8s to terminate all CouchDB pods, all PDs that were mounted into them will be released. **This will prevent flowmanager and preferences services from processing customer requests!**
    * You may also want to scale `flowmanager` and `preferences` deployments to 0 replicas as well with `kubectl --namespace gpii scale deployment preferences --replicas=0` and `kubectl --namespace gpii scale deployment flowmanager --replicas=0`. This will give you time to verify that DB restoration is successful before allowing the DB to receive traffic again.
-* Destroy `k8s-snapshots` module with `rake destroy_module["k8s/kube-system/k8s-snapshots"]` to prevent new snapshots from being created while you working with disks.
-* Open Google Cloud console, go to "Compute Engine" -> "Disks".
-* Now, repeat for every CouchDB disk name you collected:
+1. Destroy `k8s-snapshots` module with `rake destroy_module["k8s/kube-system/k8s-snapshots"]` to prevent new snapshots from being created while you working with disks.
+1. Open Google Cloud console, go to "Compute Engine" -> "Disks".
+1. Now, repeat for every CouchDB disk name you collected:
    * Save disk name, type, size, zone and description.
    * Pick proper snapshot.
    * Delete PD.
    * Create new PD from snapshot with the same name, type, size, zone and description.
-* Scale CouchDB stateful set back to number of replicas it used to have before with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=N`
-* Database is now restored to the state at the time of target snapshot.
+1. Scale CouchDB stateful set back to number of replicas it used to have before with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=N`
+1. Database is now restored to the state at the time of target snapshot.
    * You can check the status of all nodes with `for i in {0..N}; do kubectl exec --namespace gpii -it couchdb-couchdb-$i -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/_up; done`, where N is a number of CouchDB replicas.
-* Once DB state is verified and you sure that everything went as desired, you can scale `preferences` and `flowmanager` deployments back as well. From this point system functionality for the customer is fully restored.
-* Deploy `k8s-snapshots` module to resume regular snapshot process with `rake deploy_module["k8s/kube-system/k8s-snapshots"]`.
+1. Once DB state is verified and you sure that everything went as desired, you can scale `preferences` and `flowmanager` deployments back as well. From this point system functionality for the customer is fully restored.
+1. Deploy `k8s-snapshots` module to resume regular snapshot process with `rake deploy_module["k8s/kube-system/k8s-snapshots"]`.
 
 ### Hack: Adding data to CouchDB
 
@@ -513,16 +618,12 @@ Note that we assume that you are going to perform these steps into an already up
 The process:
 
 1. Go into the corresponding folder with the cluster name where you want to perform the process, "stg", "prd" or "dev". In this case We are going to perform the process in "dev": `cd gpii-infra/gcp/live/dev`.
-1. Set up the env you are going to deal with: rake configure_kubectl
-1. Optional, re-run the current dataloader to be sure that it's using the original dbData, run `helm delete --purge dataloader && rake deploy`. Note that if you are going to perform this step in either "prd" or "stg" environments, take into account that the same CouchDB credentials usded in "stg"/"prd" must be set in the _secrets.yml_ to avoid authentication failures. For that, you will need to ask an Op for such credentials which are set in the CI configuration.
-1. Open a port forwarding between the cluster's couchdb host:port and your local machine: `kubectl --namespace gpii port-forward couchdb-0 5984`
-
-The port forwarding will be there until you hit _Ctrl-C_, so leave it running until we are done loading the preferences sets.
+1. Set up the env you are going to deal with: `rake sh`
 __Note__ that if you are going to perform this in production (prd) you should do it from the _prd_ folder and remember to use the _RAKE_REALLY_RUN_IN_PRD=true_ variable when issuing the commands against the production cluster.
+1. Open a port forwarding between the cluster's couchdb host:port and your local machine: `kubectl --namespace gpii port-forward couchdb-couchdb-0 5984 &`
 
 Let's load the data, go back to the folder _testData/myDbData_ and run:
-1. `curl -d @gpiiKeys.json -H "Content-type: application/json" -X POST http://localhost:5984/gpii/_bulk_docs`
-1. `curl -d @.json -H "Content-type: application/json" -X POST http://localhost:5984/gpii/_bulk_docs`
+1. `curl -d @gpiiKeys.json -H "Content-type: application/json" -X POST http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@localhost:5984/gpii/_bulk_docs`
 
 Unless you get errors, that's all. Now you can close the port forwarding as mentioned earlier.
 
@@ -566,4 +667,8 @@ Couple of lines explaining why this is planned, what is being done, and when
 users can expect the next update. E.g., "The Ops team is currently
 investigating the issue and we will update you once the cause is known/issue is
 resolved/update is done.
+
+[For planned downtime only]
+If this downtime will be disruptive to your work ("We're giving a demo for the
+Prime Minister at that time!"), please let me know immediately.
 ```

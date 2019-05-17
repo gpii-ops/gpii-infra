@@ -100,6 +100,7 @@ describe Vars do
     expect(ENV).to have_received(:[]=).with("ENV", env)
     expect(ENV).to have_received(:[]=).with("TF_VAR_env", env)
     expect(ENV).to have_received(:[]=).with("ORGANIZATION_ID", "247149361674")
+    expect(ENV).to have_received(:[]=).with("BILLING_ORGANIZATION_ID", "247149361674")
     expect(ENV).to have_received(:[]=).with("BILLING_ID", "01A0E1-B0B31F-349F4F")
     expect(ENV).to have_received(:[]=).with("TF_VAR_organization_name", "gpii")
     expect(ENV).to have_received(:[]=).with("TF_VAR_organization_domain", "gpii.net")
@@ -110,6 +111,7 @@ describe Vars do
     allow(ENV).to receive(:[]=)
     allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
     allow(ENV).to receive(:[]).with("ORGANIZATION_ID").and_return("fake-organization-id")
+    allow(ENV).to receive(:[]).with("BILLING_ORGANIZATION_ID").and_return("fake-billing-organization-id")
     allow(ENV).to receive(:[]).with("BILLING_ID").and_return("fake-billing-id")
     env = "fake-env"
     project_type = "fake-project-type"
@@ -121,6 +123,7 @@ describe Vars do
   it "set_vars doesn't clobber vars that are already set (even when env=stg)" do
     allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
     allow(ENV).to receive(:[]).with("ORGANIZATION_ID").and_return("fake-organization-id")
+    allow(ENV).to receive(:[]).with("BILLING_ORGANIZATION_ID").and_return("fake-billing-organization-id")
     allow(ENV).to receive(:[]).with("BILLING_ID").and_return("fake-billing-id")
     allow(ENV).to receive(:[]).with("TF_VAR_organization_name").and_return("fakecorp")
     allow(ENV).to receive(:[]).with("TF_VAR_organization_domain").and_return("fake.org")
@@ -130,6 +133,7 @@ describe Vars do
     Vars.set_vars(env, project_type)
     expect(ENV).not_to have_received(:[]=).with("TF_VAR_project_id", any_args)
     expect(ENV).not_to have_received(:[]=).with("ORGANIZATION_ID", any_args)
+    expect(ENV).not_to have_received(:[]=).with("BILLING_ORGANIZATION_ID", any_args)
     expect(ENV).not_to have_received(:[]=).with("BILLING_ID", any_args)
     expect(ENV).not_to have_received(:[]=).with("TF_VAR_organization_name", any_args)
     expect(ENV).not_to have_received(:[]=).with("TF_VAR_organization_domain", any_args)
@@ -142,6 +146,87 @@ describe Vars do
     project_type = "fake-project-type"
     Vars.set_vars(env, project_type)
     expect(ENV).to have_received(:[]=).with("TF_VAR_nonce", a_value)
+  end
+
+
+  it "set_versions sets TF_VAR_<component>_(repository|checksum|tag)" do
+    fake_versions = {
+      "flowmanager" => {
+        "upstream" => {
+          "repository" => "fake_repository:fake_tag",
+        },
+        "generated" => {
+          "repository" => "gcr.io/some-project/fake_repository",
+          "sha" => "sha256:c0ffee",
+          "tag" => "fake_tag",
+        },
+      },
+      "component_without_generated" => {
+        "upstream" => {
+          "repository" => "another_fake_repository",
+        },
+      },
+      "component_without_repository" => {
+        "upstream" => {
+          "repository" => "another_fake_repository",
+        },
+        "generated" => {
+          "sha" => "sha256:50da",
+          "tag" => "fake_tag",
+        },
+      },
+      "component_without_sha" => {
+        "upstream" => {
+          "repository" => "another_fake_repository",
+        },
+        "generated" => {
+          "repository" => "gcr.io/some-project/another_fake_repository",
+          "tag" => "fake_tag",
+        },
+      },
+      "component_without_tag" => {
+        "upstream" => {
+          "repository" => "another_fake_repository",
+        },
+        "generated" => {
+          "repository" => "gcr.io/some-project/another_fake_repository",
+          "sha" => "sha256:50da",
+        },
+      },
+    }
+    allow(File).to receive(:read)
+    allow(YAML).to receive(:load).and_return(fake_versions)
+    Vars.set_versions()
+    expect(ENV).to have_received(:[]=).with("TF_VAR_flowmanager_repository", "gcr.io/some-project/fake_repository")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_flowmanager_checksum", "sha256:c0ffee")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_flowmanager_tag", "fake_tag")
+    expect(ENV).not_to have_received(:[]=).with("TF_VAR_component_without_repository_repository", any_args)
+    expect(ENV).not_to have_received(:[]=).with("TF_VAR_component_without_sha_repository", any_args)
+    expect(ENV).not_to have_received(:[]=).with("TF_VAR_component_without_tag_repository", any_args)
+  end
+
+  it "set_versions handles tags that look like floats" do
+    # Usually, the yaml library can deduce that a tag is a string. However, if
+    # the tag is a valid float it is imported as such. Then,
+    # ENV[component_tag]= raises "TypeError: no implicit conversion of Float
+    # into String".
+    fake_tag = 3.9
+    fake_versions = {
+      "flowmanager" => {
+        "upstream" => {
+          "repository" => "fake_repository:fake_tag",
+        },
+        "generated" => {
+          "repository" => "gcr.io/some-project/fake_repository",
+          "sha" => "sha256:c0ffee",
+          "tag" => fake_tag,
+        },
+      },
+    }
+    allow(File).to receive(:read)
+    allow(YAML).to receive(:load).and_return(fake_versions)
+    Vars.set_versions()
+    expect(ENV).to have_received(:[]=).with("TF_VAR_flowmanager_tag", "#{fake_tag}")
   end
 end
 

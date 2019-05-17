@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "service_account_assigner.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "service_account_assigner.name" . }}
+    helm.sh/chart: {{ include "service_account_assigner.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "service_account_assigner.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "service_account_assigner.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      hostNetwork: true
+      serviceAccountName: {{ include "service_account_assigner.fullname" . }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        args:
+        - "--iptables=true"
+        - "--host-ip=$(HOST_IP)"
+        - "--node=$(NODE_NAME)"
+        - "--log-format=json"
+        - "--default-scopes={{ include "helm-toolkit.utils.joinListWithComma" .Values.defaultScopes }}"
+        - "--default-service-account={{ .Values.defaultServiceAccount }}"
+        - "--enable-metadata-proxy"
+        securityContext:
+          privileged: true
+          capabilities:
+            drop:
+            - all
+            add:
+            - CAP_NET_ADMIN
+            - CAP_NET_RAW
+        env:
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        ports:
+        - containerPort: 8181
+          hostPort: 8181
+          name: http

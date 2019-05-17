@@ -65,7 +65,7 @@ end
 
 desc "Wait until production config tests have been completed"
 task :wait_for_productionConfigTests_complete => :configure_kubectl do
-  Rake::Task["setup_versions"].invoke("../../shared/versions.yml")
+  Rake::Task["setup_versions"].invoke("../../shared/versions.aws.yml")
   puts "Waiting for production config tests to complete..."
   puts "(You can Ctrl-C out of this safely. You may need to re-run :deploy_only afterward.)"
 

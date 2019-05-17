@@ -13,9 +13,9 @@ def sh_filter(cmd, preserve_stderr = false, exit_on_nonzero_status = true)
     # After switching back to helm-release, plaintext certificates and keys may be present in output
     out.gsub!(/-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----\\n/m, "<SENSITIVE>")
     out.gsub!(/-----BEGIN EC PRIVATE KEY-----.*?-----END EC PRIVATE KEY-----\\n/m, "<SENSITIVE>")
-    if @secrets
+    if @secrets.collected_secrets
       # Secrets are grouped by encryption key, i.e. {'key1' => ['secret1', 'secret2']}
-      @secrets.each do |encryption_key, secrets_array|
+        @secrets.collected_secrets.each do |encryption_key, secrets_array|
         secrets_array.each do |secret|
           out.gsub!(/#{Regexp.escape(ENV["TF_VAR_#{secret}"])}/, "<SENSITIVE>") if ENV["TF_VAR_#{secret}"].size > 0
         end
