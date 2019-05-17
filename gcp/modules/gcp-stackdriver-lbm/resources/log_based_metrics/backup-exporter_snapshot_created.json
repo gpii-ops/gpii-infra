@@ -1,0 +1,4 @@
+{
+  "name": "backup-exporter.snapshot_created",
+  "filter": "resource.type=\"k8s_container\" resource.labels.cluster_name=\"k8s-cluster\" resource.labels.namespace_name=\"backup-exporter\" resource.labels.container_name=\"backup-container\" textPayload=\"[Daisy] All workflows completed successfully.\n\""
+}
