@@ -21,7 +21,7 @@ task :default do
     environments.each do |env|
       sh "cd #{env} && \
         rake configure_serviceaccount_ci_clobber && \
-        rake configure_serviceaccount && \
+        rake configure_serviceaccount[use_projectowner_sa] && \
         rake configure_serviceaccount_ci_save && \
         rake clobber \
       "
@@ -35,7 +35,7 @@ task :default do
   env = "../../gcp/live/dev"
   sh "cd #{env} && \
     rake configure_serviceaccount_ci_clobber && \
-    rake configure_serviceaccount && \
+    rake configure_serviceaccount[use_projectowner_sa] && \
     rake configure_serviceaccount_ci_save && \
     rake clobber \
   "

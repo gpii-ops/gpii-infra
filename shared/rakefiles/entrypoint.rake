@@ -61,6 +61,22 @@ task :set_compose_env do
   end
 end
 
+desc "[ADVANCED] Authenticate and generate GCP credentials (gcloud auth login)"
+task :configure_login => [:set_vars] do
+  sh "#{@exekube_cmd} rake configure_login"
+end
+
+# This duplicates information in docker-compose.yaml,
+# TF_VAR_serviceaccount_key.
+desc "[ADVANCED] Create service account for authenticated user and download credentials"
+task :configure_serviceaccount, [:use_projectowner_sa] => [:set_vars] do |taskname, args|
+  if args[:use_projectowner_sa]
+    sh "#{@exekube_cmd} rake configure_serviceaccount[use_projectowner_sa]"
+  else
+    sh "#{@exekube_cmd} rake configure_serviceaccount"
+  end
+end
+
 desc "[ADVANCED] Create or update low-level infrastructure"
 task :apply_infra => [:set_vars] do
   sh "#{@exekube_cmd} rake refresh_common_infra['#{@project_type}']"
@@ -196,9 +212,13 @@ task :plain_sh, [:cmd] => [:set_vars] do |taskname, args|
   sh "#{@exekube_cmd} #{cmd}"
 end
 
-desc "[ADVANCED] Destroy all SA keys except current one"
-task :destroy_sa_keys => [:set_vars, :check_destroy_allowed] do
-  sh "#{@exekube_cmd} rake destroy_sa_keys"
+desc "[ADVANCED] Destroy all active SA keys except current one"
+task :destroy_sa_keys, [:use_projectowner_sa] => [:set_vars, :check_destroy_allowed] do |taskname, args|
+  if args[:use_projectowner_sa]
+    sh "#{@exekube_cmd} rake destroy_sa_keys[use_projectowner_sa]"
+  else
+    sh "#{@exekube_cmd} rake destroy_sa_keys"
+  end
 end
 
 desc "[ADVANCED] Destroy secrets file stored in GS bucket for encryption key, passed as argument -- rake destroy_secrets['default']"

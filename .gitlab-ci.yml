@@ -106,7 +106,7 @@ common-stg:
     - rake apply_infra
   after_script:
     - cd common/live/stg
-    - rake destroy_sa_keys
+    - rake destroy_sa_keys[use_projectowner_sa]
   environment:
     name: stg
   only:
@@ -135,7 +135,7 @@ common-stg-test-gcp-dev:
   after_script:
     - cd gcp/live/dev
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
-    - rake destroy_sa_keys || true
+    - rake destroy_sa_keys[use_projectowner_sa] || true
     - rake clobber || true
   only:
     - master@gpii-ops/gpii-infra
@@ -172,7 +172,7 @@ common-prd:
     - rake apply_infra
   after_script:
     - cd common/live/prd
-    - rake destroy_sa_keys RAKE_REALLY_DESTROY_IN_PRD=true
+    - rake destroy_sa_keys[use_projectowner_sa] RAKE_REALLY_DESTROY_IN_PRD=true
   environment:
     name: prd
   only:
@@ -212,7 +212,7 @@ gcp-dev:
   after_script:
     - cd gcp/live/dev
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
-    - rake destroy_sa_keys || true
+    - rake destroy_sa_keys[use_projectowner_sa] || true
     - rake clobber || true
   only:
     - master@gpii-ops/gpii-infra
@@ -305,7 +305,7 @@ gcp-stg:
     - rake destroy_module[locust/swarm] || true
     - rake destroy_tfstate[locust] || true
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
-    - rake destroy_sa_keys || true
+    - rake destroy_sa_keys[use_projectowner_sa] || true
   only:
     - master@gpii-ops/gpii-infra
 
@@ -408,6 +408,6 @@ gcp-prd:
     - rake destroy_module[locust/swarm] RAKE_REALLY_DESTROY_IN_PRD=true || true
     - rake destroy_tfstate[locust] RAKE_REALLY_DESTROY_IN_PRD=true || true
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
-    - rake destroy_sa_keys RAKE_REALLY_DESTROY_IN_PRD=true || true
+    - rake destroy_sa_keys[use_projectowner_sa] RAKE_REALLY_DESTROY_IN_PRD=true || true
   only:
     - master@gpii-ops/gpii-infra

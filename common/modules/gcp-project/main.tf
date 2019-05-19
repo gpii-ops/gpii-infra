@@ -81,6 +81,21 @@ variable "service_apis" {
   ]
 }
 
+# This variable contains the map of SAs for all users with access to the project.
+# Format:
+#   sa_name = "sa description"
+variable "service_accounts" {
+  type = "map"
+
+  default = {
+    projectowner                   = "CI service account"
+    alfredo-at-raisingthefloor-org = "Service account for alfredo@raisingthefloor.org"
+    sergey-at-raisingthefloor-org  = "Service account for sergey@raisingthefloor.org"
+    stepan-at-raisingthefloor-org  = "Service account for stepan@raisingthefloor.org"
+    tyler-at-raisingthefloor-org   = "Service account for tyler@raisingthefloor.org"
+  }
+}
+
 data "google_iam_policy" "combined" {
   binding {
     role = "roles/cloudkms.admin"
@@ -129,6 +144,7 @@ data "google_iam_policy" "combined" {
     members = [
       "${local.service_accounts}",
       "serviceAccount:${google_service_account.gke_cluster_pod_cert_manager.email}",
+      "serviceAccount:projectowner@${var.project_id}.iam.gserviceaccount.com",
     ]
   }
 
@@ -201,6 +217,7 @@ data "google_iam_policy" "combined" {
 
     members = [
       "${local.service_accounts}",
+      "serviceAccount:projectowner@${var.project_id}.iam.gserviceaccount.com",
     ]
   }
 
@@ -409,8 +426,9 @@ resource "google_project_iam_policy" "project" {
 }
 
 resource "google_service_account" "project" {
-  account_id   = "projectowner"
-  display_name = "Project owner service account"
+  count        = "${length(keys(var.service_accounts))}"
+  account_id   = "${element(keys(var.service_accounts), count.index)}"
+  display_name = "${element(values(var.service_accounts), count.index)}"
   project      = "${google_project.project.project_id}"
   count        = "${local.root_project_iam ? 0 : 1}"
 }

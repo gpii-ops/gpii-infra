@@ -15,8 +15,8 @@ end
 # (and a new Serviceaccount Key) whenever @gcp_creds_file changes. This is not
 # what we want, i.e. don't create a new Key/key file when @gcp_creds_file
 # changes because of :configure_kubectl.
-@serviceaccount_key_file = "/project/live/#{ENV['ENV']}/secrets/kube-system/owner.json"
-task :configure_serviceaccount => [@gcp_creds_file] do
+@serviceaccount_key_file = ENV["TF_VAR_serviceaccount_key"]
+task :configure_serviceaccount, [:use_projectowner_sa] => [:configure_current_project, :set_auth_user_vars] do |taskname, args|
   # TODO: This command is duplicated from exekube's gcp-project-init (and
   # hardcodes 'projectowner' instead of $SA_NAME which is only defined in
   # gcp-project-init). If gcp-project-init becomes idempotent (GPII-2989,
@@ -24,9 +24,10 @@ task :configure_serviceaccount => [@gcp_creds_file] do
   # step moves somewhere else in exekube, call this command from that place
   # instead.
   unless File.file?(@serviceaccount_key_file)
+    sa_name = args[:use_projectowner_sa] ? "projectowner" : @auth_user_sa_name
     sh "
-      gcloud iam service-accounts keys create #{@serviceaccount_key_file} \
-        --iam-account projectowner@$TF_VAR_project_id.iam.gserviceaccount.com
+      gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
+        --iam-account #{sa_name}@$TF_VAR_project_id.iam.gserviceaccount.com
     "
   end
   Rake::Task[:activate_serviceaccount].invoke
@@ -40,6 +41,22 @@ task :activate_serviceaccount => [@serviceaccount_key_file] do
     gcloud auth activate-service-account \
       --key-file #{@serviceaccount_key_file} \
       --project $TF_VAR_project_id
+  "
+end
+
+task :destroy_sa_keys, [:use_projectowner_sa] => [:configure_current_project, :configure_extra_tf_vars, :set_auth_user_vars] do |taskname, args|
+  sa_name = args[:use_projectowner_sa] ? "projectowner" : @auth_user_sa_name
+  sh "
+    existing_keys=$(gcloud iam service-accounts keys list \
+      --iam-account #{sa_name}@$TF_VAR_project_id.iam.gserviceaccount.com \
+      --managed-by user | grep -oE \"^[a-z0-9]+\"); \
+    current_key=$(cat $TF_VAR_serviceaccount_key 2>/dev/null | jq -r '.private_key_id'); \
+    for key in $existing_keys; do \
+      if [ \"$key\" != \"$current_key\" ]; then \
+        yes | gcloud iam service-accounts keys delete \
+          --iam-account #{sa_name}@$TF_VAR_project_id.iam.gserviceaccount.com $key; \
+      fi \
+    done
   "
 end
 
@@ -123,6 +140,18 @@ end
 task :configure => [@gcp_creds_file, @app_default_creds_file, @kubectl_creds_file, :configure_current_project, :configure_extra_tf_vars] do
   # This is a wrapper configuration task.
   # It does nothing, but it has all dependencies that required for standard rake workflow.
+end
+
+task :set_auth_user_vars => [@gcp_creds_file] do
+  # Setting authenticated user's email into env variable, so it can be
+  # accessible in modules: https://issues.gpii.net/browse/GPII-3516
+  ENV['TF_VAR_auth_user_email'] = %x{
+    gcloud auth list --filter='account!~gserviceaccount.com' --format json |  jq -r '.[].account'
+  }.chomp!
+
+  # We build auth user SA from email by replacing non-allowed characters
+  # SA name length limit is 30 symbols
+  @auth_user_sa_name = ENV['TF_VAR_auth_user_email'].sub("@", "-at-").sub(".", "-")[0..30]
 end
 
 

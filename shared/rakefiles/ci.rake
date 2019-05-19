@@ -18,11 +18,6 @@ task :set_vars_ci => [:set_vars] do
   )
 end
 
-desc "[CI ONLY] Create and download credentials for projectowner service account"
-task :configure_serviceaccount => [:set_vars] do
-  sh "#{@exekube_cmd} rake configure_serviceaccount"
-end
-
 desc "[CI ONLY] Restore GCP credentials from local backup on CI worker"
 task :configure_serviceaccount_ci_restore => [:set_vars_ci] do
   # The automated CI process cannot (and does not want to) authenticate in the
