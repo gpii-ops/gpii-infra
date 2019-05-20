@@ -15,7 +15,7 @@ end
 # (and a new Serviceaccount Key) whenever @gcp_creds_file changes. This is not
 # what we want, i.e. don't create a new Key/key file when @gcp_creds_file
 # changes because of :configure_kubectl.
-@serviceaccount_key_file = ENV["TF_VAR_serviceaccount_key"]
+@serviceaccount_key_file = "/project/live/#{ENV['ENV']}/secrets/kube-system/owner.json"
 task :configure_serviceaccount, [:use_projectowner_sa] => [:configure_current_project, :set_auth_user_vars] do |taskname, args|
   # TODO: This command is duplicated from exekube's gcp-project-init (and
   # hardcodes 'projectowner' instead of $SA_NAME which is only defined in
@@ -26,7 +26,7 @@ task :configure_serviceaccount, [:use_projectowner_sa] => [:configure_current_pr
   unless File.file?(@serviceaccount_key_file)
     sa_name = args[:use_projectowner_sa] ? "projectowner" : @auth_user_sa_name
     sh "
-      gcloud iam service-accounts keys create $TF_VAR_serviceaccount_key \
+      gcloud iam service-accounts keys create #{@serviceaccount_key_file} \
         --iam-account #{sa_name}@$TF_VAR_project_id.iam.gserviceaccount.com
     "
   end
@@ -36,7 +36,7 @@ end
 # We need separate task to activate service account from key file
 # so we can call it directly after restoring saved
 # @serviceaccount_key_file in :configure_serviceaccount_ci_restore
-task :activate_serviceaccount => [@serviceaccount_key_file] do
+task :activate_serviceaccount => [:configure_serviceaccount] do
   sh "
     gcloud auth activate-service-account \
       --key-file #{@serviceaccount_key_file} \
