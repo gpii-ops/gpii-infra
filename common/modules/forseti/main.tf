@@ -42,25 +42,3 @@ module "forseti" {
   cscc_violations_enabled = true
   cscc_source_id          = "${var.cscc_source_id}"
 }
-
-module "real_time_enforcer_roles" {
-  source = "./terraform-google-forseti-1.5.1/modules/real_time_enforcer_roles"
-  org_id = "${var.organization_id}"
-  suffix = "${module.forseti.suffix}"
-}
-
-module "real_time_enforcer_organization_sink" {
-  source            = "./terraform-google-forseti-1.5.1/modules/real_time_enforcer_organization_sink"
-  pubsub_project_id = "${var.project_id}"
-  org_id            = "${var.organization_id}"
-}
-
-module "real_time_enforcer" {
-  source               = "./terraform-google-forseti-1.5.1/modules/real_time_enforcer"
-  project_id           = "${var.project_id}"
-  org_id               = "${var.organization_id}"
-  topic                = "${module.real_time_enforcer_organization_sink.topic}"
-  enforcer_viewer_role = "${module.real_time_enforcer_roles.forseti-rt-enforcer-viewer-role-id}"
-  enforcer_writer_role = "${module.real_time_enforcer_roles.forseti-rt-enforcer-writer-role-id}"
-  suffix               = "${module.forseti.suffix}"
-}
