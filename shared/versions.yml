@@ -21,6 +21,12 @@ certmerge_operator:
     repository: gcr.io/gpii-common-prd/gpii/certmerge-operator
     sha: sha256:96c435ee42bae821210e91430c18c0fd1cbe8cd33216175a77fbdc7622f5d535
     tag: 0.0.3-gpii.0
+cloud_sdk:
+  upstream_image: google/cloud-sdk:242.0.0-alpine
+  generated:
+    image: google/cloud-sdk
+    sha: sha256:6bda894b7ac4e733a305269379ff8f50329a0cd592f1d966854972bae591b9b5
+    tag: 242.0.0-alpine
 couchdb_helper:
   upstream:
     repository: kocolosk/couchdb-statefulset-assembler
