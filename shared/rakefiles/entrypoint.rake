@@ -312,4 +312,9 @@ task :revoke_org_admin => [:set_vars] do
   sh "#{@exekube_cmd} rake revoke_org_admin"
 end
 
+desc "[ADMIN ONLY] Restore a snapshot from a remote file"
+task :restore_snapshot_from_image_file, [:files] => [:set_vars] do |taskname, args|
+  sh "#{@exekube_cmd} rake restore_snapshot_from_image_file['#{args[:files]}']"
+end
+
 # vim: et ts=2 sw=2:

@@ -21,6 +21,12 @@ certmerge_operator:
     repository: gcr.io/gpii-common-prd/gpii/certmerge-operator
     sha: sha256:96c435ee42bae821210e91430c18c0fd1cbe8cd33216175a77fbdc7622f5d535
     tag: 0.0.3-gpii.0
+cloud_sdk:
+  upstream_image: google/cloud-sdk:242.0.0-alpine
+  generated:
+    image: google/cloud-sdk
+    sha: sha256:6bda894b7ac4e733a305269379ff8f50329a0cd592f1d966854972bae591b9b5
+    tag: 242.0.0-alpine
 couchdb_helper:
   upstream:
     repository: kocolosk/couchdb-statefulset-assembler
@@ -67,7 +73,7 @@ dataloader:
     tag: latest
   generated:
     repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:e8b683b3c84a0892d8afefc039e1c5dc42f1063f98e286bd4f55637a482e141c
+    sha: sha256:4da46a18d00cf5e1f751993a6f0164bdc246124fee6505242816a16daf62b690
     tag: latest
 flowmanager:
   upstream:
@@ -75,7 +81,7 @@ flowmanager:
     tag: latest
   generated:
     repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:e8b683b3c84a0892d8afefc039e1c5dc42f1063f98e286bd4f55637a482e141c
+    sha: sha256:4da46a18d00cf5e1f751993a6f0164bdc246124fee6505242816a16daf62b690
     tag: latest
 k8s_snapshots:
   upstream:
@@ -83,7 +89,7 @@ k8s_snapshots:
     tag: v2.0
   generated:
     repository: gcr.io/gpii-common-prd/elsdoerfer/k8s-snapshots
-    sha: sha256:c787dc6fa1812c97ac96f46b4ff6dc1485e06c458839d4aa129aaf62201309e9
+    sha: sha256:a7c10c8054e801b354c43021a275bb4c97ea8aca3b9de2583820492377f26140
     tag: v2.0
 locust:
   upstream:
@@ -107,7 +113,7 @@ preferences:
     tag: latest
   generated:
     repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:e8b683b3c84a0892d8afefc039e1c5dc42f1063f98e286bd4f55637a482e141c
+    sha: sha256:4da46a18d00cf5e1f751993a6f0164bdc246124fee6505242816a16daf62b690
     tag: latest
 service_account_assigner:
   upstream:
