@@ -1,0 +1,4 @@
+{
+  "name": "compute.instances.insert",
+  "filter": "resource.type=\"gce_instance\" AND jsonPayload.event_subtype=\"compute.instances.insert\""
+}
