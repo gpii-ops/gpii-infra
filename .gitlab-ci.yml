@@ -301,8 +301,8 @@ gcp-stg:
     - rake display_cluster_state
     - rake display_universal_image_info || true
     # Destroy Locust module (used for smoke tests) and its TF state
-    - rake destroy_module[locust/istio] || true
     - rake destroy_module[locust/swarm] || true
+    - rake destroy_module[locust/istio] || true
     - rake destroy_tfstate[locust] || true
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys || true
@@ -404,8 +404,8 @@ gcp-prd:
     - rake display_cluster_state
     - rake display_universal_image_info || true
     # Destroy Locust module (used for smoke tests) and its TF state
-    - rake destroy_module[locust/istio] RAKE_REALLY_DESTROY_IN_PRD=true || true
     - rake destroy_module[locust/swarm] RAKE_REALLY_DESTROY_IN_PRD=true || true
+    - rake destroy_module[locust/istio] RAKE_REALLY_DESTROY_IN_PRD=true || true
     - rake destroy_tfstate[locust] RAKE_REALLY_DESTROY_IN_PRD=true || true
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys RAKE_REALLY_DESTROY_IN_PRD=true || true
