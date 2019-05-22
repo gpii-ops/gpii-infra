@@ -24,7 +24,6 @@ common-setup:
     - aws --version
     - docker version
     - docker-compose version
-    - pushd gcp/live/dev/ && rake update_exekube && popd
     - docker images | grep exekube
     - ruby --version
     - bundle version
@@ -57,7 +56,6 @@ gcp-setup:
   script:
     - docker version
     - docker-compose version
-    - pushd gcp/live/dev/ && rake update_exekube && popd
     - docker images | grep exekube
     - ruby --version
     - bundle version
@@ -70,7 +68,7 @@ terraform-fmt-check:
   tags:
     - common
   script:
-    - docker run --rm -v "$(pwd):/data" -w /data gpii/exekube:0.4.0-google -- terraform fmt --check=true
+    - docker run --rm -v "$(pwd):/data" -w /data gpii/exekube:0.5.1-google_gpii.0 -- terraform fmt --check=true
   only:
     - master@gpii-ops/gpii-infra
 
@@ -303,7 +301,8 @@ gcp-stg:
     - rake display_cluster_state
     - rake display_universal_image_info || true
     # Destroy Locust module (used for smoke tests) and its TF state
-    - rake destroy_module[locust] || true
+    - rake destroy_module[locust/swarm] || true
+    - rake destroy_module[locust/istio] || true
     - rake destroy_tfstate[locust] || true
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys || true
@@ -405,7 +404,8 @@ gcp-prd:
     - rake display_cluster_state
     - rake display_universal_image_info || true
     # Destroy Locust module (used for smoke tests) and its TF state
-    - rake destroy_module[locust] RAKE_REALLY_DESTROY_IN_PRD=true || true
+    - rake destroy_module[locust/swarm] RAKE_REALLY_DESTROY_IN_PRD=true || true
+    - rake destroy_module[locust/istio] RAKE_REALLY_DESTROY_IN_PRD=true || true
     - rake destroy_tfstate[locust] RAKE_REALLY_DESTROY_IN_PRD=true || true
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys RAKE_REALLY_DESTROY_IN_PRD=true || true

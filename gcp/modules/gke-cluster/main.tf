@@ -32,6 +32,10 @@ variable "prevent_destroy_cluster" {
   default = false
 }
 
+variable "enable_binary_authorization" {
+  default = false
+}
+
 data "google_service_account" "gke_cluster_node" {
   account_id = "gke-cluster-node"
   project    = "${var.project_id}"
@@ -43,28 +47,31 @@ data "google_container_engine_versions" "this" {
   region   = "${var.infra_region}"
 }
 
-data "external" "gke_version_assert" {
-  program = [
-    "bash",
-    "-c",
-    <<EOF
-      if [[ '${data.google_container_engine_versions.this.default_cluster_version}' == ${var.expected_gke_version_prefix}* ]]; then
-        echo '{"version": "${data.google_container_engine_versions.this.default_cluster_version}"}'
-      else
-        echo 'Default GKE version is ${data.google_container_engine_versions.this.default_cluster_version}, this would mean minor version upgrade!' >&2
-        false
-      fi
-EOF
-    ,
-  ]
-}
+# TODO re-enable this once Google rolls-out 1.12 as default version properly
+# data "external" "gke_version_assert" {
+#   program = [
+#     "bash",
+#     "-c",
+#     <<EOF
+#       if [[ '${data.google_container_engine_versions.this.default_cluster_version}' == ${var.expected_gke_version_prefix}* ]]; then
+#         echo '{"version": "${data.google_container_engine_versions.this.default_cluster_version}"}'
+#       else
+#         echo 'Default GKE version is ${data.google_container_engine_versions.this.default_cluster_version}, this would mean minor version upgrade!' >&2
+#         false
+#       fi
+# EOF
+#     ,
+#   ]
+# }
 
 module "gke_cluster" {
   source             = "/exekube-modules/gke-cluster"
   project_id         = "${var.project_id}"
   serviceaccount_key = "${var.serviceaccount_key}"
 
-  kubernetes_version = "${data.external.gke_version_assert.result.version}"
+  # TODO once 1.12 is default, this should be changed back
+  # kubernetes_version = "${data.external.gke_version_assert.result.version}"
+  kubernetes_version = "1.12.7-gke.10"
 
   region = "${var.infra_region}"
 
@@ -91,6 +98,8 @@ module "gke_cluster" {
   primary_pool_machine_type       = "${var.node_type}"
   primary_pool_oauth_scopes       = ["cloud-platform"]
   primary_pool_service_account    = "${data.google_service_account.gke_cluster_node.email}"
+
+  enable_binary_authorization = "${var.enable_binary_authorization}"
 }
 
 # Workaround from

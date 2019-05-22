@@ -21,6 +21,12 @@ certmerge_operator:
     repository: gcr.io/gpii-common-prd/gpii/certmerge-operator
     sha: sha256:96c435ee42bae821210e91430c18c0fd1cbe8cd33216175a77fbdc7622f5d535
     tag: 0.0.3-gpii.0
+cloud_sdk:
+  upstream_image: google/cloud-sdk:242.0.0-alpine
+  generated:
+    image: google/cloud-sdk
+    sha: sha256:6bda894b7ac4e733a305269379ff8f50329a0cd592f1d966854972bae591b9b5
+    tag: 242.0.0-alpine
 couchdb_helper:
   upstream:
     repository: kocolosk/couchdb-statefulset-assembler
@@ -35,7 +41,7 @@ couchdb_init:
     tag: 3.9
   generated:
     repository: gcr.io/gpii-common-prd/alpine
-    sha: sha256:5c40b3c27b9f13c873fefb2139765c56ce97fd50230f1f2d5c91e55dec171907
+    sha: sha256:bf1684a6e3676389ec861c602e97f27b03f14178e5bc3f70dce198f9f160cce9
     tag: 3.9
 couchdb_prometheus_exporter:
   upstream:
@@ -59,7 +65,7 @@ couchdb:
     tag: 2.3.0
   generated:
     repository: gcr.io/gpii-common-prd/couchdb
-    sha: sha256:3c64af8ea296e20ac92a496aa9fb49287c9d99e91b39291fd54489c22379d01f
+    sha: sha256:bdffbe1b4245c52e7c4fc5dd88539b9ba075188900565532fa488301b44c3031
     tag: 2.3.0
 dataloader:
   upstream:
@@ -67,7 +73,7 @@ dataloader:
     tag: latest
   generated:
     repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:68622b52d4f8673e208ff8ffe0877c695186bd961a108cd0ec88c8db89c6dcc8
+    sha: sha256:6b40918bc8abf0d7ab89d50199f9cfea896da42a0b0cdcc631dc8fd749a6c3bf
     tag: latest
 flushtokens:
   upstream:
@@ -83,7 +89,7 @@ flowmanager:
     tag: latest
   generated:
     repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:68622b52d4f8673e208ff8ffe0877c695186bd961a108cd0ec88c8db89c6dcc8
+    sha: sha256:6b40918bc8abf0d7ab89d50199f9cfea896da42a0b0cdcc631dc8fd749a6c3bf
     tag: latest
 k8s_snapshots:
   upstream:
@@ -91,7 +97,7 @@ k8s_snapshots:
     tag: v2.0
   generated:
     repository: gcr.io/gpii-common-prd/elsdoerfer/k8s-snapshots
-    sha: sha256:c787dc6fa1812c97ac96f46b4ff6dc1485e06c458839d4aa129aaf62201309e9
+    sha: sha256:a7c10c8054e801b354c43021a275bb4c97ea8aca3b9de2583820492377f26140
     tag: v2.0
 locust:
   upstream:
@@ -115,7 +121,7 @@ preferences:
     tag: latest
   generated:
     repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:68622b52d4f8673e208ff8ffe0877c695186bd961a108cd0ec88c8db89c6dcc8
+    sha: sha256:6b40918bc8abf0d7ab89d50199f9cfea896da42a0b0cdcc631dc8fd749a6c3bf
     tag: latest
 service_account_assigner:
   upstream:

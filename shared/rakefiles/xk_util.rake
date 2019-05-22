@@ -220,4 +220,35 @@ task :revoke_org_admin => [@gcp_creds_file, :configure_extra_tf_vars] do
   end
 end
 
+# This task restores a list of images in snapshots. 
+task :restore_snapshot_from_image_file, [:snapshot_files] => [@gcp_creds_file, :configure_extra_tf_vars] do |taskname, args|
+  require 'csv'
+
+  pv_zones = {}
+  CSV.parse(%x{
+              #{@exekube_cmd} kubectl get pv -o json | jq -r '.items[] | \"\\(.spec.claimRef.name),\\(.metadata.labels.\"failure-domain.beta.kubernetes.io/zone\")\"'
+           }.chomp).each do |line|
+             pv_zones[line[0]] = line[1]
+           end
+
+  snapshot_files = args[:snapshot_files].split ' '
+
+  snapshot_files.each do |snapshot_file|
+    sh "#{@exekube_cmd} sh -c ' \
+      gsutil ls #{snapshot_file}
+    '", verbose: false
+  end
+
+  snapshot_files.each do |snapshot_file|
+    snapshot_name = snapshot_file[/database-storage-couchdb-couchdb-\d-\d+-\d+/, 0]
+    sh "#{@exekube_cmd} sh -c ' \
+    gcloud compute images create image-disk-pv-#{snapshot_name} --source-uri=#{snapshot_file}
+    gcloud compute disks create disk-pv-#{snapshot_name} --zone=#{pv_zones[snapshot_name[/(([A-Za-z]+-)+[\d])/,0]]} --image=image-disk-pv-#{snapshot_name}
+    gcloud compute disks snapshot disk-pv-#{snapshot_name} --zone=#{pv_zones[snapshot_name[/(([A-Za-z]+-)+[\d])/,0]]} --snapshot-names external-pv-#{snapshot_name}
+    gcloud -q compute images delete image-disk-pv-#{snapshot_name}
+    gcloud -q compute disks delete disk-pv-#{snapshot_name} --zone=#{pv_zones[snapshot_name[/(([A-Za-z]+-)+[\d])/,0]]}
+    '", verbose: false
+  end
+
+end
 # vim: et ts=2 sw=2:

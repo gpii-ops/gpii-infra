@@ -20,11 +20,6 @@ end
 
 @exekube_cmd = "docker-compose run --rm xk"
 
-desc "Pull the current exekube container from the Docker hub"
-task :update_exekube => :set_vars do
-  sh "docker-compose pull"
-end
-
 task :clean_volumes => :set_vars do
   ["helm", "kube", "locust_tasks"].each do |app|
     sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-#{app}"
@@ -357,6 +352,11 @@ end
 desc "[ADMIN ONLY] Revoke org-level admin roles from the current user"
 task :revoke_org_admin => [:set_vars] do
   sh "#{@exekube_cmd} rake revoke_org_admin"
+end
+
+desc "[ADMIN ONLY] Restore a snapshot from a remote file"
+task :restore_snapshot_from_image_file, [:files] => [:set_vars] do |taskname, args|
+  sh "#{@exekube_cmd} rake restore_snapshot_from_image_file['#{args[:files]}']"
 end
 
 # vim: et ts=2 sw=2:
