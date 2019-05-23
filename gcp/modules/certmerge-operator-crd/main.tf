@@ -11,7 +11,7 @@ module "certmerge-operator-crd" {
   client_auth      = "${var.secrets_dir}/kube-system/helm-tls"
 
   release_name      = "certmerge-operator-crd"
-  release_namespace = "certmerge"
+  release_namespace = "istio-system"
 
   chart_name = "${var.charts_dir}/certmerge-operator-crd"
 }
