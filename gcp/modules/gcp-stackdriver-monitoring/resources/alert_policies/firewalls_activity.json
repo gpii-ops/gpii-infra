@@ -29,7 +29,7 @@
         "denominator_filter": "",
         "denominator_aggregations": []
       },
-      "display_name": "Log-based compute firewalls creation / modification check"
+      "display_name": "Log-based compute.firewalls activity check"
     }
   ],
   "documentation": {
