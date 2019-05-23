@@ -6,6 +6,7 @@ variable "env" {}
 variable "serviceaccount_key" {}
 variable "project_id" {}
 variable "auth_user_email" {}
+variable "nonce" {}
 
 variable "secrets_dir" {}
 variable "charts_dir" {}

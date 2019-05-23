@@ -4,7 +4,7 @@
 
 image:
   repository: google/cloud-sdk
-  tag: 241.0.0-alpine
+  tag: 242.0.0-alpine
   pullPolicy: IfNotPresent
 
 nameOverride: backup-exporter

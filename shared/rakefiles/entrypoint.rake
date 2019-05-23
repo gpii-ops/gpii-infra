@@ -277,11 +277,11 @@ end
 # the Registry, which creates the Registry if it does not exist (or does
 # basically nothing if it already exists).
 task :init_registry => [:set_vars] do
-  # I've chosen the current exekube base image (alpine:3.8) because it is small
+  # I've chosen the current exekube base image (alpine:3.9) because it is small
   # and because it will end up in the Registry anyway. Note that this
   # duplicates information in exekube/dockerfiles, i.e. there is coupling
   # without cohesion.
-  image = "alpine:3.8"
+  image = "alpine:3.9"
   registry_url_base = "gcr.io"
   registry_url = "#{registry_url_base}/#{ENV["TF_VAR_project_id"]}"
 
@@ -372,6 +372,11 @@ end
 desc "[ADMIN ONLY] Revoke org-level admin roles from the current user"
 task :revoke_org_admin => [:set_vars] do
   sh "#{@exekube_cmd} rake revoke_org_admin"
+end
+
+desc "[ADMIN ONLY] Restore a snapshot from a remote file"
+task :restore_snapshot_from_image_file, [:files] => [:set_vars] do |taskname, args|
+  sh "#{@exekube_cmd} rake restore_snapshot_from_image_file['#{args[:files]}']"
 end
 
 # vim: et ts=2 sw=2:
