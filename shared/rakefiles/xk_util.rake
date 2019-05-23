@@ -113,6 +113,8 @@ task :display_cluster_state => [:configure, :configure_secrets, :set_secrets] do
     "kubectl -n gpii get events -o wide",
     "kubectl -n locust get all -o wide",
     "kubectl -n locust get events -o wide",
+    "kubectl -n istio-system get svc",
+    "kubectl -n istio-system get secrets",
     # The 'terraform' disks are root partitions. Filter those out to reduce
     # some clutter.
     "gcloud compute disks list --filter 'NOT name:gke-k8s-cluster-terraform' --format json",
