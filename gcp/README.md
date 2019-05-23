@@ -180,6 +180,19 @@ See [CI-CD.md#running-in-non-dev-environments](../CI-CD.md#running-manually-in-n
    * You must run this command each time the Docker image or the `upstream.*` values in `versions.yml` change.
 1. `cd ../gpii-infra/gcp/live/dev && rake`
 
+### I want to deploy a new version of universal to production
+
+1. Find the [docker-gpii-universal-master MultiJob](https://ci.gpii.net/view/Docker/job/docker-gpii-universal-master/) that built the version you want to deploy.
+1. Find the `docker-gpii-universal-master-release` Job and look for `CALCULATED_TAG`, e.g. `CALCULATED_TAG=20190522142238-4a52f56`.
+1. Edit `gpii-infra/shared/versions.yml`.
+   * Find your component and edit the `upstream.tag` field to the `CALCULATED_TAG` you found.
+      * E.g., `201901021213-aaaaaaa -> 20190522142238-4a52f56`
+1. Create a [pull request against gpii-infra](https://github.com/gpii-ops/gpii-infra/pulls) containing your `versions.yml` change.
+1. Be prepared to coordinate deployment with the Ops team.
+   * When is a good time for you and the Ops team to deploy this change?
+   * Does the deployment require any special handling?
+   * How will you verify that your change is working correctly in production?
+
 ### I need to interact with Helm directly, e.g. because a Helm deployment was orphaned due to an error while running `rake`
 
 1. `cd gcp/live/dev` (or another environment)
