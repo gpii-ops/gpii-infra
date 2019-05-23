@@ -70,7 +70,7 @@ Users who already had an RtF email address/Google account usually have performed
 ### Interacting with an environment
 
 1. `rake display_cluster_info` shows some helpful links.
-1. `rake display_cluster_state` shows debugging info about the current state of the cluster. This output can be helpful when asking for help.
+1. `rake display_cluster_state` shows debugging info about the current state of the cluster. This output can be useful when asking for help.
 1. `rake display_universal_image_info` shows currently deployed [gpii/universal](https://github.com/GPII/universal) image SHA and link to GitHub commit that triggered the build.
 1. `rake sh` opens an interactive shell inside a container on the local host that is configured to communicate with your cluster (e.g. via `kubectl` commands).
    * `rake sh` has some issues with interactive commands (e.g. `less` and `vi`) -- see https://issues.gpii.net/browse/GPII-3407.
@@ -167,13 +167,17 @@ See [CI-CD.md#running-in-non-dev-environments](../CI-CD.md#running-manually-in-n
 
 1. Build a local Docker image containing your changes.
 1. Push your image to Docker Hub under your user account (e.g. `docker build -t mrtyler/universal . && docker push mrtyler/universal`).
-1. Edit `gpii-infra/shared/versions.yml`. Find your component and edit the `upstream.repository` field to point to your Docker Hub user account.
-   * E.g., `gpii/universal -> mrtyler/universal`
+1. Edit `gpii-infra/shared/versions.yml`.
+   * Find your component and edit the `upstream.repository` field to point to your Docker Hub user account.
+      * E.g., `gpii/universal -> mrtyler/universal`
+   * Find your component and edit the `upstream.tag` field to `latest`.
+      * E.g., `20190522142238-4a52f56 -> latest`
 1. Clone https://github.com/gpii-ops/gpii-version-updater/ in the same directory as your gpii-infra clone.
    * The `gpii-version-updater` clone and the `gpii-infra` clone should be siblings in the same directory (there are some references to `../gpii-infra`).
 1. `cd gpii-version-updater`
 1. Follow the steps at [gpii-version-updater: Installing on host](https://github.com/gpii-ops/gpii-version-updater/#installing-on-host) (or [gpii-version-updater: Running in a container](https://github.com/gpii-ops/gpii-version-updater/#running-in-a-container).
 1. `rake sync`
+   * You must run this command each time the Docker image or the `upstream.*` values in `versions.yml` change.
 1. `cd ../gpii-infra/gcp/live/dev && rake`
 
 ### I need to interact with Helm directly, e.g. because a Helm deployment was orphaned due to an error while running `rake`
