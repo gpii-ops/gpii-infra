@@ -1,5 +1,5 @@
 {
-  "display_name": "Compute Instances Creation Check",
+  "display_name": "GCE audit log does not contain non-GKE instance creation events",
   "combiner": "OR",
   "conditions": [
     {
@@ -29,7 +29,7 @@
         "denominator_filter": "",
         "denominator_aggregations": []
       },
-      "display_name": "Log-based compute instances creation check"
+      "display_name": "Non-GKE instance creation event found in GCE audit log"
     }
   ],
   "documentation": {
