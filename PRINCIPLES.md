@@ -31,3 +31,9 @@ This document describes various high-level prinicples, goals, and rules of thumb
 We should be well-aware of Docker images we use in our infrastructrue, as deploying an untrusted, potentially malicious, image poses a significant security threat.
 
 As a rule of thumb: official Docker curated images (https://docs.docker.com/docker-hub/official_images/) or images directly published by trusted OSS projects are acceptable, otherwise we should build the images ourselves.
+
+#### Fully-specified version vs "floating" patch version
+
+* In general, and especially for critical components (e.g. couchdb), prefer to use a fully specified version (e.g. 2.3.0) for maximum predictability.
+   * We have observed that even a so-called "fully-specified" version (e.g. couchdb:2.3.0) can change (Docker tags are mutable).
+* For stable utility components (e.g. alpine), prefer using a "floating" patch version (e.g. 3.9, not 3.9.4). This allows us to quickly take advantage of security updates with little risk (it is unlikely that alpine:3.9.5 breaks something that worked in alpine:3.9.4).
