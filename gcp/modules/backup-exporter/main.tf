@@ -2,11 +2,17 @@ terraform {
   backend "gcs" {}
 }
 
+provider "google-beta" {
+  project     = "${var.project_id}"
+  credentials = "${var.serviceaccount_key}"
+}
+
 variable "secrets_dir" {}
 variable "charts_dir" {}
 variable "destination_bucket" {}
 variable "project_id" {}
 variable "replica_count" {}
+variable "serviceaccount_key" {}
 variable "schedule" {}
 
 # Terragrunt variables
@@ -46,3 +52,27 @@ resource "google_storage_bucket" "backup_daisy_bkt" {
 
   force_destroy = true
 }
+
+# The google_loggin_metric does not support counter metrics yet:
+# https://github.com/terraform-providers/terraform-provider-google/issues/3698
+# We will able to use this resource once it is fixed at Terraform
+#
+#resource "google_logging_metric" "logging_metric" {
+#  name   = "backup-exporter.snapshot_created"
+#  filter = "resource.type=\"k8s_container\" resource.labels.cluster_name=\"k8s-cluster\" resource.labels.namespace_name=\"backup-exporter\" resource.labels.container_name=\"backup-container\" textPayload=\"[Daisy] All workflows completed successfully.\n\""
+#
+#  project = "${var.project_id}"
+#
+#  metric_descriptor {
+#    
+#    labels {
+#      key         = "success"
+#      value_type  = "STRING"
+#      description = "Last successfull message from the process"
+#    }
+#  }
+#
+#  label_extractors = {
+#    "success" = "EXTRACT(textPayload)"
+#  }
+#}
