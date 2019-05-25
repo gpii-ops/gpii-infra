@@ -9,6 +9,7 @@ provider "google-beta" {
 
 variable "nonce" {}
 variable "domain_name" {}
+variable "organization_id" {}
 variable "project_id" {}
 variable "serviceaccount_key" {}
 variable "auth_user_email" {}
@@ -33,6 +34,7 @@ resource "template_dir" "resources" {
 
   vars {
     project_id         = "${var.project_id}"
+    organization_id    = "${var.organization_id}"
     domain_name        = "${var.domain_name}"
     notification_email = "${(var.use_auth_user_email && var.auth_user_email != "") ? var.auth_user_email : var.notification_email}"
   }
