@@ -13,6 +13,7 @@ variable "organization_domain" {
   default = "gpii.net"
 }
 
+variable "env" {}
 variable "project_name" {} # name of the project to create
 
 # This variable set an owner account in addition to the service accounts needed
@@ -368,6 +369,20 @@ provider "google" {
   region      = "${var.infra_region}"
 }
 
+data "terraform_remote_state" "users" {
+  backend = "gcs"
+
+  config {
+    credentials = "${var.serviceaccount_key}"
+    bucket      = "${var.project_id}-tfstate"
+    prefix      = "${var.env}/infra/users"
+
+    # TODO: Next line should be removed once Terraform issue with GCS backend encryption is fixed
+    # https://issues.gpii.net/browse/GPII-3329
+    encryption_key = "/dev/null"
+  }
+}
+
 # The dnsname and the dns domain must be computed for each new project created.
 # The organization name may not match the organization domain.
 locals {
@@ -382,14 +397,13 @@ locals {
 
   # Service accounts will be empty list in case there's no google_service_account.project created
   # (this is instead of current `local.service_account` that is either actual account or empty)
-  service_accounts = "${formatlist("serviceAccount:%s", google_service_account.project.*.email)}"
+  service_accounts = "${data.terraform_remote_state.users.admin_users}"
 
   # Project owners will be empty list if var.project_owner is empty string ""
   project_owners = "${compact(list(var.project_owner))}"
 
-  # stg, prd, dev, and the projects that matches the ci_dev_project_regex variable are managed
-  # by the CI so they should have the service account and the permissions attached to it
-  #
+  # stg, prd, dev, and the projects that match the ci_dev_project_regex variable are managed
+  # by CI so they should have the service account and the permissions attached to it
   root_project_iam = "${replace(var.project_name, var.ci_dev_project_regex, "") != "" && replace(var.project_name, "/^dev-.*/", "") == ""}"
 }
 
