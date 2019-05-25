@@ -4,7 +4,17 @@ terraform {
 
 variable "nonce" {}
 variable "project_id" {}
+variable "organization_id" {}
 variable "serviceaccount_key" {}
+
+resource "template_dir" "resources" {
+  source_dir      = "${path.cwd}/resources"
+  destination_dir = "${path.cwd}/resources_rendered"
+
+  vars {
+    organization_id = "${var.organization_id}"
+  }
+}
 
 # Enables debug mode when TF_VAR_stackdriver_debug is not empty
 
@@ -30,7 +40,7 @@ resource "null_resource" "apply_stackdriver_lbm" {
         echo "[Try $RETRY_COUNT of $RETRIES] Applying Stackdriver resources..."
         ruby -e '
           require "/rakefiles/stackdriver.rb"
-          resources = read_resources("${path.module}/resources")
+          resources = read_resources("${path.module}/resources_rendered")
           apply_resources(resources)
         '
         STACKDRIVER_EXIT_STATUS="$?"
