@@ -70,19 +70,19 @@ couchdb:
 dataloader:
   upstream:
     repository: herrclown/vagrant-universal
-    tag: 20150523192303-7166267
+    tag: 20190527142650-e52d85b
   generated:
     repository: herrclown/vagrant-universal
-    sha: sha256:e7b27afd462e32e7d922a675abd442ead15e13ed8860a7e7c3cea3f5a92d0378
-    tag: 20150523192303-7166267
+    sha: sha256:c1274e7083d36c873d88bbf9c7d9c38123990224854ae0656449968205c9f194
+    tag: 20190527142650-e52d85b
 flushtokens:
   upstream:
     repository: herrclown/vagrant-universal
-    tag: 20150523192303-7166267
+    tag: 20190527142650-e52d85b
   generated:
     repository: herrclown/vagrant-universal
-    sha: sha256:e7b27afd462e32e7d922a675abd442ead15e13ed8860a7e7c3cea3f5a92d0378
-    tag: 20150523192303-7166267
+    sha: sha256:c1274e7083d36c873d88bbf9c7d9c38123990224854ae0656449968205c9f194
+    tag: 20190527142650-e52d85b
 flowmanager:
   upstream:
     repository: gpii/universal
