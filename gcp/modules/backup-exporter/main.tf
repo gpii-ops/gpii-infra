@@ -76,3 +76,4 @@ resource "google_storage_bucket" "backup_daisy_bkt" {
 #    "success" = "EXTRACT(textPayload)"
 #  }
 #}
+
