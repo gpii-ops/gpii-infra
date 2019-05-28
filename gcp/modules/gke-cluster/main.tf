@@ -23,7 +23,7 @@ variable "node_count" {
 }
 
 variable "expected_gke_version_prefix" {
-  default = "1.11"
+  default = "1.12"
 }
 
 variable "infra_region" {}
@@ -47,31 +47,28 @@ data "google_container_engine_versions" "this" {
   region   = "${var.infra_region}"
 }
 
-# TODO re-enable this once Google rolls-out 1.12 as default version properly
-# data "external" "gke_version_assert" {
-#   program = [
-#     "bash",
-#     "-c",
-#     <<EOF
-#       if [[ '${data.google_container_engine_versions.this.default_cluster_version}' == ${var.expected_gke_version_prefix}* ]]; then
-#         echo '{"version": "${data.google_container_engine_versions.this.default_cluster_version}"}'
-#       else
-#         echo 'Default GKE version is ${data.google_container_engine_versions.this.default_cluster_version}, this would mean minor version upgrade!' >&2
-#         false
-#       fi
-# EOF
-#     ,
-#   ]
-# }
+data "external" "gke_version_assert" {
+  program = [
+    "bash",
+    "-c",
+    <<EOF
+      if [[ '${data.google_container_engine_versions.this.default_cluster_version}' == ${var.expected_gke_version_prefix}* ]]; then
+        echo '{"version": "${data.google_container_engine_versions.this.default_cluster_version}"}'
+      else
+        echo 'Default GKE version is ${data.google_container_engine_versions.this.default_cluster_version}, this would mean minor version upgrade!' >&2
+        false
+      fi
+EOF
+    ,
+  ]
+}
 
 module "gke_cluster" {
   source             = "/exekube-modules/gke-cluster"
   project_id         = "${var.project_id}"
   serviceaccount_key = "${var.serviceaccount_key}"
 
-  # TODO once 1.12 is default, this should be changed back
-  # kubernetes_version = "${data.external.gke_version_assert.result.version}"
-  kubernetes_version = "1.12.7-gke.10"
+  kubernetes_version = "${data.external.gke_version_assert.result.version}"
 
   region = "${var.infra_region}"
 
