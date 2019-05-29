@@ -2,17 +2,11 @@ terraform {
   backend "gcs" {}
 }
 
-provider "google-beta" {
-  project     = "${var.project_id}"
-  credentials = "${var.serviceaccount_key}"
-}
-
 variable "secrets_dir" {}
 variable "charts_dir" {}
 variable "destination_bucket" {}
 variable "project_id" {}
 variable "replica_count" {}
-variable "serviceaccount_key" {}
 variable "schedule" {}
 
 # Terragrunt variables
