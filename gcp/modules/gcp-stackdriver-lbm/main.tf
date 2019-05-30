@@ -6,6 +6,7 @@ variable "nonce" {}
 variable "project_id" {}
 variable "organization_id" {}
 variable "serviceaccount_key" {}
+variable "common_project_id" {}
 
 resource "template_dir" "resources" {
   source_dir      = "${path.cwd}/resources"
@@ -13,6 +14,7 @@ resource "template_dir" "resources" {
 
   vars {
     organization_id = "${var.organization_id}"
+    common_sa       = "projectowner@${var.common_project_id}.iam.gserviceaccount.com"
   }
 }
 
