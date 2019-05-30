@@ -1,14 +1,12 @@
 {
-  "display_name": "K8s-snapshots Errors Check",
+  "display_name": "Snapshots Check for Backup-exporter",
   "combiner": "OR",
   "conditions": [
     {
-      "condition_threshold": {
-        "filter": "metric.type=\"logging.googleapis.com/user/k8s_snapshots.error\" resource.type=\"k8s_container\"",
-        "comparison": "COMPARISON_GT",
-        "threshold_value": 1.0,
+      "condition_absent": {
+        "filter": "metric.type=\"logging.googleapis.com/user/backup-exporter.snapshot_created\" resource.type=\"k8s_container\"",
         "duration": {
-          "seconds": 900,
+          "seconds": 1800,
           "nanos": 0
         },
         "trigger": {
@@ -25,16 +23,14 @@
             "cross_series_reducer": "REDUCE_NONE",
             "group_by_fields": []
           }
-        ],
-        "denominator_filter": "",
-        "denominator_aggregations": []
+        ]
       },
-      "display_name": "Log-based errors for k8s-snapshots"
+      "display_name": "Log-based snapshot_created for Backup-exporter"
     }
   ],
   "notification_channels": [],
   "user_labels": {},
   "enabled": {
-    "value": true
+    "value": ${enabled_in_prd}
   }
 }
