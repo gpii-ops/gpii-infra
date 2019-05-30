@@ -46,4 +46,3 @@ resource "google_storage_bucket" "backup_daisy_bkt" {
 
   force_destroy = true
 }
-
