@@ -1,5 +1,5 @@
 {
-  "display_name": "Uptime check on flowmanager.${domain_name} is green",
+  "display_name": "Uptime check on `flowmanager.${domain_name}` is green",
   "combiner": "OR",
   "conditions": [
     {
