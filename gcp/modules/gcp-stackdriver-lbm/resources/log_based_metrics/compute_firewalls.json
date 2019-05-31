@@ -1,4 +1,0 @@
-{
-  "name": "compute.firewalls",
-  "filter": "resource.type=\"gce_firewall_rule\" AND (jsonPayload.event_subtype=\"compute.firewalls.insert\" OR jsonPayload.event_subtype=\"compute.firewalls.patch\")"
-}

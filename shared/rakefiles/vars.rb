@@ -19,6 +19,8 @@ class Vars
 
     ENV["TF_VAR_organization_domain"] = "gpii.net" if ENV["TF_VAR_organization_domain"].nil?
 
+    ENV["TF_VAR_common_project_id"] = "gpii-common-prd" if ENV["TF_VAR_common_project_id"].nil?
+
     ENV["ORGANIZATION_ID"] = "247149361674" if ENV["ORGANIZATION_ID"].nil? # RtF Organization
     ENV["TF_VAR_organization_id"] = ENV["ORGANIZATION_ID"]
 
