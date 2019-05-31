@@ -1,5 +1,5 @@
 {
-  "display_name": "K8s-snapshots logs does not contain errors",
+  "display_name": "K8s-snapshots logs do not contain errors",
   "combiner": "OR",
   "conditions": [
     {

@@ -1,5 +1,5 @@
 {
-  "display_name": "K8s cluster API logs does not contain `kubectl exec` events",
+  "display_name": "K8s cluster API logs do not contain `kubectl exec` events",
   "combiner": "OR",
   "conditions": [
     {
