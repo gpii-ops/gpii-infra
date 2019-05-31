@@ -1,5 +1,5 @@
 {
-  "display_name": "IAM audit logs does not contain policy modification events",
+  "display_name": "IAM audit logs do not contain policy modification events",
   "combiner": "OR",
   "conditions": [
     {
