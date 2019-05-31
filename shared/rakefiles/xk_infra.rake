@@ -107,7 +107,7 @@ task :apply_common_infra => [@gcp_creds_file] do
   services_list = JSON.parse(services_list)
 
   project_services.each do |service|
-     sh "gcloud services enable #{service}" unless services_list.any? { |s| s['serviceName'] == service }
+     sh "gcloud services enable #{service}" unless services_list.any? { |s| s["config"]["name"] == service }
   end
 
   tfstate_bucket = %x{
