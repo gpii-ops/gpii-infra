@@ -1,5 +1,5 @@
 {
-  "display_name": "K8s-snapshots Errors Check",
+  "display_name": "K8s-snapshots logs does not contain errors",
   "combiner": "OR",
   "conditions": [
     {
@@ -29,7 +29,7 @@
         "denominator_filter": "",
         "denominator_aggregations": []
       },
-      "display_name": "Log-based errors for k8s-snapshots"
+      "display_name": "Error found in K8s-snapshots logs"
     }
   ],
   "notification_channels": [],
