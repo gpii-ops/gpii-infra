@@ -246,6 +246,13 @@ data "google_iam_policy" "combined" {
     ]
   }
 
+  # Google IAM requires a special "invite" workflow for the Owner
+  # role when the account is not part of the Organization. This
+  # comes up when using user@rtf named accounts in the test
+  # Organization. The error might (unhelpfully) look like this,
+  # followed by a bunch of Go structs:
+  #
+  # googleapi: Error 400: Request contains an invalid argument., badRequest
   binding {
     role = "roles/owner"
 
