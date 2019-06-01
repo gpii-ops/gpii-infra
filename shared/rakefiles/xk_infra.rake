@@ -22,6 +22,8 @@ cloud_admin_org_roles = [
 ]
 
 project_services = [
+  "binaryauthorization.googleapis.com",
+  "cloudkms.googleapis.com",
   "cloudresourcemanager.googleapis.com",
   "cloudbilling.googleapis.com",
   "containeranalysis.googleapis.com",
