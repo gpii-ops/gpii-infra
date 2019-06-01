@@ -1,5 +1,5 @@
 {
-  "display_name": "couchdb_prometheus_exporter exports a metric",
+  "display_name": "Pod `couchdb-prometheus-exporter` exports a metric",
   "combiner": "OR",
   "conditions": [
     {
@@ -27,7 +27,7 @@
           }
         ]
       },
-      "display_name": "custom/couchdb/httpd_node_up"
+      "display_name": "Metric `custom/couchdb/httpd_node_up` is absent"
     }
   ],
   "documentation": {

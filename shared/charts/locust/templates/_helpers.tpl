@@ -11,6 +11,10 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- printf "%s-%s" .Release.Name "master-svc" | trunc 63 -}}
 {{- end -}}
 
+{{- define "locust.worker-svc" -}}
+{{- printf "%s-%s" .Release.Name "worker-svc" | trunc 63 -}}
+{{- end -}}
+
 {{- define "locust.master" -}}
 {{- printf "%s-%s" .Release.Name "master" | trunc 63 -}}
 {{- end -}}

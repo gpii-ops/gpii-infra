@@ -10,3 +10,7 @@ worker:
   replicaCount: ${locust_workers}
   config:
     locust-script: /locust-tasks/${locust_script}
+
+service:
+  type: ClusterIP
+  name: http-master-web
