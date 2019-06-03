@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "locust.worker-svc" . }}
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app: {{ template "locust.fullname" . }}
+    component: "worker"
+    {{- range $key, $value :=  .Values.service.extraLabels }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- if .Values.service.annotations }}
+  annotations:
+  {{- range $key, $value :=  .Values.service.annotations }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app: {{ template "locust.fullname" . }}
+    component: "worker"
+  sessionAffinity: None

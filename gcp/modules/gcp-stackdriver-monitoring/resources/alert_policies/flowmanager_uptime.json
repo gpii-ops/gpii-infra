@@ -1,5 +1,5 @@
 {
-  "display_name": "Uptime Check on Flowmanager",
+  "display_name": "Uptime check on `flowmanager.${domain_name}` is green",
   "combiner": "OR",
   "conditions": [
     {
@@ -31,7 +31,7 @@
         "denominator_filter": "",
         "denominator_aggregations": []
       },
-      "display_name": "Uptime Check on flowmanager.${domain_name}"
+      "display_name": "Uptime Check on flowmanager.${domain_name} is failing"
     }
   ],
   "notification_channels": [],
