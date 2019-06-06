@@ -73,16 +73,16 @@ dataloader:
     tag: 20190529130130-a3fea39
   generated:
     repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
-    tag: 20190522142238-4a52f56
+    sha: sha256:ba74743aa411f982a1dcb39507f2ce21c34b3a46ba51dc9348a42185c2e2d5ee
+    tag: 20190529130130-a3fea39
 flowmanager:
   upstream:
     repository: gpii/universal
     tag: 20190529130130-a3fea39
   generated:
     repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
-    tag: 20190522142238-4a52f56
+    sha: sha256:ba74743aa411f982a1dcb39507f2ce21c34b3a46ba51dc9348a42185c2e2d5ee
+    tag: 20190529130130-a3fea39
 k8s_snapshots:
   upstream:
     repository: elsdoerfer/k8s-snapshots
@@ -113,8 +113,8 @@ preferences:
     tag: 20190529130130-a3fea39
   generated:
     repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
-    tag: 20190522142238-4a52f56
+    sha: sha256:ba74743aa411f982a1dcb39507f2ce21c34b3a46ba51dc9348a42185c2e2d5ee
+    tag: 20190529130130-a3fea39
 service_account_assigner:
   upstream:
     repository: gpii/service-account-assigner
