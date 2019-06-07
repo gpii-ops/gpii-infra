@@ -21,6 +21,7 @@ spec:
             env:
             - name: GPII_COUCHDB_URL
               value: '{{ .Values.couchdbUrl }}'
+            # Use '--deleteAll' to delete all of the access tokens
             - name: DELETE_ALL
-              value: ''
+              value: 'false'
           restartPolicy: OnFailure
