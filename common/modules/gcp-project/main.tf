@@ -85,6 +85,14 @@ variable "service_apis" {
 
 data "google_iam_policy" "combined" {
   binding {
+    role = "roles/binaryauthorization.serviceAgent"
+
+    members = [
+      "serviceAccount:service-${google_project.project.number}@gcp-sa-binaryauthorization.iam.gserviceaccount.com",
+    ]
+  }
+
+  binding {
     role = "roles/cloudkms.admin"
 
     members = [
@@ -122,6 +130,14 @@ data "google_iam_policy" "combined" {
 
     members = [
       "${local.service_accounts}",
+    ]
+  }
+
+  binding {
+    role = "roles/containeranalysis.ServiceAgent"
+
+    members = [
+      "serviceAccount:service-${google_project.project.number}@container-analysis.iam.gserviceaccount.com",
     ]
   }
 
