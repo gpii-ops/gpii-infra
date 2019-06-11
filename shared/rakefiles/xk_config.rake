@@ -60,18 +60,6 @@ task :destroy_sa_keys, [:use_projectowner_sa] => [:configure_current_project, :c
   "
 end
 
-@app_default_creds_file = "/root/.config/gcloud/application_default_credentials.json"
-task :configure_app_default_login => [@app_default_creds_file]
-rule @app_default_creds_file do
-  # This retrieves application-default credentials using interactive auth,
-  # only in case service account credentials are not present.
-  unless File.file?(@serviceaccount_key_file)
-    sh "gcloud auth application-default login"
-  else
-    puts "SA credentials are present locally, skipping app-default login..."
-  end
-end
-
 @kubectl_creds_file = "/root/.kube/config"
 task :configure_kubectl => [@kubectl_creds_file]
 rule @kubectl_creds_file => [@gcp_creds_file] do
@@ -137,7 +125,7 @@ task :fetch_helm_certs => [:configure, :configure_secrets, :set_secrets] do
   "
 end
 
-task :configure => [@gcp_creds_file, @app_default_creds_file, @kubectl_creds_file, :configure_current_project, :configure_extra_tf_vars] do
+task :configure => [@gcp_creds_file, :configure_serviceaccount, @kubectl_creds_file, :configure_current_project, :configure_extra_tf_vars] do
   # This is a wrapper configuration task.
   # It does nothing, but it has all dependencies that required for standard rake workflow.
 end

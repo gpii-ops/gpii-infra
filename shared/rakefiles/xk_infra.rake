@@ -34,7 +34,7 @@ project_services = [
   "securitycenter.googleapis.com",
 ]
 
-task :refresh_common_infra, [:project_type] => [@gcp_creds_file, @app_default_creds_file, :configure_extra_tf_vars] do | taskname, args|
+task :refresh_common_infra, [:project_type] => [@gcp_creds_file, :configure_serviceaccount, :configure_extra_tf_vars] do | taskname, args|
 
   next if args[:project_type] == "common"
 
@@ -179,14 +179,14 @@ task :set_billing_org_perms => [@gcp_creds_file] do
   "
 end
 
-task :plan_infra => [@gcp_creds_file, @app_default_creds_file, :configure_extra_tf_vars] do
+task :plan_infra => [@gcp_creds_file, :configure_serviceaccount, :configure_extra_tf_vars] do
   sh "#{@exekube_cmd} plan-all live/#{@env}/infra 2> /dev/null"
 end
 
-task :apply_infra => [@gcp_creds_file, @app_default_creds_file, :configure_extra_tf_vars] do
+task :apply_infra => [@gcp_creds_file, :configure_serviceaccount, :configure_extra_tf_vars] do
   sh "#{@exekube_cmd} up live/#{@env}/infra"
 end
 
-task :destroy_infra => [@gcp_creds_file, @app_default_creds_file, :configure_extra_tf_vars] do
+task :destroy_infra => [@gcp_creds_file, :configure_serviceaccount, :configure_extra_tf_vars] do
   sh "#{@exekube_cmd} down live/#{@env}/infra"
 end
