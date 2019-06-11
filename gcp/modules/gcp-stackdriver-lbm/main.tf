@@ -14,7 +14,12 @@ resource "template_dir" "resources" {
 
   vars {
     organization_id = "${var.organization_id}"
-    common_sa       = "projectowner@${var.common_project_id}.iam.gserviceaccount.com"
+
+    # Common service account to exclude in IAM modification LBM
+    common_sa = "projectowner@${var.common_project_id}.iam.gserviceaccount.com"
+
+    # Cloud Resource Manager system account to exclude in IAM modification LBM
+    crm_sa = "one-platform-tenant-manager@system.gserviceaccount.com"
   }
 }
 
