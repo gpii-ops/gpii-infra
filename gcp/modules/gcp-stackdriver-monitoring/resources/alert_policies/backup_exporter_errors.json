@@ -10,7 +10,7 @@
               "seconds": 60,
               "nanos" : 0
             },
-            "cross_series_reducer": "REDUCE_COUNT",
+            "cross_series_reducer": "REDUCE_MAX",
             "group_by_fields": [
               "metric.label.log"
             ],
@@ -23,7 +23,6 @@
           "nanos" : 0
         },
         "filter": "metric.type=\"logging.googleapis.com/user/backup-exporter.error\" resource.type=\"k8s_container\"",
-        "threshold_value": 1,
         "trigger": {
           "count": 1
         }

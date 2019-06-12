@@ -10,18 +10,10 @@
               "seconds": 60,
               "nanos" : 0
             },
-            "cross_series_reducer": "REDUCE_COUNT",
+            "cross_series_reducer": "REDUCE_MAX",
             "group_by_fields": [
               "metric.label.log"
             ],
-            "per_series_aligner": "ALIGN_COUNT"
-          },
-          {
-            "alignment_period": {
-              "seconds": 60,
-              "nanos" : 0
-            },
-            "cross_series_reducer": "REDUCE_MIN",
             "per_series_aligner": "ALIGN_COUNT"
           }
         ],
