@@ -18,7 +18,7 @@
           }
         ],
         "duration": {
-          "seconds": 1800,
+          "seconds": 43200,
           "nanos" : 0
         },
         "filter": "metric.type=\"logging.googleapis.com/user/backup-exporter.snapshot_created\" resource.type=\"k8s_container\"",
