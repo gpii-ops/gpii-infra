@@ -49,7 +49,7 @@ couchdb_prometheus_exporter:
     tag: 22
   generated:
     repository: gcr.io/gpii-common-prd/gesellix/couchdb-prometheus-exporter
-    sha: sha256:8184086713d28fc19f3d2ecd5eabd0cce23c21bd0daa9f8921fa0ce4acb912f6
+    sha: sha256:015284630a4629755dd0d573ef19cee59a55d7c2fd70dbe66c2131244a4b616c
     tag: 22
 prometheus_to_sd:
   upstream:
