@@ -70,7 +70,7 @@ couchdb:
 dataloader:
   upstream:
     repository: gpii/universal
-    tag: 20190530151536-8203d4b
+    tag: 20190522142238-4a52f56
   generated:
     repository: gcr.io/gpii-common-prd/gpii/universal
     sha: sha256:3a22203b86b16fd3e1be47b03420586710b4cacd96c519a573ad78c809493595
@@ -78,7 +78,7 @@ dataloader:
 flowmanager:
   upstream:
     repository: gpii/universal
-    tag: 20190530151536-8203d4b
+    tag: 20190522142238-4a52f56
   generated:
     repository: gcr.io/gpii-common-prd/gpii/universal
     sha: sha256:3a22203b86b16fd3e1be47b03420586710b4cacd96c519a573ad78c809493595
@@ -110,7 +110,7 @@ nginx_ingress:
 preferences:
   upstream:
     repository: gpii/universal
-    tag: 20190530151536-8203d4b
+    tag: 20190522142238-4a52f56
   generated:
     repository: gcr.io/gpii-common-prd/gpii/universal
     sha: sha256:3a22203b86b16fd3e1be47b03420586710b4cacd96c519a573ad78c809493595
