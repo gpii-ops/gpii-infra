@@ -3,7 +3,7 @@ import random
 
 class PreferencesTasks(TaskSet):
 
-  _keys = ["carla", "vladimir", "wayne", "omar", "telugu"]
+  _keys = ["carla", "vladimir", "wayne", "omar", "nvda"]
 
   @task
   def get_pref_by_key(self):
