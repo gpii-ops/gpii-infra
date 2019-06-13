@@ -17,6 +17,23 @@ task :xk, [:cmd, :skip_secret_mgmt, :preserve_stderr] => [:configure, :configure
 
   Rake::Task["set_secrets"].invoke
 
+  sh_filter "sh -c '
+    # retrieve TF state
+    RESOURCES=\"$(terragrunt state pull --terragrunt-working-dir \"live/#{@env}/k8s/istio\" | jq -er \".modules[].resources\")\"
+    [ \"$?\" -ne 0 ] && exit 1
+
+    for HPA in istio-egressgateway istio-ingressgateway istio-pilot istio-policy istio-telemetry; do
+      echo \"${RESOURCES}\" | jq -er \".[\\\"kubernetes_horizontal_pod_autoscaler.${HPA}\\\"]\" >/dev/null
+      if [ \"$?\" -ne 0 ]; then
+        # and if hpa exists
+        kubectl get hpa istio-egressgateway -n istio-system --request-timeout=\"5s\"
+        if [ \"$?\" -eq 0 ]; then
+          # import it to TF state
+          terragrunt import \"kubernetes_horizontal_pod_autoscaler.${HPA}\" \"istio-system/${HPA}\" --terragrunt-working-dir \"live/#{@env}/k8s/istio\"
+        fi
+      fi
+    done'"
+
   sh_filter "#{@exekube_cmd} #{args[:cmd]}", !args[:preserve_stderr].nil? if args[:cmd]
 end
 
