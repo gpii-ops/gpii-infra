@@ -25,10 +25,7 @@ spec:
             - name: DELETE_ALL
               value: 'false'
             lifecycle:
-              postStart:
-                exec:
-                  command: [ "/bin/sh", "-c", "echo FLUSHTOKENS START" ]
               preStop:
                 exec:
-                  command: [ "/bin/sh", "-c", "kubectl exec -n gpii -c istio-proxy -- curl -s -XPOST http://127.0.0.1:15000/quitquitquit" ]
+                  command: [ "/bin/sh", "-c", "curl -s -XPOST http://127.0.0.1:15000/quitquitquit" ]
           restartPolicy: OnFailure
