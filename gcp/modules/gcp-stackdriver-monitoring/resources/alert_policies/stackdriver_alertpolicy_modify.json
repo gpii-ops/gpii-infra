@@ -4,7 +4,7 @@
   "conditions": [
     {
       "condition_threshold": {
-        "filter": "metric.type=\"logging.googleapis.com/user/servicemanagement.modify\" resource.type=\"global\"",
+        "filter": "metric.type=\"logging.googleapis.com/user/stackdriver.alertpolicy.modify\" resource.type=\"audited_resource\"",
         "comparison": "COMPARISON_GT",
         "threshold_value": 0.0,
         "duration": {
