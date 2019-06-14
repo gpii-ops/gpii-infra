@@ -97,7 +97,7 @@ locust:
     tag: 0.9.0-gpii.6
   generated:
     repository: gcr.io/gpii-common-prd/gpii/locust
-    sha: sha256:a6b8d742092af90248c379ba20755ebe9e980d753b1f3010841d133e9ff93b27
+    sha: sha256:107e1f2ac75e74e8f9c6dd47cdd1852a5efbe1f539ac34d6e8cf54e795741082
     tag: 0.9.0-gpii.6
 nginx_ingress:
   upstream:
