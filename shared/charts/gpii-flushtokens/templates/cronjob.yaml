@@ -17,7 +17,7 @@ spec:
           containers:
           - name: gpii-flushtokens
             image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
-            command: [ "/bin/sh", "-c", "/app/scripts/dockerDeleteExpiredAccessTokens.sh; curl -s -XPOST http://127.0.0.1:15000/quitquitquit" ]
+            command: [ "/bin/sh", "-c", "/app/scripts/dockerDeleteExpiredAccessTokens.sh; while curl -s -XPOST http://127.0.0.1:15000/healthcheck/ok; do curl -XPOST http://127.0.0.1:15000/quitquitquit; done; pkill -9 /usr/local/bin/pilot-agent" ]
             env:
             - name: GPII_COUCHDB_URL
               value: '{{ .Values.couchdbUrl }}'
