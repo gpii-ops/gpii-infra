@@ -73,7 +73,7 @@ dataloader:
     tag: 20190522142238-4a52f56
   generated:
     repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
+    sha: sha256:35eafa2a5fe1e5b4dd908596854fd46015a75c4f0758c743c2491868fe8b12fa
     tag: 20190522142238-4a52f56
 flowmanager:
   upstream:
