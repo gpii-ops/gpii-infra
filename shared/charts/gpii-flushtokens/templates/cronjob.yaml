@@ -14,6 +14,7 @@ spec:
           labels:
             app: {{ template "flushtokens.name" . }}
         spec:
+          shareProcessNamespace: true
           containers:
           - name: gpii-flushtokens
             image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
