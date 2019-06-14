@@ -17,15 +17,11 @@ spec:
           containers:
           - name: gpii-flushtokens
             image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
-            command: [ '/app/scripts/dockerDeleteExpiredAccessTokens.sh' ]
+            command: [ "/bin/sh", "-c", "/app/scripts/dockerDeleteExpiredAccessTokens.sh; curl -s -XPOST http://127.0.0.1:15000/quitquitquit" ]
             env:
             - name: GPII_COUCHDB_URL
               value: '{{ .Values.couchdbUrl }}'
             # Use '--deleteAll' to delete all of the access tokens
             - name: DELETE_ALL
               value: 'false'
-            lifecycle:
-              preStop:
-                exec:
-                  command: [ "/bin/sh", "-c", "curl -s -XPOST http://127.0.0.1:15000/quitquitquit" ]
           restartPolicy: OnFailure
