@@ -33,6 +33,6 @@
   "notification_channels": [],
   "user_labels": {},
   "enabled": {
-    "value": ${enabled_in_prd}
+    "value": ${enabled}
   }
 }
