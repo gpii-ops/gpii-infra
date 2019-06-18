@@ -1,3 +1,7 @@
+# Most of the values in this module (such as max_replicas or target_cpu_utilization_percentage)
+# come from the default Istio deployment by GKE.
+# min_replicas has been increased, compared to the GKE defaults, to provide HA.
+
 resource "kubernetes_horizontal_pod_autoscaler" "istio-egressgateway" {
   metadata = {
     name      = "istio-egressgateway"
