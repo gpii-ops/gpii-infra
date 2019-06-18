@@ -1,5 +1,5 @@
 {
-  "display_name": "Snapshots Check for Backup-exporter",
+  "display_name": "Backup-exporter snapshots are missing for more than 12 hours",
   "combiner": "OR",
   "conditions": [
     {
