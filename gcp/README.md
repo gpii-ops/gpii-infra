@@ -421,22 +421,6 @@ See [Getting started: One-time Stackdriver Workspace setup](README.md#one-time-s
 
 You can run all `kubectl` commands mentioned below inside of an interactive shell started with `rake sh`.
 
-### Data corruption on a single CouchDB replica
-
-In this scenario we rely on CouchDB ability to recover from loss of one or more replicas (our current production CouchDB settings allow us to lose up to 2 random nodes and still keep data integrity). The best course of action as follows:
-
-1. Make sure that you figured affected CouchDB pod properly
-1. There is a PVC object, associated with affected CouchDB pod. Let's say affected pod is `couchdb-couchdb-1`, then corresponding PVC is `database-storage-couchdb-couchdb-1`, located in the same namespace.
-1. Delete associated PVC and then affected pod. For our example case:
-   * `kubectl --namespace gpii delete pvc database-storage-couchdb-couchdb-1`
-   * `kubectl --namespace gpii delete pod couchdb-couchdb-1`
-1. After target pod is terminated, Persistent Disk that was mounted into it thru corresponding PVC will be destroyed as well.
-1. When new pod is created to replace deleted one, corresponding PVC will be created as well, and, thru it, new PV object for new GCE PD.
-1. Run `rake deploy_module[couchdb]` to patch newly created PV with annotations for `k8s-snapshots`.
-1. CouchDB cluster will replicate data to recreated node automatically.
-1. Corrupted node is now recovered.
-   * You can check DB status on recovered node with `kubectl exec --namespace gpii -it couchdb-couchdb-N -c couchdb -- curl -s http://$TF_VAR_couchdb_admin_username:$TF_VAR_couchdb_admin_password@127.0.0.1:5984/gpii/`, where N is node index.
-
 ### The CouchDB cluster won't converge because one of its disks is in the wrong zone
 
 Consider this scenario:
@@ -483,6 +467,22 @@ An alternative workaround is to do a snapshot-restore cycle to move the Persiste
 1. `rake deploy_module"[k8s/gpii/couchdb]"`
 1. Kubernetes should run the CouchDB Pod in the correct Zone, and CouchDB should attach to the Persistent Disk. Verify this with e.g. `kubectl -n gpii get pods` or the GKE Dashboard.
 1. When you are sure the CouchDB cluster is healthy, delete any new Snapshots you created (k8s-snapshots manages its own Snapshots).
+
+### Data corruption on a single CouchDB replica
+
+In this scenario we rely on CouchDB ability to recover from loss of one or more replicas (our current production CouchDB settings allow us to lose up to 2 random nodes and still keep data integrity). The best course of action as follows:
+
+1. Make sure that you figured affected CouchDB pod properly
+1. There is a PVC object, associated with affected CouchDB pod. Let's say affected pod is `couchdb-couchdb-1`, then corresponding PVC is `database-storage-couchdb-couchdb-1`, located in the same namespace.
+1. Delete associated PVC and then affected pod. For our example case:
+   * `kubectl --namespace gpii delete pvc database-storage-couchdb-couchdb-1`
+   * `kubectl --namespace gpii delete pod couchdb-couchdb-1`
+1. After target pod is terminated, Persistent Disk that was mounted into it thru corresponding PVC will be destroyed as well.
+1. When new pod is created to replace deleted one, corresponding PVC will be created as well, and, thru it, new PV object for new GCE PD.
+1. Run `rake deploy_module[couchdb]` to patch newly created PV with annotations for `k8s-snapshots`.
+1. CouchDB cluster will replicate data to recreated node automatically.
+1. Corrupted node is now recovered.
+   * You can check DB status on recovered node with `kubectl exec --namespace gpii -it couchdb-couchdb-N -c couchdb -- curl -s http://$TF_VAR_couchdb_admin_username:$TF_VAR_couchdb_admin_password@127.0.0.1:5984/gpii/`, where N is node index.
 
 ### Data corruption on all replicas of CouchDB cluster
 
