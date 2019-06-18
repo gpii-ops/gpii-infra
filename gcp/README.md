@@ -486,9 +486,16 @@ In this scenario we rely on CouchDB ability to recover from loss of one or more 
 
 ### Data corruption on all replicas of CouchDB cluster
 
-There may be a situation, when we want to roll back entire DB data set to another point in the past. Current solution is disruptive, requires bringing entire CouchDB cluster down and some manual actions (we'll most likely automate this in future):
+There may be a situation, when we want to roll back entire DB data set to another point in the past. Current solution is disruptive, requires bringing entire CouchDB cluster down and some manual actions (we'll most likely automate this in future).
 
-1. Choose a snapshot set that you want to restore, make sure that snapshots are present for all disks that are currently in use by CouchDB cluster.
+Ops team must perform backup restoration test using this scenario on `gpii-gcp-stg` cluster monthly, to make sure that:
+* Automated backups are being created as expected.
+* Existing backups can be used to restore functional and consistent DB.
+* Restoration guide (this scenario) is accurate.
+
+Here are the steps:
+
+1. Choose a snapshot set that you want to restore (in case of a test pick randomly from any snapshot set created in last month), make sure that snapshots are present for all disks that are currently in use by CouchDB cluster.
 1. Collect CouchDB disk names from PVCs with `kubectl --namespace gpii get pvc -l app=couchdb -o json | jq -r .items[].spec.volumeName`.
 1. Get current number of CouchDB stateful set replicas with `kubectl --namespace gpii get statefulset couchdb-couchdb -o jsonpath="{.status.replicas}"`.
 1. Scale CouchDB stateful set to 0 replicas with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=0`. This will cause K8s to terminate all CouchDB pods, all PDs that were mounted into them will be released. **This will prevent flowmanager and preferences services from processing customer requests!**
