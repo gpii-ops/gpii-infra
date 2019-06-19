@@ -50,7 +50,7 @@ for HPA in ${ISTIO_HPAS}; do
   if ! echo "${RESOURCES}" | jq -ers ".[].\"kubernetes_horizontal_pod_autoscaler.${HPA}\"" >/dev/null
   then
     # and if hpa exists
-    if kubectl get hpa "${HPA}" -n istio-system --request-timeout='5s'
+    if kubectl get hpa "${HPA}" -n istio-system --request-timeout='5s' >/dev/null
     then
       echo "${THIS_SCRIPT}: Trying to import GKE Istio HPA - ${HPA}"
       # import it to TF state
