@@ -83,6 +83,14 @@ flushtokens:
     repository: gpii/universal
     sha: sha256:42f238d64e3afec834a1da2b33b602be68e6acb437d623b2b5c559c61a9f6b2a
     tag: 20190610144430-9bd021f
+istio_proxy_manager:
+  upstream:
+    repository: alpine
+    tag: 3.9
+  generated:
+    repository: alpine
+    sha: sha256:769fddc7cc2f0a1c35abb2f91432e8beecf83916c421420e6a6da9f8975464b6
+    tag: 3.9
 flowmanager:
   upstream:
     repository: gpii/universal

@@ -18,11 +18,14 @@ spec:
           containers:
           - name: gpii-flushtokens
             image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
-            command: [ "/bin/sh", "-c", "/app/scripts/dockerDeleteExpiredAccessTokens.sh; while curl -s -XPOST http://127.0.0.1:15000/healthcheck/ok; do curl -s -XPOST http://127.0.0.1:15000/quitquitquit; done; pkill -9 /usr/local/bin/pilot-agent" ]
+            command: [ "/bin/sh", "-c", "/app/scripts/dockerDeleteExpiredAccessTokens.sh; curl -s -XPOST http://127.0.0.1:15000/quitquitquit" ]
             env:
             - name: GPII_COUCHDB_URL
               value: '{{ .Values.couchdbUrl }}'
             # Use '--deleteAll' to delete all of the access tokens
             - name: DELETE_ALL
               value: 'false'
+          - name: alpine
+            image: alpine@sha256:769fddc7cc2f0a1c35abb2f91432e8beecf83916c421420e6a6da9f8975464b6
+            command: [ "/bin/sh", "-c", "-x", "while curl -s -XPOST http://127.0.0.1:15000/healthcheck/ok; do sleep 1; done; kill `pgrep pilot-agent`" ]
           restartPolicy: OnFailure
