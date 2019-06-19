@@ -233,6 +233,8 @@ gcp-plan-all-stg:
     - rake fetch_helm_certs
     # Infra requires special treatment because of secrets configuration
     - rake plain_sh['rake plan_infra'] || true
+    # Sync GKE Istio state so that the plan reflects real changes
+    - rake plain_sh['rake sync_gke_istio_state'] || true
     - rake sh['xk plan-all live/stg/k8s 2> /dev/null'] || true
   only:
     - master@gpii-ops/gpii-infra
@@ -344,6 +346,8 @@ gcp-plan-all-prd:
     - rake fetch_helm_certs
     # Infra requires special treatment because of secrets configuration
     - rake plain_sh['rake plan_infra'] || true
+    # Sync GKE Istio state so that the plan reflects real changes
+    - rake plain_sh['rake sync_gke_istio_state'] || true
     - rake sh['xk plan-all live/prd/k8s 2> /dev/null'] || true
   only:
     - master@gpii-ops/gpii-infra
