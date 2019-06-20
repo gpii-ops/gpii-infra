@@ -24,7 +24,7 @@ REQUIRED_BINARIES=${REQUIRED_BINARIES:="kubectl terragrunt jq"}
 # check the module does exist, otherwise silently exit
 if [ ! -d "${ISTIO_MODULE_DIR}" ]
 then
-  echo "${THIS_SCRIPT}: Istio module not found (${ISTIO_MODULE_DIR})"
+  echo "${THIS_SCRIPT}: Skipping Istio HPA state synchronization, Istio module not found (${ISTIO_MODULE_DIR})"
   exit 0
 fi
 
