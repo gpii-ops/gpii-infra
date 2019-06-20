@@ -24,7 +24,6 @@ variable "project_name" {} # name of the project to create
 # IAMs inherited from the org.
 #
 # The variable is set to avoid a failure in the execution of the module, but it won't be set.
-
 variable "project_owner" {
   default = ""
 }
@@ -161,7 +160,6 @@ data "google_iam_policy" "combined" {
     members = [
       "${local.service_accounts}",
       "serviceAccount:${google_service_account.gke_cluster_pod_cert_manager.email}",
-      "serviceAccount:projectowner@${var.project_id}.iam.gserviceaccount.com",
     ]
   }
 
@@ -234,7 +232,6 @@ data "google_iam_policy" "combined" {
 
     members = [
       "${local.service_accounts}",
-      "serviceAccount:projectowner@${var.project_id}.iam.gserviceaccount.com",
     ]
   }
 
