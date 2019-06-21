@@ -85,12 +85,12 @@ flushtokens:
     tag: 20190610144430-9bd021f
 istio_proxy_manager:
   upstream:
-    repository: alpine
-    tag: 3.9
+    repository: gcr.io/gke-release/istio/proxyv2
+    tag: 1.0.6-gke.3
   generated:
-    repository: alpine
-    sha: sha256:769fddc7cc2f0a1c35abb2f91432e8beecf83916c421420e6a6da9f8975464b6
-    tag: 3.9
+    repository: gcr.io/gke-release/istio/proxyv2
+    sha: sha256:1f6dac3dbf69c0b0d519398003b6572e0218f695f1be295a2ffff95df2395ed0
+    tag: 1.0.6-gke.3
 flowmanager:
   upstream:
     repository: gpii/universal
