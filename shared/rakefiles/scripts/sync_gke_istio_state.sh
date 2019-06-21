@@ -37,8 +37,9 @@ for BIN in ${REQUIRED_BINARIES}; do
   fi
 done
 
-# retrieve TF state
-if ! RESOURCES="$(terragrunt state pull --terragrunt-working-dir "${ISTIO_MODULE_DIR}" | jq -ers '.[].modules[].resources')"
+# retrieve TF state, remove "o:" which is weird artifact added to output when
+# running terraform in terraform
+if ! RESOURCES="$(terragrunt state pull --terragrunt-working-dir "${ISTIO_MODULE_DIR}" | sed 's/^o://g' | jq -ers '.[].modules[].resources')"
 then
   echo "${THIS_SCRIPT}: Failed to retrieve or parse Terraform state"
   exit 1
