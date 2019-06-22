@@ -106,6 +106,7 @@ describe Vars do
     expect(ENV).to have_received(:[]=).with("TF_VAR_organization_domain", "gpii.net")
     expect(ENV).to have_received(:[]=).with("TF_VAR_common_project_id", "gpii-common-prd")
     expect(ENV).to have_received(:[]=).with("TF_VAR_infra_region", "us-central1")
+    expect(ENV).to have_received(:[]=).with("TF_VAR_extra_admin_users", '["alfredo", "sergey", "stepan", "tyler"]')
   end
 
   it "set_vars sets default vars for billing and organization" do
@@ -130,6 +131,7 @@ describe Vars do
     allow(ENV).to receive(:[]).with("TF_VAR_organization_domain").and_return("fake.org")
     allow(ENV).to receive(:[]).with("TF_VAR_common_project_id").and_return("fakecorp-common-stg")
     allow(ENV).to receive(:[]).with("TF_VAR_infra_region").and_return("fake-region1")
+    allow(ENV).to receive(:[]).with("TF_VAR_extra_admin_users").and_return('["alice", "bob"]')
     env = "stg"
     project_type = "fake-project-type"
     Vars.set_vars(env, project_type)
@@ -141,6 +143,7 @@ describe Vars do
     expect(ENV).not_to have_received(:[]=).with("TF_VAR_organization_domain", any_args)
     expect(ENV).not_to have_received(:[]=).with("TF_VAR_common_project_id", any_args)
     expect(ENV).not_to have_received(:[]=).with("TF_VAR_infra_region", any_args)
+    expect(ENV).not_to have_received(:[]=).with("TF_VAR_extra_admin_users", any_args)
   end
 
   it "set_vars sets TF_VAR_nonce" do

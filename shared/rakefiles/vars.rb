@@ -48,6 +48,8 @@ class Vars
 
     ENV["TF_VAR_domain_name"] = @domain_name #i.e doe.dev.gcp.gpii.net
 
+    ENV["TF_VAR_extra_admin_users"] = '["alfredo", "sergey", "stepan", "tyler"]' if ENV["TF_VAR_extra_admin_users"].nil?
+
     # Hack to force Terraform to reapply some resources on every run
     ENV["TF_VAR_nonce"] = SecureRandom.hex
 
