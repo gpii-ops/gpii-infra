@@ -12,10 +12,12 @@ require_relative "./sh_filter.rb"
 # This task is being called from entrypoint.rake and runs inside exekube container.
 # It applies secret-mgmt, sets secrets, and then executes arbitrary command from args[:cmd].
 # You should not invoke this task directly!
-task :xk, [:cmd, :skip_secret_mgmt, :preserve_stderr] => [:configure, :configure_secrets] do |taskname, args|
+task :xk, [:cmd, :skip_secret_mgmt, :preserve_stderr, :sync_gke_istio_state] => [:configure, :configure_secrets] do |taskname, args|
   sh "#{@exekube_cmd} up live/#{@env}/secret-mgmt" unless args[:skip_secret_mgmt]
 
   Rake::Task["set_secrets"].invoke
+
+  Rake::Task["sync_gke_istio_state"].invoke if args[:sync_gke_istio_state]
 
   sh_filter "#{@exekube_cmd} #{args[:cmd]}", !args[:preserve_stderr].nil? if args[:cmd]
 end

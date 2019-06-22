@@ -142,5 +142,12 @@ task :set_auth_user_vars => [@gcp_creds_file] do
   @auth_user_sa_name = ENV['TF_VAR_auth_user_email'].split('@')[0] + "-svc-acct"
 end
 
+task :sync_gke_istio_state => [:configure, :configure_secrets, :set_secrets] do
+  #  This task syncs Terrafrom state to actual state of Istio components.
+  #  As Istio components are created and managed by Google (via Kubernetes add-on manager),
+  #  they have to be imported to Terraform state first, before being modified via Terraform,
+  #  and repeatedly synced as the state can change independently on this code.
+  sh "/rakefiles/scripts/sync_gke_istio_state.sh"
+end
 
 # vim: et ts=2 sw=2:

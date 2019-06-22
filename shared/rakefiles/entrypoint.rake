@@ -85,7 +85,7 @@ end
 
 desc "Create cluster and deploy GPII components to it"
 task :deploy => [:set_vars, :apply_infra] do
-  sh "#{@exekube_cmd} rake xk[up]"
+  sh "#{@exekube_cmd} rake xk[up,false,false,true]"
   Rake::Task["display_cluster_info"].invoke
 end
 
@@ -334,7 +334,7 @@ task :deploy_module, [:module] => [:set_vars, :fetch_helm_certs] do |taskname, a
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
     raise
   end
-  sh "#{@exekube_cmd} rake xk['apply live/#{@env}/#{args[:module]}',skip_secret_mgmt]"
+  sh "#{@exekube_cmd} rake xk['apply live/#{@env}/#{args[:module]}',true,false,true]"
 end
 
 desc "[ADVANCED] Destroy provided module in the cluster -- rake destroy_module['k8s/kube-system/cert-manager']"
