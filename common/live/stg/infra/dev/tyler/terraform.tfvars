@@ -15,4 +15,4 @@ terragrunt = {
 # ↓ Module configuration (empty means all default)
 
 project_name    = "dev-tyler"
-project_owner   = "user:tyler@raisingthefloor.org"
+project_owner   = "tyler"

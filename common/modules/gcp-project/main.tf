@@ -81,19 +81,9 @@ variable "service_apis" {
   ]
 }
 
-# This variable contains the map of SAs for all users with access to the project.
-# Format:
-#   sa_name = "sa description"
-variable "service_accounts" {
-  type = "map"
-
-  default = {
-    projectowner                   = "CI service account"
-    alfredo-at-raisingthefloor-org = "Service account for alfredo@raisingthefloor.org"
-    sergey-at-raisingthefloor-org  = "Service account for sergey@raisingthefloor.org"
-    stepan-at-raisingthefloor-org  = "Service account for stepan@raisingthefloor.org"
-    tyler-at-raisingthefloor-org   = "Service account for tyler@raisingthefloor.org"
-  }
+variable "extra_admin_users" {
+  default     = []
+  description = "List of user accounts (minus the @RtF part) that have admin access to this project. We will also create a service account for each user with admin access. This list is supplemented from a few sources, like the CI user and var.project_owner."
 }
 
 data "google_iam_policy" "combined" {
@@ -109,7 +99,7 @@ data "google_iam_policy" "combined" {
     role = "roles/cloudkms.admin"
 
     members = [
-      "${local.service_accounts}",
+      "${local.service_accounts_that_have_admin}",
     ]
   }
 
@@ -117,7 +107,7 @@ data "google_iam_policy" "combined" {
     role = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
     members = [
-      "${local.service_accounts}",
+      "${local.service_accounts_that_have_admin}",
     ]
   }
 
@@ -125,7 +115,7 @@ data "google_iam_policy" "combined" {
     role = "roles/compute.admin"
 
     members = [
-      "${local.service_accounts}",
+      "${local.service_accounts_that_have_admin}",
       "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
     ]
   }
@@ -134,7 +124,7 @@ data "google_iam_policy" "combined" {
     role = "roles/container.clusterAdmin"
 
     members = [
-      "${local.service_accounts}",
+      "${local.service_accounts_that_have_admin}",
     ]
   }
 
@@ -142,7 +132,7 @@ data "google_iam_policy" "combined" {
     role = "roles/container.admin"
 
     members = [
-      "${local.service_accounts}",
+      "${local.service_accounts_that_have_admin}",
     ]
   }
 
@@ -158,7 +148,7 @@ data "google_iam_policy" "combined" {
     role = "roles/dns.admin"
 
     members = [
-      "${local.service_accounts}",
+      "${local.service_accounts_that_have_admin}",
       "serviceAccount:${google_service_account.gke_cluster_pod_cert_manager.email}",
     ]
   }
@@ -167,7 +157,7 @@ data "google_iam_policy" "combined" {
     role = "roles/iam.serviceAccountKeyAdmin"
 
     members = [
-      "${local.service_accounts}",
+      "${local.service_accounts_that_have_admin}",
     ]
   }
 
@@ -175,7 +165,7 @@ data "google_iam_policy" "combined" {
     role = "roles/iam.serviceAccountUser"
 
     members = [
-      "${local.service_accounts}",
+      "${local.service_accounts_that_have_admin}",
     ]
   }
 
@@ -191,7 +181,7 @@ data "google_iam_policy" "combined" {
     role = "roles/iam.serviceAccountAdmin"
 
     members = [
-      "${local.service_accounts}",
+      "${local.service_accounts_that_have_admin}",
     ]
   }
 
@@ -199,7 +189,7 @@ data "google_iam_policy" "combined" {
     role = "roles/logging.configWriter"
 
     members = [
-      "${local.service_accounts}",
+      "${local.service_accounts_that_have_admin}",
     ]
   }
 
@@ -207,7 +197,7 @@ data "google_iam_policy" "combined" {
     role = "roles/monitoring.editor"
 
     members = [
-      "${local.service_accounts}",
+      "${local.service_accounts_that_have_admin}",
     ]
   }
 
@@ -215,7 +205,7 @@ data "google_iam_policy" "combined" {
     role = "roles/resourcemanager.projectIamAdmin"
 
     members = [
-      "${local.service_accounts}",
+      "${local.service_accounts_that_have_admin}",
     ]
   }
 
@@ -223,7 +213,7 @@ data "google_iam_policy" "combined" {
     role = "roles/serviceusage.serviceUsageAdmin"
 
     members = [
-      "${local.service_accounts}",
+      "${local.service_accounts_that_have_admin}",
     ]
   }
 
@@ -231,7 +221,7 @@ data "google_iam_policy" "combined" {
     role = "roles/storage.admin"
 
     members = [
-      "${local.service_accounts}",
+      "${local.service_accounts_that_have_admin}",
     ]
   }
 
@@ -288,7 +278,7 @@ data "google_iam_policy" "combined" {
     role = "roles/owner"
 
     members = [
-      "${local.project_owners}",
+      "${local.accounts_that_have_owner}",
     ]
   }
 
@@ -404,9 +394,9 @@ provider "google" {
   region      = "${var.infra_region}"
 }
 
-# The dnsname and the dns domain must be computed for each new project created.
-# The organization name may not match the organization domain.
 locals {
+  # The dnsname and the dns domain must be computed for each new project created.
+  # The organization name may not match the organization domain.
   dnsname = "${replace(
               replace(
                 google_project.project.name,
@@ -416,17 +406,59 @@ locals {
               "")
             }"
 
-  # Service accounts will be empty list in case there's no google_service_account.project created
-  # (this is instead of current `local.service_account` that is either actual account or empty)
-  service_accounts = "${formatlist("serviceAccount:%s", google_service_account.project.*.email)}"
-
-  # Project owners will be empty list if var.project_owner is empty string ""
-  project_owners = "${compact(list(var.project_owner))}"
-
   # stg, prd, dev, and the projects that matches the ci_dev_project_regex variable are managed
   # by the CI so they should have the service account and the permissions attached to it
-  #
   root_project_iam = "${replace(var.project_name, var.ci_dev_project_regex, "") != "" && replace(var.project_name, "/^dev-.*/", "") == ""}"
+
+  # Let's collect all the accounts that get access to this project.
+  #
+  # Order matters! If you ask Terraform to create service accounts for "[a, b,
+  # c]", then change the input to "[b, c]", Terraform will destroy 'a', destroy
+  # 'b' to re-create it as service_account[0], and destroy 'c' to re-create it
+  # as service_account[1]. When a service account is destroyed and re-created,
+  # any associated keys must be re-created. Hence, we will try to place "stable"
+  # accounts earlier in the list than accounts which are likely to change.
+  #
+  # First comes the project-level 'projectowner' used by CI, since all projects
+  # need this.
+  ci_service_account = "projectowner"
+
+  # Next comes the owner of the project, i.e. 'mrtyler' for 'dev-mrtyler'.
+  #
+  # Projects in shared environments (e.g. dev-gitlab-runner, dev-doe, stg, prd)
+  # don't have an owner in this sense, so ### we'll handle that some other way.
+  #
+  # Last come the extra_admin_users (the list most likely to change).
+  #
+  # Service account names must be 6-30 characters long (more precisely, they
+  # must match regexp "^[a-z](?:[-a-z0-9]{4,28}[a-z0-9])$"). We must add a slug
+  # long enough that JJ's username becomes a valid service account name.
+  service_accounts_to_create = "${
+    distinct(
+      concat(
+        list(local.ci_service_account),
+        formatlist("%s-svc-acct", list(var.project_owner)),
+        formatlist("%s-svc-acct", var.extra_admin_users),
+      )
+    )
+  }"
+
+  ###        formatlist("serviceAccount:%s@%s.iam.gserviceaccount.com", list(local.ci_service_account), var.project_name),
+  ###        formatlist("serviceAccount:%s-svc-acct@%s.iam.gserviceaccount.com", list(var.project_owner), var.project_name),  --> project_name = dev-tyler, project_id = common-stg, both are wrong
+  ### this is cheating, in particular [1] will be wrong if project_owner is empty.
+  accounts_that_have_owner = "${
+    distinct(
+      list(
+        element(local.service_accounts_that_have_admin, 0),
+        format("user:%s@raisingthefloor.org", var.project_owner),
+        element(local.service_accounts_that_have_admin, 1),
+      )
+    )
+  }"
+
+  # Service accounts will be empty list in case there's no google_service_account.project created
+  # (this is instead of current `local.service_account` that is either actual account or empty)
+  service_accounts_that_have_admin = "${formatlist("serviceAccount:%s", google_service_account.project.*.email)}"
 }
 
 resource "google_project" "project" {
@@ -447,11 +479,22 @@ resource "google_project_iam_policy" "project" {
 }
 
 resource "google_service_account" "project" {
-  count        = "${length(keys(var.service_accounts))}"
-  account_id   = "${element(keys(var.service_accounts), count.index)}"
-  display_name = "${element(values(var.service_accounts), count.index)}"
-  project      = "${google_project.project.project_id}"
-  count        = "${local.root_project_iam ? 0 : 1}"
+  count      = "${length(local.service_accounts_to_create)}"
+  account_id = "${element(local.service_accounts_to_create, count.index)}"
+
+  display_name = "${
+    format(
+      "Terraform-managed SA for %s",
+      element(
+        local.service_accounts_to_create,
+        count.index,
+      ),
+    )
+  }"
+
+  project = "${google_project.project.project_id}"
+  ### this is on my todo list. i was surprised terraform even allows a duplicate argument
+  count   = "${local.root_project_iam ? 0 : 1}"
 }
 
 resource "google_dns_managed_zone" "project" {

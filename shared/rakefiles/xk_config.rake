@@ -137,9 +137,9 @@ task :set_auth_user_vars => [@gcp_creds_file] do
     gcloud auth list --filter='account!~gserviceaccount.com' --format json |  jq -r '.[].account'
   }.chomp!
 
-  # We build auth user SA from email by replacing non-allowed characters
-  # SA name length limit is 30 symbols
-  @auth_user_sa_name = ENV['TF_VAR_auth_user_email'].sub("@", "-at-").sub(".", "-")[0..30]
+  # We build auth user SA from email by isolating the username part and adding
+  # "-svc-acct", as defined in the gcp-project module.
+  @auth_user_sa_name = ENV['TF_VAR_auth_user_email'].split('@')[0] + "-svc-acct"
 end
 
 
