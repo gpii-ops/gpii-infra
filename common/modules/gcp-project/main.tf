@@ -493,8 +493,9 @@ resource "google_service_account" "project" {
   }"
 
   project = "${google_project.project.project_id}"
+
   ### this is on my todo list. i was surprised terraform even allows a duplicate argument
-  count   = "${local.root_project_iam ? 0 : 1}"
+  count = "${local.root_project_iam ? 0 : 1}"
 }
 
 resource "google_dns_managed_zone" "project" {
