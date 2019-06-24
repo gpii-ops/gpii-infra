@@ -18,7 +18,7 @@ spec:
           containers:
           - name: gpii-flushtokens
             image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
-            command: [ "/bin/sh", "-c", "-x", "/app/scripts/dockerDeleteExpiredAccessTokens.sh; EXIT_STATUS=$?; if [ $EXIT_STATUS = 0 ]; then curl -s -XPOST http://127.0.0.1:15000/quitquitquit; else exit $EXIT_STATUS; fi" ]
+            command: [ "/bin/sh", "-c", "-x", "/app/scripts/dockerDeleteExpiredAccessTokens.sh" ]
             env:
             - name: GPII_COUCHDB_URL
               value: '{{ .Values.couchdbUrl }}'
@@ -30,5 +30,5 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               runAsUser: 1337
-            command: [ "/bin/sh", "-c", "for i in `seq 1 30`; do pgrep envoy; RET_CODE=$?; echo \"RET_CODE is $RET_CODE\"; if [ $RET_CODE = 0 ]; then DETECTED=\"true\"; break; fi; sleep 2; done; echo \"i is $i\"; echo \"DETECTED is $DETECTED\"; for i in `seq 1 30`; do pgrep envoy; RET_CODE=$?; echo \"RET_CODE is $RET_CODE\"; if [ $RET_CODE != 0 ]; then DETECTED=\"false\"; break; fi; sleep 2; done; echo \"i is $i\"; echo \"DETECTED is $DETECTED\"; kill `pgrep pilot-agent`" ]
+            command: [ "/bin/sh", "-c", "for i in `seq 1 30`; do ps -C 'dockerDeleteExpiredAccessTokens.sh'; RET_CODE=$?; echo \"RET_CODE is $RET_CODE\"; if [ $RET_CODE = 0 ]; then DETECTED=\"true\"; break; fi; sleep 2; done; echo \"i is $i\"; echo \"DETECTED is $DETECTED\"; for i in `seq 1 30`; do ps -C 'dockerDeleteExpiredAccessTokens.sh'; RET_CODE=$?; echo \"RET_CODE is $RET_CODE\"; if [ $RET_CODE != 0 ]; then DETECTED=\"false\"; break; fi; sleep 2; done; echo \"i is $i\"; echo \"DETECTED is $DETECTED\"; kill `pgrep pilot-agent`" ]
           restartPolicy: OnFailure
