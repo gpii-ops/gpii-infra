@@ -6,7 +6,7 @@ variable "project_id" {}
 variable "nonce" {}
 
 variable "sa_id" {
-  default = "gke-cluster-pod-default" 
+  default = "gke-cluster-pod-default"
 }
 
 resource "kubernetes_namespace" "gpii" {
@@ -33,6 +33,7 @@ resource "kubernetes_secret" "sa_credentials" {
     name      = "${var.sa_id}-credentials"
     namespace = "gpii"
   }
+
   data {
     credentials.json = "${base64decode(google_service_account_key.sa_key.private_key)}"
   }
