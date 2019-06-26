@@ -21,10 +21,6 @@ spec:
         ports:
         - containerPort: {{ .Values.flowmanagerListenPort }}
         env:
-        {{- if .Values.enableStackdriverTrace }}
-        - name: GOOGLE_APPLICATION_CREDENTIALS
-          value: /etc/credentials/credentials.json
-        {{- end }}
         - name: NODE_ENV
           value: '{{ .Values.nodeEnv }}'
         - name: GPII_FLOWMANAGER_LISTEN_PORT
@@ -38,6 +34,10 @@ spec:
         {{- if .Values.enableStackdriverTrace }}
         - name: GPII_ENABLE_STACKDRIVER_TRACE
           value: 'true'
+        {{- end }}
+        {{- if .Values.credentialsSecretName }}
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /etc/credentials/credentials.json
         volumeMounts:
         - name: credentials
           mountPath: /etc/credentials
@@ -59,7 +59,7 @@ spec:
             - '/usr/bin/curl'
             - '-f'
             - 'http://localhost:{{ .Values.flowmanagerListenPort }}/ready'
-      {{- if .Values.enableStackdriverTrace }}
+      {{- if .Values.credentialsSecretName }}
       volumes:
         - name: credentials
           secret:
