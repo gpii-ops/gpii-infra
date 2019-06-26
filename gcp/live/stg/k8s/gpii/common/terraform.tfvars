@@ -1,7 +1,7 @@
 # ↓ Module metadata
 terragrunt = {
   terraform {
-    source = "/project/modules//gpii-istio"
+    source = "/project/modules//gpii-common"
   }
 
   dependencies {
