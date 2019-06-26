@@ -10,7 +10,11 @@ datasourceListenPort: 5984
 datasourceHostname: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local"
 
 nodeEnv: gpii.config.preferencesServer.standalone.production
+
 enableStackdriverTrace: false
+## When Stackdriver Trace is enabled SA credentials must be provided in a secret,
+## to be mounted as a volume into preferences container
+# credentialsSecretName: gke-cluster-pod-default-credentials
 
 image:
   repository: gpii/universal
