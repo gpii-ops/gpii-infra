@@ -1,0 +1,21 @@
+{{- if .Values.enableStackdriverTrace }}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  namespace: {{ .Release.Namespace | quote }}
+  name: {{ template "flowmanager.name" . }}-cloudtrace
+spec:
+  hosts:
+  - cloudtrace.googleapis.com
+  tls:
+  - match:
+    - port: 443
+      sni_hosts:
+      - cloudtrace.googleapis.com
+    route:
+    - destination:
+        host: cloudtrace.googleapis.com
+        port:
+          number: 443
+      weight: 100
+{{- end }}
