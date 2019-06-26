@@ -192,6 +192,7 @@ See [CI-CD.md#running-in-non-dev-environments](../CI-CD.md#running-manually-in-n
    * When is a good time for you and the Ops team to deploy this change?
    * Does the deployment require any special handling?
    * How will you verify that your change is working correctly in production?
+   * What is the rollback plan if things don't go well?
 
 ### I need to interact with Helm directly, e.g. because a Helm deployment was orphaned due to an error while running `rake`
 
