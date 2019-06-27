@@ -1,5 +1,5 @@
 {
-  "display_name": "Snapshots Check for CouchDB",
+  "display_name": "Snapshots are being created for persistent volumes of CouchDB stateful set",
   "combiner": "OR",
   "conditions": [
     {
@@ -25,7 +25,7 @@
           }
         ]
       },
-      "display_name": "Log-based snapshot_created k8s-snapshots events check for CouchDB"
+      "display_name": "Snapshot creation events are missing in K8s-snapshot logs for CouchDB"
     },
     {
       "condition_absent": {
@@ -50,7 +50,7 @@
           }
         ]
       },
-      "display_name": "Log-based compute.disks.createSnapshot events check"
+      "display_name": "Snapshot creation events are missing for CouchDB GCE disks"
     }
   ],
   "notification_channels": [],

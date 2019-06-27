@@ -1,5 +1,5 @@
 {
-  "display_name": "K8s-snapshots Errors Check",
+  "display_name": "K8s-snapshots logs do not contain errors",
   "combiner": "OR",
   "conditions": [
     {
@@ -29,9 +29,13 @@
         "denominator_filter": "",
         "denominator_aggregations": []
       },
-      "display_name": "Log-based errors for k8s-snapshots"
+      "display_name": "Error found in K8s-snapshots logs"
     }
   ],
+  "documentation": {
+    "content": "[Use this link to explore policy events in Logs Viewer](https://console.cloud.google.com/logs/viewer?project=${project_id}&minLogLevel=0&expandAll=false&interval=PT1H&advancedFilter=resource.type%3D%22k8s_container%22%20AND%20resource.labels.container_name%3D%22k8s-snapshots%22%20AND%20textPayload:%22Error:%20%22)",
+    "mime_type": "text/markdown"
+  },
   "notification_channels": [],
   "user_labels": {},
   "enabled": {

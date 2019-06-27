@@ -1,5 +1,5 @@
 {
-  "display_name": "Container Resource Limit Utilization",
+  "display_name": "K8s container CPU utilization stays within 85% of limit",
   "combiner": "OR",
   "conditions": [
     {
@@ -29,7 +29,7 @@
         "denominator_filter": "",
         "denominator_aggregations": []
       },
-      "display_name": "Container CPU Limit Utilization"
+      "display_name": "K8s container utilizes more than 85% of allowed CPU"
     }
   ],
   "notification_channels": [],

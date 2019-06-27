@@ -14,6 +14,7 @@ provider "google-beta" {
 
 variable "project_id" {}
 variable "serviceaccount_key" {}
+variable "env" {}
 
 # Terragrunt variables
 variable "node_type" {}

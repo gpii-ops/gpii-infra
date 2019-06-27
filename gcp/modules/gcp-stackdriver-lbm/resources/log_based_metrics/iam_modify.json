@@ -1,0 +1,4 @@
+{
+  "name": "iam.modify",
+  "filter": "((resource.type=\"project\" AND protoPayload.methodName=\"SetIamPolicy\") OR (resource.type=\"service_account\" AND protoPayload.methodName:\"SetIAMPolicy\")) AND protoPayload.authenticationInfo.principalEmail!=\"${common_sa}\" AND protoPayload.authenticationInfo.principalEmail!=\"${crm_sa}\""
+}
