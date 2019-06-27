@@ -19,7 +19,7 @@
         ],
         "comparison": "COMPARISON_GT",
         "duration": {
-          "seconds": 0,
+          "seconds": 900,
           "nanos" : 0
         },
         "filter": "metric.type=\"logging.googleapis.com/user/backup-exporter.error\" resource.type=\"k8s_container\"",
