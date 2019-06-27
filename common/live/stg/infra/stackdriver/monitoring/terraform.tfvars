@@ -16,4 +16,5 @@ terragrunt = {
 }
 
 # ↓ Module configuration (empty means all default)
+# TODO: Change the following mail once the whole solution goes to production
 notification_email = "alfredo@raisingthefloor.org"
