@@ -30,5 +30,29 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               runAsUser: 1337
-            command: [ "/bin/sh", "-c", "for i in `seq 1 30`; do ps -C 'dockerDeleteExpiredAccessTokens.sh' > /dev/null; if [ $? = 0 ]; then echo 'dockerDeleteExpiredAccessTokens.sh started.'; break; fi; sleep 2; done; for i in `seq 1 30`; do ps -C 'dockerDeleteExpiredAccessTokens.sh' > /dev/null; if [ $? != 0 ]; then echo 'dockerDeleteExpiredAccessTokens.sh finished'; break; fi;  echo 'Waiting for dockerDeleteExpiredAccessTokens.sh to finish...'; sleep 2; done; echo 'sending TERM to pilot-agent'; kill `pgrep pilot-agent`" ]
+            command: [ "/bin/sh", "-c" ]
+            args:
+              - for i in `seq 1 30`;
+                do
+                  ps -C 'dockerDeleteExpiredAccessTokens.sh' > /dev/null;
+                  if [ $? = 0 ];
+                  then
+                    echo 'dockerDeleteExpiredAccessTokens.sh started.';
+                    break;
+                  fi;
+                  sleep 2;
+                done;
+                for i in `seq 1 30`;
+                do
+                  ps -C 'dockerDeleteExpiredAccessTokens.sh' > /dev/null;
+                  if [ $? != 0 ];
+                  then
+                    echo 'dockerDeleteExpiredAccessTokens.sh finished';
+                    break;
+                  fi;
+                  echo 'Waiting for dockerDeleteExpiredAccessTokens.sh to finish...';
+                  sleep 2;
+                done;
+                echo 'sending TERM to pilot-agent';
+                kill `pgrep pilot-agent`;
           restartPolicy: OnFailure
