@@ -694,9 +694,9 @@ Prime Minister at that time!"), please let me know immediately.
 
 #### Sending backup outside of the organization.
 
-The process is mostly executed by the `gcloud compute images export` command, which uses Cloud Build service, which uses [Daisy](ttps://github.com/GoogleCloudPlatform/compute-image-tools/tree/master/daisy) to create a VM, attach the images based on the snapshots to backup, create a file from those images and send the result files to the external storage.
+The process is mostly executed by the `gcloud compute images export` command, which uses Cloud Build service, which uses [Daisy](https://github.com/GoogleCloudPlatform/compute-image-tools/tree/master/daisy) to create a VM, attach the images based on the snapshots to backup, create a file from those images and send the result files to the external storage.
 
-The destination bucket must be created manually. This is a once time setup for STG and PRD, because it doesn't need to be recreated in the future. The bucket must have the following permissions for the service account `[Source_project_number_id]@cloudbuild.gserviceaccount.com` needs the `Storage Admin` roles, because the Cloud Build service needs to copy the final images in the GCS bucket. Note that such service account must exist in order to attach the role. The Cloud Build service account is created when the Cloud Build API is enabled.
+The destination buckets are created automatically by [Terraform code outside the organization](https://github.com/gpii-ops/gpii-infra/tree/master/common/modules/gcp-external-backup).
 
 #### Restoring a backup from outside of the organization.
 
@@ -704,6 +704,6 @@ The process of the restore it's similar but the other way around. It uses the `g
 ```
 rake restore_snapshot_from_image_file["gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-0-030519-205726.raw.gz gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-1-030519-205756.raw.gz"]
 ```
-Once the task finished new restored snapshots will appear with the leading in the name `external-`. This will help with the search when at the restoration of the disks using the snapshots.
+Once the task finished new restored snapshot files will appear with the string `external-` at the beginning of the name. This will help with the search when at the restoration of the disks using the snapshots.
 
-And follow the [restore a pv from snapshot procedure](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#data-corruption-on-a-single-couchdb-replica) using the snapshots restored.
+And follow the process [Data corruption on all replicas of CouchDB cluster](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#data-corruption-on-all-replicas-of-couchdb-cluster) using the snapshot files restored.
