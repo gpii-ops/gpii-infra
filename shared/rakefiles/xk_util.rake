@@ -222,17 +222,30 @@ task :revoke_org_admin => [@gcp_creds_file, :configure_extra_tf_vars] do
   end
 end
 
-# This task restores a list of images in snapshots. 
+# This task restores a list of images in snapshots.
 task :restore_snapshot_from_image_file, [:snapshot_files] => [@gcp_creds_file, :configure_extra_tf_vars] do |taskname, args|
-  require 'csv'
+  if args[:snapshot_files].nil? || args[:snapshot_files].size == 0
+    puts "  ERROR: Argument :snapshot_files not present!"
+    raise
+  end
 
+  require 'csv'
+  # kubectl get pv -o json | jq -r '.items[] | "\(.spec.claimRef.name),\(.metadata.labels."failure-domain.beta.kubernetes.io/zone")"'
+  #
+  # database-storage-couchdb-couchdb-0,us-central1-f
+  # database-storage-couchdb-couchdb-1,us-central1-a
   pv_zones = {}
   CSV.parse(%x{
-              #{@exekube_cmd} kubectl get pv -o json | jq -r '.items[] | \"\\(.spec.claimRef.name),\\(.metadata.labels.\"failure-domain.beta.kubernetes.io/zone\")\"'
-           }.chomp).each do |line|
-             pv_zones[line[0]] = line[1]
-           end
+      #{@exekube_cmd} kubectl get pv -o json | jq -r '.items[] | \"\\(.spec.claimRef.name),\\(.metadata.labels.\"failure-domain.beta.kubernetes.io/zone\")\"'
+    }.chomp).each do |line|
+      pv_zones[line[0]] = line[1]
+    end
 
+  # pv_zones = {
+  #   "database-storage-couchdb-couchdb-0": "us-central1-f",
+  #   "database-storage-couchdb-couchdb-1": "us-central1-a"
+  # }
+  # that will be used later to know in which zone we need to restore the images.
   snapshot_files = args[:snapshot_files].split ' '
 
   snapshot_files.each do |snapshot_file|
