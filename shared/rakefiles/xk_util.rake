@@ -244,11 +244,11 @@ task :restore_snapshot_from_image_file, [:snapshot_files] => [@gcp_creds_file, :
   snapshot_files.each do |snapshot_file|
     snapshot_name = snapshot_file[/database-storage-couchdb-couchdb-\d-\d+-\d+/, 0]
     sh "#{@exekube_cmd} sh -c ' \
-    gcloud compute images create image-disk-pv-#{snapshot_name} --source-uri=#{snapshot_file}
-    gcloud compute disks create disk-pv-#{snapshot_name} --zone=#{pv_zones[snapshot_name[/(([A-Za-z]+-)+[\d])/,0]]} --image=image-disk-pv-#{snapshot_name}
-    gcloud compute disks snapshot disk-pv-#{snapshot_name} --zone=#{pv_zones[snapshot_name[/(([A-Za-z]+-)+[\d])/,0]]} --snapshot-names external-pv-#{snapshot_name}
-    gcloud -q compute images delete image-disk-pv-#{snapshot_name}
-    gcloud -q compute disks delete disk-pv-#{snapshot_name} --zone=#{pv_zones[snapshot_name[/(([A-Za-z]+-)+[\d])/,0]]}
+      gcloud compute images create image-disk-pv-#{snapshot_name} --source-uri=#{snapshot_file}
+      gcloud compute disks create disk-pv-#{snapshot_name} --zone=#{pv_zones[snapshot_name[/(([A-Za-z]+-)+[\d])/,0]]} --image=image-disk-pv-#{snapshot_name}
+      gcloud compute disks snapshot disk-pv-#{snapshot_name} --zone=#{pv_zones[snapshot_name[/(([A-Za-z]+-)+[\d])/,0]]} --snapshot-names external-pv-#{snapshot_name}
+      gcloud -q compute images delete image-disk-pv-#{snapshot_name}
+      gcloud -q compute disks delete disk-pv-#{snapshot_name} --zone=#{pv_zones[snapshot_name[/(([A-Za-z]+-)+[\d])/,0]]}
     '", verbose: false
   end
 
