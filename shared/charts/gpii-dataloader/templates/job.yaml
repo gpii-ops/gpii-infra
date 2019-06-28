@@ -9,6 +9,7 @@ spec:
       labels:
         app: {{ template "dataloader.name" . }}
     spec:
+      shareProcessNamespace: true
       containers:
       - name: gpii-dataloader
         image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
@@ -16,4 +17,31 @@ spec:
         env:
         - name: GPII_COUCHDB_URL
           value: '{{ .Values.couchdbUrl }}'
+      - name: istio-proxy-manager
+        image: gcr.io/gke-release/istio/proxyv2:1.0.6-gke.3@sha256:1f6dac3dbf69c0b0d519398003b6572e0218f695f1be295a2ffff95df2395ed0
+        command: [ "/bin/sh", "-c" ]
+        args:
+          - for i in `seq 1 30`;
+            do
+              ps -C 'deleteAndLoadSnapsets.sh' > /dev/null;
+              if [ $? = 0 ];
+              then
+                echo 'deleteAndLoadSnapsets.sh started.';
+                break;
+              fi;
+              sleep 2;
+            done;
+            for i in `seq 1 30`;
+            do
+              ps -C 'deleteAndLoadSnapsets.sh' > /dev/null;
+              if [ $? != 0 ];
+              then
+                echo 'deleteAndLoadSnapsets.sh finished';
+                break;
+              fi;
+              echo 'Waiting for deleteAndLoadSnapsets.sh to finish...';
+              sleep 2;
+            done;
+            echo 'sending TERM to pilot-agent';
+            kill `pgrep pilot-agent`;
       restartPolicy: OnFailure
