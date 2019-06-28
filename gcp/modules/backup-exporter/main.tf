@@ -4,6 +4,8 @@ terraform {
 
 variable "secrets_dir" {}
 variable "charts_dir" {}
+variable "cloud_sdk_repository" {}
+variable "cloud_sdk_tag" {}
 variable "destination_bucket" {}
 variable "project_id" {}
 variable "replica_count" {}
@@ -19,11 +21,14 @@ data "template_file" "backup-exporter" {
   template = "${file("values.yaml")}"
 
   vars {
-    service_account_name = "${data.google_service_account.gke_cluster_pod_backup_exporter.email}"
-    destination_bucket   = "${var.destination_bucket}"
-    replica_count        = "${var.replica_count}"
-    log_bucket           = "gs://${google_storage_bucket.backup_daisy_bkt.name}/logs"
-    schedule             = "${var.schedule}"
+    cloud_sdk_repository      = "${var.cloud_sdk_repository}"
+    cloud_sdk_tag             = "${var.cloud_sdk_tag}"
+    service_account_name      = "${data.google_service_account.gke_cluster_pod_backup_exporter.email}"
+    destination_bucket        = "${var.destination_bucket}"
+    local_intermediate_bucket = "${google_storage_bucket.backup_daisy_bkt.name}"
+    replica_count             = "${var.replica_count}"
+    log_bucket                = "gs://${google_storage_bucket.backup_daisy_bkt.name}/logs"
+    schedule                  = "${var.schedule}"
   }
 }
 
