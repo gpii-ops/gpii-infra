@@ -242,6 +242,9 @@ task :restore_snapshot_from_image_file, [:snapshot_files] => [@gcp_creds_file, :
   end
 
   snapshot_files.each do |snapshot_file|
+    # The snapshot_name must be something like:
+    # database-storage-couchdb-couchdb-0-060619-195849 from the file name:
+    # 2019-06-27_154922-pv-database-storage-couchdb-couchdb-0-060619-195849.tar.gz
     snapshot_name = snapshot_file[/database-storage-couchdb-couchdb-\d-\d+-\d+/, 0]
     sh "#{@exekube_cmd} sh -c ' \
       gcloud compute images create image-disk-pv-#{snapshot_name} --source-uri=#{snapshot_file}
