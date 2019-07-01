@@ -7,6 +7,7 @@ terragrunt = {
   dependencies {
     paths = [
       "../cluster",
+      "../kube-system/helm-initializer"
     ]
   }
 
