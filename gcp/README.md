@@ -138,13 +138,14 @@ Deploying to `stg` verifies that the gpii-infra code that worked to create a `de
 
 Because `stg` emulates production, it will (in the future) allow us to run realistic end-to-end tests before deploying to `prd`.
 
-The `stg` environment is almost the same environment as `prd`, this fact makes `stg` the proper environment to test some recovering procedures that the ops team must perform periodically. Like the restoration of the persistance layer. **The ops team will perform a restoration of the persistance layer every first monday of the month as part of the procedures verification needed for the FERPA compliance, so expect an outage of about 30 min at that time of the services in `stg`**.
+The `stg` environment is almost the same environment as `prd`, this fact makes `stg` the proper environment to test some recovering procedures that the ops team must perform periodically. 
 
 #### Service Level Objective
 
 * No guarantee of service for development environments (stg is a development environment).
 * Ops team receives alerts about problems, and addresses them when convenient for the team (i.e. we won't wake up an on-call engineer, but we will investigate during business hours)
 * Ops team makes an effort to keep stg stable and available for ad-hoc testing, but may disrupt the environment at any time for our own testing.
+* Ops team will perform a restoration of the persistence layer every first monday of the month as part of the procedures verification needed for the FERPA compliance, so expect an outage of about 30 min at that time of the services in `stg`.
 
 ### prd
 
