@@ -81,22 +81,24 @@ task :import_keyring => [:configure, :configure_secrets] do
   end
 end
 
-# This task destroy all keys except current one for projectowner's SA.
-# It does nothing in case local SA credentials not present.
-task :destroy_sa_keys => [@gcp_creds_file, :configure_extra_tf_vars] do
+# This task destroys all keys for target SA (default is projectowner SA).
+# It keeps current key when second argument is unset and local SA credentials are present.
+task :destroy_sa_keys, [:sa_name, :destroy_current_key] => [:configure] do |taskname, args|
+  sa_name = args[:sa_name] ? args[:sa_name] : "projectowner"
+  destroy_current_key = 1 unless args[:destroy_current_key].nil?
   sh "
-    if [ \"$TF_VAR_serviceaccount_key\" != \"\" ] && [ -f $TF_VAR_serviceaccount_key ]; then \
-      existing_keys=$(gcloud iam service-accounts keys list \
-        --iam-account projectowner@\"$TF_VAR_project_id\".iam.gserviceaccount.com \
-        --managed-by user | grep -oE \"^[a-z0-9]+\"); \
+    existing_keys=$(gcloud iam service-accounts keys list \
+      --iam-account #{sa_name}@\"$TF_VAR_project_id\".iam.gserviceaccount.com \
+      --managed-by user | grep -oE \"^[a-z0-9]+\"); \
+    if [ \"#{destroy_current_key}\" == \"1\" ] && [ \"$TF_VAR_serviceaccount_key\" != \"\" ] && [ -f $TF_VAR_serviceaccount_key ]; then \
       current_key=$(cat $TF_VAR_serviceaccount_key 2>/dev/null | jq -r '.private_key_id'); \
-      for key in $existing_keys; do \
-        if [ \"$key\" != \"$current_key\" ]; then \
-          yes | gcloud iam service-accounts keys delete \
-            --iam-account projectowner@\"$TF_VAR_project_id\".iam.gserviceaccount.com $key; \
-        fi \
-      done
     fi
+    for key in $existing_keys; do \
+      if [ \"$key\" != \"$current_key\" ]; then \
+        yes | gcloud iam service-accounts keys delete \
+          --iam-account #{sa_name}@\"$TF_VAR_project_id\".iam.gserviceaccount.com $key; \
+      fi \
+    done
   "
 end
 

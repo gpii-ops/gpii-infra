@@ -196,9 +196,9 @@ task :plain_sh, [:cmd] => [:set_vars] do |taskname, args|
   sh "#{@exekube_cmd} #{cmd}"
 end
 
-desc "[ADVANCED] Destroy all SA keys except current one"
-task :destroy_sa_keys => [:set_vars, :check_destroy_allowed] do
-  sh "#{@exekube_cmd} rake destroy_sa_keys"
+desc "[ADVANCED] Destroy keys for target SA"
+task :destroy_sa_keys, [:sa_name, :destroy_current_key] => [:set_vars, :check_destroy_allowed] do |taskname, args|
+  sh "#{@exekube_cmd} rake destroy_sa_keys['#{args[:sa_name]}','#{args[:destroy_current_key]}']"
 end
 
 desc "[ADVANCED] Destroy secrets file stored in GS bucket for encryption key, passed as argument -- rake destroy_secrets['default']"
