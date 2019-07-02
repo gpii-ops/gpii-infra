@@ -1,3 +1,9 @@
+# This functionality cannot co-exist in istio module due to Terraform's
+# inability to handle dynamic provider configuration for import command (even
+# though the provider is not used for the actual resource import, helm_release
+# & helm provider use data source dependent config). See
+# hashicorp/terraform#17847 for details.
+
 terraform {
   backend "gcs" {}
 }
