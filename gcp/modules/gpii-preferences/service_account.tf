@@ -1,23 +1,23 @@
-variable "sa_id" {
+variable "service_account_id" {
   default = "gke-cluster-pod-preferences"
 }
 
-data "google_service_account" "sa" {
-  account_id = "${var.sa_id}"
+data "google_service_account" "service_account" {
+  account_id = "${var.service_account_id}"
   project    = "${var.project_id}"
 }
 
-resource "google_service_account_key" "sa_key" {
-  service_account_id = "${data.google_service_account.sa.name}"
+resource "google_service_account_key" "service_account_key" {
+  service_account_id = "${data.google_service_account.service_account.name}"
 }
 
-resource "kubernetes_secret" "sa_credentials" {
+resource "kubernetes_secret" "service_account_credentials" {
   metadata = {
-    name      = "${var.sa_id}-credentials"
+    name      = "${var.service_account_id}-credentials"
     namespace = "gpii"
   }
 
   data {
-    credentials.json = "${base64decode(google_service_account_key.sa_key.private_key)}"
+    credentials.json = "${base64decode(google_service_account_key.service_account_key.private_key)}"
   }
 }
