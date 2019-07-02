@@ -55,6 +55,34 @@ task :rotate_secrets_key, [:encryption_key] => [:configure, :configure_secrets] 
   @secrets.disable_non_primary_key_versions(args[:encryption_key], new_version_id)
 end
 
+# This task gracefully rotates SA credentials used by target K8s deployment
+task :rotate_deployment_credentials, [:deployment, :namespace] => [:configure] do |taskname, args|
+  if args[:deployment].nil?
+    puts "  ERROR: args[:deployment] must be set!"
+    raise
+  end
+  puts args[:namespace].inspect
+  namespace = args[:namespace] ? args[:namespace] : "gpii"
+
+  # Rolling-restarting deployment so all pods can obtain tokens from static credentials
+  sh "kubectl -n #{namespace} rollout restart deployment #{args[:deployment]}"
+
+  # Rollout status ensures that all pods updated (waiting)
+  sh "kubectl -n #{namespace} rollout status deployment #{args[:deployment]}"
+
+  # Destroying existing credentials
+  sh "rake destroy_sa_keys['gke-cluster-pod-#{args[:deployment]}']"
+
+  # Applying deployment module to force TF to generate new credentials and re-create K8s secret
+  sh "rake xk['apply live/#{@env}/k8s/#{namespace}/#{args[:deployment]}',true,false,true]"
+
+  # Rolling-restarting deployment so all pods using new credentials
+  sh "kubectl -n #{namespace} rollout restart deployment #{args[:deployment]}"
+
+  # Waiting for rollout to complete
+  sh "kubectl -n #{namespace} rollout status deployment #{args[:deployment]}"
+end
+
 # This is an EXPERIMENTAL helper for moving between regions, but it is not very smart and it
 # is strongly coupled with the gcp-secret-mgmt module (e.g. if resource names
 # change there, they will also need to change here).
@@ -224,7 +252,7 @@ task :revoke_org_admin => [@gcp_creds_file, :configure_extra_tf_vars] do
   end
 end
 
-# This task restores a list of images in snapshots. 
+# This task restores a list of images in snapshots.
 task :restore_snapshot_from_image_file, [:snapshot_files] => [@gcp_creds_file, :configure_extra_tf_vars] do |taskname, args|
   require 'csv'
 

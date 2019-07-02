@@ -247,6 +247,11 @@ task :rotate_secrets_key, [:kms_key] => [:set_vars, :check_destroy_allowed] do |
   sh "#{@exekube_cmd} rake rotate_secrets_key['#{kms_key}']"
 end
 
+desc "[ADVANCED] Gracefully rotate SA credentials used by target K8s deployment"
+task :rotate_deployment_credentials, [:deployment, :namespace] => [:set_vars, :check_destroy_allowed] do |taskname, args|
+  sh "#{@exekube_cmd} rake rotate_deployment_credentials['#{args[:deployment]}','#{args[:namespace]}']"
+end
+
 desc "[EXPERIMENTAL] [ADVANCED] Import an existing KMS keyring, e.g when moving an environment to a new (but previously-used) region"
 task :import_keyring => [:set_vars, :check_destroy_allowed] do
   sh "#{@exekube_cmd} rake import_keyring"
