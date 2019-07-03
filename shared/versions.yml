@@ -70,19 +70,19 @@ couchdb:
 dataloader:
   upstream:
     repository: gpii/universal
-    tag: 20190627093650-73d2bc2
+    tag: 20190627203047-1262ac8
   generated:
-    repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:35eafa2a5fe1e5b4dd908596854fd46015a75c4f0758c743c2491868fe8b12fa
-    tag: 20190522142238-4a52f56
+    repository: gpii/universal
+    sha: sha256:7af8e370b70c257e791c521e31ebfa233e5632c3a798ff5d8d83ab30c74bfa69
+    tag: 20190627203047-1262ac8
 flowmanager:
   upstream:
     repository: gpii/universal
-    tag: 20190627093650-73d2bc2
+    tag: 20190627203047-1262ac8
   generated:
-    repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:35eafa2a5fe1e5b4dd908596854fd46015a75c4f0758c743c2491868fe8b12fa
-    tag: 20190522142238-4a52f56
+    repository: gpii/universal
+    sha: sha256:7af8e370b70c257e791c521e31ebfa233e5632c3a798ff5d8d83ab30c74bfa69
+    tag: 20190627203047-1262ac8
 k8s_snapshots:
   upstream:
     repository: elsdoerfer/k8s-snapshots
@@ -110,11 +110,11 @@ nginx_ingress:
 preferences:
   upstream:
     repository: gpii/universal
-    tag: 20190627093650-73d2bc2
+    tag: 20190627203047-1262ac8
   generated:
-    repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:35eafa2a5fe1e5b4dd908596854fd46015a75c4f0758c743c2491868fe8b12fa
-    tag: 20190522142238-4a52f56
+    repository: gpii/universal
+    sha: sha256:7af8e370b70c257e791c521e31ebfa233e5632c3a798ff5d8d83ab30c74bfa69
+    tag: 20190627203047-1262ac8
 service_account_assigner:
   upstream:
     repository: gpii/service-account-assigner
