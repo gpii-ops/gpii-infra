@@ -1,0 +1,19 @@
+# List of components to create Pod Disruption Budgets for and their labels
+components:
+  egressgateway:
+    app: istio-egressgateway
+    istio: egressgateway
+  ingressgateway:
+    app: istio-ingressgateway
+    istio: ingressgateway
+  pilot:
+    app: pilot
+    istio: pilot
+  policy:
+    app: policy
+    istio: mixer
+  telemetry:
+    app: telemetry
+    istio: mixer
+
+maxUnavailable: 1
