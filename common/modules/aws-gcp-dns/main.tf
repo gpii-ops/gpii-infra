@@ -35,13 +35,6 @@ provider "aws" {
   region  = "us-east-2"
 }
 
-module "aws_zone" {
-  source              = "./aws-dns-zone"
-  record_name         = "aws"
-  aws_zone_id         = "${var.aws_zone_id}"
-  organization_domain = "${var.organization_domain}"
-}
-
 module "gcp_zone" {
   source              = "./gcp-dns-zone"
   record_name         = "gcp"
