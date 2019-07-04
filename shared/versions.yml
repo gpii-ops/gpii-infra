@@ -70,35 +70,35 @@ couchdb:
 dataloader:
   upstream:
     repository: gpii/universal
-    tag: 20190610144430-9bd021f
+    tag: 20190627203047-1262ac8
   generated:
     repository: gpii/universal
-    sha: sha256:42f238d64e3afec834a1da2b33b602be68e6acb437d623b2b5c559c61a9f6b2a
-    tag: 20190610144430-9bd021f
+    sha: sha256:7af8e370b70c257e791c521e31ebfa233e5632c3a798ff5d8d83ab30c74bfa69
+    tag: 20190627203047-1262ac8
 flushtokens:
   upstream:
     repository: gpii/universal
-    tag: 20190610144430-9bd021f
+    tag: 20190627203047-1262ac8
   generated:
     repository: gpii/universal
-    sha: sha256:42f238d64e3afec834a1da2b33b602be68e6acb437d623b2b5c559c61a9f6b2a
-    tag: 20190610144430-9bd021f
+    sha: sha256:7af8e370b70c257e791c521e31ebfa233e5632c3a798ff5d8d83ab30c74bfa69
+    tag: 20190627203047-1262ac8
 istio_proxy_manager:
   upstream:
-    repository: gcr.io/gke-release/istio/proxyv2
-    tag: 1.0.6-gke.3
+    repository: gpii/universal
+    tag: 20190627203047-1262ac8
   generated:
-    repository: gcr.io/gke-release/istio/proxyv2
-    sha: sha256:1f6dac3dbf69c0b0d519398003b6572e0218f695f1be295a2ffff95df2395ed0
-    tag: 1.0.6-gke.3
+    repository: gpii/universal
+    sha: sha256:7af8e370b70c257e791c521e31ebfa233e5632c3a798ff5d8d83ab30c74bfa69
+    tag: 20190627203047-1262ac8
 flowmanager:
   upstream:
     repository: gpii/universal
-    tag: 20190522142238-4a52f56
+    tag: 20190627203047-1262ac8
   generated:
     repository: gpii/universal
-    sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
-    tag: 20190522142238-4a52f56
+    sha: sha256:7af8e370b70c257e791c521e31ebfa233e5632c3a798ff5d8d83ab30c74bfa69
+    tag: 20190627203047-1262ac8
 k8s_snapshots:
   upstream:
     repository: elsdoerfer/k8s-snapshots
@@ -126,11 +126,11 @@ nginx_ingress:
 preferences:
   upstream:
     repository: gpii/universal
-    tag: 20190522142238-4a52f56
+    tag: 20190627203047-1262ac8
   generated:
     repository: gpii/universal
-    sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
-    tag: 20190522142238-4a52f56
+    sha: sha256:7af8e370b70c257e791c521e31ebfa233e5632c3a798ff5d8d83ab30c74bfa69
+    tag: 20190627203047-1262ac8
 service_account_assigner:
   upstream:
     repository: gpii/service-account-assigner
