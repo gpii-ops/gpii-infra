@@ -188,10 +188,18 @@ end
 
 # This task grants the owner role in the current project to the current user
 task :grant_project_admin => [@gcp_creds_file, :configure_extra_tf_vars] do
+  if ENV["TF_VAR_organization_name"] == "gpii"
+    role = "roles/owner"
+  else
+    # The owner role can not be granted using other method than the console for
+    # external users to a particular organization.
+    # https://cloud.google.com/iam/docs/understanding-roles#invitation_flow
+    role = "roles/editor"
+  end
   sh "
     gcloud projects add-iam-policy-binding \"$TF_VAR_project_id\" \
       --member user:\"$TF_VAR_auth_user_email\" \
-      --role roles/owner
+      --role #{role}
   "
 end
 
@@ -222,7 +230,7 @@ task :revoke_org_admin => [@gcp_creds_file, :configure_extra_tf_vars] do
   end
 end
 
-# This task restores a list of images in snapshots. 
+# This task restores a list of images in snapshots.
 task :restore_snapshot_from_image_file, [:snapshot_files] => [@gcp_creds_file, :configure_extra_tf_vars] do |taskname, args|
   require 'csv'
 
