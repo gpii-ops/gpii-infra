@@ -4,8 +4,10 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: {{ template "flushtokens.name" . }}
 spec:
-  schedule: "*/15 * * * *"
-  concurrencyPolicy: Forbid
+  schedule: "{{ .Values.cronJobSchedule }}"
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 1
+  concurrencyPolicy: Replace
   startingDeadlineSeconds: 200
   jobTemplate:
     spec:
