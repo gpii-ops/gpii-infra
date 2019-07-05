@@ -136,13 +136,14 @@ This is a shared, long-lived environment for staging / pre-production. It aims t
 
 Deploying to `stg` verifies that the gpii-infra code that worked to create a `dev-$USER` environment from scratch also works to update a pre-existing environment. This is important since we generally don't want to destroy and re-create the production environment from scratch.
 
-Because `stg` emulates production, it will (in the future) allow us to run realistic end-to-end tests before deploying to `prd`.
+Because `stg` emulates production, it will (in the future) allow us to run realistic end-to-end tests before deploying to `prd`. This fact also makes `stg` the proper environment to test some recovering procedures that the ops team must perform periodically.
 
 #### Service Level Objective
 
 * No guarantee of service for development environments (stg is a development environment).
 * Ops team receives alerts about problems, and addresses them when convenient for the team (i.e. we won't wake up an on-call engineer, but we will investigate during business hours)
 * Ops team makes an effort to keep stg stable and available for ad-hoc testing, but may disrupt the environment at any time for our own testing.
+* Ops team will perform a restoration of the persistence layer every first monday of the month at 13:00EDT as part of the backup testing process needed for the FERPA compliance, so expect an outage of about 30 min at that time of the services in `stg`.
 
 ### prd
 
@@ -708,7 +709,7 @@ Prime Minister at that time!"), please let me know immediately.
 ##### Setup.
 
 Create a Terragrunt definition like `gcp/live/prd/k8s/kube-system/backup-exporter/terraform.tfvars` inside the exekube project. This file contains 3 variables:
-   * `destination_bucket` - The destination GCS bucket, i.e "gs://gpii-backup-external-prd". 
+   * `destination_bucket` - The destination GCS bucket, i.e "gs://gpii-backup-external-prd".
    * `replica_count` - the number of CouchDB replicas that the cluster has. This is important for copying all the snapshots of the cluster at the same time.
    * `schedule` - Follows the same format as a Cron Job. i.e: `*/10 * * * *` to execute the task every 10 minutes.
 
