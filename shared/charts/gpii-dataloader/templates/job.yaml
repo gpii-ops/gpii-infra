@@ -18,30 +18,24 @@ spec:
         - name: GPII_COUCHDB_URL
           value: '{{ .Values.couchdbUrl }}'
       - name: istio-proxy-manager
-        image: gcr.io/gke-release/istio/proxyv2:1.0.6-gke.3@sha256:1f6dac3dbf69c0b0d519398003b6572e0218f695f1be295a2ffff95df2395ed0
+        image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 1337
         command: [ "/bin/sh", "-c" ]
         args:
-          - for i in `seq 1 30`;
+          - while ! ps -o user | grep node > /dev/null;
             do
-              ps -C 'deleteAndLoadSnapsets.sh' > /dev/null;
-              if [ $? = 0 ];
-              then
-                echo 'deleteAndLoadSnapsets.sh started.';
-                break;
-              fi;
+              echo 'Waiting for deleteAndLoadSnapsets.sh to start...';
               sleep 2;
             done;
-            for i in `seq 1 30`;
+            echo 'deleteAndLoadSnapsets.sh started.';
+            while ps -o user | grep node > /dev/null;
             do
-              ps -C 'deleteAndLoadSnapsets.sh' > /dev/null;
-              if [ $? != 0 ];
-              then
-                echo 'deleteAndLoadSnapsets.sh finished';
-                break;
-              fi;
               echo 'Waiting for deleteAndLoadSnapsets.sh to finish...';
               sleep 2;
             done;
-            echo 'sending TERM to pilot-agent';
-            kill `pgrep pilot-agent`;
+            echo 'deleteAndLoadSnapsets.sh finished.';
+            echo 'Sending TERM to pilot-agent';
+            pkill pilot-agent;
       restartPolicy: OnFailure
