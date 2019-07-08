@@ -32,17 +32,3 @@ resource "google_service_account" "gke_cluster_pod_k8s_snapshots" {
   display_name = "gke-cluster-pod-k8s-snapshots"
   project      = "${google_project.project.project_id}"
 }
-
-# Service account for preferences
-resource "google_service_account" "gke_cluster_pod_preferences" {
-  account_id   = "gke-cluster-pod-preferences"
-  display_name = "gke-cluster-pod-preferences"
-  project      = "${google_project.project.project_id}"
-}
-
-# Service account for flowmanger
-resource "google_service_account" "gke_cluster_pod_flowmanager" {
-  account_id   = "gke-cluster-pod-flowmanager"
-  display_name = "gke-cluster-pod-flowmanager"
-  project      = "${google_project.project.project_id}"
-}

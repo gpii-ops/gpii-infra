@@ -261,8 +261,6 @@ data "google_iam_policy" "combined" {
       "serviceAccount:${google_service_account.gke_cluster_node.email}",
       "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
       "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
-      "serviceAccount:${google_service_account.gke_cluster_pod_preferences.email}",
-      "serviceAccount:${google_service_account.gke_cluster_pod_flowmanager.email}",
     ]
   }
 
@@ -273,8 +271,6 @@ data "google_iam_policy" "combined" {
       "serviceAccount:${google_service_account.gke_cluster_node.email}",
       "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
       "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
-      "serviceAccount:${google_service_account.gke_cluster_pod_preferences.email}",
-      "serviceAccount:${google_service_account.gke_cluster_pod_flowmanager.email}",
     ]
   }
 
@@ -285,8 +281,6 @@ data "google_iam_policy" "combined" {
       "serviceAccount:${google_service_account.gke_cluster_node.email}",
       "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
       "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
-      "serviceAccount:${google_service_account.gke_cluster_pod_preferences.email}",
-      "serviceAccount:${google_service_account.gke_cluster_pod_flowmanager.email}",
     ]
   }
 
@@ -297,8 +291,6 @@ data "google_iam_policy" "combined" {
       "serviceAccount:${google_service_account.gke_cluster_node.email}",
       "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
       "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
-      "serviceAccount:${google_service_account.gke_cluster_pod_preferences.email}",
-      "serviceAccount:${google_service_account.gke_cluster_pod_flowmanager.email}",
     ]
   }
 
