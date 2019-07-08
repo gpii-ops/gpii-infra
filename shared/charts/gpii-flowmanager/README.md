@@ -15,7 +15,6 @@ This chart bootstraps a GPII Flowmanager deployment on a [Kubernetes](http://kub
 
 ## Prerequisites
   - Kubernetes 1.8+ with Beta APIs enabled
-  - [nginx-ingress](https://github.com/kubernetes/charts/tree/master/stable/nginx-ingress)
   - [cert-manager](https://github.com/kubernetes/charts/tree/master/stable/cert-manager)
 
 ## Installing the Chart
@@ -50,7 +49,7 @@ The following table lists the configurable parameters of the gpii-flowmanager ch
 | `acme.server                   | optional ACME server for certificate issuer                                              | `https://acme-staging-v02.api.letsencrypt.org/directory`                  |
 | `datasourceHostname`           | data source hostname for preferences service                                             | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`        |
 | `datasourceListenPort`         | data source port for flowmanager service                                                 | `5984`                                                                    |
-| `dnsNames`                     | list of host names for nginx-ingress controller                                          | `flowmanager.test.local`                                                  |
+| `dnsNames`                     | list of DNS host names                                                                   | `flowmanager.test.local`                                                  |
 | `enableStackdriverTrace`       | enable [GCP Stackdriver Trace](https://cloud.google.com/trace/)                          | `false`                                                                   |
 | `flowmanagerListenPort`        | port for flowmanager service to listen on                                                | `8081`                                                                    |
 | `image.checksum`               | container image checksum                                                                 | `sha256:8547f22ae8e86d7b4b09e10d9ec87b1605b47dc37904171c84555a55462f161e` |
