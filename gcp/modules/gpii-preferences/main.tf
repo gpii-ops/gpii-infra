@@ -33,7 +33,6 @@ data "template_file" "preferences_values" {
   template = "${file("${path.module}/templates/values.yaml.tpl")}"
 
   vars {
-    service_account_id     = "${var.service_account_id}"
     preferences_repository = "${var.preferences_repository}"
     preferences_checksum   = "${var.preferences_checksum}"
     couchdb_admin_username = "${var.secret_couchdb_admin_username}"

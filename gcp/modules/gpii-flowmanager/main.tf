@@ -40,7 +40,6 @@ data "template_file" "flowmanager_values" {
   template = "${file("${path.module}/templates/values.yaml.tpl")}"
 
   vars {
-    service_account_id     = "${var.service_account_id}"
     domain_name            = "${var.domain_name}"
     flowmanager_repository = "${var.flowmanager_repository}"
     flowmanager_checksum   = "${var.flowmanager_checksum}"

@@ -15,7 +15,6 @@ dnsNames:
 datasourceHostname: "http://${couchdb_admin_username}:${couchdb_admin_password}@couchdb-svc-couchdb.gpii.svc.cluster.local"
 
 enableStackdriverTrace: true
-credentialsSecretName: ${service_account_id}-credentials
 
 resources:
   requests:
