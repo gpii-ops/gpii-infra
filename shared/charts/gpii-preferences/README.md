@@ -15,7 +15,6 @@ This chart bootstraps a GPII Preferences deployment on a [Kubernetes](http://kub
 
 ## Prerequisites
   - Kubernetes 1.8+ with Beta APIs enabled
-  - [nginx-ingress](https://github.com/kubernetes/charts/tree/master/stable/nginx-ingress)
   - [cert-manager](https://github.com/kubernetes/charts/tree/master/stable/cert-manager)
 
 ## Installing the Chart

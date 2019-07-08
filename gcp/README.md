@@ -136,13 +136,14 @@ This is a shared, long-lived environment for staging / pre-production. It aims t
 
 Deploying to `stg` verifies that the gpii-infra code that worked to create a `dev-$USER` environment from scratch also works to update a pre-existing environment. This is important since we generally don't want to destroy and re-create the production environment from scratch.
 
-Because `stg` emulates production, it will (in the future) allow us to run realistic end-to-end tests before deploying to `prd`.
+Because `stg` emulates production, it will (in the future) allow us to run realistic end-to-end tests before deploying to `prd`. This fact also makes `stg` the proper environment to test some recovering procedures that the ops team must perform periodically.
 
 #### Service Level Objective
 
 * No guarantee of service for development environments (stg is a development environment).
 * Ops team receives alerts about problems, and addresses them when convenient for the team (i.e. we won't wake up an on-call engineer, but we will investigate during business hours)
 * Ops team makes an effort to keep stg stable and available for ad-hoc testing, but may disrupt the environment at any time for our own testing.
+* Ops team will perform a restoration of the persistence layer every first monday of the month at 13:00EDT as part of the backup testing process needed for the FERPA compliance, so expect an outage of about 30 min at that time of the services in `stg`.
 
 ### prd
 
@@ -497,9 +498,11 @@ Ops team must perform backup restoration test using this scenario on `gpii-gcp-s
 
 Here are the steps:
 
-1. Choose a snapshot set that you want to restore (in case of a test, pick latest snapshot set available), make sure that snapshots are present for all disks that are currently in use by CouchDB cluster.
+1. Grant yourself admin permissions in the project you are working on with `rake grant_project_admin`.
+1. Get current number of CouchDB stateful set replicas N with `kubectl --namespace gpii get statefulset couchdb-couchdb -o json | jq ".status.replicas"`.
 1. Collect CouchDB disk names from PVCs with `kubectl --namespace gpii get pvc -l app=couchdb -o json | jq -r .items[].spec.volumeName`.
-1. Get current number of CouchDB stateful set replicas with `kubectl --namespace gpii get statefulset couchdb-couchdb -o jsonpath="{.status.replicas}"`.
+1. Choose a snapshot set that you want to restore, make sure that snapshots are present for all disks that are currently in use by CouchDB cluster.
+   * In case of a backup restoration test, pick latest snapshot set available: you can do this with `for i in {0..N}; do gcloud compute snapshots list --sort-by=~creationTimestamp,STATUS --limit=1 --format="value[separator=';'](name,status)" --filter="name~'pv-database-storage-couchdb-couchdb-$i-*'" | cut -f1 -d\; ; done`
 1. Scale CouchDB stateful set to 0 replicas with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=0`. This will cause K8s to terminate all CouchDB pods, all PDs that were mounted into them will be released. **This will prevent flowmanager and preferences services from processing customer requests!**
    * You may also want to scale `flowmanager` and `preferences` deployments to 0 replicas as well with `kubectl --namespace gpii scale deployment preferences --replicas=0` and `kubectl --namespace gpii scale deployment flowmanager --replicas=0`. This will give you time to verify that DB restoration is successful before allowing the DB to receive traffic again.
 1. Destroy `k8s-snapshots` module with `rake destroy_module["k8s/kube-system/k8s-snapshots"]` to prevent new snapshots from being created while you working with disks.
@@ -512,6 +515,7 @@ Here are the steps:
 1. Scale CouchDB stateful set back to number of replicas it used to have before with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=N`
 1. Database is now restored to the state at the time of target snapshot.
    * You can check the status of all nodes with `for i in {0..N}; do kubectl exec --namespace gpii -it couchdb-couchdb-$i -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/_up; done`, where N is a number of CouchDB replicas.
+   * You can also check CouchDB membership status with `kubectl exec --namespace gpii -it couchdb-couchdb-0 -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/_membership | jq`.
 1. Once DB state is verified and you sure that everything went as desired, you can scale `preferences` and `flowmanager` deployments back as well. From this point system functionality for the customer is fully restored.
 1. Deploy `k8s-snapshots` module to resume regular snapshot process with `rake deploy_module["k8s/kube-system/k8s-snapshots"]`.
 1. To make sure that all systems are functional, run smoke tests with `rake test_preferences` and then `rake test_flowmanager`.
@@ -705,7 +709,7 @@ Prime Minister at that time!"), please let me know immediately.
 ##### Setup.
 
 Create a Terragrunt definition like `gcp/live/prd/k8s/kube-system/backup-exporter/terraform.tfvars` inside the exekube project. This file contains 3 variables:
-   * `destination_bucket` - The destination GCS bucket, i.e "gs://gpii-backup-external-prd". 
+   * `destination_bucket` - The destination GCS bucket, i.e "gs://gpii-backup-external-prd".
    * `replica_count` - the number of CouchDB replicas that the cluster has. This is important for copying all the snapshots of the cluster at the same time.
    * `schedule` - Follows the same format as a Cron Job. i.e: `*/10 * * * *` to execute the task every 10 minutes.
 

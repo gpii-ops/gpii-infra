@@ -80,7 +80,8 @@ module "gke_cluster" {
   istio_disabled = false
   istio_auth     = "AUTH_MUTUAL_TLS"
 
-  dashboard_disabled = true
+  dashboard_disabled           = true
+  http_load_balancing_disabled = true
 
   # empty password and username disables legacy basic authentication
   master_auth_username = ""

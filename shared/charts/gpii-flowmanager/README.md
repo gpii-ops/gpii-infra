@@ -15,7 +15,6 @@ This chart bootstraps a GPII Flowmanager deployment on a [Kubernetes](http://kub
 
 ## Prerequisites
   - Kubernetes 1.8+ with Beta APIs enabled
-  - [nginx-ingress](https://github.com/kubernetes/charts/tree/master/stable/nginx-ingress)
   - [cert-manager](https://github.com/kubernetes/charts/tree/master/stable/cert-manager)
 
 ## Installing the Chart
@@ -51,7 +50,7 @@ The following table lists the configurable parameters of the gpii-flowmanager ch
 | `acme.server`                  | Optional ACME server for certificate issuer                                                  | `https://acme-staging-v02.api.letsencrypt.org/directory`                  |
 | `datasourceHostname`           | Data source hostname for preferences service                                                 | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`        |
 | `datasourceListenPort`         | data source port for flowmanager service                                                     | `5984`                                                                    |
-| `dnsNames`                     | List of host names for nginx-ingress controller                                              | `flowmanager.test.local`                                                  |
+| `dnsNames`                     | List of DNS host names                                               | `flowmanager.test.local`                                                  |
 | `enableStackdriverTrace`       | Enable [GCP Stackdriver Trace](https://cloud.google.com/trace/)                              | `false`                                                                   |
 | `credentialsSecretName`        | Name of the secret with SA credentials (must be set when `enableStackdriverTrace` is `true`) | `gke-cluster-pod-default-credentials`                                     |
 | `flowmanagerListenPort`        | Port for flowmanager service to listen on                                                    | `8081`                                                                    |
