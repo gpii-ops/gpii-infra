@@ -48,7 +48,6 @@ The following table lists the configurable parameters of the gpii-preferences ch
 | `datasourceHostname`           | Data source hostname for preferences service                                                 | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`        |
 | `datasourceListenPort`         | Data source port for preferences service                                                     |  `5984`                                                                   |
 | `enableStackdriverTrace`       | Enable [GCP Stackdriver Trace](https://cloud.google.com/trace/)                              | `false`                                                                   |
-| `credentialsSecretName`        | Name of the secret with SA credentials (must be set when `enableStackdriverTrace` is `true`) | `gke-cluster-pod-default-credentials`                                     |
 | `image.checksum`               | Container image checksum                                                                     | `sha256:f279c6ab7fa1c19e5f358a6a3d87a970eaf8d615c8b6181851fa086b6229b3a1` |
 | `image.pullPolicy`             | Container image pullPolicy                                                                   | `IfNotPresent`                                                            |
 | `image.repository`             | Container image repository                                                                   | `gpii/universal`                                                          |

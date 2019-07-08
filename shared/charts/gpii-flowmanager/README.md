@@ -50,9 +50,8 @@ The following table lists the configurable parameters of the gpii-flowmanager ch
 | `acme.server`                  | Optional ACME server for certificate issuer                                                  | `https://acme-staging-v02.api.letsencrypt.org/directory`                  |
 | `datasourceHostname`           | Data source hostname for preferences service                                                 | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`        |
 | `datasourceListenPort`         | data source port for flowmanager service                                                     | `5984`                                                                    |
-| `dnsNames`                     | List of DNS host names                                               | `flowmanager.test.local`                                                  |
+| `dnsNames`                     | List of DNS host names                                                                       | `flowmanager.test.local`                                                  |
 | `enableStackdriverTrace`       | Enable [GCP Stackdriver Trace](https://cloud.google.com/trace/)                              | `false`                                                                   |
-| `credentialsSecretName`        | Name of the secret with SA credentials (must be set when `enableStackdriverTrace` is `true`) | `gke-cluster-pod-default-credentials`                                     |
 | `flowmanagerListenPort`        | Port for flowmanager service to listen on                                                    | `8081`                                                                    |
 | `image.checksum`               | Container image checksum                                                                     | `sha256:8547f22ae8e86d7b4b09e10d9ec87b1605b47dc37904171c84555a55462f161e` |
 | `image.pullPolicy`             | Container image pullPolicy                                                                   | `IfNotPresent`                                                            |

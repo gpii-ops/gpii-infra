@@ -13,6 +13,8 @@ spec:
     metadata:
       labels:
         app: preferences
+      annotations:
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: "169.254.169.254/32"
     spec:
       containers:
       - name: preferences
@@ -33,14 +35,6 @@ spec:
         - name: GPII_ENABLE_STACKDRIVER_TRACE
           value: 'true'
         {{- end }}
-        {{- if .Values.credentialsSecretName }}
-        - name: GOOGLE_APPLICATION_CREDENTIALS
-          value: /etc/credentials/credentials.json
-        volumeMounts:
-        - name: credentials
-          mountPath: /etc/credentials
-          readOnly: true
-        {{- end }}
         {{- if .Values.resources }}
         resources:
           {{ toYaml .Values.resources | indent 10 | trim }}
@@ -57,9 +51,3 @@ spec:
             - '/usr/bin/curl'
             - '-f'
             - 'http://localhost:{{ .Values.preferencesListenPort }}/ready'
-      {{- if .Values.credentialsSecretName }}
-      volumes:
-        - name: credentials
-          secret:
-            secretName: {{ .Values.credentialsSecretName }}
-      {{- end }}
