@@ -24,7 +24,7 @@ certmerge_operator:
 cloud_sdk:
   upstream: 
     repository: google/cloud-sdk
-    tag: 242.0.0-alpine
+    tag: 253.0.0-alpine
   generated:
     repository: google/cloud-sdk
     sha: sha256:6bda894b7ac4e733a305269379ff8f50329a0cd592f1d966854972bae591b9b5
