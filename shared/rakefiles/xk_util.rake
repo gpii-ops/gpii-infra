@@ -189,18 +189,20 @@ end
 # This task grants the owner role in the current project to the current user
 task :grant_project_admin => [@gcp_creds_file, :configure_extra_tf_vars] do
   if ENV["TF_VAR_organization_name"] == "gpii"
-    role = "roles/owner"
+    roles = ["roles/owner"]
   else
     # The owner role can not be granted using other method than the console for
     # external users to a particular organization.
     # https://cloud.google.com/iam/docs/understanding-roles#invitation_flow
-    role = "roles/editor"
+    roles = ["roles/editor", "roles/resourcemanager.projectIamAdmin"]
   end
-  sh "
-    gcloud projects add-iam-policy-binding \"$TF_VAR_project_id\" \
-      --member user:\"$TF_VAR_auth_user_email\" \
-      --role #{role}
-  "
+  roles.each do |role|
+    sh "
+      gcloud projects add-iam-policy-binding \"$TF_VAR_project_id\" \
+        --member user:\"$TF_VAR_auth_user_email\" \
+        --role #{role}
+    "
+  end
 end
 
 # This task revokes the owner role in the current project from the current user
