@@ -64,7 +64,6 @@ resource "null_resource" "apply_stackdriver_monitoring" {
           require "/rakefiles/stackdriver.rb"
           resources = read_resources("${path.module}/resources_rendered")
           apply_resources(resources)
-          destroy_uptime_checks(["${join("\",\"", google_monitoring_uptime_check_config.this.*.name)}"])
         '
         STACKDRIVER_EXIT_STATUS="$?"
         if [ "$STACKDRIVER_EXIT_STATUS" == "120" ]; then
@@ -103,7 +102,6 @@ resource "null_resource" "destroy_stackdriver_monitoring" {
         ruby -e '
           require "/rakefiles/stackdriver.rb"
           destroy_resources({"alert_policies"=>[],"notification_channels"=>[]})
-          destroy_uptime_checks(["${join("\",\"", google_monitoring_uptime_check_config.this.*.name)}"])
         '
         STACKDRIVER_EXIT_STATUS="$?"
         if [ "$STACKDRIVER_EXIT_STATUS" == "120" ]; then
