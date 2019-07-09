@@ -2,6 +2,12 @@ terraform {
   backend "gcs" {}
 }
 
+provider "google" {
+  credentials = "${var.serviceaccount_key}"
+  project     = "${var.project_id}"
+  region      = "${var.infra_region}"
+}
+
 data "google_project" "project" {
   project_id = "gpii-gcp-${var.source_project_name}"
 }
@@ -49,7 +55,7 @@ resource "google_storage_bucket_iam_binding" "member" {
   # WARNING: the backup exporter must be installed in the source project in
   # order to have the service account gke-cluster-pod-bckp-exporter. As the
   # deployment of that module will be performed after this module, the 'count'
-  # variable must be set to 0 the first time. Then it should be 1 in order to 
+  # variable must be set to 0 the first time. Then it should be 1 in order to
   # apply this IAM binding.
   count = 1
 

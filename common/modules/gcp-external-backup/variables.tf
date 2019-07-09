@@ -12,4 +12,8 @@ variable "location" {
   default = "us"
 }
 
+variable "serviceaccount_key" {}
+
 variable "project_id" {}
+
+variable "infra_region" {}
