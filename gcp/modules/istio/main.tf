@@ -2,6 +2,16 @@ terraform {
   backend "gcs" {}
 }
 
+variable "project_id" {}
+variable "serviceaccount_key" {}
+variable "infra_region" {}
+variable "nonce" {}
+
+provider "google" {
+  project     = "${var.project_id}"
+  credentials = "${var.serviceaccount_key}"
+}
+
 # This resource waits till GCP allocates IP address for Istio ingress gateway
 resource "null_resource" "ingress_ip_wait" {
   triggers = {
@@ -25,4 +35,22 @@ resource "null_resource" "ingress_ip_wait" {
       done
     EOF
   }
+}
+
+data "kubernetes_service" "istio-ingressgateway" {
+  metadata {
+    name      = "istio-ingressgateway"
+    namespace = "istio-system"
+  }
+
+  depends_on = ["null_resource.ingress_ip_wait"]
+}
+
+resource "google_compute_address" "istio-ingress" {
+  project      = "${var.project_id}"
+  region       = "${var.infra_region}"
+  name         = "istio-ingress"
+  address_type = "EXTERNAL"
+  address      = "${data.kubernetes_service.istio-ingressgateway.load_balancer_ingress.0.ip}"
+  network_tier = "PREMIUM"
 }
