@@ -1,13 +1,13 @@
 # ↓ Module metadata
 terragrunt = {
   terraform {
-    source = "/project/modules//nginx-ingress"
+    source = "/project/modules//istio-gke-helper"
   }
 
   dependencies {
     paths = [
-      "../../kube-system/helm-initializer",
-      "../../kube-system/cert-manager",
+      "../cluster",
+      "../kube-system/helm-initializer"
     ]
   }
 
