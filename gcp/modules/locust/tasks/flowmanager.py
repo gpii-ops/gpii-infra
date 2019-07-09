@@ -3,7 +3,7 @@ import random
 
 class FlowmanagerTasks(TaskSet):
 
-  _keys = ["carla", "vladimir", "wayne", "omar", "telugu"]
+  _keys = ["carla", "vladimir", "wayne", "omar", "nvda"]
 
   @task
   def post_access_token(self):

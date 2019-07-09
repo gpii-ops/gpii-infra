@@ -192,6 +192,7 @@ See [CI-CD.md#running-in-non-dev-environments](../CI-CD.md#running-manually-in-n
    * When is a good time for you and the Ops team to deploy this change?
    * Does the deployment require any special handling?
    * How will you verify that your change is working correctly in production?
+   * What is the rollback plan if things don't go well?
 
 ### I need to interact with Helm directly, e.g. because a Helm deployment was orphaned due to an error while running `rake`
 
@@ -421,22 +422,6 @@ See [Getting started: One-time Stackdriver Workspace setup](README.md#one-time-s
 
 You can run all `kubectl` commands mentioned below inside of an interactive shell started with `rake sh`.
 
-### Data corruption on a single CouchDB replica
-
-In this scenario we rely on CouchDB ability to recover from loss of one or more replicas (our current production CouchDB settings allow us to lose up to 2 random nodes and still keep data integrity). The best course of action as follows:
-
-1. Make sure that you figured affected CouchDB pod properly
-1. There is a PVC object, associated with affected CouchDB pod. Let's say affected pod is `couchdb-couchdb-1`, then corresponding PVC is `database-storage-couchdb-couchdb-1`, located in the same namespace.
-1. Delete associated PVC and then affected pod. For our example case:
-   * `kubectl --namespace gpii delete pvc database-storage-couchdb-couchdb-1`
-   * `kubectl --namespace gpii delete pod couchdb-couchdb-1`
-1. After target pod is terminated, Persistent Disk that was mounted into it thru corresponding PVC will be destroyed as well.
-1. When new pod is created to replace deleted one, corresponding PVC will be created as well, and, thru it, new PV object for new GCE PD.
-1. Run `rake deploy_module[couchdb]` to patch newly created PV with annotations for `k8s-snapshots`.
-1. CouchDB cluster will replicate data to recreated node automatically.
-1. Corrupted node is now recovered.
-   * You can check DB status on recovered node with `kubectl exec --namespace gpii -it couchdb-couchdb-N -c couchdb -- curl -s http://$TF_VAR_couchdb_admin_username:$TF_VAR_couchdb_admin_password@127.0.0.1:5984/gpii/`, where N is node index.
-
 ### The CouchDB cluster won't converge because one of its disks is in the wrong zone
 
 Consider this scenario:
@@ -484,13 +469,39 @@ An alternative workaround is to do a snapshot-restore cycle to move the Persiste
 1. Kubernetes should run the CouchDB Pod in the correct Zone, and CouchDB should attach to the Persistent Disk. Verify this with e.g. `kubectl -n gpii get pods` or the GKE Dashboard.
 1. When you are sure the CouchDB cluster is healthy, delete any new Snapshots you created (k8s-snapshots manages its own Snapshots).
 
+### Data corruption on a single CouchDB replica
+
+In this scenario we rely on CouchDB ability to recover from loss of one or more replicas (our current production CouchDB settings allow us to lose up to 2 random nodes and still keep data integrity). The best course of action as follows:
+
+1. Make sure that you figured affected CouchDB pod properly
+1. There is a PVC object, associated with affected CouchDB pod. Let's say affected pod is `couchdb-couchdb-1`, then corresponding PVC is `database-storage-couchdb-couchdb-1`, located in the same namespace.
+1. Delete associated PVC and then affected pod. For our example case:
+   * `kubectl --namespace gpii delete pvc database-storage-couchdb-couchdb-1`
+   * `kubectl --namespace gpii delete pod couchdb-couchdb-1`
+1. After target pod is terminated, Persistent Disk that was mounted into it thru corresponding PVC will be destroyed as well.
+1. When new pod is created to replace deleted one, corresponding PVC will be created as well, and, thru it, new PV object for new GCE PD.
+1. Run `rake deploy_module[couchdb]` to patch newly created PV with annotations for `k8s-snapshots`.
+1. CouchDB cluster will replicate data to recreated node automatically.
+1. Corrupted node is now recovered.
+   * You can check DB status on recovered node with `kubectl exec --namespace gpii -it couchdb-couchdb-N -c couchdb -- curl -s http://$TF_VAR_couchdb_admin_username:$TF_VAR_couchdb_admin_password@127.0.0.1:5984/gpii/`, where N is node index.
+1. To make sure that all systems are functional, run smoke tests with `rake test_preferences` and then `rake test_flowmanager`.
+
 ### Data corruption on all replicas of CouchDB cluster
 
-There may be a situation, when we want to roll back entire DB data set to another point in the past. Current solution is disruptive, requires bringing entire CouchDB cluster down and some manual actions (we'll most likely automate this in future):
+There may be a situation, when we want to roll back entire DB data set to another point in the past. Current solution is disruptive, requires bringing entire CouchDB cluster down and some manual actions (we'll most likely automate this in future).
 
-1. Choose a snapshot set that you want to restore, make sure that snapshots are present for all disks that are currently in use by CouchDB cluster.
+Ops team must perform backup restoration test using this scenario on `gpii-gcp-stg` cluster monthly, to make sure that:
+* Automated backups are being created as expected.
+* Existing backups can be used to restore functional and consistent DB.
+* Restoration guide (this scenario) is accurate.
+
+Here are the steps:
+
+1. Grant yourself admin permissions in the project you are working on with `rake grant_project_admin`.
+1. Get current number of CouchDB stateful set replicas N with `kubectl --namespace gpii get statefulset couchdb-couchdb -o json | jq ".status.replicas"`.
 1. Collect CouchDB disk names from PVCs with `kubectl --namespace gpii get pvc -l app=couchdb -o json | jq -r .items[].spec.volumeName`.
-1. Get current number of CouchDB stateful set replicas with `kubectl --namespace gpii get statefulset couchdb-couchdb -o jsonpath="{.status.replicas}"`.
+1. Choose a snapshot set that you want to restore, make sure that snapshots are present for all disks that are currently in use by CouchDB cluster.
+   * In case of a backup restoration test, pick latest snapshot set available: you can do this with `for i in {0..N}; do gcloud compute snapshots list --sort-by=~creationTimestamp,STATUS --limit=1 --format="value[separator=';'](name,status)" --filter="name~'pv-database-storage-couchdb-couchdb-$i-*'" | cut -f1 -d\; ; done`
 1. Scale CouchDB stateful set to 0 replicas with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=0`. This will cause K8s to terminate all CouchDB pods, all PDs that were mounted into them will be released. **This will prevent flowmanager and preferences services from processing customer requests!**
    * You may also want to scale `flowmanager` and `preferences` deployments to 0 replicas as well with `kubectl --namespace gpii scale deployment preferences --replicas=0` and `kubectl --namespace gpii scale deployment flowmanager --replicas=0`. This will give you time to verify that DB restoration is successful before allowing the DB to receive traffic again.
 1. Destroy `k8s-snapshots` module with `rake destroy_module["k8s/kube-system/k8s-snapshots"]` to prevent new snapshots from being created while you working with disks.
@@ -503,8 +514,10 @@ There may be a situation, when we want to roll back entire DB data set to anothe
 1. Scale CouchDB stateful set back to number of replicas it used to have before with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=N`
 1. Database is now restored to the state at the time of target snapshot.
    * You can check the status of all nodes with `for i in {0..N}; do kubectl exec --namespace gpii -it couchdb-couchdb-$i -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/_up; done`, where N is a number of CouchDB replicas.
+   * You can also check CouchDB membership status with `kubectl exec --namespace gpii -it couchdb-couchdb-0 -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/_membership | jq`.
 1. Once DB state is verified and you sure that everything went as desired, you can scale `preferences` and `flowmanager` deployments back as well. From this point system functionality for the customer is fully restored.
 1. Deploy `k8s-snapshots` module to resume regular snapshot process with `rake deploy_module["k8s/kube-system/k8s-snapshots"]`.
+1. To make sure that all systems are functional, run smoke tests with `rake test_preferences` and then `rake test_flowmanager`.
 
 ### Hack: Adding data to CouchDB
 
@@ -734,10 +747,15 @@ The destination bucket must be created manually. This is a once time setup for S
 
 ##### Restoring a backup from outside of the organization.
 
-The process of the restore it's similar but the other way around. It uses the `gcloud compute images import` command. In order to make easier the process a rake task called `restore_snapshot_from_image_file`can be used. This task takes only one parameter with each snapshot to recover separated by one space. i.e:
-```
-rake restore_snapshot_from_image_file["gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-0-030519-205726.raw.gz gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-1-030519-205756.raw.gz"]
-```
-Once the task finished new restored snapshots will appear with the leading in the name `external-`. This will help with the search when at the restoration of the disks using the snapshots.
+1. Stop `backup-exporter` process in order to not stop the cloudbuild process of restoring the snapshots.
+   ```
+   rake destroy_module["k8s/kube-system/backup-exporter/"]
+   ```
+2. The process of the restore it's similar but the other way around. It uses the `gcloud compute images import` command. In order to make easier the process a rake task called `restore_snapshot_from_image_file`can be used. This task takes only one parameter with each snapshot to recover separated by one space. i.e:
+   ```
+   rake restore_snapshot_from_image_file["gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-0-030519-205726.raw.gz gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-1-030519-205756.raw.gz"]
+   ```
 
-And follow the [restore a pv from snapshot procedure](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#data-corruption-on-a-single-couchdb-replica) using the snapshots restored.
+3. Once the task finished new restored snapshots will appear with the leading in the name `external-`. This will help with the search when at the restoration of the disks using the snapshots.
+
+4. Follow the [restore a pv from snapshot procedure](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#data-corruption-on-a-single-couchdb-replica) using the snapshots restored.

@@ -1,16 +1,19 @@
 # ↓ Module metadata
-
 terragrunt = {
   terraform {
-    source = "/project/modules//gcp-external-backup"
+    source = "/project/modules//istio-gke-helper"
   }
+
+  dependencies {
+    paths = [
+      "../cluster",
+      "../kube-system/helm-initializer"
+    ]
+  }
+
   include = {
     path = "${find_in_parent_folders()}"
   }
 }
 
 # ↓ Module configuration (empty means all default)
-
-source_project_name = "stg"
-days_until_coldline = "180"
-days_until_delete   = "180"

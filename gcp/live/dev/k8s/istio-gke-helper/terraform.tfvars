@@ -1,12 +1,13 @@
 # ↓ Module metadata
 terragrunt = {
   terraform {
-    source = "/project/modules//gcp-stackdriver-monitoring"
+    source = "/project/modules//istio-gke-helper"
   }
 
   dependencies {
     paths = [
-      "../lbm"
+      "../cluster",
+      "../kube-system/helm-initializer"
     ]
   }
 
@@ -16,5 +17,3 @@ terragrunt = {
 }
 
 # ↓ Module configuration (empty means all default)
-# TODO: Change the following mail once the whole solution goes to production
-notification_email = "alfredo@raisingthefloor.org"

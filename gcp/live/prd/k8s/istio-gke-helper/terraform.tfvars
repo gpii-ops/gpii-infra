@@ -1,7 +1,14 @@
 # ↓ Module metadata
 terragrunt = {
   terraform {
-    source = "/project/modules//gcp-stackdriver-lbm"
+    source = "/project/modules//istio-gke-helper"
+  }
+
+  dependencies {
+    paths = [
+      "../cluster",
+      "../kube-system/helm-initializer"
+    ]
   }
 
   include = {
