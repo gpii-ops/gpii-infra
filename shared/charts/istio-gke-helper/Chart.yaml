@@ -1,0 +1,10 @@
+name: istio-gke-helper
+version: v0.1.0
+description: A Helm chart for GKE Istio support resources
+home: https://github.com/istio/istio
+keywords:
+  - gcp
+  - gke
+  - istio
+sources:
+  - https://github.com/istio/istio

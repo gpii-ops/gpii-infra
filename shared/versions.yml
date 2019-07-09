@@ -51,7 +51,7 @@ couchdb_prometheus_exporter:
     tag: 22
   generated:
     repository: gcr.io/gpii-common-prd/gesellix/couchdb-prometheus-exporter
-    sha: sha256:8184086713d28fc19f3d2ecd5eabd0cce23c21bd0daa9f8921fa0ce4acb912f6
+    sha: sha256:015284630a4629755dd0d573ef19cee59a55d7c2fd70dbe66c2131244a4b616c
     tag: 22
 prometheus_to_sd:
   upstream:
@@ -67,7 +67,7 @@ couchdb:
     tag: 2.3.0
   generated:
     repository: gcr.io/gpii-common-prd/couchdb
-    sha: sha256:818f2fda376c300164150044501a30b8c5a84bbcb3eb7e0dbbb92b440f4d64c6
+    sha: sha256:05ced582691f18a81a68b413b68e6f71a567e5442ff5b09454a8600d6aec249f
     tag: 2.3.0
 dataloader:
   upstream:
@@ -75,7 +75,7 @@ dataloader:
     tag: 20190522142238-4a52f56
   generated:
     repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
+    sha: sha256:35eafa2a5fe1e5b4dd908596854fd46015a75c4f0758c743c2491868fe8b12fa
     tag: 20190522142238-4a52f56
 flowmanager:
   upstream:
@@ -83,7 +83,7 @@ flowmanager:
     tag: 20190522142238-4a52f56
   generated:
     repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
+    sha: sha256:35eafa2a5fe1e5b4dd908596854fd46015a75c4f0758c743c2491868fe8b12fa
     tag: 20190522142238-4a52f56
 k8s_snapshots:
   upstream:
@@ -99,7 +99,7 @@ locust:
     tag: 0.9.0-gpii.6
   generated:
     repository: gcr.io/gpii-common-prd/gpii/locust
-    sha: sha256:a6b8d742092af90248c379ba20755ebe9e980d753b1f3010841d133e9ff93b27
+    sha: sha256:107e1f2ac75e74e8f9c6dd47cdd1852a5efbe1f539ac34d6e8cf54e795741082
     tag: 0.9.0-gpii.6
 nginx_ingress:
   upstream:
@@ -115,7 +115,7 @@ preferences:
     tag: 20190522142238-4a52f56
   generated:
     repository: gcr.io/gpii-common-prd/gpii/universal
-    sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
+    sha: sha256:35eafa2a5fe1e5b4dd908596854fd46015a75c4f0758c743c2491868fe8b12fa
     tag: 20190522142238-4a52f56
 service_account_assigner:
   upstream:
