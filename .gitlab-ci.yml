@@ -24,26 +24,7 @@ common-setup:
     - aws --version
     - docker version
     - docker-compose version
-    - pushd gcp/live/dev/ && rake update_exekube && popd
     - docker images | grep exekube
-    - ruby --version
-    - bundle version
-    - rake --version
-  only:
-    - master@gpii-ops/gpii-infra
-
-aws-setup:
-  stage: setup
-  tags:
-    - aws
-  script:
-    - terraform -version
-    - terragrunt -version
-    - kubectl version --client
-    - kops version
-    - helm version --client
-    - aws --version
-    - jq --version
     - ruby --version
     - bundle version
     - rake --version
@@ -57,7 +38,6 @@ gcp-setup:
   script:
     - docker version
     - docker-compose version
-    - pushd gcp/live/dev/ && rake update_exekube && popd
     - docker images | grep exekube
     - ruby --version
     - bundle version
@@ -70,17 +50,7 @@ terraform-fmt-check:
   tags:
     - common
   script:
-    - docker run --rm -v "$(pwd):/data" -w /data gpii/exekube:0.4.0-google -- terraform fmt --check=true
-  only:
-    - master@gpii-ops/gpii-infra
-
-aws-unit-tests:
-  stage: unit-tests
-  tags:
-    - aws
-  script:
-    - cd aws/rakefiles/tests
-    - rake
+    - docker run --rm -v "$(pwd):/data" -w /data gpii/exekube:0.5.1-google_gpii.0 -- terraform fmt --check=true
   only:
     - master@gpii-ops/gpii-infra
 
@@ -104,6 +74,7 @@ common-stg:
     - rake clobber
     - rake configure_serviceaccount_ci_restore
     - rake apply_common_infra
+    - rake init_registry
     - rake apply_infra
   after_script:
     - cd common/live/stg
@@ -122,6 +93,7 @@ common-stg-test-gcp-dev:
     ORGANIZATION_ID: "327626828918"
     TF_VAR_organization_name: "gpii2test"
     TF_VAR_organization_domain: "test1.gpii.net"
+    TF_VAR_common_project_id: "gpii2test-common-stg"
     TF_VAR_aws_zone_id: "Z1T3NF8J9WVBSP"
     # We override default infra region for dev environments
     # due to GCP resource exhaustion issues:
@@ -169,29 +141,13 @@ common-prd:
     - rake clobber
     - rake configure_serviceaccount_ci_restore
     - rake apply_common_infra
+    - rake init_registry
     - rake apply_infra
   after_script:
     - cd common/live/prd
     - rake destroy_sa_keys RAKE_REALLY_DESTROY_IN_PRD=true
   environment:
     name: prd
-  only:
-    - master@gpii-ops/gpii-infra
-
-aws-dev:
-  stage: dev
-  tags:
-    - aws
-  script:
-    - cd aws/dev
-    - bundle install --path "vendor/bundle"
-    - rake clobber
-    - rake
-  after_script:
-    # Clean up even if something failed.
-    - cd aws/dev
-    - rake destroy || true
-    - rake clobber || true
   only:
     - master@gpii-ops/gpii-infra
 
@@ -232,22 +188,9 @@ gcp-plan-all-stg:
     - rake fetch_helm_certs
     # Infra requires special treatment because of secrets configuration
     - rake plain_sh['rake plan_infra'] || true
+    # Sync GKE Istio state so that the plan reflects real changes
+    - rake plain_sh['rake sync_gke_istio_state'] || true
     - rake sh['xk plan-all live/stg/k8s 2> /dev/null'] || true
-  only:
-    - master@gpii-ops/gpii-infra
-
-aws-promote-to-stg:
-  stage: promote-to-stg
-  tags:
-    - aws
-  script:
-    - export DATESTAMP="$(date -u '+%Y%m%d%H%M%S')"  # e.g. 20170603220542. Uses UTC.
-    - echo "DATESTAMP is $DATESTAMP"  # So it's visible in the log
-    - git tag "deploy-aws-stg-$DATESTAMP"
-    # gitlab is not clever enough to clean up an added remote and git complains
-    # if we add a remote that already exists.
-    - git remote | grep -q "^origin-rw" || git remote add origin-rw git@github.com:gpii-ops/gpii-infra
-    - git push --tags origin-rw
   only:
     - master@gpii-ops/gpii-infra
 
@@ -263,19 +206,6 @@ gcp-promote-to-stg:
     # if we add a remote that already exists.
     - git remote | grep -q "^origin-rw" || git remote add origin-rw git@github.com:gpii-ops/gpii-infra
     - git push --tags origin-rw
-  only:
-    - master@gpii-ops/gpii-infra
-
-aws-stg:
-  stage: stg
-  tags:
-    - aws
-  environment:
-    name: stg
-  script:
-    - cd aws/stg
-    - rake clobber
-    - rake
   only:
     - master@gpii-ops/gpii-infra
 
@@ -299,28 +229,13 @@ gcp-stg:
     # Clean up even if something failed.
     - cd gcp/live/stg
     - rake display_cluster_state
+    - rake display_universal_image_info || true
     # Destroy Locust module (used for smoke tests) and its TF state
-    - rake destroy_module[locust] || true
+    - rake destroy_module[locust/swarm] || true
+    - rake destroy_module[locust/istio] || true
     - rake destroy_tfstate[locust] || true
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys || true
-  only:
-    - master@gpii-ops/gpii-infra
-
-aws-promote-to-prd:
-  stage: promote-to-prd
-  tags:
-    - aws
-  script:
-    - export DATESTAMP="$(date -u '+%Y%m%d%H%M%S')"  # e.g. 20170603220542. Uses UTC.
-    - echo "DATESTAMP is $DATESTAMP"  # So it's visible in the log
-    - git tag "deploy-aws-prd-$DATESTAMP"
-    # gitlab is not clever enough to clean up an added remote and git complains
-    # if we add a remote that already exists.
-    - git remote | grep -q "^origin-rw" || git remote add origin-rw git@github.com:gpii-ops/gpii-infra
-    - git push --tags origin-rw
-  when: manual
-  allow_failure: false
   only:
     - master@gpii-ops/gpii-infra
 
@@ -341,6 +256,8 @@ gcp-plan-all-prd:
     - rake fetch_helm_certs
     # Infra requires special treatment because of secrets configuration
     - rake plain_sh['rake plan_infra'] || true
+    # Sync GKE Istio state so that the plan reflects real changes
+    - rake plain_sh['rake sync_gke_istio_state'] || true
     - rake sh['xk plan-all live/prd/k8s 2> /dev/null'] || true
   only:
     - master@gpii-ops/gpii-infra
@@ -360,21 +277,6 @@ gcp-promote-to-prd:
     - git push --tags origin-rw
   when: manual
   allow_failure: false
-  only:
-    - master@gpii-ops/gpii-infra
-
-aws-prd:
-  stage: prd
-  variables:
-    RAKE_REALLY_RUN_IN_PRD: "true"
-  tags:
-    - aws
-  environment:
-    name: prd
-  script:
-    - cd aws/prd
-    - rake clobber
-    - rake
   only:
     - master@gpii-ops/gpii-infra
 
@@ -400,8 +302,10 @@ gcp-prd:
     # Clean up even if something failed.
     - cd gcp/live/prd
     - rake display_cluster_state
+    - rake display_universal_image_info || true
     # Destroy Locust module (used for smoke tests) and its TF state
-    - rake destroy_module[locust] RAKE_REALLY_DESTROY_IN_PRD=true || true
+    - rake destroy_module[locust/swarm] RAKE_REALLY_DESTROY_IN_PRD=true || true
+    - rake destroy_module[locust/istio] RAKE_REALLY_DESTROY_IN_PRD=true || true
     - rake destroy_tfstate[locust] RAKE_REALLY_DESTROY_IN_PRD=true || true
     # Remove all SA keys except current one to prevent hitting 10 keys per SA limit (GPII-3299)
     - rake destroy_sa_keys RAKE_REALLY_DESTROY_IN_PRD=true || true

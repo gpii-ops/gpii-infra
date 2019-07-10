@@ -4,15 +4,13 @@ terraform {
 
 variable "secrets_dir" {}
 variable "charts_dir" {}
-variable "domain_name" {}
 
 variable "preferences_repository" {}
 variable "preferences_checksum" {}
 
 # Terragrunt variables
-variable "cert_issuer_name" {}
-
 variable "replica_count" {}
+
 variable "requests_cpu" {}
 variable "requests_memory" {}
 variable "limits_cpu" {}
@@ -23,16 +21,22 @@ variable "secret_couchdb_admin_username" {}
 
 variable "secret_couchdb_admin_password" {}
 
+variable "serviceaccount_key" {}
+variable "project_id" {}
+
+provider "google" {
+  project     = "${var.project_id}"
+  credentials = "${var.serviceaccount_key}"
+}
+
 data "template_file" "preferences_values" {
-  template = "${file("values.yaml")}"
+  template = "${file("${path.module}/templates/values.yaml.tpl")}"
 
   vars {
-    domain_name            = "${var.domain_name}"
     preferences_repository = "${var.preferences_repository}"
     preferences_checksum   = "${var.preferences_checksum}"
     couchdb_admin_username = "${var.secret_couchdb_admin_username}"
     couchdb_admin_password = "${var.secret_couchdb_admin_password}"
-    cert_issuer_name       = "${var.cert_issuer_name}"
     replica_count          = "${var.replica_count}"
     requests_cpu           = "${var.requests_cpu}"
     requests_memory        = "${var.requests_memory}"

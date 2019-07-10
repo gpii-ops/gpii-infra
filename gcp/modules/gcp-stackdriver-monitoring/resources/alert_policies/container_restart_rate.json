@@ -1,5 +1,5 @@
 {
-  "display_name": "Container Restart Rate",
+  "display_name": "K8s containers does not restart more often than 1.5 times per minute",
   "combiner": "OR",
   "conditions": [
     {
@@ -29,7 +29,7 @@
         "denominator_filter": "",
         "denominator_aggregations": []
       },
-      "display_name": "Container Restart Rate"
+      "display_name": "K8s container restarting more often than 1.5 times per minute"
     }
   ],
   "notification_channels": [],

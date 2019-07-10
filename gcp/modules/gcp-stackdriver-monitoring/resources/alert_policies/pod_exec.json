@@ -1,5 +1,5 @@
 {
-  "display_name": "Pod Exec Check",
+  "display_name": "K8s cluster API logs do not contain `kubectl exec` events",
   "combiner": "OR",
   "conditions": [
     {
@@ -29,7 +29,7 @@
         "denominator_filter": "",
         "denominator_aggregations": []
       },
-      "display_name": "Log-based io.k8s.core.v1.pods.exec.create activity check"
+      "display_name": "New `kubectl exec` event found in K8s API log"
     }
   ],
   "documentation": {

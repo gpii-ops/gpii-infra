@@ -1,0 +1,20 @@
+name: backup-exporter
+version: 0.0.1
+appVersion: v1.0
+home: https://github.com/gpii-ops/gpii-infra
+description: Chart for installing a cronjob that exports disk snapshots
+icon: https://gpii.net/sites/all/themes/gpii_main/logo.png
+keywords:
+  - disk
+  - snapshot
+sources:
+  - https://github.com/gpii-ops/gpii-infra
+maintainers:
+  - name: amatas
+    email: alfredo@raisingthefloor.org
+  - name: natarajaya
+    email: sergey@raisingthefloor.org
+  - name: mrtyler
+    email: tyler@raisingthefloor.org
+  - name: stepan
+    email: stepan@raisingthefloor.org

@@ -2,7 +2,7 @@ Name: locust
 
 image:
   repository: gpii/locust
-  tag: 0.9.0-gpii.2
+  tag: 0.9.0-gpii.4
   pullPolicy: IfNotPresent
   pullSecrets: []
 
@@ -14,6 +14,7 @@ service:
   nodePort: 0
   annotations: {}
   extraLabels: {}
+
 master:
   config:
     target-host: https://site.example.com
@@ -24,9 +25,9 @@ master:
     requests:
       cpu: 100m
       memory: 128Mi
+
 worker:
   config:
-
     # all files from tasks folder are mounted under `/locust-tasks`
     locust-script: "/locust-tasks/tasks.py"
   replicaCount: 2

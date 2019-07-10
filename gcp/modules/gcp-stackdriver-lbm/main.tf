@@ -4,7 +4,24 @@ terraform {
 
 variable "nonce" {}
 variable "project_id" {}
+variable "organization_id" {}
 variable "serviceaccount_key" {}
+variable "common_project_id" {}
+
+resource "template_dir" "resources" {
+  source_dir      = "${path.cwd}/resources"
+  destination_dir = "${path.cwd}/resources_rendered"
+
+  vars {
+    organization_id = "${var.organization_id}"
+
+    # Common service account to exclude in IAM modification LBM
+    common_sa = "projectowner@${var.common_project_id}.iam.gserviceaccount.com"
+
+    # Cloud Resource Manager system account to exclude in IAM modification LBM
+    crm_sa = "one-platform-tenant-manager@system.gserviceaccount.com"
+  }
+}
 
 # Enables debug mode when TF_VAR_stackdriver_debug is not empty
 
@@ -30,7 +47,7 @@ resource "null_resource" "apply_stackdriver_lbm" {
         echo "[Try $RETRY_COUNT of $RETRIES] Applying Stackdriver resources..."
         ruby -e '
           require "/rakefiles/stackdriver.rb"
-          resources = read_resources("${path.module}/resources")
+          resources = read_resources("${path.module}/resources_rendered")
           apply_resources(resources)
         '
         STACKDRIVER_EXIT_STATUS="$?"

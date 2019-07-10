@@ -1,5 +1,5 @@
 {
-  "display_name": "Pod Volume Utilization",
+  "display_name": "K8s pods utilize less than 85% of persistent volume capacity",
   "combiner": "OR",
   "conditions": [
     {
@@ -29,7 +29,7 @@
         "denominator_filter": "",
         "denominator_aggregations": []
       },
-      "display_name": "Pod Volume Utilization"
+      "display_name": "K8s pod utilizes more than 85% of persistent volume capacity"
     }
   ],
   "notification_channels": [],

@@ -5,6 +5,12 @@ terraform {
 variable "secrets_dir" {}
 variable "charts_dir" {}
 variable "nonce" {}
+variable "couchdb_helper_repository" {}
+variable "couchdb_helper_tag" {}
+variable "couchdb_init_repository" {}
+variable "couchdb_init_tag" {}
+variable "couchdb_repository" {}
+variable "couchdb_tag" {}
 
 # Terragrunt variables
 
@@ -33,17 +39,23 @@ data "template_file" "couchdb_values" {
   template   = "${file("values.yaml")}"
 
   vars {
-    couchdb_admin_username = "${var.secret_couchdb_admin_username}"
-    couchdb_admin_password = "${var.secret_couchdb_admin_password}"
-    couchdb_auth_cookie    = "${var.secret_couchdb_auth_cookie}"
-    replica_count          = "${var.replica_count}"
-    requests_cpu           = "${var.requests_cpu}"
-    requests_memory        = "${var.requests_memory}"
-    limits_cpu             = "${var.limits_cpu}"
-    limits_memory          = "${var.limits_memory}"
-    pv_capacity            = "${var.pv_capacity}"
-    pv_storage_class       = "${var.pv_storage_class}"
-    pv_provisioner         = "${var.pv_provisioner}"
+    couchdb_admin_username    = "${var.secret_couchdb_admin_username}"
+    couchdb_admin_password    = "${var.secret_couchdb_admin_password}"
+    couchdb_auth_cookie       = "${var.secret_couchdb_auth_cookie}"
+    couchdb_helper_repository = "${var.couchdb_helper_repository}"
+    couchdb_helper_tag        = "${var.couchdb_helper_tag}"
+    couchdb_init_repository   = "${var.couchdb_init_repository}"
+    couchdb_init_tag          = "${var.couchdb_init_tag}"
+    couchdb_repository        = "${var.couchdb_repository}"
+    couchdb_tag               = "${var.couchdb_tag}"
+    replica_count             = "${var.replica_count}"
+    requests_cpu              = "${var.requests_cpu}"
+    requests_memory           = "${var.requests_memory}"
+    limits_cpu                = "${var.limits_cpu}"
+    limits_memory             = "${var.limits_memory}"
+    pv_capacity               = "${var.pv_capacity}"
+    pv_storage_class          = "${var.pv_storage_class}"
+    pv_provisioner            = "${var.pv_provisioner}"
   }
 }
 
@@ -72,13 +84,26 @@ resource "null_resource" "couchdb_finish_cluster" {
       COUCHDB_URL="http://${var.secret_couchdb_admin_username}:${var.secret_couchdb_admin_password}@127.0.0.1:5984"
       PORT_FORWARD_CMD="kubectl -n ${var.release_namespace} port-forward statefulset/couchdb-couchdb 5984:5984"
 
-      $PORT_FORWARD_CMD </dev/null &>/dev/null &
-      sleep 5
+      start_forwarding_port() {
+        sleep_secs=5
+        echo "...starting port forward (and sleeping $sleep_secs)..."
+        $PORT_FORWARD_CMD </dev/null &>/dev/null &
+        sleep $sleep_secs
+      }
+
+      stop_forwarding_port() {
+        sleep_secs=1
+        echo "...stopping port forward (and sleeping $sleep_secs)..."
+        kill $(pgrep -f "^$PORT_FORWARD_CMD")
+        sleep $sleep_secs
+      }
 
       RETRIES=15
       RETRY_COUNT=1
       while [ "$CLUSTER_READY" != "true" ]; do
         echo "[Try $RETRY_COUNT of $RETRIES] Waiting for all CouchDB pods to join the cluster..."
+        stop_forwarding_port
+        start_forwarding_port
         MEMBERSHIP_OUTPUT=$(curl -s $COUCHDB_URL/_membership 2>/dev/null)
         CLUSTER_MEMBERS_COUNT=$(echo $MEMBERSHIP_OUTPUT | jq -r .cluster_nodes[] | grep -c .)
         echo "/_membership returned: $MEMBERSHIP_OUTPUT"
@@ -88,7 +113,7 @@ resource "null_resource" "couchdb_finish_cluster" {
         fi
         if [ "$RETRY_COUNT" == "$RETRIES" ] && [ "$CLUSTER_READY" != "true" ]; then
           echo "Retry limit reached, giving up!"
-          kill $(pgrep -f "^$PORT_FORWARD_CMD")
+          stop_forwarding_port
           exit 1
         fi
         if [ "$CLUSTER_READY" != "true" ]; then
@@ -106,7 +131,7 @@ resource "null_resource" "couchdb_finish_cluster" {
         STATUS=$(echo $RESULT | jq ".reason")
         if [ "$RETRY_COUNT" == "$RETRIES" ] && [ "$STATUS" != '"Cluster is already finished"' ]; then
           echo "Retry limit reached, giving up!"
-          kill $(pgrep -f "^$PORT_FORWARD_CMD")
+          stop_forwarding_port
           exit 1
         fi
         if [ "$STATUS" != '"Cluster is already finished"' ]; then
@@ -115,7 +140,7 @@ resource "null_resource" "couchdb_finish_cluster" {
         RETRY_COUNT=$(($RETRY_COUNT+1))
       done
 
-      kill $(pgrep -f "^$PORT_FORWARD_CMD")
+      stop_forwarding_port
     EOF
   }
 }

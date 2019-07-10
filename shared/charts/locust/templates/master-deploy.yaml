@@ -41,6 +41,8 @@ spec:
           value: "master"
         - name: LOCUST_SCRIPT
           value: {{ index .Values.worker.config "locust-script" | quote }}
+        - name: WAIT_FOR_TARGET
+          value: "false"
         ports:
         - containerPort: {{ .Values.service.internalPort }}
           name: loc-master-web
@@ -55,15 +57,17 @@ spec:
           - name: locust-tasks
             mountPath: /locust-tasks/
         livenessProbe:
-          periodSeconds: 30
-          httpGet:
-            path: /
-            port: {{ .Values.service.internalPort }}
+          exec:
+            command:
+            - '/usr/bin/curl'
+            - '-f'
+            - 'http://localhost:{{ .Values.service.internalPort }}/'
         readinessProbe:
-          periodSeconds: 30
-          httpGet:
-            path: /
-            port: {{ .Values.service.internalPort }}
+          exec:
+            command:
+            - '/usr/bin/curl'
+            - '-f'
+            - 'http://localhost:{{ .Values.service.internalPort }}/'
       volumes:
       - name: "locust-tasks"
         configMap:

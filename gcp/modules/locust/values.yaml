@@ -1,3 +1,7 @@
+image:
+  repository: ${locust_repository}
+  tag: ${locust_tag}
+
 master:
   config:
     target-host: ${target_host}
@@ -6,3 +10,7 @@ worker:
   replicaCount: ${locust_workers}
   config:
     locust-script: /locust-tasks/${locust_script}
+
+service:
+  type: ClusterIP
+  name: http-master-web
