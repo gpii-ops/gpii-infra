@@ -135,8 +135,7 @@ task :destroy_hard => [:set_vars] do
     Rake::Task["destroy"].invoke
     Rake::Task["destroy_secrets"].reenable
     Rake::Task["destroy_secrets"].invoke
-    # If destroy and destroy_secrets both succeed, we want to run all of these
-    # destroy_tfstate commands (regardless if any one destroy_tfstate fails).
+    # If destroy and destroy_secrets both succeed, we want to destroy_tfstate as well.
     begin
       Rake::Task["destroy_tfstate"].reenable
       Rake::Task["destroy_tfstate"].invoke("k8s")
