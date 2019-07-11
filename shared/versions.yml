@@ -75,6 +75,14 @@ dataloader:
     repository: gpii/universal
     sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
     tag: 20190522142238-4a52f56
+productiontests:
+  upstream:
+    repository: gpii/universal
+    tag: 20190522142238-4a52f56
+  generated:
+    repository: gpii/universal
+    sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
+    tag: 20190522142238-4a52f56
 flowmanager:
   upstream:
     repository: gpii/universal
