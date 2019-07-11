@@ -1,0 +1,12 @@
+# Default values for gpii-productiontests.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+couchdbUrl: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local:5984/gpii"
+
+image:
+  repository: gpii/universal
+  checksum: sha256:652ed9dc86639d51e806356737567336339c9eb675193ba04b2c5346de3bdee6
+  pullPolicy: IfNotPresent
+
+nameOverride: productiontests
