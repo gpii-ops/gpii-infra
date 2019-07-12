@@ -5,6 +5,7 @@ task :test do
   end
   # We want to clean up after Locust even if test failed
   sh "#{@exekube_cmd} rake xk['down live/#{@env}/locust',skip_secret_mgmt]"
+  Rake::Task[:destroy_tfstate].reenable
   Rake::Task[:destroy_tfstate].invoke('locust')
   # Exit only if something went wrong to fail the pipeline
   exit locust_status unless locust_status == 0
