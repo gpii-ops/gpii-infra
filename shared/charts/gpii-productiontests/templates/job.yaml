@@ -40,4 +40,4 @@ spec:
             echo 'npm run test:productionConfig finished.';
             echo 'Sending TERM to pilot-agent';
             pkill pilot-agent;
-      restartPolicy: OnFailure
+      restartPolicy: Never

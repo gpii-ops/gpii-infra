@@ -77,12 +77,12 @@ dataloader:
     tag: 20190522142238-4a52f56
 productiontests:
   upstream:
-    repository: gpii/universal
-    tag: 20190522142238-4a52f56
+    repository: herrclown/prodtests-universal
+    tag: 20190712180617-48c9530d
   generated:
-    repository: gpii/universal
-    sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
-    tag: 20190522142238-4a52f56
+    repository: herrclown/prodtests-universal
+    sha: sha256:1e2685cc72329f274ac802edb0721ad3e17c9c210d9e726c243d7ca952828485
+    tag: 20190712180617-48c9530d
 flowmanager:
   upstream:
     repository: gpii/universal
