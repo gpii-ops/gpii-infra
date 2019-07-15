@@ -110,7 +110,7 @@ preferences:
 service_account_assigner:
   upstream:
     repository: gpii/service-account-assigner
-    tag: 0.0.2-gpii.0
+    tag: 0.0.3-gpii.0
   generated:
     repository: gcr.io/gpii-common-prd/gpii/service-account-assigner
     sha: sha256:c464aceecdb83363ee8d339cfdcc6877210b881be1e8fa020ffaddf25a3c83bd
