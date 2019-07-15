@@ -23,6 +23,12 @@ variable "node_count" {
   default = 1
 }
 
+# When this variable is blank, GKE-default K8s version is used.
+# Check data.gke_version_assert for more details.
+variable "kubernetes_version" {
+  default = "1.13.7-gke.8"
+}
+
 variable "expected_gke_version_prefix" {
   default = "1.12"
 }
@@ -53,13 +59,15 @@ data "external" "gke_version_assert" {
     "bash",
     "-c",
     <<EOF
-      if [[ '${data.google_container_engine_versions.this.default_cluster_version}' == ${var.expected_gke_version_prefix}* ]]; then
+      if [ '${var.kubernetes_version}' != '' ]; then
+        echo '{"version": "${var.kubernetes_version}"}'
+      elif [[ '${data.google_container_engine_versions.this.default_cluster_version}' == ${var.expected_gke_version_prefix}* ]]; then
         echo '{"version": "${data.google_container_engine_versions.this.default_cluster_version}"}'
       else
         echo 'Default GKE version is ${data.google_container_engine_versions.this.default_cluster_version}, this would mean minor version upgrade!' >&2
         false
       fi
-EOF
+    EOF
     ,
   ]
 }
