@@ -7,7 +7,8 @@ terragrunt = {
   dependencies {
     paths = [
       "../../kube-system/helm-initializer",
-      "../../kube-system/cert-manager"
+      "../../kube-system/cert-manager",
+      "../istio",
     ]
   }
 
