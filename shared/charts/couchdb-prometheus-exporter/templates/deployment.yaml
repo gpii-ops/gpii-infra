@@ -9,6 +9,8 @@ spec:
     metadata:
       labels:
         app: couchdb-prometheus-exporter
+      annotations:
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: "169.254.169.254/32"
     spec:
       containers:
       - name: couchdb-prometheus-exporter
