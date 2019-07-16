@@ -13,6 +13,8 @@ spec:
     metadata:
       labels:
         app: flowmanager
+      annotations:
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: "169.254.169.254/32"
     spec:
       containers:
       - name: flowmanager
