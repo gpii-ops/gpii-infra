@@ -34,11 +34,11 @@ variable "prevent_destroy_cluster" {
 }
 
 variable "enable_binary_authorization" {
-  default = false
+  default = true
 }
 
 variable "binary_authorization_evaluation_mode" {
-  default = "ALWAYS_DENY"
+  default = "ALWAYS_ALLOW"
 }
 
 variable "binary_authorization_enforcement_mode" {
@@ -46,8 +46,8 @@ variable "binary_authorization_enforcement_mode" {
 }
 
 variable "binary_authorization_admission_whitelist_pattern_0" {
-  # This value cannot be empty, so use a placeholder value that satisfies Google's API.
-  default = "PLACE.HOLDER/PATTERN"
+  # Allow images from our GCR.
+  default = "gcr.io/gpii-common-prd/*"
 }
 
 variable "binary_authorization_admission_whitelist_pattern_1" {
