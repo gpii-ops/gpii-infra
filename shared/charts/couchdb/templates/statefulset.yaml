@@ -20,8 +20,6 @@ spec:
       labels:
         app: {{ template "couchdb.name" . }}
         release: {{ .Release.Name }}
-      annotations:
-        sidecar.istio.io/inject: "false"
     spec:
       initContainers:
         - name: init-copy
