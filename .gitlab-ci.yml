@@ -50,7 +50,7 @@ terraform-fmt-check:
   tags:
     - common
   script:
-    - docker run --rm -v "$(pwd):/data" -w /data gpii/exekube:0.5.1-google_gpii.0 -- terraform fmt --check=true
+    - docker run --rm -v "$(pwd):/data" -w /data gpii/exekube:0.8.0-google_gpii.0 -- terraform fmt --check=true
   only:
     - master@gpii-ops/gpii-infra
 
