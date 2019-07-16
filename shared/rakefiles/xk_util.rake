@@ -194,7 +194,14 @@ task :configure_project_admin_roles do
     # The owner role can not be granted using other method than the console for
     # external users to a particular organization.
     # https://cloud.google.com/iam/docs/understanding-roles#invitation_flow
-    @project_admin_roles.push("roles/editor", "roles/resourcemanager.projectIamAdmin")
+    @project_admin_roles.push(
+      "roles/cloudkms.admin",
+      "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+      "roles/logging.configWriter",
+      "roles/editor",
+      "roles/resourcemanager.projectIamAdmin",
+      "roles/storage.admin",
+    )
   end
 end
 
