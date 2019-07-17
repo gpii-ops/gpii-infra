@@ -33,10 +33,6 @@ variable "prevent_destroy_cluster" {
   default = false
 }
 
-variable "enable_binary_authorization" {
-  default = true
-}
-
 variable "binary_authorization_evaluation_mode" {
   default = "ALWAYS_ALLOW"
 }
@@ -146,7 +142,7 @@ module "gke_cluster" {
   primary_pool_oauth_scopes       = ["cloud-platform"]
   primary_pool_service_account    = "${data.google_service_account.gke_cluster_node.email}"
 
-  enable_binary_authorization                        = "${var.enable_binary_authorization}"
+  enable_binary_authorization                        = "true"
   binary_authorization_evaluation_mode               = "${var.binary_authorization_evaluation_mode}"
   binary_authorization_enforcement_mode              = "${var.binary_authorization_enforcement_mode}"
   binary_authorization_admission_whitelist_pattern_0 = "${var.binary_authorization_admission_whitelist_pattern_0}"
