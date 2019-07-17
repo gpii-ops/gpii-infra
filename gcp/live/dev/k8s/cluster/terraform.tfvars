@@ -21,4 +21,4 @@ terragrunt = {
 
 node_type = "n1-highcpu-4"
 # Allow images from our test GCR.
-binary_authorization_admission_whitelist_pattern_1 = "gcr.io/gpii2test-common-stg/*"
+binary_authorization_admission_whitelist_patterns = ["gcr.io/gpii-common-prd/*", "gcr.io/gpii2test-common-stg/*"]

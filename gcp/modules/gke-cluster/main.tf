@@ -41,44 +41,9 @@ variable "binary_authorization_enforcement_mode" {
   default = "ENFORCED_BLOCK_AND_AUDIT_LOG"
 }
 
-variable "binary_authorization_admission_whitelist_pattern_0" {
+variable "binary_authorization_admission_whitelist_patterns" {
   # Allow images from our GCR.
-  default = "gcr.io/gpii-common-prd/*"
-}
-
-variable "binary_authorization_admission_whitelist_pattern_1" {
-  # This value cannot be empty, so use a placeholder value that satisfies Google's API.
-  default = "PLACE.HOLDER/PATTERN"
-}
-
-variable "binary_authorization_admission_whitelist_pattern_2" {
-  # This value cannot be empty, so use a placeholder value that satisfies Google's API.
-  default = "PLACE.HOLDER/PATTERN"
-}
-
-variable "binary_authorization_admission_whitelist_pattern_3" {
-  # This value cannot be empty, so use a placeholder value that satisfies Google's API.
-  default = "PLACE.HOLDER/PATTERN"
-}
-
-variable "binary_authorization_admission_whitelist_pattern_4" {
-  # This value cannot be empty, so use a placeholder value that satisfies Google's API.
-  default = "PLACE.HOLDER/PATTERN"
-}
-
-variable "binary_authorization_admission_whitelist_pattern_5" {
-  # This value cannot be empty, so use a placeholder value that satisfies Google's API.
-  default = "PLACE.HOLDER/PATTERN"
-}
-
-variable "binary_authorization_admission_whitelist_pattern_6" {
-  # This value cannot be empty, so use a placeholder value that satisfies Google's API.
-  default = "PLACE.HOLDER/PATTERN"
-}
-
-variable "binary_authorization_admission_whitelist_pattern_7" {
-  # This value cannot be empty, so use a placeholder value that satisfies Google's API.
-  default = "PLACE.HOLDER/PATTERN"
+  default = ["gcr.io/gpii-common-prd/*"]
 }
 
 data "google_service_account" "gke_cluster_node" {
@@ -142,17 +107,10 @@ module "gke_cluster" {
   primary_pool_oauth_scopes       = ["cloud-platform"]
   primary_pool_service_account    = "${data.google_service_account.gke_cluster_node.email}"
 
-  enable_binary_authorization                        = "true"
-  binary_authorization_evaluation_mode               = "${var.binary_authorization_evaluation_mode}"
-  binary_authorization_enforcement_mode              = "${var.binary_authorization_enforcement_mode}"
-  binary_authorization_admission_whitelist_pattern_0 = "${var.binary_authorization_admission_whitelist_pattern_0}"
-  binary_authorization_admission_whitelist_pattern_1 = "${var.binary_authorization_admission_whitelist_pattern_1}"
-  binary_authorization_admission_whitelist_pattern_2 = "${var.binary_authorization_admission_whitelist_pattern_2}"
-  binary_authorization_admission_whitelist_pattern_3 = "${var.binary_authorization_admission_whitelist_pattern_3}"
-  binary_authorization_admission_whitelist_pattern_4 = "${var.binary_authorization_admission_whitelist_pattern_4}"
-  binary_authorization_admission_whitelist_pattern_5 = "${var.binary_authorization_admission_whitelist_pattern_5}"
-  binary_authorization_admission_whitelist_pattern_6 = "${var.binary_authorization_admission_whitelist_pattern_6}"
-  binary_authorization_admission_whitelist_pattern_7 = "${var.binary_authorization_admission_whitelist_pattern_7}"
+  enable_binary_authorization                       = "true"
+  binary_authorization_evaluation_mode              = "${var.binary_authorization_evaluation_mode}"
+  binary_authorization_enforcement_mode             = "${var.binary_authorization_enforcement_mode}"
+  binary_authorization_admission_whitelist_patterns = "${var.binary_authorization_admission_whitelist_patterns}"
 }
 
 # Workaround from
