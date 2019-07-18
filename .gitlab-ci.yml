@@ -100,6 +100,13 @@ common-stg-test-gcp-dev:
     # https://issues.gpii.net/browse/GPII-3697
     TF_VAR_infra_region: "us-east4"
     USER: "doe"
+    # Normally we don't enforce binauth in dev environments, e.g. since it makes
+    # it harder for developers to test custom images which they can't upload to
+    # GCR. However, we want to know as early as possible if a developer
+    # introduced a new image that will fail in environments like stg and prd
+    # with binauth enforcement enabled. So, we override the setting for CI dev
+    # envs.
+    TF_VAR_binary_authorization_evaluation_mode: "ALWAYS_DENY"
   script:
     - cd gcp/live/dev
     - rake clobber
@@ -160,6 +167,13 @@ gcp-dev:
     # due to GCP resource exhaustion issues:
     # https://issues.gpii.net/browse/GPII-3697
     TF_VAR_infra_region: "us-east1"
+    # Normally we don't enforce binauth in dev environments, e.g. since it makes
+    # it harder for developers to test custom images which they can't upload to
+    # GCR. However, we want to know as early as possible if a developer
+    # introduced a new image that will fail in environments like stg and prd
+    # with binauth enforcement enabled. So, we override the setting for CI dev
+    # envs.
+    TF_VAR_binary_authorization_evaluation_mode: "ALWAYS_DENY"
   script:
     - cd gcp/live/dev
     - rake clobber
