@@ -81,7 +81,7 @@ productiontests:
     tag: 20190712180617-48c9530d
   generated:
     repository: herrclown/prodtests-universal
-    sha: sha256:1e2685cc72329f274ac802edb0721ad3e17c9c210d9e726c243d7ca952828485
+    sha: sha256:f1969f978c6bb066895ac569abba8342d6c30ce7cb7c2f7fb6995c536626185a
     tag: 20190712180617-48c9530d
 flowmanager:
   upstream:
