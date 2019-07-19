@@ -10,8 +10,14 @@ variable "destination_bucket" {}
 variable "project_id" {}
 variable "replica_count" {}
 variable "schedule" {}
+variable "serviceaccount_key" {}
 
 # Terragrunt variables
+
+provider "google" {
+  project     = "${var.project_id}"
+  credentials = "${var.serviceaccount_key}"
+}
 
 data "google_project" "project" {
   project_id = "${var.project_id}"

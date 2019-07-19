@@ -1,0 +1,16 @@
+{{ if not (index .Values.master.config "target-host" | regexMatch ".cluster.local")  }}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: locust-target
+spec:
+  hosts:
+  - {{ include "locust.host" . }}
+  tls:
+  - match:
+    - sniHosts:
+      - {{ include "locust.host" . }}
+    route:
+    - destination:
+        host: {{ include "locust.host" . }}
+{{ end }}

@@ -9,11 +9,12 @@ spec:
     rollingUpdate:
       maxSurge: {{ .Values.rollingUpdate.maxSurge }}
       maxUnavailable: {{ .Values.rollingUpdate.maxUnavailable }}
-    type: RollingUpdate
   template:
     metadata:
       labels:
         app: preferences
+      annotations:
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: "169.254.169.254/32"
     spec:
       containers:
       - name: preferences
