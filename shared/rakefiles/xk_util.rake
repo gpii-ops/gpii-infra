@@ -263,4 +263,19 @@ task :restore_snapshot_from_image_file, [:snapshot_files] => [@gcp_creds_file, :
   end
 
 end
+
+# This task forwards CouchDB port
+task :couchdb_ui => [:configure, :configure_secrets, :set_secrets] do
+  sh "sh -mc 'kubectl port-forward service/couchdb-svc-couchdb -n gpii --address=0.0.0.0 5984 &
+    echo
+    echo \"CouchDB port is now being forwarded to your local machine, port 5984.\"
+    echo
+    echo \"You can access CouchDB Web UI at:\"
+    echo \"http://${TF_VAR_secret_couchdb_admin_username}:${TF_VAR_secret_couchdb_admin_password}@localhost:5984/_utils\"
+    echo
+    echo \"You can close this terminal and port-forwarding by pressing ctrl+c.\"
+    echo
+    fg'", verbose: false
+end
+
 # vim: et ts=2 sw=2:
