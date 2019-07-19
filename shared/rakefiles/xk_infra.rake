@@ -5,6 +5,7 @@ common_sa_org_roles = [
   "roles/iam.serviceAccountAdmin",
   "roles/iam.serviceAccountKeyAdmin",
   "roles/resourcemanager.organizationAdmin",
+  "roles/resourcemanager.projectCreator",
   "roles/serviceusage.serviceUsageAdmin",
   "roles/storage.admin",
   "roles/viewer",

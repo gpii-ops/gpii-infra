@@ -125,5 +125,12 @@ task :configure => [@gcp_creds_file, @app_default_creds_file, @kubectl_creds_fil
   # It does nothing, but it has all dependencies that required for standard rake workflow.
 end
 
+task :sync_gke_istio_state => [:configure, :configure_secrets, :set_secrets] do
+  #  This task syncs Terrafrom state to actual state of Istio components.
+  #  As Istio components are created and managed by Google (via Kubernetes add-on manager),
+  #  they have to be imported to Terraform state first, before being modified via Terraform,
+  #  and repeatedly synced as the state can change independently on this code.
+  sh "/rakefiles/scripts/sync_gke_istio_state.sh"
+end
 
 # vim: et ts=2 sw=2:

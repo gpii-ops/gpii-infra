@@ -1,0 +1,18 @@
+{{- range $key, $val := .Values.components }}
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: "{{ include "istio-gke-helper.fullname" $ }}-{{ $key }}"
+  labels:
+    app: {{ include "istio-gke-helper.name" $ }}
+    chart: {{ $.Chart.Name }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+spec:
+  maxUnavailable: {{ $.Values.maxUnavailable }}
+  selector:
+    matchLabels:
+      app: {{ .app | quote }}
+      istio: {{ .istio | quote }}
+{{- end }}

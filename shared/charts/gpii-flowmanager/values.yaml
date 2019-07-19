@@ -11,6 +11,7 @@ datasourceHostname: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.
 
 nodeEnv: gpii.config.cloudBased.flowManager.production
 preferencesUrl: http://preferences.gpii.svc.cluster.local
+
 enableStackdriverTrace: false
 
 image:
