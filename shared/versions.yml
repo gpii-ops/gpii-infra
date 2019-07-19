@@ -67,7 +67,7 @@ couchdb:
     tag: 2.3.0
   generated:
     repository: gcr.io/gpii-common-prd/couchdb
-    sha: sha256:05ced582691f18a81a68b413b68e6f71a567e5442ff5b09454a8600d6aec249f
+    sha: sha256:e8c1a2a97a60458da3916dc3ec2ba5510b35030c9fc374a6eb1263a70fddd8bc
     tag: 2.3.0
 dataloader:
   upstream:
@@ -101,14 +101,6 @@ locust:
     repository: gcr.io/gpii-common-prd/gpii/locust
     sha: sha256:107e1f2ac75e74e8f9c6dd47cdd1852a5efbe1f539ac34d6e8cf54e795741082
     tag: 0.9.0-gpii.6
-nginx_ingress:
-  upstream:
-    repository: quay.io/kubernetes-ingress-controller/nginx-ingress-controller
-    tag: 0.24.1
-  generated:
-    repository: gcr.io/gpii-common-prd/quay.io/kubernetes-ingress-controller/nginx-ingress-controller
-    sha: sha256:a805454d5fdc799d28011752b7da5bfa52a4b12dccef735f09c4b18f8598c488
-    tag: 0.24.1
 preferences:
   upstream:
     repository: gpii/universal
@@ -120,8 +112,8 @@ preferences:
 service_account_assigner:
   upstream:
     repository: gpii/service-account-assigner
-    tag: 0.0.2-gpii.0
+    tag: 0.0.3-gpii.0
   generated:
     repository: gcr.io/gpii-common-prd/gpii/service-account-assigner
-    sha: sha256:c464aceecdb83363ee8d339cfdcc6877210b881be1e8fa020ffaddf25a3c83bd
-    tag: 0.0.2-gpii.0
+    sha: sha256:5c6d9ed84af21d85a71af9e991c4e8adadcc7ccd792ce0472ea2a0378a27f8ca
+    tag: 0.0.3-gpii.0
