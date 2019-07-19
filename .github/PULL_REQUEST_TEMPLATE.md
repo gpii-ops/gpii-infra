@@ -23,9 +23,9 @@ The following sections are optional, remove them if needed
 
 ##### Tests done by the creator
 
-´´´
+```
 Commands output
-´´´
+```
 <!--
 Drag&drop an image to this text box if needed
 -->
