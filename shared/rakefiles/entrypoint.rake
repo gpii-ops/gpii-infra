@@ -350,4 +350,9 @@ task :restore_snapshot_from_image_file, [:files] => [:set_vars] do |taskname, ar
   sh "#{@exekube_cmd} rake restore_snapshot_from_image_file['#{args[:files]}']"
 end
 
+desc "CouchDB - access Fauxton Web UI"
+task :couchdb_ui => [:set_vars] do
+  sh "docker-compose run --rm -p 5984:5984 xk rake couchdb_ui"
+end
+
 # vim: et ts=2 sw=2:
