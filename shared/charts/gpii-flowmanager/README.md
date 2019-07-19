@@ -43,23 +43,23 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the gpii-flowmanager chart and their default values.
 
-| Parameter                      | Description                                                                              | Default                                                                   |
-| `acme.clouddnsProject`         | required GCP project id to use for CLoudDNS                                              | -                                                                         |
-| `acme.email`                   | optional email to use for registration with certificate issuer                           | `dev-null@raisingthefloor.org`                                                |
-| `acme.server                   | optional ACME server for certificate issuer                                              | `https://acme-staging-v02.api.letsencrypt.org/directory`                  |
-| `datasourceHostname`           | data source hostname for preferences service                                             | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`        |
-| `datasourceListenPort`         | data source port for flowmanager service                                                 | `5984`                                                                    |
-| `dnsNames`                     | list of DNS host names                                                                   | `flowmanager.test.local`                                                  |
-| `enableStackdriverTrace`       | enable [GCP Stackdriver Trace](https://cloud.google.com/trace/)                          | `false`                                                                   |
-| `flowmanagerListenPort`        | port for flowmanager service to listen on                                                | `8081`                                                                    |
-| `image.checksum`               | container image checksum                                                                 | `sha256:8547f22ae8e86d7b4b09e10d9ec87b1605b47dc37904171c84555a55462f161e` |
-| `image.pullPolicy`             | container image pullPolicy                                                               | `IfNotPresent`                                                            |
-| `image.repository`             | container image repository                                                               | `gpii/universal`                                                          |
-| `nodeEnv`                      | flowmanager node env                                                                     | `gpii.config.cloudBased.flowManager.production`                           |
-| `preferencesUrl`               | preferences service url                                                                  | `http://preferences.gpii.svc.cluster.local`                               |
-| `replicaCount`                 | desired number of controller pods                                                        | `1`                                                                       |
-| `resources`                    | optional resource requests and limits for deployment                                     | `{}`                                                                      |
-| `rollingUpdate.maxSurge`       | maximum number of pods that can be created over the desired number during rolling update | `25%`                                                                     |
-| `rollingUpdate.maxUnavailable` | maximum number of pods that can become unavailable during rolling update                 | `0`                                                                       |
-| `svcListenPort`                | ClusterIP service port                                                                   | `80`                                                                      |
-|--------------------------------|------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| Parameter                      | Description                                                                                  | Default                                                                   |
+|--------------------------------|----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| `acme.clouddnsProject`         | Required GCP project id to use for CLoudDNS                                                  | -                                                                         |
+| `acme.email`                   | Optional email to use for registration with certificate issuer                               | `dev-null@raisingthefloor.org`                                                |
+| `acme.server`                  | Optional ACME server for certificate issuer                                                  | `https://acme-staging-v02.api.letsencrypt.org/directory`                  |
+| `datasourceHostname`           | Data source hostname for preferences service                                                 | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`        |
+| `datasourceListenPort`         | data source port for flowmanager service                                                     | `5984`                                                                    |
+| `dnsNames`                     | List of DNS host names                                                                       | `flowmanager.test.local`                                                  |
+| `enableStackdriverTrace`       | Enable [GCP Stackdriver Trace](https://cloud.google.com/trace/)                              | `false`                                                                   |
+| `flowmanagerListenPort`        | Port for flowmanager service to listen on                                                    | `8081`                                                                    |
+| `image.checksum`               | Container image checksum                                                                     | `sha256:8547f22ae8e86d7b4b09e10d9ec87b1605b47dc37904171c84555a55462f161e` |
+| `image.pullPolicy`             | Container image pullPolicy                                                                   | `IfNotPresent`                                                            |
+| `image.repository`             | Container image repository                                                                   | `gpii/universal`                                                          |
+| `nodeEnv`                      | Flowmanager NPM environment                                                                  | `gpii.config.cloudBased.flowManager.production`                           |
+| `preferencesUrl`               | Preferences service url                                                                      | `http://preferences.gpii.svc.cluster.local`                               |
+| `replicaCount`                 | Desired number of controller pods                                                            | `1`                                                                       |
+| `resources`                    | Optional resource requests and limits for deployment                                         | `{}`                                                                      |
+| `rollingUpdate.maxSurge`       | Max number of pods that can be created over the desired number during rolling update         | `25%`                                                                     |
+| `rollingUpdate.maxUnavailable` | Max number of pods that can become unavailable during rolling update                         | `0`                                                                       |
+| `svcListenPort`                | ClusterIP service port                                                                       | `80`                                                                      |

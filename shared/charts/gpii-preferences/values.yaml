@@ -10,6 +10,7 @@ datasourceListenPort: 5984
 datasourceHostname: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local"
 
 nodeEnv: gpii.config.preferencesServer.standalone.production
+
 enableStackdriverTrace: false
 
 image:

@@ -103,7 +103,7 @@ resource "null_resource" "locust_swarm_session" {
         fi
         RETRY_COUNT=$((RETRY_COUNT+1))
       done
-      [ "$EXIT_STATUS" != "0" ] && echo "Failed to post resutls to Stackdriver, retry limit reached, giving up."
+      [ "$EXIT_STATUS" != "0" ] && echo "Failed to post results to Stackdriver, retry limit reached, giving up."
 
       if [ "$total_rps" -lt "${var.locust_desired_total_rps}" ]; then
         echo
