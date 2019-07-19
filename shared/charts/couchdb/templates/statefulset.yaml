@@ -96,7 +96,10 @@ spec:
           imagePullPolicy: {{ .Values.helperImage.pullPolicy }}
           env:
             - name: COUCHDB_CLUSTER_SIZE
-              value: "{{ .Values.clusterSize }}"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "couchdb.fullname" . }}
+                  key: clusterSize
 {{- if not .Values.allowAdminParty }}
             - name: COUCHDB_USER
               valueFrom:
