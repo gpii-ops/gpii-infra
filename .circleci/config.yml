@@ -37,4 +37,3 @@ workflows:
     jobs:
       - terraform-fmt-check
       - gcp-unit-tests
-      - aws-unit-tests
