@@ -35,9 +35,9 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: http-couchdb
+            - name: couchdb
               containerPort: 5984
-            - name: tcp-epmd
+            - name: epmd
               containerPort: 4369
             - containerPort: 9100
           env:
@@ -94,10 +94,8 @@ spec:
         - name: couchdb-statefulset-assembler
           image: "{{ .Values.helperImage.repository }}:{{ .Values.helperImage.tag }}"
           imagePullPolicy: {{ .Values.helperImage.pullPolicy }}
-          env:
-            - name: SRV_RECORD
-              value: "_http-couchdb._tcp.{{ template "couchdb.fullname" . }}.gpii.svc.cluster.local"
 {{- if not .Values.allowAdminParty }}
+          env:
             - name: COUCHDB_USER
               valueFrom:
                 secretKeyRef:

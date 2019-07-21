@@ -10,8 +10,7 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
   ports:
-    - name: http-couchdb
-      port: {{ .Values.service.externalPort }}
+    - port: {{ .Values.service.externalPort }}
       protocol: TCP
       targetPort: 5984
   type: {{ .Values.service.type }}

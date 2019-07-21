@@ -10,7 +10,7 @@ metadata:
 spec:
   clusterIP: None
   ports:
-    - name: http-couchdb
+    - name: couchdb
       port: 5984
   selector:
     app: {{ template "couchdb.name" . }}
