@@ -32,7 +32,7 @@ couchdb_helper:
     repository: kocolosk/couchdb-statefulset-assembler
     tag: 1.2.0
   generated:
-    repository: gcr.io/gpii-common-prd/kocolosk/couchdb-statefulset-assembler
+    repository: gcr.io/gpii-common-prd/kocolosk__couchdb-statefulset-assembler
     sha: sha256:6effb982154ed2d480a8ea49f9aad0cd5fded721d024012165638991c71b1f97
     tag: 1.2.0
 couchdb_init:
