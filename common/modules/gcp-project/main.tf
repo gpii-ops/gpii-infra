@@ -92,6 +92,14 @@ data "google_iam_policy" "combined" {
   }
 
   binding {
+    role = "roles/binaryauthorization.policyAdmin"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_bin_auth.email}",
+    ]
+  }
+
+  binding {
     role = "roles/cloudkms.admin"
 
     members = [
@@ -272,6 +280,16 @@ data "google_iam_policy" "combined" {
   # googleapi: Error 400: Request contains an invalid argument., badRequest
   binding {
     role = "roles/owner"
+
+    members = [
+      "${local.project_owners}",
+    ]
+  }
+
+  # Needed so that ADCs can impersonate the dedicated binary auth SA. See
+  # GPII-3860.
+  binding {
+    role = "roles/iam.serviceAccountTokenCreator"
 
     members = [
       "${local.project_owners}",
