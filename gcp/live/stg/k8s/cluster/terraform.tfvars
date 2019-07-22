@@ -32,3 +32,5 @@ node_type = "n1-highcpu-8"
 # you change 'cluster_protector'. I recommend leaving this variable alone when
 # temporarily allowing a cluster to be destroyed.
 prevent_destroy_cluster = true
+
+binary_authorization_evaluation_mode = "ALWAYS_DENY"

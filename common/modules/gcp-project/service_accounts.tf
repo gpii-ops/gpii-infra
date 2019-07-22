@@ -32,3 +32,11 @@ resource "google_service_account" "gke_cluster_pod_k8s_snapshots" {
   display_name = "gke-cluster-pod-k8s-snapshots"
   project      = "${google_project.project.project_id}"
 }
+
+# Since we sometimes use ADCs, and since the binaryauthorization API does not
+# allow ADCs, we need a dedicated SA to manage binary auth. See GPII-3860.
+resource "google_service_account" "gke_cluster_bin_auth" {
+  account_id   = "gke-cluster-bin-auth"
+  display_name = "gke-cluster-bin-auth"
+  project      = "${google_project.project.project_id}"
+}
