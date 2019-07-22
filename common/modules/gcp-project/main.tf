@@ -58,6 +58,7 @@ variable "service_apis" {
     "cloudkms.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "cloudtrace.googleapis.com",
+    "containeranalysis.googleapis.com",
     "compute.googleapis.com",
     "container.googleapis.com",
     "containerregistry.googleapis.com",
@@ -82,6 +83,14 @@ variable "service_apis" {
 }
 
 data "google_iam_policy" "combined" {
+  binding {
+    role = "roles/binaryauthorization.serviceAgent"
+
+    members = [
+      "serviceAccount:service-${google_project.project.number}@gcp-sa-binaryauthorization.iam.gserviceaccount.com",
+    ]
+  }
+
   binding {
     role = "roles/cloudkms.admin"
 
@@ -120,6 +129,14 @@ data "google_iam_policy" "combined" {
 
     members = [
       "${local.service_accounts}",
+    ]
+  }
+
+  binding {
+    role = "roles/containeranalysis.ServiceAgent"
+
+    members = [
+      "serviceAccount:service-${google_project.project.number}@container-analysis.iam.gserviceaccount.com",
     ]
   }
 
@@ -246,6 +263,13 @@ data "google_iam_policy" "combined" {
     ]
   }
 
+  # Google IAM requires a special "invite" workflow for the Owner
+  # role when the account is not part of the Organization. This
+  # comes up when using user@rtf named accounts in the test
+  # Organization. The error might (unhelpfully) look like this,
+  # followed by a bunch of Go structs:
+  #
+  # googleapi: Error 400: Request contains an invalid argument., badRequest
   binding {
     role = "roles/owner"
 
