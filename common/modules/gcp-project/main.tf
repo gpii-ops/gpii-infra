@@ -90,7 +90,7 @@ data "google_iam_policy" "combined" {
       "serviceAccount:service-${google_project.project.number}@gcp-sa-binaryauthorization.iam.gserviceaccount.com",
     ]
   }
-  
+
   binding {
     role = "roles/binaryauthorization.policyAdmin"
 
