@@ -4,6 +4,7 @@
 # generates temporary credentials and prints link for Web UI access
 
 set -emou pipefail
+LC_CTYPE=C
 
 # Enable debug output if $DEBUG is set to true
 [ "${DEBUG:=false}" = 'true' ] && set -x
@@ -23,6 +24,7 @@ COUCHDB_SVC_PORT=${COUCHDB_SVC_PORT:='5984'}
 COUCHDB_LOCAL_FWD_PORT=${COUCHDB_LOCAL_FWD_PORT:='35984'}
 COUCHDB_NAMESPACE=${COUCHDB_NAMESPACE:='gpii'}
 COUCHDB_SVC_NAME=${COUCHDB_SVC_NAME:='couchdb-svc-couchdb'}
+COUCHDB_UI_USERNAME=${COUCHDB_UI_USERNAME:='ui'}
 REQUIRED_BINARIES=${REQUIRED_BINARIES:="kubectl curl"}
 
 # Check if we have all the dependencies
@@ -35,16 +37,45 @@ for BIN in ${REQUIRED_BINARIES}; do
 done
 
 # Start port forwarding
-kubectl port-forward "service/${COUCHDB_SVC_NAME}" -n "${COUCHDB_NAMESPACE}" --address=0.0.0.0 "${COUCHDB_LOCAL_FWD_PORT}:${COUCHDB_SVC_PORT}" &
+echo "${THIS_SCRIPT}: Starting port-forwarding"
+kubectl port-forward "service/${COUCHDB_SVC_NAME}" -n "${COUCHDB_NAMESPACE}" \
+  --address=0.0.0.0 "${COUCHDB_LOCAL_FWD_PORT}:${COUCHDB_SVC_PORT}" >/dev/null &
+KUBECTL_PID="${!}"
 
-echo
-echo "CouchDB port is now being forwarded to your local machine, port ${COUCHDB_LOCAL_FWD_PORT}."
-echo
-echo "You can access CouchDB Web UI at:"
-echo "http://${TF_VAR_secret_couchdb_admin_username}:${TF_VAR_secret_couchdb_admin_password}@localhost:35984/_utils"
-echo
-echo "You can close this terminal and port-forwarding by pressing ctrl+c."
+# Set target CouchDB url
+HOST="http://${COUCHDB_ADMIN_USERNAME}:${COUCHDB_ADMIN_PASSWORD}@localhost:${COUCHDB_LOCAL_FWD_PORT}"
 
-fg
+# Wait for CouchDB
+while ! curl -s -o /dev/null -m10 "${HOST}/_up"; do
+  echo "${THIS_SCRIPT}: Waiting for CouchDB port to be available..."
+  sleep 1
+done
+
+# Create a new user
+COUCHDB_UI_PASSWORD="$(tr -dc A-Za-z0-9 < /dev/urandom | fold -w 32 | head -n 1 || true)"
+echo "${THIS_SCRIPT}: Creating temporary UI user (${COUCHDB_UI_USERNAME})"
+
+curl -s -o /dev/null -X PUT "${HOST}/_node/_local/_config/admins/${COUCHDB_UI_USERNAME}" \
+  -d "\"${COUCHDB_UI_PASSWORD}\""
+
+echo "${THIS_SCRIPT}:"
+echo "${THIS_SCRIPT}: CouchDB port is now being forwarded to your local machine, port ${COUCHDB_LOCAL_FWD_PORT}."
+echo "${THIS_SCRIPT}:"
+echo "${THIS_SCRIPT}: You can access CouchDB Web UI at:"
+echo "${THIS_SCRIPT}: http://${COUCHDB_UI_USERNAME}:${COUCHDB_UI_PASSWORD}@localhost:${COUCHDB_LOCAL_FWD_PORT}/_utils"
+echo "${THIS_SCRIPT}:"
+echo "${THIS_SCRIPT}: You can close this terminal and port-forwarding by pressing ENTER (new line)."
+echo "${THIS_SCRIPT}:"
+
+# idle waiting for abort from user
+read -r
+
+# Clean up temporary ui user
+echo "${THIS_SCRIPT}: Removing temporary UI user (${COUCHDB_UI_USERNAME})"
+curl -s -o /dev/null -X DELETE "${HOST}/_node/_local/_config/admins/${COUCHDB_UI_USERNAME}"
+
+# Stop port-forwarding
+echo "${THIS_SCRIPT}: Stopping port-forwarding"
+kill "${KUBECTL_PID}"
 
 echo "${THIS_SCRIPT}: Done"
