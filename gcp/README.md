@@ -136,13 +136,14 @@ This is a shared, long-lived environment for staging / pre-production. It aims t
 
 Deploying to `stg` verifies that the gpii-infra code that worked to create a `dev-$USER` environment from scratch also works to update a pre-existing environment. This is important since we generally don't want to destroy and re-create the production environment from scratch.
 
-Because `stg` emulates production, it will (in the future) allow us to run realistic end-to-end tests before deploying to `prd`.
+Because `stg` emulates production, it will (in the future) allow us to run realistic end-to-end tests before deploying to `prd`. This fact also makes `stg` the proper environment to test some recovering procedures that the ops team must perform periodically.
 
 #### Service Level Objective
 
 * No guarantee of service for development environments (stg is a development environment).
 * Ops team receives alerts about problems, and addresses them when convenient for the team (i.e. we won't wake up an on-call engineer, but we will investigate during business hours)
 * Ops team makes an effort to keep stg stable and available for ad-hoc testing, but may disrupt the environment at any time for our own testing.
+* Ops team will perform a restoration of the persistence layer every first monday of the month at 13:00EDT as part of the backup testing process needed for the FERPA compliance, so expect an outage of about 30 min at that time of the services in `stg`.
 
 ### prd
 
@@ -291,6 +292,10 @@ For example: a developer deleted their tfstate bucket in GCS and re-created it w
 1. The easiest workaround is to destroy couchdb, then re-run the deployment:
    * `rake destroy_module"[k8s/gpii/couchdb]" && rake`
 1. If you need to, you may be able to repair the split brain manually using [CouchDB Cluster Management commands](https://docs.couchdb.org/en/stable/cluster/nodes.html).
+
+### My component won't start and the Event logs say `Error creating: pods "my-pod-name" is forbidden: image policy webhook backend denied one or more images: Denied by default admission rule. Overridden by evaluation mode`
+
+This means your component is trying to use a Docker image that is not hosted in our Google Container Registry instance, or which is otherwise not allowed by our Kubernetes Binary Authorization configuration. The Ops team will want to discuss next steps but [gke-cluster](https://github.com/gpii-ops/exekube/tree/master/modules/gke-cluster) is the relevant module. For development purposes, you may add an additional `binary_authorization_admission_whitelist_pattern_N` to allow your new image. You may want to re-deploy your component so that Kubernetes notices the change more quickly.
 
 ### Errors trying to enable/disable Google Cloud APIs
 
@@ -708,7 +713,7 @@ Prime Minister at that time!"), please let me know immediately.
 ##### Setup.
 
 Create a Terragrunt definition like `gcp/live/prd/k8s/kube-system/backup-exporter/terraform.tfvars` inside the exekube project. This file contains 3 variables:
-   * `destination_bucket` - The destination GCS bucket, i.e "gs://gpii-backup-external-prd". 
+   * `destination_bucket` - The destination GCS bucket, i.e "gs://gpii-backup-external-prd".
    * `replica_count` - the number of CouchDB replicas that the cluster has. This is important for copying all the snapshots of the cluster at the same time.
    * `schedule` - Follows the same format as a Cron Job. i.e: `*/10 * * * *` to execute the task every 10 minutes.
 

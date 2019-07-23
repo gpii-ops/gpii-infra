@@ -15,7 +15,6 @@ This chart bootstraps a GPII Preferences deployment on a [Kubernetes](http://kub
 
 ## Prerequisites
   - Kubernetes 1.8+ with Beta APIs enabled
-  - [nginx-ingress](https://github.com/kubernetes/charts/tree/master/stable/nginx-ingress)
   - [cert-manager](https://github.com/kubernetes/charts/tree/master/stable/cert-manager)
 
 ## Installing the Chart
@@ -44,18 +43,18 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the gpii-preferences chart and their default values.
 
-| Parameter                      | Description                                                                              | Default                                                                   |
-| `datasourceHostname`           | data source hostname for preferences service                                             | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`        |
-| `datasourceListenPort`         | data source port for preferences service                                                 | `5984`                                                                    |
-| `enableStackdriverTrace`       | enable [GCP Stackdriver Trace](https://cloud.google.com/trace/)                          | `false`                                                                   |
-| `image.checksum`               | container image checksum                                                                 | `sha256:f279c6ab7fa1c19e5f358a6a3d87a970eaf8d615c8b6181851fa086b6229b3a1` |
-| `image.pullPolicy`             | container image pullPolicy                                                               | `IfNotPresent`                                                            |
-| `image.repository`             | container image repository                                                               | `gpii/universal`                                                          |
-| `nodeEnv`                      | preferences node env                                                                     | `gpii.config.preferencesServer.standalone.production`                     |
-| `preferencesListenPort`        | port for preferences service to listen on                                                | `8081`                                                                    |
-| `replicaCount`                 | desired number of controller pods                                                        | `1`                                                                       |
-| `resources`                    | optional resource requests and limits for deployment                                     | `{}`                                                                      |
-| `rollingUpdate.maxSurge`       | maximum number of pods that can be created over the desired number during rolling update | `25%`                                                                     |
-| `rollingUpdate.maxUnavailable` | maximum number of pods that can become unavailable during rolling update                 | `0`                                                                       |
-| `svcListenPort`                | ClusterIP service port                                                                   | `80`                                                                      |
-|--------------------------------|------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| *Parameter*                    | *Description*                                                                                | *Default*                                                                 |
+|--------------------------------|----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| `datasourceHostname`           | Data source hostname for preferences service                                                 | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`        |
+| `datasourceListenPort`         | Data source port for preferences service                                                     |  `5984`                                                                   |
+| `enableStackdriverTrace`       | Enable [GCP Stackdriver Trace](https://cloud.google.com/trace/)                              | `false`                                                                   |
+| `image.checksum`               | Container image checksum                                                                     | `sha256:f279c6ab7fa1c19e5f358a6a3d87a970eaf8d615c8b6181851fa086b6229b3a1` |
+| `image.pullPolicy`             | Container image pullPolicy                                                                   | `IfNotPresent`                                                            |
+| `image.repository`             | Container image repository                                                                   | `gpii/universal`                                                          |
+| `nodeEnv`                      | Preferences NPM environment                                                                  | `gpii.config.preferencesServer.standalone.production`                     |
+| `preferencesListenPort`        | Port for preferences service to listen on                                                    | `8081`                                                                    |
+| `replicaCount`                 | Desired number of deployment pods                                                            | `1`                                                                       |
+| `resources`                    | Optional resource requests and limits for deployment                                         | `{}`                                                                      |
+| `rollingUpdate.maxSurge`       | Max number of pods that can be created over the desired number during rolling update         | `25%`                                                                     |
+| `rollingUpdate.maxUnavailable` | Max number of pods that can become unavailable during rolling update                         | `0`                                                                       |
+| `svcListenPort`                | ClusterIP service port                                                                       | `80`                                                                      |
