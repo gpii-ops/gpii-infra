@@ -58,6 +58,7 @@ variable "service_apis" {
     "cloudkms.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "cloudtrace.googleapis.com",
+    "containeranalysis.googleapis.com",
     "compute.googleapis.com",
     "container.googleapis.com",
     "containerregistry.googleapis.com",
@@ -82,6 +83,22 @@ variable "service_apis" {
 }
 
 data "google_iam_policy" "combined" {
+  binding {
+    role = "roles/binaryauthorization.serviceAgent"
+
+    members = [
+      "serviceAccount:service-${google_project.project.number}@gcp-sa-binaryauthorization.iam.gserviceaccount.com",
+    ]
+  }
+
+  binding {
+    role = "roles/binaryauthorization.policyAdmin"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_bin_auth.email}",
+    ]
+  }
+
   binding {
     role = "roles/cloudkms.admin"
 
@@ -124,6 +141,14 @@ data "google_iam_policy" "combined" {
   }
 
   binding {
+    role = "roles/containeranalysis.ServiceAgent"
+
+    members = [
+      "serviceAccount:service-${google_project.project.number}@container-analysis.iam.gserviceaccount.com",
+    ]
+  }
+
+  binding {
     role = "roles/dns.admin"
 
     members = [
@@ -134,6 +159,14 @@ data "google_iam_policy" "combined" {
 
   binding {
     role = "roles/iam.serviceAccountKeyAdmin"
+
+    members = [
+      "${local.service_accounts}",
+    ]
+  }
+
+  binding {
+    role = "roles/iam.serviceAccountTokenCreator"
 
     members = [
       "${local.service_accounts}",
@@ -246,8 +279,25 @@ data "google_iam_policy" "combined" {
     ]
   }
 
+  # Google IAM requires a special "invite" workflow for the Owner
+  # role when the account is not part of the Organization. This
+  # comes up when using user@rtf named accounts in the test
+  # Organization. The error might (unhelpfully) look like this,
+  # followed by a bunch of Go structs:
+  #
+  # googleapi: Error 400: Request contains an invalid argument., badRequest
   binding {
     role = "roles/owner"
+
+    members = [
+      "${local.project_owners}",
+    ]
+  }
+
+  # Needed so that ADCs can impersonate the dedicated binary auth SA. See
+  # GPII-3860.
+  binding {
+    role = "roles/iam.serviceAccountTokenCreator"
 
     members = [
       "${local.project_owners}",
