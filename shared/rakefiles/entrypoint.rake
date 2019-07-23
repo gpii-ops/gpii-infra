@@ -30,7 +30,7 @@ Rake::Task["clean"].enhance do
 end
 
 task :clobber_volumes => :set_vars do
-  ["secrets", "gcloud", "aws"].each do |app|
+  ["secrets", "gcloud"].each do |app|
     sh "docker volume rm -f -- #{ENV["TF_VAR_project_id"]}-#{ENV["USER"]}-#{app}"
   end
 end

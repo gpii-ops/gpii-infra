@@ -21,7 +21,6 @@ common-setup:
   script:
     - terraform -version
     - terragrunt -version
-    - aws --version
     - docker version
     - docker-compose version
     - docker images | grep exekube
