@@ -4,12 +4,20 @@ terraform {
 
 variable "secrets_dir" {}
 variable "charts_dir" {}
+variable "cloud_sdk_repository" {}
+variable "cloud_sdk_tag" {}
 variable "destination_bucket" {}
 variable "project_id" {}
 variable "replica_count" {}
 variable "schedule" {}
+variable "serviceaccount_key" {}
 
 # Terragrunt variables
+
+provider "google" {
+  project     = "${var.project_id}"
+  credentials = "${var.serviceaccount_key}"
+}
 
 data "google_project" "project" {
   project_id = "${var.project_id}"
@@ -19,11 +27,14 @@ data "template_file" "backup-exporter" {
   template = "${file("values.yaml")}"
 
   vars {
-    service_account_name = "${data.google_service_account.gke_cluster_pod_backup_exporter.email}"
-    destination_bucket   = "${var.destination_bucket}"
-    replica_count        = "${var.replica_count}"
-    log_bucket           = "gs://${google_storage_bucket.backup_daisy_bkt.name}/logs"
-    schedule             = "${var.schedule}"
+    cloud_sdk_repository      = "${var.cloud_sdk_repository}"
+    cloud_sdk_tag             = "${var.cloud_sdk_tag}"
+    service_account_name      = "${data.google_service_account.gke_cluster_pod_backup_exporter.email}"
+    destination_bucket        = "${var.destination_bucket}"
+    local_intermediate_bucket = "${google_storage_bucket.backup_daisy_bkt.name}"
+    replica_count             = "${var.replica_count}"
+    log_bucket                = "gs://${google_storage_bucket.backup_daisy_bkt.name}/logs"
+    schedule                  = "${var.schedule}"
   }
 }
 
