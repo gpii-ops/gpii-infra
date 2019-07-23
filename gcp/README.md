@@ -293,6 +293,10 @@ For example: a developer deleted their tfstate bucket in GCS and re-created it w
    * `rake destroy_module"[k8s/gpii/couchdb]" && rake`
 1. If you need to, you may be able to repair the split brain manually using [CouchDB Cluster Management commands](https://docs.couchdb.org/en/stable/cluster/nodes.html).
 
+### My component won't start and the Event logs say `Error creating: pods "my-pod-name" is forbidden: image policy webhook backend denied one or more images: Denied by default admission rule. Overridden by evaluation mode`
+
+This means your component is trying to use a Docker image that is not hosted in our Google Container Registry instance, or which is otherwise not allowed by our Kubernetes Binary Authorization configuration. The Ops team will want to discuss next steps but [gke-cluster](https://github.com/gpii-ops/exekube/tree/master/modules/gke-cluster) is the relevant module. For development purposes, you may add an additional `binary_authorization_admission_whitelist_pattern_N` to allow your new image. You may want to re-deploy your component so that Kubernetes notices the change more quickly.
+
 ### Errors trying to enable/disable Google Cloud APIs
 
 When destroying an environment completely (`rake destroy`), or creating an environment for the first time or after complete destruction (`rake deploy`), we disable/enable some Google Cloud APIs. This action is asynchronous and can take a few minutes to propagate.
