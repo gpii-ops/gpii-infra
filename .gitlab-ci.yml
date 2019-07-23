@@ -94,7 +94,6 @@ common-stg-test-gcp-dev:
     TF_VAR_organization_name: "gpii2test"
     TF_VAR_organization_domain: "test1.gpii.net"
     TF_VAR_common_project_id: "gpii2test-common-stg"
-    TF_VAR_aws_zone_id: "Z1T3NF8J9WVBSP"
     # We override default infra region for dev environments
     # due to GCP resource exhaustion issues:
     # https://issues.gpii.net/browse/GPII-3697
