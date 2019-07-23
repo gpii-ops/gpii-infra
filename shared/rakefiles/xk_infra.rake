@@ -107,7 +107,7 @@ task :apply_common_infra => [@gcp_creds_file] do
   services_list = JSON.parse(services_list)
 
   project_services.each do |service|
-     sh "gcloud services enable #{service}" unless services_list.any? { |s| s['serviceName'] == service }
+     sh "gcloud services enable #{service}" unless services_list.any? { |s| s["config"]["name"] == service }
   end
 
   tfstate_bucket = %x{
@@ -127,13 +127,15 @@ task :set_org_perms => [@gcp_creds_file] do
     --filter bindings.members:user:* \
     --flatten="bindings[].members" \
     --format json | jq -r ".[].bindings.members"
-  }.split.uniq.each do |user|
+  }
+  user_roles.split.uniq.each do |user|
     existing_user_roles = %x{
       gcloud organizations get-iam-policy #{ENV["ORGANIZATION_ID"]} \
       --filter bindings.members:#{user} \
       --flatten="bindings[].members" \
       --format json | jq -r ".[].bindings.role"
-    }.split.each do |role|
+    }
+    existing_user_roles.split.each do |role|
       sh "gcloud organizations remove-iam-policy-binding #{ENV["ORGANIZATION_ID"]} \
         --member #{user} \
         --role #{role}"
