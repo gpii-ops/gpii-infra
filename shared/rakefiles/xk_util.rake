@@ -269,4 +269,10 @@ task :restore_snapshot_from_image_file, [:snapshot_files] => [@gcp_creds_file, :
   end
 
 end
+
+# This task forwards CouchDB port
+task :couchdb_ui => [:configure, :configure_secrets, :set_secrets] do
+  sh "/rakefiles/scripts/couchdb_ui.sh"
+end
+
 # vim: et ts=2 sw=2:
