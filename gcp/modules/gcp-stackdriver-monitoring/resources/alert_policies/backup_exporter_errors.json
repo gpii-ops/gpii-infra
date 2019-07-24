@@ -1,0 +1,38 @@
+{
+  "display_name": "Backup-exporter process reports one or more errors",
+  "combiner": "OR",
+  "conditions": [
+    {
+      "condition_threshold": {
+        "aggregations": [
+          {
+            "alignment_period": {
+              "seconds": 60,
+              "nanos" : 0
+            },
+            "cross_series_reducer": "REDUCE_MAX",
+            "group_by_fields": [
+              "metric.label.log"
+            ],
+            "per_series_aligner": "ALIGN_MEAN"
+          }
+        ],
+        "comparison": "COMPARISON_GT",
+        "duration": {
+          "seconds": 900,
+          "nanos" : 0
+        },
+        "filter": "metric.type=\"logging.googleapis.com/user/backup-exporter.error\" resource.type=\"k8s_container\"",
+        "trigger": {
+          "count": 1
+        }
+      },
+      "display_name": "Log-based errors for Backup-exporter"
+    }
+  ],
+  "notification_channels": [],
+  "user_labels": {},
+  "enabled": {
+    "value": ${enabled}
+  }
+}

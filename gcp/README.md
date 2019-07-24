@@ -293,6 +293,10 @@ For example: a developer deleted their tfstate bucket in GCS and re-created it w
    * `rake destroy_module"[k8s/gpii/couchdb]" && rake`
 1. If you need to, you may be able to repair the split brain manually using [CouchDB Cluster Management commands](https://docs.couchdb.org/en/stable/cluster/nodes.html).
 
+### My component won't start and the Event logs say `Error creating: pods "my-pod-name" is forbidden: image policy webhook backend denied one or more images: Denied by default admission rule. Overridden by evaluation mode`
+
+This means your component is trying to use a Docker image that is not hosted in our Google Container Registry instance, or which is otherwise not allowed by our Kubernetes Binary Authorization configuration. The Ops team will want to discuss next steps but [gke-cluster](https://github.com/gpii-ops/exekube/tree/master/modules/gke-cluster) is the relevant module. For development purposes, you may add an additional `binary_authorization_admission_whitelist_pattern_N` to allow your new image. You may want to re-deploy your component so that Kubernetes notices the change more quickly.
+
 ### Errors trying to enable/disable Google Cloud APIs
 
 When destroying an environment completely (`rake destroy`), or creating an environment for the first time or after complete destruction (`rake deploy`), we disable/enable some Google Cloud APIs. This action is asynchronous and can take a few minutes to propagate.
@@ -748,10 +752,15 @@ The destination bucket must be created manually. This is a once time setup for S
 
 ##### Restoring a backup from outside of the organization.
 
-The process of the restore it's similar but the other way around. It uses the `gcloud compute images import` command. In order to make easier the process a rake task called `restore_snapshot_from_image_file`can be used. This task takes only one parameter with each snapshot to recover separated by one space. i.e:
-```
-rake restore_snapshot_from_image_file["gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-0-030519-205726.raw.gz gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-1-030519-205756.raw.gz"]
-```
-Once the task finished new restored snapshots will appear with the leading in the name `external-`. This will help with the search when at the restoration of the disks using the snapshots.
+1. Stop `backup-exporter` process in order to not stop the cloudbuild process of restoring the snapshots.
+   ```
+   rake destroy_module["k8s/kube-system/backup-exporter/"]
+   ```
+2. The process of the restore it's similar but the other way around. It uses the `gcloud compute images import` command. In order to make easier the process a rake task called `restore_snapshot_from_image_file`can be used. This task takes only one parameter with each snapshot to recover separated by one space. i.e:
+   ```
+   rake restore_snapshot_from_image_file["gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-0-030519-205726.raw.gz gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-1-030519-205756.raw.gz"]
+   ```
 
-And follow the [restore a pv from snapshot procedure](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#data-corruption-on-a-single-couchdb-replica) using the snapshots restored.
+3. Once the task finished new restored snapshots will appear with the leading in the name `external-`. This will help with the search when at the restoration of the disks using the snapshots.
+
+4. Follow the [restore a pv from snapshot procedure](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#data-corruption-on-a-single-couchdb-replica) using the snapshots restored.
