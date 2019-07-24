@@ -94,8 +94,10 @@ spec:
         - name: couchdb-statefulset-assembler
           image: "{{ .Values.helperImage.repository }}:{{ .Values.helperImage.tag }}"
           imagePullPolicy: {{ .Values.helperImage.pullPolicy }}
-{{- if not .Values.allowAdminParty }}
           env:
+            - name: SRV_RECORD
+              value: "_http-couchdb._tcp.{{ template "couchdb.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"
+{{- if not .Values.allowAdminParty }}
             - name: COUCHDB_USER
               valueFrom:
                 secretKeyRef:
