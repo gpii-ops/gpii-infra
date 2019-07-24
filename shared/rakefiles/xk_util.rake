@@ -186,32 +186,38 @@ task :display_universal_image_info => [:configure] do
   '", verbose: false
 end
 
-# This task grants the owner role in the current project to the current user
-task :grant_project_admin => [@gcp_creds_file, :configure_extra_tf_vars] do
+task :configure_project_admin_roles do
+  @project_admin_roles = ["roles/iam.serviceAccountTokenCreator"]
   if ENV["TF_VAR_organization_name"] == "gpii"
-    roles = ["roles/owner"]
+    @project_admin_roles.push("roles/owner")
   else
     # The owner role can not be granted using other method than the console for
     # external users to a particular organization.
     # https://cloud.google.com/iam/docs/understanding-roles#invitation_flow
-    roles = ["roles/editor", "roles/resourcemanager.projectIamAdmin"]
+    @project_admin_roles.push("roles/editor", "roles/resourcemanager.projectIamAdmin")
   end
-  roles.each do |role|
+end
+
+# This task grants the owner role in the current project to the current user
+task :grant_project_admin => [@gcp_creds_file, :configure_extra_tf_vars, :configure_project_admin_roles] do
+  @project_admin_roles.each do |role|
     sh "
       gcloud projects add-iam-policy-binding \"$TF_VAR_project_id\" \
         --member user:\"$TF_VAR_auth_user_email\" \
-        --role #{role}
+        --role \"#{role}\"
     "
   end
 end
 
 # This task revokes the owner role in the current project from the current user
-task :revoke_project_admin => [@gcp_creds_file, :configure_extra_tf_vars] do
-  sh "
-    gcloud projects remove-iam-policy-binding \"$TF_VAR_project_id\" \
-      --member user:\"$TF_VAR_auth_user_email\" \
-      --role roles/owner
-  "
+task :revoke_project_admin => [@gcp_creds_file, :configure_extra_tf_vars, :configure_project_admin_roles] do
+  @project_admin_roles.each do |role|
+    sh "
+      gcloud projects remove-iam-policy-binding \"$TF_VAR_project_id\" \
+        --member user:\"$TF_VAR_auth_user_email\" \
+        --role \"#{role}\"
+    "
+  end
 end
 
 # This task grants organization roles declared in org_admin_roles to the current user
