@@ -107,7 +107,7 @@ preferences:
     tag: 20190522142238-4a52f56
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
+    sha: sha256:3feb62b002a83972cb6c8cdebd00b9a1b7459dc0173935c83170f7f1b5bc7045
     tag: 20190522142238-4a52f56
 service_account_assigner:
   upstream:
