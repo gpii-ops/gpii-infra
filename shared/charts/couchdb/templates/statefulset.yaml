@@ -35,9 +35,9 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: couchdb
+            - name: http-couchdb
               containerPort: 5984
-            - name: epmd
+            - name: tcp-epmd
               containerPort: 4369
             - containerPort: 9100
           env:
