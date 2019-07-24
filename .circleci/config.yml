@@ -31,23 +31,9 @@ jobs:
             bundle install;
             rake
 
-  aws-unit-tests:
-    <<: *default_docker
-    working_directory: /workspace
-    steps:
-      - checkout
-      - run:
-          name: AWS Unit Tests
-          command: |
-            echo "Running AWS unit tests...";
-            cd /workspace/aws/rakefiles/tests;
-            gem install test-unit --no-ri --no-rdoc;
-            rake
-
 workflows:
   version: 2
   main:
     jobs:
       - terraform-fmt-check
       - gcp-unit-tests
-      - aws-unit-tests
