@@ -199,8 +199,7 @@ See [CI-CD.md#running-in-non-dev-environments](../CI-CD.md#running-manually-in-n
 
 1. `cd gcp/live/dev` (or another environment)
 1. `rake sh`
-1. `helm --tiller-namespace kube-system list --tls --tls-verify --tls-ca-cert /project/live/dev/secrets/kube-system/helm-tls/ca.cert.pem --tls-cert /project/live/dev/secrets/kube-system/helm-tls/helm.cert.pem  --tls-key /project/live/dev/secrets/kube-system/helm-tls/helm.key.pem`
-   * Adjust paths for the environment you're using.
+1. `helm list` (or other command)
 
 ### I want to spin up my dev environment in a different region
 
