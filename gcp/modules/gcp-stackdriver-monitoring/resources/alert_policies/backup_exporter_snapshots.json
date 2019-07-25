@@ -4,27 +4,28 @@
   "conditions": [
     {
       "condition_absent": {
+        "filter": "metric.type=\"logging.googleapis.com/user/backup-exporter.snapshot_created\" resource.type=\"k8s_container\"",
+        "duration": {
+          "seconds": 43200,
+          "nanos" : 0
+        },
+        "trigger": {
+          "count": 1,
+          "percent": 0.0
+        },
         "aggregations": [
           {
             "alignment_period": {
               "seconds": 60,
               "nanos" : 0
             },
+            "per_series_aligner": "ALIGN_COUNT",
             "cross_series_reducer": "REDUCE_MAX",
             "group_by_fields": [
               "metric.label.log"
-            ],
-            "per_series_aligner": "ALIGN_COUNT"
+            ]
           }
-        ],
-        "duration": {
-          "seconds": 43200,
-          "nanos" : 0
-        },
-        "filter": "metric.type=\"logging.googleapis.com/user/backup-exporter.snapshot_created\" resource.type=\"k8s_container\"",
-        "trigger": {
-          "count": 1
-        }
+        ]
       },
       "display_name": "Log-based snapshot_created for Backup-exporter"
     }
