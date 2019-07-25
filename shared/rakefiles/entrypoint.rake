@@ -41,7 +41,7 @@ end
 desc "Create cluster and deploy GPII components to it"
 task :default => :deploy
 
-task :set_vars do
+task :set_vars => [:check_deprecated_volumes] do
   Vars.set_vars(@env, @project_type)
   Vars.set_versions()
   Rake::Task[:set_compose_env].invoke
@@ -71,6 +71,22 @@ desc "Create cluster and deploy GPII components to it"
 task :deploy => [:set_vars, :apply_infra] do
   sh "#{@exekube_cmd} rake xk[up,false,false,true]"
   Rake::Task["display_cluster_info"].invoke
+end
+
+task :check_deprecated_volumes do
+  deprecated_volumes = %x{
+    docker volume ls | grep #{ ENV["USER"] }-aws | awk '{print $2}'
+  }.chomp
+
+  unless deprecated_volumes.empty?
+    puts
+    puts "The following volumes can have sensible data, please remove them"
+    puts
+    puts deprecated_volumes
+    puts
+    puts "i.e: docker volume rm [NAME]"
+    puts
+  end
 end
 
 desc "Display some handy info about the cluster"
