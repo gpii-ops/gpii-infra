@@ -30,6 +30,18 @@ The DNS zones are:
 - dev.gcp.gpii.net
 - ${user}.dev.gcp.gpii.net
 
+The zones "gpii.net", "gcp.gpii.net", "test1.gpii.net" and "gcp.test1.gpii.net" need to be created manually before this code creates the rest of the resources.
+
+This code will use the following zones stored in the following projects:
+
+* DNS: "gcp.gpii.net"
+* id: gcp-gpii-net
+* project: gpii-common-prd
+
+* DNS: "gcp.test1.gpii.net"
+* id: gcp-test1-gpii-net
+* project: gpii2test-common-prd (testing organization)
+
 ## Creating the initial infrastructure
 
 1. Clone this repo.
