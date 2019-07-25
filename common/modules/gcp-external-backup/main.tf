@@ -27,18 +27,7 @@ resource "google_storage_bucket" "external-backup-store" {
   location = "${var.location}"
   project  = "${var.project_id}"
 
-  storage_class = "MULTI_REGIONAL"
-
-  lifecycle_rule = {
-    action = {
-      type          = "SetStorageClass"
-      storage_class = "COLDLINE"
-    }
-
-    condition = {
-      age = "${var.days_until_coldline}"
-    }
-  }
+  storage_class = "COLDLINE"
 
   lifecycle_rule = {
     action = {
