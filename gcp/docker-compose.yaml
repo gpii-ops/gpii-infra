@@ -35,6 +35,13 @@ services:
       # TF_VAR_charts_dir is the place where common charts live, relative to modules
       TF_VAR_charts_dir: ../../../../../charts
 
+      # HELM_ variables are used to set paths to Helm certs and other TLS settings
+      HELM_TLS_CERT:
+      HELM_TLS_KEY:
+      HELM_TLS_CA_CERT:
+      HELM_TLS_ENABLE:
+      HELM_TLS_VERIFY:
+
     # File with other environment variables will be populated by rake
     env_file:
       - live/${ENV}/compose.env
