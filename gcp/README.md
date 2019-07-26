@@ -562,11 +562,10 @@ data='
 1. Before the restore: verify that the new record is present.
 1. After the restore: verify that the new record is no longer present.
 
-### Manual process: Generating db data of user preferences and load it into a cluster's preferences server
+### Manual processes: Users' data and client credentials
 
-#### Generate the data
+#### Generating db data of user preferences
 
-1. `git clone git://github.com/gpii/universal.git && cd universal && npm install`
 1. Put the preferences set you want to load into a folder, i.e.: _testData/myPrefsSets_.
 1. Create a folder to store the db data, i.e.: _testData/myDbData_.
 1. `node ./scripts/convertPrefs.js testData/myPrefsSets testData/myDbData`
@@ -638,7 +637,13 @@ For the lazy:
 * `sed -i '1i { "docs": ' prefsSafes.json gpiiKeys.json`
 * `sed -i '$ a }' prefsSafes.json gpiiKeys.json`
 
-Congratulations, half of the work is done, now on to the load step.
+Congratulations, half of the work is done, now you have to load both json files by following the instructions described in the [load step section](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/README.md#load-the-data-into-a-cluster). Remember that you need to perform a POST request for every json file.
+
+#### Generating client credentials
+
+It's as easy as following the process described in the generateCredentials.js script from universal.
+After running the script with the appropriate arguments, a new folder will be created with the _site name_ you provided when running the script, something like _my.site.com-credentials_.
+Then you need to load the _couchDBData.json_ file according to the instructions in the [load step section](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/README.md#load-the-data-into-a-cluster) below.
 
 #### Load the data into a cluster
 
@@ -654,10 +659,10 @@ The process:
 1. Go into the corresponding folder with the cluster name where you want to perform the process, "stg", "prd" or "dev". In this case We are going to perform the process in "dev": `cd gpii-infra/gcp/live/dev`.
 1. Set up the env you are going to deal with: `rake sh`
 __Note__ that if you are going to perform this in production (prd) you should do it from the _prd_ folder and remember to use the _RAKE_REALLY_RUN_IN_PRD=true_ variable when issuing the commands against the production cluster.
-1. Open a port forwarding between the cluster's couchdb host:port and your local machine: `kubectl --namespace gpii port-forward couchdb-couchdb-0 5984 &`
+1. Open a port forwarding between the cluster's couchdb host:port and your local machine: `rake couchdb_ui`. This command will provide you the user/password and url/port that you will need in the next step, something like: _http://ui:1xFA6vhGKCGiLRsZBnencvNqm1QEneMG@localhost:35984/_utils_, we will just need to remove the __utils_.
 
-Let's load the data, go back to the folder _testData/myDbData_ and run:
-1. `curl -d @gpiiKeys.json -H "Content-type: application/json" -X POST http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@localhost:5984/gpii/_bulk_docs`
+Let's load the data from your jsonData file by running:
+1. `curl -d @yourDataFile.json -H "Content-type: application/json" -X POST http://ui:1xFA6vhGKCGiLRsZBnencvNqm1QEneMG@localhost:35984/gpii/_bulk_docs`
 
 Unless you get errors, that's all. Now you can close the port forwarding as mentioned earlier.
 
