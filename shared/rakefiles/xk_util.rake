@@ -256,10 +256,14 @@ task :restore_snapshot_from_image_file, [:snapshot_files] => [@gcp_creds_file, :
     pv_zones[item["spec"]["claimRef"]["name"]] = item["metadata"]["labels"]["failure-domain.beta.kubernetes.io/zone"]
   end
 
+  # The output of the above code should be a hash type object with the volumes and the zones
+  # where they are:
+  #
   # pv_zones = {
   #   "database-storage-couchdb-couchdb-0": "us-central1-f",
   #   "database-storage-couchdb-couchdb-1": "us-central1-a"
   # }
+  #
   # that will be used later to know in which zone we need to restore the images.
   snapshot_files = args[:snapshot_files].split ' '
 
