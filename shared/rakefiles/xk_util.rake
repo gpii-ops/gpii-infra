@@ -269,7 +269,7 @@ task :restore_snapshot_from_image_file, [:snapshot_files] => [@gcp_creds_file, :
 
   snapshot_files.each do |snapshot_file|
     sh "#{@exekube_cmd} sh -c ' \
-      gsutil ls #{snapshot_file}
+      gsutil ls #{snapshot_file} 2>1 >/dev/null || { echo \"File #{snapshot_file} not found\"; exit 1; }
     '", verbose: false
   end
 
@@ -280,11 +280,14 @@ task :restore_snapshot_from_image_file, [:snapshot_files] => [@gcp_creds_file, :
     snapshot_name = snapshot_file[/database-storage-couchdb-couchdb-\d-\d+-\d+/, 0]
     pv_zone = pv_zones[snapshot_name[/(([A-Za-z]+-)+[\d])/,0]]
     sh "#{@exekube_cmd} sh -c ' \
-      gcloud compute images create image-disk-pv-#{snapshot_name} --source-uri=#{snapshot_file}
-      gcloud compute disks create disk-pv-#{snapshot_name} --zone=#{pv_zone} --image=image-disk-pv-#{snapshot_name}
-      gcloud compute disks snapshot disk-pv-#{snapshot_name} --zone=#{pv_zone} --snapshot-names external-pv-#{snapshot_name}
-      gcloud -q compute images delete image-disk-pv-#{snapshot_name}
-      gcloud -q compute disks delete disk-pv-#{snapshot_name} --zone=#{pv_zone}
+      function cleanup {
+        gcloud -q compute disks delete disk-pv-#{snapshot_name} --zone=#{pv_zone}
+        gcloud -q compute images delete image-disk-pv-#{snapshot_name}
+      }
+      gcloud compute images create image-disk-pv-#{snapshot_name} --source-uri=#{snapshot_file} || { cleanup; return 1; }
+      gcloud compute disks create disk-pv-#{snapshot_name} --zone=#{pv_zone} --image=image-disk-pv-#{snapshot_name} || { cleanup; return 1; }
+      gcloud compute disks snapshot disk-pv-#{snapshot_name} --zone=#{pv_zone} --snapshot-names external-pv-#{snapshot_name} || { cleanup; return 1; }
+      cleanup
     '", verbose: false
   end
 
