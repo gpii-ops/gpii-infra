@@ -566,6 +566,7 @@ data='
 
 #### Generating db data of user preferences
 
+1. `git clone git://github.com/gpii/universal.git && cd universal && npm install`
 1. Put the preferences set you want to load into a folder, i.e.: _testData/myPrefsSets_.
 1. Create a folder to store the db data, i.e.: _testData/myDbData_.
 1. `node ./scripts/convertPrefs.js testData/myPrefsSets testData/myDbData`
