@@ -714,7 +714,7 @@ Prime Minister at that time!"), please let me know immediately.
 
 The process is mostly executed by the `gcloud compute images export` command, which uses Cloud Build service, which uses [Daisy](https://github.com/GoogleCloudPlatform/compute-image-tools/tree/master/daisy) to create a VM, attach the images based on the snapshots to backup, create a file from those images and send the result files to the external storage.
 
-The destination buckets are created automatically by [Terraform code outside the organization](https://github.com/gpii-ops/gpii-infra/tree/master/common/modules/gcp-external-backup).
+The destination buckets are created automatically by [Terraform code](https://github.com/gpii-ops/gpii-infra/tree/master/common/modules/gcp-external-backup). These buckets live in the testing organization (gpii2test) rather than the main organization (gpii) to keep them safe if a disaster affects the main organization.
 
 #### Restoring a backup from outside of the organization.
 
