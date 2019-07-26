@@ -106,7 +106,8 @@ resource "null_resource" "couchdb_finish_cluster" {
         start_forwarding_port
         MEMBERSHIP_OUTPUT=$(curl -s $COUCHDB_URL/_membership 2>/dev/null)
         CLUSTER_MEMBERS_COUNT=$(echo $MEMBERSHIP_OUTPUT | jq -r .cluster_nodes[] | grep -c .)
-        echo "/_membership returned: $MEMBERSHIP_OUTPUT"
+        echo "/_membership returned:"
+        echo "$MEMBERSHIP_OUTPUT" | jq
         echo "$CLUSTER_MEMBERS_COUNT of ${var.replica_count} pods have joined the cluster."
         if [ "$CLUSTER_MEMBERS_COUNT" == "${var.replica_count}" ]; then
           CLUSTER_READY="true"
