@@ -80,7 +80,7 @@ task :check_deprecated_volumes do
 
   unless deprecated_volumes.empty?
     puts
-    puts "The following volumes can have sensible data, please remove them"
+    puts "The following volumes can have sensitive data, please remove them"
     puts
     puts deprecated_volumes
     puts
