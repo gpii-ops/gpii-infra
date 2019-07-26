@@ -245,17 +245,16 @@ task :restore_snapshot_from_image_file, [:snapshot_files] => [@gcp_creds_file, :
     raise
   end
 
-  require 'csv'
-  # kubectl get pv -o json | jq -r '.items[] | "\(.spec.claimRef.name),\(.metadata.labels."failure-domain.beta.kubernetes.io/zone")"'
-  #
-  # database-storage-couchdb-couchdb-0,us-central1-f
-  # database-storage-couchdb-couchdb-1,us-central1-a
+  require 'json'
+
+  pv_hash = JSON.parse(%x{
+      #{@exekube_cmd} kubectl get pv -o json
+    })
+
   pv_zones = {}
-  CSV.parse(%x{
-      #{@exekube_cmd} kubectl get pv -o json | jq -r '.items[] | \"\\(.spec.claimRef.name),\\(.metadata.labels.\"failure-domain.beta.kubernetes.io/zone\")\"'
-    }.chomp).each do |line|
-      pv_zones[line[0]] = line[1]
-    end
+  pv_hash["items"].each do |item|
+    pv_zones[item["spec"]["claimRef"]["name"]] = item["metadata"]["labels"]["failure-domain.beta.kubernetes.io/zone"]
+  end
 
   # pv_zones = {
   #   "database-storage-couchdb-couchdb-0": "us-central1-f",
