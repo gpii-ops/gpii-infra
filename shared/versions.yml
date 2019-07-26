@@ -64,18 +64,18 @@ prometheus_to_sd:
 couchdb:
   upstream:
     repository: couchdb
-    tag: 2.3.0
+    tag: 2.3.1
   generated:
     repository: gcr.io/gpii-common-prd/couchdb
-    sha: sha256:e8c1a2a97a60458da3916dc3ec2ba5510b35030c9fc374a6eb1263a70fddd8bc
-    tag: 2.3.0
+    sha: sha256:f19e0751c52e6c6948e851a01967d7a0eef37db290b7bf3444a88d2774a04c5f
+    tag: 2.3.1
 dataloader:
   upstream:
     repository: gpii/universal
     tag: 20190522142238-4a52f56
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
+    sha: sha256:3feb62b002a83972cb6c8cdebd00b9a1b7459dc0173935c83170f7f1b5bc7045
     tag: 20190522142238-4a52f56
 flowmanager:
   upstream:
@@ -83,7 +83,7 @@ flowmanager:
     tag: 20190522142238-4a52f56
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
+    sha: sha256:3feb62b002a83972cb6c8cdebd00b9a1b7459dc0173935c83170f7f1b5bc7045
     tag: 20190522142238-4a52f56
 k8s_snapshots:
   upstream:
@@ -107,7 +107,7 @@ preferences:
     tag: 20190522142238-4a52f56
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
+    sha: sha256:3feb62b002a83972cb6c8cdebd00b9a1b7459dc0173935c83170f7f1b5bc7045
     tag: 20190522142238-4a52f56
 service_account_assigner:
   upstream:
