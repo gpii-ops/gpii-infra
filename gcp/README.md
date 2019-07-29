@@ -77,16 +77,6 @@ Users who already had an RtF email address/Google account usually have performed
 1. `rake plain_sh` is like `rake sh`, but not all configuration is performed. This can be helpful for debugging (e.g. when `rake sh` does not work) and with interactive commands.
 1. To `curl` a single couchdb instance: `kubectl exec --namespace gpii couchdb-couchdb-0 -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/`
 
-#### Accessing CouchDB and CouchDB Web UI 
-
-1. Running `rake couchdb_ui` will set up port-forwarding of CouchDB port to local
-   machine and print a link and credentials to access CouchDB Fauxton Web UI.
-1. *(optional)* You can also use the displayed credentials to interact with
-   CouchDB API directly via the forwarded port (`35984`), e.g.:
-   ```
-   curl http://ui:$password@localhost:35984/_up
-   ```
-
 ### Tearing down an environment
 
 1. `cd gpii-infra/gcp/live/dev`
@@ -435,6 +425,17 @@ See [Getting started: One-time Stackdriver Workspace setup](README.md#one-time-s
 ## Working with CouchDB data
 
 You can run all `kubectl` commands mentioned below inside of an interactive shell started with `rake sh`.
+
+### Accessing CouchDB and CouchDB Web UI
+
+1. Running `rake couchdb_ui` task in corresponding environment direcotry (e.g.
+   `gcp/live/dev`) will set up port-forwarding of CouchDB port to your local
+   machine and print a link and credentials to access CouchDB Fauxton Web UI.
+1. *(optional)* You can also use the displayed credentials to interact with
+   CouchDB API directly via the forwarded port (`35984`), e.g.:
+   ```
+   curl http://ui:$password@localhost:35984/_up
+   ```
 
 ### The CouchDB cluster won't converge because one of its disks is in the wrong zone
 
