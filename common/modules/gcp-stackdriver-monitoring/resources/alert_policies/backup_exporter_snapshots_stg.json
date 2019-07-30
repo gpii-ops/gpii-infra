@@ -1,5 +1,5 @@
 {
-  "display_name": "Backup-exporter of stg snapshots are missing for more than 12 hours",
+  "display_name": "Backup-exporter of stg snapshots are ok for 12 hours",
   "combiner": "OR",
   "conditions": [
     {
@@ -26,7 +26,7 @@
           "count": 1
         }
       },
-      "display_name": "Log-based snapshot_created for Backup-exporter"
+      "display_name": "Backup-exporter of stg snapshots are missing in the last 12 hours"
     }
   ],
   "notification_channels": [],
