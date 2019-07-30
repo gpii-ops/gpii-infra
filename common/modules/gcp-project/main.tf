@@ -335,6 +335,14 @@ data "google_iam_policy" "combined" {
   }
 
   binding {
+    role = "roles/websecurityscanner.serviceAgent"
+
+    members = [
+      "serviceAccount:service-${google_project.project.number}@gcp-sa-websecurityscanner.iam.gserviceaccount.com",
+    ]
+  }
+
+  binding {
     role = "roles/cloudtrace.agent"
 
     members = [
