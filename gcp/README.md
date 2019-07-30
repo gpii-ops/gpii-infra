@@ -426,6 +426,17 @@ See [Getting started: One-time Stackdriver Workspace setup](README.md#one-time-s
 
 You can run all `kubectl` commands mentioned below inside of an interactive shell started with `rake sh`.
 
+### Accessing CouchDB and CouchDB Web UI
+
+1. Running `rake couchdb_ui` task in corresponding environment direcotry (e.g.
+   `gcp/live/dev`) will set up port-forwarding of CouchDB port to your local
+   machine and print a link and credentials to access CouchDB Fauxton Web UI.
+1. *(optional)* You can also use the displayed credentials to interact with
+   CouchDB API directly via the forwarded port (`35984`), e.g.:
+   ```
+   curl http://ui:$password@localhost:35984/_up
+   ```
+
 ### The CouchDB cluster won't converge because one of its disks is in the wrong zone
 
 Consider this scenario:

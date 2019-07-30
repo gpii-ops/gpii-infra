@@ -18,6 +18,7 @@ COUCHDB_ADMIN_USERNAME=${COUCHDB_ADMIN_USERNAME:=${TF_VAR_secret_couchdb_admin_u
 COUCHDB_ADMIN_PASSWORD=${COUCHDB_ADMIN_PASSWORD:=${TF_VAR_secret_couchdb_admin_password}}
 COUCHDB_ADMIN_USERNAME=${COUCHDB_ADMIN_USERNAME:?"Environment variable must be set"}
 COUCHDB_ADMIN_PASSWORD=${COUCHDB_ADMIN_PASSWORD:?"Environment variable must be set"}
+ENV=${ENV:?"Environment variable must be set"}
 
 # Optional
 COUCHDB_SVC_PORT=${COUCHDB_SVC_PORT:='5984'}
@@ -25,6 +26,7 @@ COUCHDB_LOCAL_FWD_PORT=${COUCHDB_LOCAL_FWD_PORT:='35984'}
 COUCHDB_NAMESPACE=${COUCHDB_NAMESPACE:='gpii'}
 COUCHDB_SVC_NAME=${COUCHDB_SVC_NAME:='couchdb-svc-couchdb'}
 COUCHDB_UI_USERNAME=${COUCHDB_UI_USERNAME:='ui'}
+COUCHDB_UI_PASSWORD_DIR=${COUCHDB_UI_PASSWORD_PATH_PREFIX:="/project/live/${ENV}/secrets/couchdb"}
 REQUIRED_BINARIES=${REQUIRED_BINARIES:="kubectl curl"}
 
 # Check if we have all the dependencies
@@ -51,8 +53,21 @@ while ! curl -s -o /dev/null -m10 "${HOST}/_up"; do
   sleep 1
 done
 
+# Get unique hash for cluster
+CLUSTER_HASH="$(kubectl config view --output json | jq -ers '.[].clusters[].cluster.server | @base64')"
+COUCHDB_UI_PASSWORD_FILE="${COUCHDB_UI_PASSWORD_DIR}/ui-${CLUSTER_HASH}.password"
+
+# Create a password for a current cluster if it doesn't exist
+if [ ! -f "${COUCHDB_UI_PASSWORD_FILE}" ]; then
+  mkdir -p "${COUCHDB_UI_PASSWORD_DIR}"
+  # Clean up any existing old passwords
+  rm -f "${COUCHDB_UI_PASSWORD_DIR}"/*
+  tr -dc 'A-Za-z0-9' < /dev/urandom | fold -w 32 | head -n 1 > "${COUCHDB_UI_PASSWORD_FILE}" || true
+fi
+
+COUCHDB_UI_PASSWORD="$(cat "${COUCHDB_UI_PASSWORD_FILE}")"
+
 # Create a new user
-COUCHDB_UI_PASSWORD="$(tr -dc A-Za-z0-9 < /dev/urandom | fold -w 32 | head -n 1 || true)"
 echo "${THIS_SCRIPT}: Creating temporary UI user (${COUCHDB_UI_USERNAME})"
 
 curl -s -o /dev/null -X PUT "${HOST}/_node/_local/_config/admins/${COUCHDB_UI_USERNAME}" \
@@ -63,6 +78,10 @@ echo "${THIS_SCRIPT}: CouchDB port is now being forwarded to your local machine,
 echo "${THIS_SCRIPT}:"
 echo "${THIS_SCRIPT}: You can access CouchDB Web UI at:"
 echo "${THIS_SCRIPT}: http://${COUCHDB_UI_USERNAME}:${COUCHDB_UI_PASSWORD}@localhost:${COUCHDB_LOCAL_FWD_PORT}/_utils"
+echo "${THIS_SCRIPT}:"
+echo "${THIS_SCRIPT}: Some browsers require credentials to be entered manually:"
+echo "${THIS_SCRIPT}:   username: ${COUCHDB_UI_USERNAME}"
+echo "${THIS_SCRIPT}:   password: ${COUCHDB_UI_PASSWORD}"
 echo "${THIS_SCRIPT}:"
 echo "${THIS_SCRIPT}: You can close this terminal and port-forwarding by pressing ENTER (new line)."
 echo "${THIS_SCRIPT}:"
