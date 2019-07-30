@@ -29,15 +29,12 @@
           }
         ],
         "denominator_filter": "",
-        "denominator_aggregations": [
-
-        ]
+        "denominator_aggregations": []
       },
       "display_name": "Log-based errors for Backup-exporter"
     }
   ],
-  "notification_channels": [
-  ],
+  "notification_channels": [],
   "user_labels": {
   },
   "enabled": {

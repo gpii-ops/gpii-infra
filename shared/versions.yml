@@ -64,11 +64,11 @@ prometheus_to_sd:
 couchdb:
   upstream:
     repository: couchdb
-    tag: 2.3.0
+    tag: 2.3.1
   generated:
     repository: gcr.io/gpii-common-prd/couchdb
-    sha: sha256:e8c1a2a97a60458da3916dc3ec2ba5510b35030c9fc374a6eb1263a70fddd8bc
-    tag: 2.3.0
+    sha: sha256:f19e0751c52e6c6948e851a01967d7a0eef37db290b7bf3444a88d2774a04c5f
+    tag: 2.3.1
 dataloader:
   upstream:
     repository: gpii/universal
