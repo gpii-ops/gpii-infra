@@ -1,5 +1,5 @@
 {
-  "display_name": "Backup-exporter process reports one or more errors",
+  "display_name": "Backup-exporter process does not report one or more errors",
   "combiner": "OR",
   "conditions": [
     {
@@ -31,7 +31,7 @@
         "denominator_filter": "",
         "denominator_aggregations": []
       },
-      "display_name": "Log-based errors for Backup-exporter"
+      "display_name": "Backup-exporter process reports one or more errors"
     }
   ],
   "notification_channels": [],
