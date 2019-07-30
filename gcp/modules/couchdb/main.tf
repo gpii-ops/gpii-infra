@@ -125,10 +125,14 @@ resource "null_resource" "couchdb_finish_cluster" {
 
       RETRY_COUNT=1
       while [ "$STATUS" != '"Cluster is already finished"' ]; do
+        echo "[Try $RETRY_COUNT of $RETRIES] Posting \"finish_cluster\"..."
+        stop_forwarding_port
+        start_forwarding_port
         RESULT=$(
           curl -s $COUCHDB_URL/_cluster_setup \
           -X POST -H 'Content-Type: application/json' -d '{"action": "finish_cluster"}')
-        echo "[Try $RETRY_COUNT of $RETRIES] Posting \"finish_cluster\", CouchDB returned: $RESULT"
+        echo "_cluster_setup returned:"
+        echo "$RESULT" | jq
         STATUS=$(echo $RESULT | jq ".reason")
         if [ "$RETRY_COUNT" == "$RETRIES" ] && [ "$STATUS" != '"Cluster is already finished"' ]; then
           echo "Retry limit reached, giving up!"
