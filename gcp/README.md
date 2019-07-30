@@ -642,7 +642,7 @@ Congratulations, half of the work is done, now you have to load both json files 
 
 #### Generating client credentials
 
-It's as easy as following the process described in the generateCredentials.js script from universal.
+It's as easy as following the process described in the [generateCredentials.js script](https://github.com/GPII/universal/blob/master/scripts/generateCredentials.js) from universal.
 After running the script with the appropriate arguments, a new folder will be created with the _site name_ you provided when running the script, something like _my.site.com-credentials_.
 Then you need to load the _couchDBData.json_ file according to the instructions in the [load step section](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/README.md#load-the-data-into-a-cluster) below.
 
@@ -655,6 +655,8 @@ Requirements:
 
 Note that we assume that you are going to perform these steps into an already up & running cluster. Also, remember that you always need to test the changes in your "dev" cluster first. In case that everything worked in your "dev" cluster, then proceed with "stg". If everything worked in "stg" too, then, proceed with "prd". In order for you to understand the differences beetween the different environments, check [this section](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/README.md#what-are-all-these-environments) from our documentation.
 
+Note that the following process is mostly for "dev" environments since the Ops team prefer to use the secrets from env vars when dealing with "stg" and "prd", so the process might differ a bit.
+
 The process:
 
 1. Go into the corresponding folder with the cluster name where you want to perform the process, "stg", "prd" or "dev". In this case We are going to perform the process in "dev": `cd gpii-infra/gcp/live/dev`.
@@ -665,7 +667,7 @@ __Note__ that if you are going to perform this in production (prd) you should do
 Let's load the data from your jsonData file by running:
 1. `curl -d @yourDataFile.json -H "Content-type: application/json" -X POST http://ui:1xFA6vhGKCGiLRsZBnencvNqm1QEneMG@localhost:35984/gpii/_bulk_docs`
 
-Unless you get errors, that's all. Now you can close the port forwarding as mentioned earlier.
+Unless you get errors, that's all. Now you can close the port forwarding by pressing _Enter_ in the terminal where you ran _rake couchdb_ui_.
 
 ### Downtime procedures
 
