@@ -15,9 +15,9 @@ data:
     INTERMEDIATE_BUCKET={{ .Values.localIntermediateBucket }}
     LOG_BUCKET={{ .Values.logBucket }}
 
-    gsutil -q ls "gs://${DESTINATION_BUCKET}/" 2>1 >/dev/null || { echo "Destination bucket is not accessible"; exit 1; }
-    gsutil -q ls "gs://${INTERMEDIATE_BUCKET}/" 2>1 >/dev/null || { echo "Intermediate bucket is not accessible"; exit 1; }
-    gsutil -q ls "gs://${LOG_BUCKET}/" 2>1 >/dev/null || { echo "Log bucket is not accessible"; exit 1; }
+    gsutil -q ls "gs://${DESTINATION_BUCKET}/" 2>&1 >/dev/null || { echo "Destination bucket is not accessible"; exit 1; }
+    gsutil -q ls "gs://${INTERMEDIATE_BUCKET}/" 2>&1 >/dev/null || { echo "Intermediate bucket is not accessible"; exit 1; }
+    gsutil -q ls "gs://${LOG_BUCKET}/" 2>&1 >/dev/null || { echo "Log bucket is not accessible"; exit 1; }
 
     gcloud config set account {{ .Values.serviceAccountName }}
     SNAPSHOTS=$(for i in `seq 0 $(({{ .Values.replicaCount }}-1))`; do gcloud compute snapshots list --sort-by=~creationTimestamp,STATUS --limit=1 --format="value[separator=';'](name,status)" --filter="name~'pv-database-storage-couchdb-couchdb-$i-*'" | cut -f1 -d\; ; done)

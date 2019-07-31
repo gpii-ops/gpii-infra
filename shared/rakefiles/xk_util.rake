@@ -269,7 +269,7 @@ task :restore_snapshot_from_image_file, [:snapshot_files] => [@gcp_creds_file, :
 
   snapshot_files.each do |snapshot_file|
     sh "#{@exekube_cmd} sh -c ' \
-      gsutil ls #{snapshot_file} 2>1 >/dev/null || { echo \"File #{snapshot_file} not found\"; exit 1; }
+      gsutil ls #{snapshot_file} 2>&1 >/dev/null || { echo \"File #{snapshot_file} not found\"; exit 1; }
     '", verbose: false
   end
 
