@@ -31,12 +31,12 @@ cloud_sdk:
     tag: 253.0.0-alpine
 couchdb_helper:
   upstream:
-    repository: kocolosk/couchdb-statefulset-assembler
-    tag: 1.2.0
+    repository: gpii/couchdb-statefulset-assembler
+    tag: 1.3.0-gpii.0
   generated:
-    repository: gcr.io/gpii-common-prd/kocolosk__couchdb-statefulset-assembler
-    sha: sha256:6effb982154ed2d480a8ea49f9aad0cd5fded721d024012165638991c71b1f97
-    tag: 1.2.0
+    repository: gcr.io/gpii-common-prd/gpii__couchdb-statefulset-assembler
+    sha: sha256:aee756f436ff1daf32701d21da929e8c0b657b5b5ed7755d84e3f0f3c8c75116
+    tag: 1.3.0-gpii.0
 couchdb_init:
   upstream:
     repository: alpine
@@ -64,11 +64,11 @@ prometheus_to_sd:
 couchdb:
   upstream:
     repository: couchdb
-    tag: 2.3.0
+    tag: 2.3.1
   generated:
     repository: gcr.io/gpii-common-prd/couchdb
-    sha: sha256:e8c1a2a97a60458da3916dc3ec2ba5510b35030c9fc374a6eb1263a70fddd8bc
-    tag: 2.3.0
+    sha: sha256:f19e0751c52e6c6948e851a01967d7a0eef37db290b7bf3444a88d2774a04c5f
+    tag: 2.3.1
 dataloader:
   upstream:
     repository: gpii/universal

@@ -199,8 +199,7 @@ See [CI-CD.md#running-in-non-dev-environments](../CI-CD.md#running-manually-in-n
 
 1. `cd gcp/live/dev` (or another environment)
 1. `rake sh`
-1. `helm --tiller-namespace kube-system list --tls --tls-verify --tls-ca-cert /project/live/dev/secrets/kube-system/helm-tls/ca.cert.pem --tls-cert /project/live/dev/secrets/kube-system/helm-tls/helm.cert.pem  --tls-key /project/live/dev/secrets/kube-system/helm-tls/helm.key.pem`
-   * Adjust paths for the environment you're using.
+1. `helm list` (or other command)
 
 ### I want to spin up my dev environment in a different region
 
@@ -426,6 +425,17 @@ See [Getting started: One-time Stackdriver Workspace setup](README.md#one-time-s
 ## Working with CouchDB data
 
 You can run all `kubectl` commands mentioned below inside of an interactive shell started with `rake sh`.
+
+### Accessing CouchDB and CouchDB Web UI
+
+1. Running `rake couchdb_ui` task in corresponding environment direcotry (e.g.
+   `gcp/live/dev`) will set up port-forwarding of CouchDB port to your local
+   machine and print a link and credentials to access CouchDB Fauxton Web UI.
+1. *(optional)* You can also use the displayed credentials to interact with
+   CouchDB API directly via the forwarded port (`35984`), e.g.:
+   ```
+   curl http://ui:$password@localhost:35984/_up
+   ```
 
 ### The CouchDB cluster won't converge because one of its disks is in the wrong zone
 
