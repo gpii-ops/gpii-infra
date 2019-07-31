@@ -13,6 +13,8 @@ serviceAccountName: ""
 
 destinationBucket: ""
 
+localIntermediateBucket: ""
+
 replicaCount: 2
 
 schedule: "0 0 * * *"

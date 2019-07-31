@@ -1,0 +1,38 @@
+{
+  "display_name": "Backup-exporter snapshots are ok for 12 hours",
+  "combiner": "OR",
+  "conditions": [
+    {
+      "condition_absent": {
+        "filter": "metric.type=\"logging.googleapis.com/user/backup-exporter.snapshot_created\" resource.type=\"k8s_container\"",
+        "duration": {
+          "seconds": 43200,
+          "nanos": 0
+        },
+        "trigger": {
+          "count": 0,
+          "percent": 0.0
+        },
+        "aggregations": [
+          {
+            "alignment_period": {
+              "seconds": 60,
+              "nanos": 0
+            },
+            "per_series_aligner": "ALIGN_COUNT",
+            "cross_series_reducer": "REDUCE_MAX",
+            "group_by_fields": [
+              "metric.label.log"
+            ]
+          }
+        ]
+      },
+      "display_name": "Backup-exporter snapshots failed in less than 12 hours"
+    }
+  ],
+  "notification_channels": [],
+  "user_labels": {},
+  "enabled": {
+    "value": ${enabled}
+  }
+}

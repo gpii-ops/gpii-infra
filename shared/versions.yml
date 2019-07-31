@@ -22,11 +22,13 @@ certmerge_operator:
     sha: sha256:96c435ee42bae821210e91430c18c0fd1cbe8cd33216175a77fbdc7622f5d535
     tag: 0.0.3-gpii.0
 cloud_sdk:
-  upstream_image: google/cloud-sdk:242.0.0-alpine
+  upstream:
+    repository: google/cloud-sdk
+    tag: 253.0.0-alpine
   generated:
-    image: google/cloud-sdk
-    sha: sha256:6bda894b7ac4e733a305269379ff8f50329a0cd592f1d966854972bae591b9b5
-    tag: 242.0.0-alpine
+    repository: gcr.io/gpii-common-prd/google__cloud-sdk
+    sha: sha256:7b65f849358606e702ee476b9c735c4d729f1db32e401fdc2746b076d7536e27
+    tag: 253.0.0-alpine
 couchdb_helper:
   upstream:
     repository: gpii/couchdb-statefulset-assembler
@@ -62,11 +64,11 @@ prometheus_to_sd:
 couchdb:
   upstream:
     repository: couchdb
-    tag: 2.3.0
+    tag: 2.3.1
   generated:
     repository: gcr.io/gpii-common-prd/couchdb
-    sha: sha256:e8c1a2a97a60458da3916dc3ec2ba5510b35030c9fc374a6eb1263a70fddd8bc
-    tag: 2.3.0
+    sha: sha256:f19e0751c52e6c6948e851a01967d7a0eef37db290b7bf3444a88d2774a04c5f
+    tag: 2.3.1
 dataloader:
   upstream:
     repository: gpii/universal

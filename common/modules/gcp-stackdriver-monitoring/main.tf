@@ -37,11 +37,9 @@ resource "template_dir" "resources" {
     project_id         = "${var.project_id}"
     organization_id    = "${var.organization_id}"
     domain_name        = "${var.domain_name}"
-    notification_email = "${(var.use_auth_user_email && var.auth_user_email != "") ? var.auth_user_email : var.notification_email}"
+    notification_email = "${var.notification_email}"
 
-    # This variable is diabled until GPII-3917 is merged, only affects to
-    # backup-exporter alerts
-    # enabled            = "${(var.env == "prd" || var.env == "stg") ? true : false}"
+    # Disabled until GPII-3917 is merged
     enabled = "false"
   }
 }
@@ -68,7 +66,6 @@ resource "null_resource" "apply_stackdriver_monitoring" {
           require "/rakefiles/stackdriver.rb"
           resources = read_resources("${path.module}/resources_rendered")
           apply_resources(resources)
-          destroy_uptime_checks(["${join("\",\"", google_monitoring_uptime_check_config.this.*.name)}"])
         '
         STACKDRIVER_EXIT_STATUS="$?"
         if [ "$STACKDRIVER_EXIT_STATUS" == "120" ]; then
@@ -107,7 +104,6 @@ resource "null_resource" "destroy_stackdriver_monitoring" {
         ruby -e '
           require "/rakefiles/stackdriver.rb"
           destroy_resources({"alert_policies"=>[],"notification_channels"=>[]})
-          destroy_uptime_checks(["${join("\",\"", google_monitoring_uptime_check_config.this.*.name)}"])
         '
         STACKDRIVER_EXIT_STATUS="$?"
         if [ "$STACKDRIVER_EXIT_STATUS" == "120" ]; then

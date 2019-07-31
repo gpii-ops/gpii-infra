@@ -199,8 +199,7 @@ See [CI-CD.md#running-in-non-dev-environments](../CI-CD.md#running-manually-in-n
 
 1. `cd gcp/live/dev` (or another environment)
 1. `rake sh`
-1. `helm --tiller-namespace kube-system list --tls --tls-verify --tls-ca-cert /project/live/dev/secrets/kube-system/helm-tls/ca.cert.pem --tls-cert /project/live/dev/secrets/kube-system/helm-tls/helm.cert.pem  --tls-key /project/live/dev/secrets/kube-system/helm-tls/helm.key.pem`
-   * Adjust paths for the environment you're using.
+1. `helm list` (or other command)
 
 ### I want to spin up my dev environment in a different region
 
@@ -292,6 +291,10 @@ For example: a developer deleted their tfstate bucket in GCS and re-created it w
 1. The easiest workaround is to destroy couchdb, then re-run the deployment:
    * `rake destroy_module"[k8s/gpii/couchdb]" && rake`
 1. If you need to, you may be able to repair the split brain manually using [CouchDB Cluster Management commands](https://docs.couchdb.org/en/stable/cluster/nodes.html).
+
+### My component won't start and the Event logs say `Error creating: pods "my-pod-name" is forbidden: image policy webhook backend denied one or more images: Denied by default admission rule. Overridden by evaluation mode`
+
+This means your component is trying to use a Docker image that is not hosted in our Google Container Registry instance, or which is otherwise not allowed by our Kubernetes Binary Authorization configuration. The Ops team will want to discuss next steps but [gke-cluster](https://github.com/gpii-ops/exekube/tree/master/modules/gke-cluster) is the relevant module. For development purposes, you may add an additional `binary_authorization_admission_whitelist_pattern_N` to allow your new image. You may want to re-deploy your component so that Kubernetes notices the change more quickly.
 
 ### Errors trying to enable/disable Google Cloud APIs
 
@@ -422,6 +425,17 @@ See [Getting started: One-time Stackdriver Workspace setup](README.md#one-time-s
 ## Working with CouchDB data
 
 You can run all `kubectl` commands mentioned below inside of an interactive shell started with `rake sh`.
+
+### Accessing CouchDB and CouchDB Web UI
+
+1. Running `rake couchdb_ui` task in corresponding environment direcotry (e.g.
+   `gcp/live/dev`) will set up port-forwarding of CouchDB port to your local
+   machine and print a link and credentials to access CouchDB Fauxton Web UI.
+1. *(optional)* You can also use the displayed credentials to interact with
+   CouchDB API directly via the forwarded port (`35984`), e.g.:
+   ```
+   curl http://ui:$password@localhost:35984/_up
+   ```
 
 ### The CouchDB cluster won't converge because one of its disks is in the wrong zone
 
@@ -748,10 +762,15 @@ The destination bucket must be created manually. This is a once time setup for S
 
 ##### Restoring a backup from outside of the organization.
 
-The process of the restore it's similar but the other way around. It uses the `gcloud compute images import` command. In order to make easier the process a rake task called `restore_snapshot_from_image_file`can be used. This task takes only one parameter with each snapshot to recover separated by one space. i.e:
-```
-rake restore_snapshot_from_image_file["gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-0-030519-205726.raw.gz gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-1-030519-205756.raw.gz"]
-```
-Once the task finished new restored snapshots will appear with the leading in the name `external-`. This will help with the search when at the restoration of the disks using the snapshots.
+1. Stop `backup-exporter` process in order to not stop the cloudbuild process of restoring the snapshots.
+   ```
+   rake destroy_module["k8s/kube-system/backup-exporter/"]
+   ```
+2. The process of the restore it's similar but the other way around. It uses the `gcloud compute images import` command. In order to make easier the process a rake task called `restore_snapshot_from_image_file`can be used. This task takes only one parameter with each snapshot to recover separated by one space. i.e:
+   ```
+   rake restore_snapshot_from_image_file["gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-0-030519-205726.raw.gz gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-1-030519-205756.raw.gz"]
+   ```
 
-And follow the [restore a pv from snapshot procedure](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#data-corruption-on-a-single-couchdb-replica) using the snapshots restored.
+3. Once the task finished new restored snapshots will appear with the leading in the name `external-`. This will help with the search when at the restoration of the disks using the snapshots.
+
+4. Follow the [restore a pv from snapshot procedure](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#data-corruption-on-a-single-couchdb-replica) using the snapshots restored.

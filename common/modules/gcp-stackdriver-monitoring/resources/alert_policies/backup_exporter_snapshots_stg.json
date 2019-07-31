@@ -1,0 +1,37 @@
+{
+  "display_name": "Backup-exporter of stg snapshots are ok for 12 hours",
+  "combiner": "OR",
+  "conditions": [
+    {
+      "condition_absent": {
+        "aggregations": [
+          {
+            "alignment_period": {
+              "seconds": 60,
+              "nanos" : 0
+            },
+            "cross_series_reducer": "REDUCE_MAX",
+            "group_by_fields": [
+              "metric.label.log"
+            ],
+            "per_series_aligner": "ALIGN_COUNT"
+          }
+        ],
+        "duration": {
+          "seconds": 43200,
+          "nanos" : 0
+        },
+        "filter": "metric.type=\"logging.googleapis.com/user/backup-exporter.snapshot_created_stg\" resource.type=\"k8s_container\"",
+        "trigger": {
+          "count": 1
+        }
+      },
+      "display_name": "Backup-exporter of stg snapshots are missing in the last 12 hours"
+    }
+  ],
+  "notification_channels": [],
+  "user_labels": {},
+  "enabled": {
+    "value": ${enabled}
+  }
+}

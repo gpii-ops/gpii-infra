@@ -51,6 +51,13 @@ class Vars
     # Hack to force Terraform to reapply some resources on every run
     ENV["TF_VAR_nonce"] = SecureRandom.hex
 
+    # Set HELM TLS variables
+    ENV["HELM_TLS_CERT"]    = "/project/live/#{env}/secrets/kube-system/helm-tls/helm.cert.pem"
+    ENV["HELM_TLS_KEY"]     = "/project/live/#{env}/secrets/kube-system/helm-tls/helm.key.pem"
+    ENV["HELM_TLS_CA_CERT"] = "/project/live/#{env}/secrets/kube-system/helm-tls/ca.cert.pem"
+    ENV["HELM_TLS_ENABLE"]  = "true"
+    ENV["HELM_TLS_VERIFY"]  = "true"
+
     if ENV["TF_VAR_project_id"].nil?
       if ["dev"].include?(env)
         ENV["TF_VAR_project_id"] = "#{ENV["TF_VAR_organization_name"]}-#{project_type}-#{env}-#{ENV["USER"]}"

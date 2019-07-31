@@ -2,25 +2,21 @@ terraform {
   backend "gcs" {}
 }
 
-provider "google-beta" {
-  project     = "${var.project_id}"
-  credentials = "${var.serviceaccount_key}"
-}
-
 variable "nonce" {}
-variable "domain_name" {}
-variable "env" {}
-variable "organization_id" {}
 variable "project_id" {}
+variable "organization_id" {}
 variable "serviceaccount_key" {}
-variable "auth_user_email" {}
+variable "common_project_id" {}
 
-# Terragrunt variables
+resource "template_dir" "resources" {
+  source_dir      = "${path.cwd}/resources"
+  destination_dir = "${path.cwd}/resources_rendered"
 
-variable "notification_email" {}
-
-variable "use_auth_user_email" {
-  default = false
+  vars {
+    organization_id = "${var.organization_id}"
+    common_sa       = "projectowner@${var.common_project_id}.iam.gserviceaccount.com"
+    project_id      = "${var.project_id}"
+  }
 }
 
 # Enables debug mode when TF_VAR_stackdriver_debug is not empty
@@ -29,26 +25,7 @@ variable "stackdriver_debug" {
   default = ""
 }
 
-resource "template_dir" "resources" {
-  source_dir      = "${path.cwd}/resources"
-  destination_dir = "${path.cwd}/resources_rendered"
-
-  vars {
-    project_id         = "${var.project_id}"
-    organization_id    = "${var.organization_id}"
-    domain_name        = "${var.domain_name}"
-    notification_email = "${(var.use_auth_user_email && var.auth_user_email != "") ? var.auth_user_email : var.notification_email}"
-
-    # This variable is diabled until GPII-3917 is merged, only affects to
-    # backup-exporter alerts
-    # enabled            = "${(var.env == "prd" || var.env == "stg") ? true : false}"
-    enabled = "false"
-  }
-}
-
-resource "null_resource" "apply_stackdriver_monitoring" {
-  depends_on = ["template_dir.resources"]
-
+resource "null_resource" "apply_stackdriver_lbm" {
   triggers = {
     nonce = "${var.nonce}"
   }
@@ -59,7 +36,7 @@ resource "null_resource" "apply_stackdriver_monitoring" {
       export GOOGLE_CLOUD_KEYFILE=${var.serviceaccount_key}
       export STACKDRIVER_DEBUG=${var.stackdriver_debug}
 
-      RETRIES=10
+      RETRIES=5
       RETRY_COUNT=1
       while [ "$STACKDRIVER_DEADLINE_EXCEEDED" != "false" ]; do
         STACKDRIVER_DEADLINE_EXCEEDED="false"
@@ -68,7 +45,6 @@ resource "null_resource" "apply_stackdriver_monitoring" {
           require "/rakefiles/stackdriver.rb"
           resources = read_resources("${path.module}/resources_rendered")
           apply_resources(resources)
-          destroy_uptime_checks(["${join("\",\"", google_monitoring_uptime_check_config.this.*.name)}"])
         '
         STACKDRIVER_EXIT_STATUS="$?"
         if [ "$STACKDRIVER_EXIT_STATUS" == "120" ]; then
@@ -89,9 +65,7 @@ resource "null_resource" "apply_stackdriver_monitoring" {
   }
 }
 
-resource "null_resource" "destroy_stackdriver_monitoring" {
-  depends_on = ["template_dir.resources"]
-
+resource "null_resource" "destroy_stackdriver_lbm" {
   provisioner "local-exec" {
     when = "destroy"
 
@@ -106,8 +80,7 @@ resource "null_resource" "destroy_stackdriver_monitoring" {
         echo "[Try $RETRY_COUNT of $RETRIES] Destroying Stackdriver resources..."
         ruby -e '
           require "/rakefiles/stackdriver.rb"
-          destroy_resources({"alert_policies"=>[],"notification_channels"=>[]})
-          destroy_uptime_checks(["${join("\",\"", google_monitoring_uptime_check_config.this.*.name)}"])
+          destroy_resources({"log_based_metrics"=>[]})
         '
         STACKDRIVER_EXIT_STATUS="$?"
         if [ "$STACKDRIVER_EXIT_STATUS" == "120" ]; then
