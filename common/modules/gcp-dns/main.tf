@@ -25,6 +25,8 @@ provider "google" {
   region      = "${var.infra_region}"
 }
 
+# This provider is still needed for manage the AWS resources
+# it needs to be removed before GPII-2883 PR is merged
 provider "aws" {
   version = "~> 1.8"
   region  = "us-east-2"
