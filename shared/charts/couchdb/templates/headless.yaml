@@ -10,8 +10,12 @@ metadata:
 spec:
   clusterIP: None
   ports:
-    - name: couchdb
+    - name: http-couchdb
       port: 5984
+    - name: tcp-epmd
+      port: 4369
+    - name: tcp-erl
+      port: 9100
   selector:
     app: {{ template "couchdb.name" . }}
     release: {{ .Release.Name }}

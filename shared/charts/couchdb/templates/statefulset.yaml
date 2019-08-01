@@ -20,8 +20,6 @@ spec:
       labels:
         app: {{ template "couchdb.name" . }}
         release: {{ .Release.Name }}
-      annotations:
-        sidecar.istio.io/inject: "false"
     spec:
       initContainers:
         - name: init-copy
@@ -37,11 +35,12 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: couchdb
+            - name: http-couchdb
               containerPort: 5984
-            - name: epmd
+            - name: tcp-epmd
               containerPort: 4369
-            - containerPort: 9100
+            - name: tcp-erl
+              containerPort: 9100
           env:
 {{- if not .Values.allowAdminParty }}
             - name: COUCHDB_USER
@@ -96,8 +95,15 @@ spec:
         - name: couchdb-statefulset-assembler
           image: "{{ .Values.helperImage.repository }}:{{ .Values.helperImage.tag }}"
           imagePullPolicy: {{ .Values.helperImage.pullPolicy }}
-{{- if not .Values.allowAdminParty }}
           env:
+            - name: COUCHDB_CLUSTER_SIZE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "couchdb.fullname" . }}
+                  key: clusterSize
+            - name: SRV_RECORD
+              value: "_http-couchdb._tcp.{{ template "couchdb.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"
+{{- if not .Values.allowAdminParty }}
             - name: COUCHDB_USER
               valueFrom:
                 secretKeyRef:

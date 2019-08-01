@@ -9,11 +9,15 @@ spec:
     rollingUpdate:
       maxSurge: {{ .Values.rollingUpdate.maxSurge }}
       maxUnavailable: {{ .Values.rollingUpdate.maxUnavailable }}
-    type: RollingUpdate
   template:
     metadata:
       labels:
         app: preferences
+      annotations:
+        # This annotation is needed to allow traffic to metadata.google.internal
+        # until Istio's issue with FQDNs in ServiceEntries is not resolved:
+        # https://github.com/istio/istio/issues/14404
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: "169.254.169.254/32"
     spec:
       containers:
       - name: preferences
