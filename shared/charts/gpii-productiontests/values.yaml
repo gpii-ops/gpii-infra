@@ -3,10 +3,11 @@
 # Declare variables to be passed into your templates.
 
 couchdbUrl: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local:5984/gpii"
+flowmanagerUrl: "http://flowmanager.clown.dev.gcp.gpii.net"
 
 image:
   repository: gpii/universal
-  checksum: sha256:652ed9dc86639d51e806356737567336339c9eb675193ba04b2c5346de3bdee6
+  checksum: sha256:01610ce6980ec825f9282b0b72cc2be4a207a7817afcdc590a7b594d71f9d83b
   pullPolicy: IfNotPresent
 
 nameOverride: productiontests

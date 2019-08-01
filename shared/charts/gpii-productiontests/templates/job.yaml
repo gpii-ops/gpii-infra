@@ -16,14 +16,25 @@ spec:
         securityContext:
           allowPrivilegeEscalation: false
           runAsUser: 1337
-        command: [ "/bin/sh", "-c", "npm run test:productionConfig" ]
+        command: [ "/bin/sh", "-c" ]
+        args:
+          - while true;
+            do
+              echo "Waiting for flowmanager...";
+              RET_CODE=$(curl -k --write-out '%{http_code}' --silent --output /dev/null https://flowmanager.clown.dev.gcp.gpii.net/health);
+              if [ "$RET_CODE" = '200' ]; then
+                break;
+              fi;
+              sleep 30;
+            done;
+            npm run test:productionConfig;
         env:
         - name: GPII_COUCHDB_URL
           value: '{{ .Values.couchdbUrl }}'
         - name: GPII_CLOUD_URL
-          value: 'https://flowmanager.clown.dev.gcp.gpii.net'
+          value: '{{ .Values.flowmanagerUrl }}'
         - name: GPII_FLOWMANAGER_LISTEN_PORT
-          value: '{{ .Values.flowmanagerListenPort }}'
+          value: '80'
         - name: GPII_DATASOURCE_HOSTNAME
           value: '{{ .Values.datasourceHostname }}'
         - name: GPII_DATASOURCE_PORT

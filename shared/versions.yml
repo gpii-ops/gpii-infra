@@ -80,17 +80,17 @@ dataloader:
 productiontests:
   upstream:
     repository: herrclown/prodtests-universal
-    tag: 20190712180617-48c9530d
+    tag: latest
   generated:
     repository: herrclown/prodtests-universal
-    sha: sha256:f1969f978c6bb066895ac569abba8342d6c30ce7cb7c2f7fb6995c536626185a
-    tag: 20190712180617-48c9530d
+    sha: sha256:01610ce6980ec825f9282b0b72cc2be4a207a7817afcdc590a7b594d71f9d83b
+    tag: latest
 flowmanager:
   upstream:
     repository: gpii/universal
     tag: 20190522142238-4a52f56
   generated:
-    repository: gcr.io/gpii-common-prd/gpii__universal
+    repository: gpii/universal
     sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
     tag: 20190522142238-4a52f56
 k8s_snapshots:
@@ -114,7 +114,7 @@ preferences:
     repository: gpii/universal
     tag: 20190522142238-4a52f56
   generated:
-    repository: gcr.io/gpii-common-prd/gpii__universal
+    repository: gpii/universal
     sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
     tag: 20190522142238-4a52f56
 service_account_assigner:
