@@ -39,7 +39,7 @@ resource "template_dir" "resources" {
     domain_name        = "${var.domain_name}"
     notification_email = "${(var.use_auth_user_email && var.auth_user_email != "") ? var.auth_user_email : var.notification_email}"
 
-    enabled            = "${(var.env == "prd" || var.env == "stg") ? true : false}"
+    enabled = "${(var.env == "prd" || var.env == "stg") ? true : false}"
   }
 }
 
