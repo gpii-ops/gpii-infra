@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  namespace: {{ .Release.Namespace | quote }}
+  name: {{ template "couchdb_prometheus_exporter.name" . }}-monitoring
+spec:
+  hosts:
+  - monitoring.googleapis.com
+  tls:
+  - match:
+    - sniHosts:
+      - monitoring.googleapis.com
+    route:
+    - destination:
+        host: monitoring.googleapis.com

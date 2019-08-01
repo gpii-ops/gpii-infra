@@ -1,5 +1,5 @@
 {
-  "display_name": "Backup-exporter process reports one or more errors",
+  "display_name": "Backup-exporter process does not report one or more errors",
   "combiner": "OR",
   "conditions": [
     {
@@ -9,17 +9,17 @@
         "threshold_value": 0.0,
         "duration": {
           "seconds": 900,
-          "nanos" : 0
+          "nanos": 0
         },
         "trigger": {
-          "count": 1,
+          "count": 0,
           "percent": 0.0
         },
         "aggregations": [
           {
             "alignment_period": {
               "seconds": 60,
-              "nanos" : 0
+              "nanos": 0
             },
             "per_series_aligner": "ALIGN_MEAN",
             "cross_series_reducer": "REDUCE_MAX",
@@ -31,7 +31,7 @@
         "denominator_filter": "",
         "denominator_aggregations": []
       },
-      "display_name": "Log-based errors for Backup-exporter"
+      "display_name": "Backup-exporter process reports one or more errors"
     }
   ],
   "notification_channels": [],

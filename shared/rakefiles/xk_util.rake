@@ -240,31 +240,54 @@ end
 
 # This task restores a list of images in snapshots.
 task :restore_snapshot_from_image_file, [:snapshot_files] => [@gcp_creds_file, :configure_extra_tf_vars] do |taskname, args|
-  require 'csv'
+  if args[:snapshot_files].nil? || args[:snapshot_files].size == 0
+    puts "  ERROR: Argument :snapshot_files not present!"
+    raise
+  end
+
+  require 'json'
+
+  pv_hash = JSON.parse(%x{
+      #{@exekube_cmd} kubectl get pv -o json
+    })
 
   pv_zones = {}
-  CSV.parse(%x{
-              #{@exekube_cmd} kubectl get pv -o json | jq -r '.items[] | \"\\(.spec.claimRef.name),\\(.metadata.labels.\"failure-domain.beta.kubernetes.io/zone\")\"'
-           }.chomp).each do |line|
-             pv_zones[line[0]] = line[1]
-           end
+  pv_hash["items"].each do |item|
+    pv_zones[item["spec"]["claimRef"]["name"]] = item["metadata"]["labels"]["failure-domain.beta.kubernetes.io/zone"]
+  end
 
+  # The output of the above code should be a hash type object with the volumes and the zones
+  # where they are:
+  #
+  # pv_zones = {
+  #   "database-storage-couchdb-couchdb-0": "us-central1-f",
+  #   "database-storage-couchdb-couchdb-1": "us-central1-a"
+  # }
+  #
+  # that will be used later to know in which zone we need to restore the images.
   snapshot_files = args[:snapshot_files].split ' '
 
   snapshot_files.each do |snapshot_file|
     sh "#{@exekube_cmd} sh -c ' \
-      gsutil ls #{snapshot_file}
+      gsutil ls #{snapshot_file} 2>&1 >/dev/null || { echo \"File #{snapshot_file} not found\"; exit 1; }
     '", verbose: false
   end
 
   snapshot_files.each do |snapshot_file|
+    # The snapshot_name must be something like:
+    # database-storage-couchdb-couchdb-0-060619-195849 from the file name:
+    # 2019-06-27_154922-pv-database-storage-couchdb-couchdb-0-060619-195849.tar.gz
     snapshot_name = snapshot_file[/database-storage-couchdb-couchdb-\d-\d+-\d+/, 0]
+    pv_zone = pv_zones[snapshot_name[/(([A-Za-z]+-)+[\d])/,0]]
     sh "#{@exekube_cmd} sh -c ' \
-    gcloud compute images create image-disk-pv-#{snapshot_name} --source-uri=#{snapshot_file}
-    gcloud compute disks create disk-pv-#{snapshot_name} --zone=#{pv_zones[snapshot_name[/(([A-Za-z]+-)+[\d])/,0]]} --image=image-disk-pv-#{snapshot_name}
-    gcloud compute disks snapshot disk-pv-#{snapshot_name} --zone=#{pv_zones[snapshot_name[/(([A-Za-z]+-)+[\d])/,0]]} --snapshot-names external-pv-#{snapshot_name}
-    gcloud -q compute images delete image-disk-pv-#{snapshot_name}
-    gcloud -q compute disks delete disk-pv-#{snapshot_name} --zone=#{pv_zones[snapshot_name[/(([A-Za-z]+-)+[\d])/,0]]}
+      function cleanup {
+        gcloud -q compute disks delete disk-pv-#{snapshot_name} --zone=#{pv_zone} || true
+        gcloud -q compute images delete image-disk-pv-#{snapshot_name} || true
+      }
+      gcloud compute images create image-disk-pv-#{snapshot_name} --source-uri=#{snapshot_file} || { cleanup; return 1; }
+      gcloud compute disks create disk-pv-#{snapshot_name} --zone=#{pv_zone} --image=image-disk-pv-#{snapshot_name} || { cleanup; return 1; }
+      gcloud compute disks snapshot disk-pv-#{snapshot_name} --zone=#{pv_zone} --snapshot-names external-pv-#{snapshot_name} || { cleanup; return 1; }
+      cleanup
     '", verbose: false
   end
 

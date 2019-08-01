@@ -42,3 +42,16 @@ Create a random string if the supplied key does not exist
 {{- randAlphaNum 20 | b64enc | quote -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Create a list of hostnames for CouchDB pods
+*/}}
+{{- define "couchdb.hosts" -}}
+{{- $couchdb_fullname := include "couchdb.fullname" . -}}
+{{- $local := dict "first" true -}}
+[{{- range $node_id, $e := until ( .Values.clusterSize | int ) -}}
+{{- if not $local.first -}},{{- end -}}
+"{{- printf "%s-%d.%s.%s.svc.cluster.local" $couchdb_fullname $node_id $couchdb_fullname $.Release.Namespace -}}"
+{{- $_ := set $local "first" false -}}
+{{- end -}}]
+{{- end -}}
