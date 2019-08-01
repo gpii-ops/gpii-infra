@@ -48,3 +48,4 @@ Parameter | Description | Default
 `image.repository` | container image repository | `gpii/universal`
 `image.checksum` | container image checksum | `sha256:fa3bbf3a8255be83552da35b84a1a005d5cb3a44627510171a5a5eb11b2aea89`
 `image.pullPolicy` | container image pullPolicy | `IfNotPresent`
+`cronJobSchedule` | frequency with which flushtokens job runs | `*/15 * * * *`

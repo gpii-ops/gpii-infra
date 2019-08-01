@@ -10,3 +10,5 @@ image:
   pullPolicy: IfNotPresent
 
 nameOverride: flushtokens
+
+cronJobSchedule: "*/15 * * * *"
