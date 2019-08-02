@@ -12,4 +12,4 @@ terragrunt = {
 # ↓ Module configuration (empty means all default)
 
 source_project_name = "stg"
-days_until_delete   = "180"
+days_until_delete   = "2"
