@@ -16,5 +16,6 @@ terragrunt = {
 }
 
 # ↓ Module configuration (empty means all default)
-# TODO: Change the following mail once the whole solution goes to production
-notification_email = "alfredo@raisingthefloor.org"
+
+# This email will receive all the alerts of the backups exported by prd and stg
+notification_email = "alerts+prd@raisingthefloor.org"
