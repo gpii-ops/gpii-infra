@@ -199,8 +199,7 @@ See [CI-CD.md#running-in-non-dev-environments](../CI-CD.md#running-manually-in-n
 
 1. `cd gcp/live/dev` (or another environment)
 1. `rake sh`
-1. `helm --tiller-namespace kube-system list --tls --tls-verify --tls-ca-cert /project/live/dev/secrets/kube-system/helm-tls/ca.cert.pem --tls-cert /project/live/dev/secrets/kube-system/helm-tls/helm.cert.pem  --tls-key /project/live/dev/secrets/kube-system/helm-tls/helm.key.pem`
-   * Adjust paths for the environment you're using.
+1. `helm list` (or other command)
 
 ### I want to spin up my dev environment in a different region
 
@@ -426,6 +425,17 @@ See [Getting started: One-time Stackdriver Workspace setup](README.md#one-time-s
 ## Working with CouchDB data
 
 You can run all `kubectl` commands mentioned below inside of an interactive shell started with `rake sh`.
+
+### Accessing CouchDB and CouchDB Web UI
+
+1. Running `rake couchdb_ui` task in corresponding environment direcotry (e.g.
+   `gcp/live/dev`) will set up port-forwarding of CouchDB port to your local
+   machine and print a link and credentials to access CouchDB Fauxton Web UI.
+1. *(optional)* You can also use the displayed credentials to interact with
+   CouchDB API directly via the forwarded port (`35984`), e.g.:
+   ```
+   curl http://ui:$password@localhost:35984/_up
+   ```
 
 ### The CouchDB cluster won't converge because one of its disks is in the wrong zone
 
@@ -708,59 +718,20 @@ If this downtime will be disruptive to your work ("We're giving a demo for the
 Prime Minister at that time!"), please let me know immediately.
 ```
 
-#### External backups
+### External backups
 
-##### Setup.
+#### Sending backup outside of the organization.
 
-Create a Terragrunt definition like `gcp/live/prd/k8s/kube-system/backup-exporter/terraform.tfvars` inside the exekube project. This file contains 3 variables:
-   * `destination_bucket` - The destination GCS bucket, i.e "gs://gpii-backup-external-prd".
-   * `replica_count` - the number of CouchDB replicas that the cluster has. This is important for copying all the snapshots of the cluster at the same time.
-   * `schedule` - Follows the same format as a Cron Job. i.e: `*/10 * * * *` to execute the task every 10 minutes.
+The process is mostly executed by the `gcloud compute images export` command, which uses Cloud Build service, which uses [Daisy](https://github.com/GoogleCloudPlatform/compute-image-tools/tree/master/daisy) to create a VM, attach the images based on the snapshots to backup, create a file from those images and send the result files to the external storage.
 
-i.e:
+The destination buckets are created automatically by [Terraform code](https://github.com/gpii-ops/gpii-infra/tree/master/common/modules/gcp-external-backup). These buckets live in the testing organization (gpii2test) rather than the main organization (gpii) to keep them safe if a disaster affects the main organization.
+
+#### Restoring a backup from outside of the organization.
+
+The process of the restore it's similar but the other way around. It uses the `gcloud compute images import` command. In order to make easier the process a rake task called `restore_snapshot_from_image_file`can be used. This task takes only one parameter with each snapshot to recover separated by one space. i.e:
 ```
-# ↓ Module metadata
-
-terragrunt = {
-  terraform {
-    source = "/project/modules//backup-exporter"
-  }
-
-  dependencies {
-    paths = [
-      "../k8s-snapshots",
-    ]
-  }
-
-  include = {
-    path = "${find_in_parent_folders()}"
-  }
-}
-
-# ↓ Module configuration (empty means all default)
-
-destination_bucket = "gs://gpii-backup-dev-alfredo"
-replica_count      = 2
-schedule           = "*/30 * * * *"
+rake restore_snapshot_from_image_file["gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-0-030519-205726.raw.gz gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-1-030519-205756.raw.gz"]
 ```
+Once the task finished new restored snapshot files will appear with the string `external-` at the beginning of the name. This will help with the search when at the restoration of the disks using the snapshots.
 
-##### Sending backup outside of the organization.
-
-The process is mostly executed by the `gcloud compute images export` command, which uses Cloud Build service, which uses [Daisy](ttps://github.com/GoogleCloudPlatform/compute-image-tools/tree/master/daisy) to create a VM, attach the images based on the snapshots to backup, create a file from those images and send the result files to the external storage.
-
-The destination bucket must be created manually. This is a once time setup for STG and PRD, because it doesn't need to be recreated in the future. The bucket must have the following permissions for the service account `[Source_project_number_id]@cloudbuild.gserviceaccount.com` needs the `Storage Admin` roles, because the Cloud Build service needs to copy the final images in the GCS bucket. Note that such service account must exist in order to attach the role. The Cloud Build service account is created when the Cloud Build API is enabled.
-
-##### Restoring a backup from outside of the organization.
-
-1. Stop `backup-exporter` process in order to not stop the cloudbuild process of restoring the snapshots.
-   ```
-   rake destroy_module["k8s/kube-system/backup-exporter/"]
-   ```
-2. The process of the restore it's similar but the other way around. It uses the `gcloud compute images import` command. In order to make easier the process a rake task called `restore_snapshot_from_image_file`can be used. This task takes only one parameter with each snapshot to recover separated by one space. i.e:
-   ```
-   rake restore_snapshot_from_image_file["gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-0-030519-205726.raw.gz gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-1-030519-205756.raw.gz"]
-   ```
-
-3. Once the task finished new restored snapshots will appear with the leading in the name `external-`. This will help with the search when at the restoration of the disks using the snapshots.
-
-4. Follow the [restore a pv from snapshot procedure](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#data-corruption-on-a-single-couchdb-replica) using the snapshots restored.
+And follow the process [Data corruption on all replicas of CouchDB cluster](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#data-corruption-on-all-replicas-of-couchdb-cluster) using the snapshot files restored.

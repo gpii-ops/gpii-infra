@@ -1,0 +1,17 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: {{ template "couchdb.fullname" . }}
+spec:
+  hosts: {{ template "couchdb.hosts" . }}
+  ports:
+  - number: 5984
+    name: http-couchdb
+    protocol: http
+  - number: 4369
+    name: tcp-epmd
+    protocol: tcp
+  - number: 9100
+    name: tcp-erl
+    protocol: tcp
+  location: MESH_INTERNAL
