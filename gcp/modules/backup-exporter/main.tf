@@ -9,6 +9,7 @@ variable "cloud_sdk_tag" {}
 
 # `destination_bucket` - The destination GCS bucket, i.e "gs://gpii-backup-external-prd".
 variable "destination_bucket" {}
+
 variable "project_id" {}
 
 # `replica_count` - the number of CouchDB replicas that the cluster has. This is important for copying all the snapshots of the cluster at the same time.
@@ -16,6 +17,7 @@ variable "replica_count" {}
 
 # `schedule` - Follows the same format as a Cron Job. i.e: `*/10 * * * *` to execute the task every 10 minutes.
 variable "schedule" {}
+
 variable "serviceaccount_key" {}
 
 # Terragrunt variables
