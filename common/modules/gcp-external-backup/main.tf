@@ -27,7 +27,7 @@ resource "google_storage_bucket" "external-backup-store" {
   location = "${var.location}"
   project  = "${var.project_id}"
 
-  # The Storage class is Nealine for less than 30 days of living period and
+  # The Storage class is NEARLINE for less than 30 days of living period and
   # COLDLINE for more.
   storage_class = "${var.days_until_delete < 30 ? "NEARLINE" : "COLDLINE"}"
 
