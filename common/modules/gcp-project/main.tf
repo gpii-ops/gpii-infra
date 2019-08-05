@@ -304,6 +304,36 @@ data "google_iam_policy" "combined" {
     ]
   }
 
+  # Needed for setting up monitoring
+  # GPII-2782
+  binding {
+    role = "roles/logging.configWriter"
+
+    members = [
+      "${local.service_accounts}",
+    ]
+  }
+
+  # Needed for setting up monitoring
+  # GPII-2782
+  binding {
+    role = "roles/monitoring.alertPolicyEditor"
+
+    members = [
+      "${local.service_accounts}",
+    ]
+  }
+
+  # Needed for setting up monitoring
+  # GPII-2782
+  binding {
+    role = "roles/monitoring.notificationChannelEditor"
+
+    members = [
+      "${local.service_accounts}",
+    ]
+  }
+
   binding {
     role = "roles/logging.logWriter"
 
