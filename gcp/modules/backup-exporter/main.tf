@@ -7,7 +7,7 @@ variable "charts_dir" {}
 variable "cloud_sdk_repository" {}
 variable "cloud_sdk_tag" {}
 
-# `destination_bucket` - The destination GCS bucket, i.e "gs://gpii-backup-external-prd".
+# `destination_bucket` - The destination GCS bucket, i.e "gpii-backup-external-prd".
 variable "destination_bucket" {}
 
 variable "project_id" {}
@@ -41,7 +41,7 @@ data "template_file" "backup-exporter" {
     destination_bucket        = "${var.destination_bucket}"
     local_intermediate_bucket = "${google_storage_bucket.backup_daisy_bkt.name}"
     replica_count             = "${var.replica_count}"
-    log_bucket                = "gs://${google_storage_bucket.backup_daisy_bkt.name}/logs"
+    log_bucket                = "${google_storage_bucket.backup_daisy_bkt.name}"
     schedule                  = "${var.schedule}"
   }
 }
