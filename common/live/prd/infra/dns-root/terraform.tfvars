@@ -2,9 +2,8 @@
 
 terragrunt = {
   terraform {
-    source = "/project/modules//aws-gcp-dns"
+    source = "/project/modules//gcp-dns"
   }
-
   include = {
     path = "${find_in_parent_folders()}"
   }
