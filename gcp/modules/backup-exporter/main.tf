@@ -61,7 +61,11 @@ module "backup-exporter" {
 
 resource "google_storage_bucket" "backup_daisy_bkt" {
   project = "${data.google_project.project.project_id}"
-  name    = "${data.google_project.project.name}-daisy-bkt"
+
+  # The Daisy bucket can use a different name depending on the zone where the
+  # Cloudbuild runs. By default it uses [project_name]-daisy-bkt but if the zone
+  # is set to us-* the name of the bucket will end with -us
+  name = "${data.google_project.project.name}-daisy-bkt-us"
 
   force_destroy = true
 }
