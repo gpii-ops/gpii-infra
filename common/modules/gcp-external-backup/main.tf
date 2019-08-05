@@ -8,10 +8,6 @@ provider "google" {
   region      = "${var.infra_region}"
 }
 
-data "google_project" "project" {
-  project_id = "gpii-gcp-${var.source_project_name}"
-}
-
 resource "null_resource" "retention_policy" {
   triggers = {
     days_until_delete = "${var.days_until_delete}"
