@@ -178,11 +178,20 @@ data "google_iam_policy" "combined" {
 
     members = [
       "${local.service_accounts}",
+      "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
     ]
   }
 
   binding {
     role = "roles/iam.serviceAccountActor"
+
+    members = [
+      "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
+    ]
+  }
+
+  binding {
+    role = "roles/iam.serviceAccountTokenCreator"
 
     members = [
       "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
