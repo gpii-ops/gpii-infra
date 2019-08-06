@@ -18,8 +18,8 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
-# `destination_bucket` - The destination GCS bucket, i.e "gs://gpii-backup-external-prd".
-destination_bucket = "gs://gpii-backup-prd"
+# `destination_bucket` - The destination GCS bucket, i.e "gpii-backup-external-prd".
+destination_bucket = "gpii-backup-prd"
 
 # `replica_count` - the number of CouchDB replicas that the cluster has. This is important for copying all the snapshots of the cluster at the same time.
 replica_count      = 3
