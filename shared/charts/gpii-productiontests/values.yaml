@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 couchdbUrl: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local:5984/gpii"
-flowmanagerUrl: "http://flowmanager.clown.dev.gcp.gpii.net"
+flowmanagerUrl: "http://flowmanager.gpii.svc.cluster.local"
 
 image:
   repository: gpii/universal

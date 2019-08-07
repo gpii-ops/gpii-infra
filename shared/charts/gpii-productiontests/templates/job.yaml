@@ -28,6 +28,11 @@ spec:
               sleep 30;
             done;
             npm run test:productionConfig;
+            while true;
+            do
+                echo "sleeping...";
+                sleep 2;
+            done;
         env:
         - name: GPII_COUCHDB_URL
           value: '{{ .Values.couchdbUrl }}'
