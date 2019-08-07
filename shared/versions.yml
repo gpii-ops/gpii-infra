@@ -72,19 +72,27 @@ couchdb:
 dataloader:
   upstream:
     repository: gpii/universal
-    tag: 20190522142238-4a52f56
+    tag: 20190801163411-26be63f
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
-    tag: 20190522142238-4a52f56
+    sha: sha256:fb90080bee40bf89684afd166797b700d8fed3342f043a5f71914ce69aae326e
+    tag: 20190801163411-26be63f
+flushtokens:
+  upstream:
+    repository: gpii/universal
+    tag: 20190801163411-26be63f
+  generated:
+    repository: gcr.io/gpii-common-prd/gpii__universal
+    sha: sha256:fb90080bee40bf89684afd166797b700d8fed3342f043a5f71914ce69aae326e
+    tag: 20190801163411-26be63f
 flowmanager:
   upstream:
     repository: gpii/universal
-    tag: 20190522142238-4a52f56
+    tag: 20190801163411-26be63f
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
-    tag: 20190522142238-4a52f56
+    sha: sha256:fb90080bee40bf89684afd166797b700d8fed3342f043a5f71914ce69aae326e
+    tag: 20190801163411-26be63f
 k8s_snapshots:
   upstream:
     repository: elsdoerfer/k8s-snapshots
@@ -104,11 +112,11 @@ locust:
 preferences:
   upstream:
     repository: gpii/universal
-    tag: 20190522142238-4a52f56
+    tag: 20190801163411-26be63f
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
-    tag: 20190522142238-4a52f56
+    sha: sha256:fb90080bee40bf89684afd166797b700d8fed3342f043a5f71914ce69aae326e
+    tag: 20190801163411-26be63f
 service_account_assigner:
   upstream:
     repository: gpii/service-account-assigner
