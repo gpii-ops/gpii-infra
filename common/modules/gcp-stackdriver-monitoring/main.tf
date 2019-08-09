@@ -39,8 +39,7 @@ resource "template_dir" "resources" {
     domain_name        = "${var.domain_name}"
     notification_email = "${var.notification_email}"
 
-    # Disabled until GPII-3917 is merged
-    enabled = "false"
+    enabled = "true"
   }
 }
 

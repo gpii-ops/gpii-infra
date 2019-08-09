@@ -173,7 +173,7 @@ task :sh, [:cmd] => [:set_vars] do |taskname, args|
     puts "Argument :cmd -- the command to run inside the exekube container -- not present, defaulting to 'bash'"
     cmd = "bash"
   end
-  sh "#{@exekube_cmd} rake xk['#{cmd}',skip_secret_mgmt,preserve_stderr]"
+  sh "#{@exekube_cmd} rake xk['#{cmd}',true,true]"
 end
 
 desc "[ADVANCED] Run arbitrary command in exekube container via plain shell -- rake plain_sh['kubectl --namespace gpii get pods']"
@@ -317,7 +317,7 @@ task :destroy_module, [:module] => [:set_vars, :check_destroy_allowed, :fetch_he
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
     raise
   end
-  sh "#{@exekube_cmd} rake xk['destroy live/#{@env}/#{args[:module]}',skip_secret_mgmt]"
+  sh "#{@exekube_cmd} rake xk['destroy live/#{@env}/#{args[:module]}',true]"
 end
 
 desc "[ADMIN ONLY] Grant owner role in the current project to the current user"

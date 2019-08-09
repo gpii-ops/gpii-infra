@@ -39,10 +39,7 @@ resource "template_dir" "resources" {
     domain_name        = "${var.domain_name}"
     notification_email = "${(var.use_auth_user_email && var.auth_user_email != "") ? var.auth_user_email : var.notification_email}"
 
-    # This variable is diabled until GPII-3917 is merged, only affects to
-    # backup-exporter alerts
-    # enabled            = "${(var.env == "prd" || var.env == "stg") ? true : false}"
-    enabled = "false"
+    enabled = "${(var.env == "prd" || var.env == "stg") ? true : false}"
   }
 }
 

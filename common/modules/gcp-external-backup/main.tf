@@ -8,10 +8,6 @@ provider "google" {
   region      = "${var.infra_region}"
 }
 
-data "google_project" "project" {
-  project_id = "gpii-gcp-${var.source_project_name}"
-}
-
 resource "null_resource" "retention_policy" {
   triggers = {
     days_until_delete = "${var.days_until_delete}"
@@ -27,18 +23,9 @@ resource "google_storage_bucket" "external-backup-store" {
   location = "${var.location}"
   project  = "${var.project_id}"
 
-  storage_class = "MULTI_REGIONAL"
-
-  lifecycle_rule = {
-    action = {
-      type          = "SetStorageClass"
-      storage_class = "COLDLINE"
-    }
-
-    condition = {
-      age = "${var.days_until_coldline}"
-    }
-  }
+  # The Storage class is NEARLINE for less than 30 days of living period and
+  # COLDLINE for more.
+  storage_class = "${var.days_until_delete < 30 ? "NEARLINE" : "COLDLINE"}"
 
   lifecycle_rule = {
     action = {

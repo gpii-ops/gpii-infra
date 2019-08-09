@@ -178,11 +178,20 @@ data "google_iam_policy" "combined" {
 
     members = [
       "${local.service_accounts}",
+      "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
     ]
   }
 
   binding {
     role = "roles/iam.serviceAccountActor"
+
+    members = [
+      "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
+    ]
+  }
+
+  binding {
+    role = "roles/iam.serviceAccountTokenCreator"
 
     members = [
       "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
@@ -301,6 +310,36 @@ data "google_iam_policy" "combined" {
 
     members = [
       "${local.project_owners}",
+    ]
+  }
+
+  # Needed for setting up monitoring
+  # GPII-2782
+  binding {
+    role = "roles/logging.configWriter"
+
+    members = [
+      "${local.service_accounts}",
+    ]
+  }
+
+  # Needed for setting up monitoring
+  # GPII-2782
+  binding {
+    role = "roles/monitoring.alertPolicyEditor"
+
+    members = [
+      "${local.service_accounts}",
+    ]
+  }
+
+  # Needed for setting up monitoring
+  # GPII-2782
+  binding {
+    role = "roles/monitoring.notificationChannelEditor"
+
+    members = [
+      "${local.service_accounts}",
     ]
   }
 

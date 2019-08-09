@@ -1,8 +1,7 @@
 # ↓ Module metadata
-
 terragrunt = {
   terraform {
-    source = "/project/modules//gcp-dns"
+    source = "/project/modules//gcp-stackdriver-lbm"
   }
 
   include = {
@@ -10,3 +9,4 @@ terragrunt = {
   }
 }
 
+# ↓ Module configuration (empty means all default)

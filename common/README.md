@@ -1,6 +1,6 @@
-# Common gpii-infra GCP-AWS
+# Common gpii-infra GCP
 
-This directory manages GPII infrastructure in [Google Cloud Project (GCP)](https://cloud.google.com/) and [Amazon Web Services (AWS)](https://aws.amazon.com/). It is organized as an [exekube](https://github.com/exekube/exekube) project and is very loosely based on the [exekube demo-apps-project](https://github.com/exekube/demo-apps-project)
+This directory manages GPII infrastructure in [Google Cloud Project (GCP)](https://cloud.google.com/). It is organized as an [exekube](https://github.com/exekube/exekube) project and is very loosely based on the [exekube demo-apps-project](https://github.com/exekube/demo-apps-project)
 
 Initial instructions based on [exekube's Getting Started](https://exekube.github.io/exekube/in-practice/getting-started/) (version 0.3.0).
 
@@ -30,6 +30,18 @@ The DNS zones are:
 - dev.gcp.gpii.net
 - ${user}.dev.gcp.gpii.net
 
+The zones "gpii.net", "gcp.gpii.net", "test1.gpii.net" and "gcp.test1.gpii.net" need to be created manually before this code creates the rest of the resources.
+
+This code will use the following zones stored in the following projects:
+
+* DNS: "gcp.gpii.net"
+* id: gcp-gpii-net
+* project: gpii-common-prd
+
+* DNS: "gcp.test1.gpii.net"
+* id: gcp-test1-gpii-net
+* project: gpii2test-common-prd (testing organization)
+
 ## Creating the initial infrastructure
 
 1. Clone this repo.
@@ -37,9 +49,6 @@ The DNS zones are:
    * The `gpii-infra` clone and the `exekube` clone should be siblings in the same directory (there are some references to `../exekube`).
 1. By default you'll use the RtF Organization and Billing Account.
    * You can use a different Organization or Billing Account, e.g. from a GCP Free Trial Account, with `export ORGANIZATION_ID=111111111111` and/or `export BILLING_ID=222222-222222-222222`.
-1. Check that [you have the AWS credentials](../aws#configure-cloud-provider-credentials).
-   * Be sure that your AWS credentials are in your $HOME/.aws directory.
-1. `cd gpii-infra/common/live/prd` or `cd gpii-infra/common/live/stg`
 1. `rake apply_common_infra`
    * This will create a project called `gpii-common-prd` or `gpii-common-stg`, with all the resources needed to run Terraform and create all the organization projects.
    * This step must be executed by an user with admin privileges in the organization, because it needs to create IAMs that are able to create projects and associate the billing account to them.
@@ -140,8 +149,6 @@ In the case of the DNS-root, the resources are spread AWS and Google DNS:
 
    ```
    # DNS zones
-   terragrunt import module.aws_zone.aws_route53_record.main_ns Z26C1YEN96KOGI_aws.gpii.net_NS
-   terragrunt import module.aws_zone.aws_route53_zone.main Z26VOXVJXXG9QQ
    terragrunt import module.gcp_zone_in_aws.aws_route53_record.main_ns  Z26C1YEN96KOGI_gcp.gpii.net_NS
    terragrunt import module.gcp_zone_in_aws.aws_route53_zone.main Z29SXC5CAHOH1D
    ```

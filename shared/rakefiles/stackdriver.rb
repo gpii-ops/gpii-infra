@@ -85,7 +85,7 @@ def get_alert_policy_identifier(alert_policy)
 end
 
 def compare_alert_policies(stackdriver_alert_policy, alert_policy)
-  stackdriver_alert_policy = JSON.parse(stackdriver_alert_policy.to_hash.to_json)
+  stackdriver_alert_policy = JSON.parse(stackdriver_alert_policy.to_h.to_json)
   ["name", "creation_record", "mutated_by", "mutation_record"]. each do |attribute|
     stackdriver_alert_policy.delete(attribute)
   end
@@ -108,13 +108,13 @@ def compare_alert_policies(stackdriver_alert_policy, alert_policy)
 end
 
 def compare_notification_channels(stackdriver_notification_channel, notification_channel)
-  stackdriver_notification_channel = JSON.parse(stackdriver_notification_channel.to_hash.to_json)
+  stackdriver_notification_channel = JSON.parse(stackdriver_notification_channel.to_h.to_json)
 
   return stackdriver_notification_channel != notification_channel
 end
 
 def debug_output(resource)
-  return JSON.pretty_generate(resource.to_hash)
+  return JSON.pretty_generate(resource.to_h)
 end
 
 def apply_log_based_metrics(log_based_metrics = [])
