@@ -5,7 +5,7 @@
 # Enable debug output if $DEBUG is set to true
 [ "${DEBUG:=false}" = 'true' ] && set -x
 
-# Get script name
+# Only print commands to delete rules by default
 DRY_RUN=${DRY_RUN:='true'}
 
 # Get projects
@@ -19,8 +19,7 @@ for p in ${PROJECTS}; do
   # Verify we have expected number of rules with tag (5 or 0)
   echo "GKE FWs:     $(gcloud -q --project "${p}" compute firewall-rules list --filter="targetTags :( ${GCP_TAG} )" --format="value(name)" 2>/dev/null | wc -l)"
 
-  # Count bad rules - 2 are dupes from exekube - will be removed after this PR
-  # rest are orphaned ones
+  # Count bad - orphaned - rules
   BAD_FW_RULES="$(gcloud -q --project "${p}" compute firewall-rules list --filter="NOT targetTags :( ${GCP_TAG} )" --format="value(name)" 2>/dev/null | tr '\r\n' ' ')"
   echo "Bad FWs:     $(echo "${BAD_FW_RULES}" | wc -w)"
   
