@@ -71,28 +71,28 @@ couchdb:
     tag: 2.3.1
 dataloader:
   upstream:
-    repository: cindyqili/universal
-    tag: latest
+    repository: gpii/universal
+    tag: 20190809170605-f8485e9
   generated:
-    repository: cindyqili/universal
-    sha: sha256:f9020505bf92b32ed2865715c8748b118a962b7d8a0078e2136b120a5850f4e0
-    tag: latest
+    repository: gpii/universal
+    sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
+    tag: 20190809170605-f8485e9
 flushtokens:
   upstream:
-    repository: cindyqili/universal
-    tag: latest
+    repository: gpii/universal
+    tag: 20190809170605-f8485e9
   generated:
-    repository: cindyqili/universal
-    sha: sha256:f9020505bf92b32ed2865715c8748b118a962b7d8a0078e2136b120a5850f4e0
-    tag: latest
+    repository: gpii/universal
+    sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
+    tag: 20190809170605-f8485e9
 flowmanager:
   upstream:
-    repository: cindyqili/universal
-    tag: latest
+    repository: gpii/universal
+    tag: 20190809170605-f8485e9
   generated:
-    repository: cindyqili/universal
-    sha: sha256:f9020505bf92b32ed2865715c8748b118a962b7d8a0078e2136b120a5850f4e0
-    tag: latest
+    repository: gpii/universal
+    sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
+    tag: 20190809170605-f8485e9
 k8s_snapshots:
   upstream:
     repository: elsdoerfer/k8s-snapshots
@@ -111,12 +111,12 @@ locust:
     tag: 0.9.0-gpii.6
 preferences:
   upstream:
-    repository: cindyqili/universal
-    tag: latest
+    repository: gpii/universal
+    tag: 20190809170605-f8485e9
   generated:
-    repository: cindyqili/universal
-    sha: sha256:f9020505bf92b32ed2865715c8748b118a962b7d8a0078e2136b120a5850f4e0
-    tag: latest
+    repository: gpii/universal
+    sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
+    tag: 20190809170605-f8485e9
 service_account_assigner:
   upstream:
     repository: gpii/service-account-assigner
