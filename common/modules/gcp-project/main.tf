@@ -489,10 +489,11 @@ locals {
 }
 
 resource "google_project" "project" {
-  name            = "${var.organization_name}-gcp-${var.project_name}"
-  project_id      = "${var.organization_name}-gcp-${var.project_name}"
-  billing_account = "${var.billing_id}"
-  org_id          = "${var.organization_id}"
+  name                = "${var.organization_name}-gcp-${var.project_name}"
+  project_id          = "${var.organization_name}-gcp-${var.project_name}"
+  billing_account     = "${var.billing_id}"
+  org_id              = "${var.organization_id}"
+  auto_create_network = false
 }
 
 resource "google_project_services" "project" {
