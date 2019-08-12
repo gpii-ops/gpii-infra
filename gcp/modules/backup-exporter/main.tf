@@ -20,7 +20,17 @@ variable "schedule" {}
 
 variable "serviceaccount_key" {}
 
-# Terragrunt variables
+# Region where the cluster is
+variable "infra_region" {}
+
+# Network to attach the VM created by CloudBuild
+variable "vm_network" {
+  default = "network"
+}
+variable "vm_subnetwork" {
+  default = "nodes"
+}
+
 
 provider "google" {
   project     = "${var.project_id}"
@@ -43,6 +53,9 @@ data "template_file" "backup-exporter" {
     replica_count             = "${var.replica_count}"
     log_bucket                = "${google_storage_bucket.backup_daisy_bkt.name}"
     schedule                  = "${var.schedule}"
+    infra_region              = "${var.infra_region}"
+    vm_network                = "${var.vm_network}"
+    vm_subnetwork             = "${var.vm_subnetwork}"
   }
 }
 
