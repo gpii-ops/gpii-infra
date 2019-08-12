@@ -14,7 +14,6 @@ variable "couchdb_tag" {}
 
 # Terragrunt variables
 
-variable "replica_count" {}
 variable "backup_deltas" {}
 variable "release_namespace" {}
 variable "requests_cpu" {}
@@ -33,6 +32,12 @@ variable "execute_recover_pvcs" {}
 variable "secret_couchdb_admin_password" {}
 variable "secret_couchdb_admin_username" {}
 variable "secret_couchdb_auth_cookie" {}
+
+# Default variables
+
+variable "replica_count" {
+  default = 3
+}
 
 data "template_file" "couchdb_values" {
   depends_on = ["null_resource.couchdb_recover_pvcs"]
