@@ -57,11 +57,9 @@ gcp-unit-tests:
   stage: unit-tests
   tags:
     - gcp
-  variables:
-    BUNDLE_GEMFILE: "/gemfiles/google/Gemfile"
   script:
     - cd shared/rakefiles/tests
-    - bundle install --with test
+    - bundle install --path "vendor/bundle"
     - rake
   only:
     - master@gpii-ops/gpii-infra
