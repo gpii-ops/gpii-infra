@@ -27,10 +27,10 @@ variable "infra_region" {}
 variable "vm_network" {
   default = "network"
 }
+
 variable "vm_subnetwork" {
   default = "nodes"
 }
-
 
 provider "google" {
   project     = "${var.project_id}"
