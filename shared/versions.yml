@@ -74,7 +74,7 @@ dataloader:
     repository: gpii/universal
     tag: 20190809170605-f8485e9
   generated:
-    repository: gpii/universal
+    repository: gcr.io/gpii-common-prd/gpii__universal
     sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
     tag: 20190809170605-f8485e9
 flushtokens:
@@ -82,7 +82,7 @@ flushtokens:
     repository: gpii/universal
     tag: 20190809170605-f8485e9
   generated:
-    repository: gpii/universal
+    repository: gcr.io/gpii-common-prd/gpii__universal
     sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
     tag: 20190809170605-f8485e9
 flowmanager:
@@ -90,7 +90,7 @@ flowmanager:
     repository: gpii/universal
     tag: 20190809170605-f8485e9
   generated:
-    repository: gpii/universal
+    repository: gcr.io/gpii-common-prd/gpii__universal
     sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
     tag: 20190809170605-f8485e9
 k8s_snapshots:
@@ -114,7 +114,7 @@ preferences:
     repository: gpii/universal
     tag: 20190809170605-f8485e9
   generated:
-    repository: gpii/universal
+    repository: gcr.io/gpii-common-prd/gpii__universal
     sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
     tag: 20190809170605-f8485e9
 service_account_assigner:
