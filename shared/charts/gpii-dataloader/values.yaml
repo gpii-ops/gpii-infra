@@ -2,7 +2,11 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-couchdbUrl: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local:5984/gpii"
+couchdb:
+  url: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local:5984/gpii"
+  labels:
+    app: couchdb
+  port: http-couchdb
 
 image:
   repository: gpii/universal
