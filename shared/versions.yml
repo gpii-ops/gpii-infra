@@ -99,7 +99,7 @@ k8s_snapshots:
     tag: v2.0
   generated:
     repository: gcr.io/gpii-common-prd/elsdoerfer__k8s-snapshots
-    sha: sha256:c787dc6fa1812c97ac96f46b4ff6dc1485e06c458839d4aa129aaf62201309e9
+    sha: sha256:06ceb13d357ef689cd4ecfa17d20f6cd7874554c6da4dfad7bd56cd005e4e452
     tag: v2.0
 locust:
   upstream:
