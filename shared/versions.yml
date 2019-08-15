@@ -11,7 +11,7 @@ cert_manager:
     tag: v0.6.1
   generated:
     repository: gcr.io/gpii-common-prd/quay.io__jetstack__cert-manager-controller
-    sha: sha256:e995152afc1f609e91343122aff8af56b192eee102ffbe5a8350bb37b68fde7f
+    sha: sha256:5a4bc171592615ff78e024c8091e77e70179edba840989a203d49c088b6135a6
     tag: v0.6.1
 certmerge_operator:
   upstream:
@@ -67,24 +67,32 @@ couchdb:
     tag: 2.3.1
   generated:
     repository: gcr.io/gpii-common-prd/couchdb
-    sha: sha256:f19e0751c52e6c6948e851a01967d7a0eef37db290b7bf3444a88d2774a04c5f
+    sha: sha256:a7a7967643418a11bf42b86ad652cb01f4dc68b7872374b5e3c5219750817771
     tag: 2.3.1
 dataloader:
   upstream:
     repository: gpii/universal
-    tag: 20190522142238-4a52f56
+    tag: 20190809170605-f8485e9
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
-    tag: 20190522142238-4a52f56
+    sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
+    tag: 20190809170605-f8485e9
+flushtokens:
+  upstream:
+    repository: gpii/universal
+    tag: 20190809170605-f8485e9
+  generated:
+    repository: gcr.io/gpii-common-prd/gpii__universal
+    sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
+    tag: 20190809170605-f8485e9
 flowmanager:
   upstream:
     repository: gpii/universal
-    tag: 20190522142238-4a52f56
+    tag: 20190809170605-f8485e9
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
-    tag: 20190522142238-4a52f56
+    sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
+    tag: 20190809170605-f8485e9
 k8s_snapshots:
   upstream:
     repository: elsdoerfer/k8s-snapshots
@@ -104,11 +112,11 @@ locust:
 preferences:
   upstream:
     repository: gpii/universal
-    tag: 20190522142238-4a52f56
+    tag: 20190809170605-f8485e9
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:57606b63cc431e1608c00d124e86a60b8f6d24196d0e600b0d279dee31395076
-    tag: 20190522142238-4a52f56
+    sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
+    tag: 20190809170605-f8485e9
 service_account_assigner:
   upstream:
     repository: gpii/service-account-assigner
