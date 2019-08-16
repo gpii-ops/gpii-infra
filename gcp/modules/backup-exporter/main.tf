@@ -23,6 +23,11 @@ variable "serviceaccount_key" {}
 # Region where the cluster is
 variable "infra_region" {}
 
+# Zone inside the region where the cluster is
+variable "zone" {
+  default = "a"
+}
+
 # Network to attach the VM created by CloudBuild
 variable "vm_network" {
   default = "network"
@@ -56,6 +61,7 @@ data "template_file" "backup-exporter" {
     infra_region              = "${var.infra_region}"
     vm_network                = "${var.vm_network}"
     vm_subnetwork             = "${var.vm_subnetwork}"
+    zone                      = "${var.zone}"
   }
 }
 
