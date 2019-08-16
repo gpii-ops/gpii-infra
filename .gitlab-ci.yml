@@ -58,9 +58,7 @@ gcp-unit-tests:
   tags:
     - gcp
   script:
-    - cd shared/rakefiles/tests
-    - bundle install --path "vendor/bundle"
-    - rake
+    - docker run --rm -v "$(pwd):/data" -w /data/shared/rakefiles/tests gpii/exekube:0.9.4-google_gpii.0 -- sh -c "bundle install --with test && rake"
   only:
     - master@gpii-ops/gpii-infra
 
