@@ -27,7 +27,7 @@ cloud_sdk:
     tag: 253.0.0-alpine
   generated:
     repository: gcr.io/gpii-common-prd/google__cloud-sdk
-    sha: sha256:7b65f849358606e702ee476b9c735c4d729f1db32e401fdc2746b076d7536e27
+    sha: sha256:5080b4ac5c3f23af87f3c99179bcfaed155e3c71eda788cd60a157a9c8d72907
     tag: 253.0.0-alpine
 couchdb_helper:
   upstream:
