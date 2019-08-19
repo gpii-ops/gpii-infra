@@ -48,3 +48,4 @@ workflows:
     jobs:
       - terraform-fmt-check
       - gcp-unit-tests
+      - exekube-versions-check
