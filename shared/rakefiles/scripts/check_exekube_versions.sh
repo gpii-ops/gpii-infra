@@ -8,7 +8,7 @@ IMAGE_REGEX="gpii/exekube:\d+\.\d+\.\d+-google_gpii\.\d+"
 images=$(find . \( -name "$EXCLUDE_DIRS" -prune \) -o -type f -exec grep -h -o -E "$IMAGE_REGEX" {} \; | sort -u)
 images_count=$(echo "$images" | wc -l | awk '{ print $1 }')
 
-if [ "$images" == "" ]; then
+if [ "$images" = "" ]; then
 	echo "Can't find any matches, skipping..."
 elif [ "$images_count" -eq 1 ]; then
   echo "Check passed!"
