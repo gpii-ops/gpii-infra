@@ -38,3 +38,7 @@ worker:
     requests:
       cpu: 100m
       memory: 128Mi
+
+target:
+  labels:
+  namespace: gpii
