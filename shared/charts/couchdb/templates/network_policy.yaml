@@ -20,3 +20,10 @@ spec:
         matchLabels:
           app: {{ template "couchdb.name" . }}
           release: {{ .Release.Name }}
+    ports:
+    - port: http-couchdb
+      protocol: TCP
+    - port: tcp-epmd
+      protocol: TCP
+    - port: tcp-erl
+      protocol: TCP
