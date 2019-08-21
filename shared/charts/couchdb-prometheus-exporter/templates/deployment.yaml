@@ -29,13 +29,13 @@ spec:
         - containerPort: {{ .Values.exporterListenPort }}
         env:
         - name: COUCHDB_URI
-          value: {{ .Values.couchdbUri }}
+          value: {{ .Values.couchdb.uri }}
         - name: COUCHDB_USERNAME
-          value: {{ .Values.couchdbUsername }}
+          value: {{ .Values.couchdb.username }}
         - name: COUCHDB_PASSWORD
-          value: {{ .Values.couchdbPassword }}
+          value: {{ .Values.couchdb.password }}
         - name: COUCHDB_DATABASES
-          value: {{ .Values.couchdbDatabases }}
+          value: {{ .Values.couchdb.databases }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
       - name: prometheus-to-sd

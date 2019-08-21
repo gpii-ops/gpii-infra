@@ -44,7 +44,9 @@ The following table lists the configurable parameters of the gpii-dataloader cha
 
 Parameter | Description | Default
 --- | --- | ---
-`couchdbUrl` | couchdb url for dataloader | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local:5984/gpii`
+`couchdb.labels` | CouchDB pod labels for `NetworkPolicy` | `{ app: "couchdb" }`
+`couchdb.port` | CouchDB port for `NetworkPolicy` (can either be a numerical or named port on a pod) | `http-couchdb`
+`couchdb.url` | CouchDB url for dataloader | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local:5984/gpii`
 `image.repository` | container image repository | `gpii/universal`
 `image.checksum` | container image checksum | `sha256:fa3bbf3a8255be83552da35b84a1a005d5cb3a44627510171a5a5eb11b2aea89`
 `image.pullPolicy` | container image pullPolicy | `IfNotPresent`

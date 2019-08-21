@@ -1,6 +1,6 @@
 name: locust
 description: A modern load testing framework
-version: 0.4.2
+version: 0.5.0
 appVersion: 0.7.5
 maintainers:
   - name: so0k

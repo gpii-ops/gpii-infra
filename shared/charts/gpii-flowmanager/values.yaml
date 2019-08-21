@@ -9,8 +9,24 @@ flowmanagerListenPort: 8081
 datasourceListenPort: 5984
 datasourceHostname: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local"
 
+couchdb:
+  labels:
+    app: couchdb
+  port: http-couchdb
+
 nodeEnv: gpii.config.cloudBased.flowManager.production
-preferencesUrl: http://preferences.gpii.svc.cluster.local
+
+preferences:
+  url: http://preferences.gpii.svc.cluster.local
+  labels:
+    app: preferences
+  port: http
+
+ingress:
+  labels:
+    app: istio-ingressgateway
+  namespaceLabels:
+    k8s-app: istio
 
 enableStackdriverTrace: false
 

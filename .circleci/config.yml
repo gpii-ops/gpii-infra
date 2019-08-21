@@ -30,9 +30,21 @@ jobs:
             bundle install --with test;
             rake
 
+  exekube-versions-check:
+    <<: *default_docker
+    working_directory: /workspace
+    steps:
+      - checkout
+      - run:
+          name: Exekube Versions Check
+          command: |
+            echo "Running Exekube Versions Check...";
+            cd /workspace && shared/rakefiles/scripts/check_exekube_versions.sh
+
 workflows:
   version: 2
   main:
     jobs:
       - terraform-fmt-check
       - gcp-unit-tests
+      - exekube-versions-check
