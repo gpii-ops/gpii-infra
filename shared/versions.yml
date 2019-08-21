@@ -59,7 +59,7 @@ prometheus_to_sd:
     tag: v0.5.1
   generated:
     repository: gcr.io/gpii-common-prd/gcr.io__google-containers__prometheus-to-sd
-    sha: sha256:8e3679a6e059d1806daae335ab08b304fd1d8d35cdff457baded7306b5af9ba5
+    sha: sha256:14f37ba6eef9ca91cb1ffa71a7a23550f3b074003b60fc0974b4206dc81e0d85
     tag: v0.5.1
 couchdb:
   upstream:
