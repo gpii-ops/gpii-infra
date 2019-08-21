@@ -32,6 +32,10 @@
       "display_name": "CouchDB request time exceeded 100ms"
     }
   ],
+  "documentation": {
+    "content": "Typical \"healthy\" response time for CouchDB is < 50ms.\n\nThat value is doubled to give it some buffer and used as a threshold for this policy.",
+    "mime_type": "text/markdown"
+  },
   "notification_channels": [],
   "user_labels": {},
   "enabled": {
