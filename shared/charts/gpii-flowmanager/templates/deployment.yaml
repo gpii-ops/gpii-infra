@@ -25,6 +25,7 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.flowmanagerListenPort }}
+          name: http
         env:
         - name: NODE_ENV
           value: '{{ .Values.nodeEnv }}'
