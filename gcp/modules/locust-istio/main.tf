@@ -8,6 +8,7 @@ resource "kubernetes_namespace" "locust" {
 
     labels {
       istio-injection = "enabled"
+      name            = "locust"
     }
   }
 }
