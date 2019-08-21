@@ -38,7 +38,7 @@ spec:
         - name: GPII_DATASOURCE_HOSTNAME
           valueFrom:
             secretKeyRef:
-              name: {{ template "preferences.name" . }}
+              name: {{ template "flowmanager.name" . }}
               key: datasourceHostname
         {{- if .Values.enableStackdriverTrace }}
         - name: GPII_ENABLE_STACKDRIVER_TRACE

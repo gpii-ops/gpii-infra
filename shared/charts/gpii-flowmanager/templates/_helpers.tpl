@@ -16,7 +16,7 @@ Create chart name and version as used by the chart label.
 {{/*
 Create a random string if the supplied key does not exist
 */}}
-{{- define "flowmanger.defaultsecret" -}}
+{{- define "flowmanager.defaultsecret" -}}
 {{- if . -}}
 {{- . | b64enc | quote -}}
 {{- else -}}
