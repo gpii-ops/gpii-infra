@@ -45,7 +45,7 @@ The following table lists the configurable parameters of the gpii-flushtokens ch
 Parameter | Description | Default
 --- | --- | ---
 `couchdb.labels` | CouchDB pod labels for `NetworkPolicy` | `{ app: "couchdb" }`
-`couchdb.port` | CouchDB port for `NetworkPolicy` | `http-couchdb`
+`couchdb.port` | CouchDB port for `NetworkPolicy` (can either be a numerical or named port on a pod) | `http-couchdb`
 `couchdb.url` | couchdb url for flushtokens | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local:5984/gpii`
 `maxDocsInBatchPerRequest` | maximum number of database documents to process in batch per each request for expired access token records | `10000`
 `image.repository` | container image repository | `gpii/universal`

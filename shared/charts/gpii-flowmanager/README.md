@@ -49,7 +49,7 @@ The following table lists the configurable parameters of the gpii-flowmanager ch
 | `acme.email`                   | Optional email to use for registration with certificate issuer                               | `dev-null@raisingthefloor.org`                                            |
 | `acme.server`                  | Optional ACME server for certificate issuer                                                  | `https://acme-staging-v02.api.letsencrypt.org/directory`                  |
 | `couchdb.labels`               | CouchDB pod labels for `NetworkPolicy`                                                       | `{ app: "couchdb" }`                                                      |
-| `couchdb.port`                 | CouchDB port for `NetworkPolicy`                                                             | `http-couchdb`                                                            |
+| `couchdb.port`                 | CouchDB port for `NetworkPolicy` (can either be a numerical or named port on a pod)          | `http-couchdb`                                                            |
 | `datasourceHostname`           | Data source hostname for preferences service                                                 | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`        |
 | `datasourceListenPort`         | data source port for flowmanager service                                                     | `5984`                                                                    |
 | `dnsNames`                     | List of DNS host names                                                                       | `flowmanager.test.local`                                                  |
