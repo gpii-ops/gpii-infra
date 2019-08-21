@@ -3,7 +3,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-{{ template "locust.fullname" . }}-to-target
-  namespace: {{ .Values.target.namespace }}
+  namespace: {{ .Values.worker.target.namespace }}
   labels:
     app: {{ template "locust.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
@@ -12,8 +12,8 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-    {{- if .Values.target.labels }}
-    {{- range $key, $value := .Values.target.labels }}
+    {{- if .Values.worker.target.labels }}
+    {{- range $key, $value := .Values.worker.target.labels }}
       {{ $key }}: {{ $value | quote }}
     {{- end }}
     {{- else }}
