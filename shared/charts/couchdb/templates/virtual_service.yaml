@@ -10,6 +10,7 @@ spec:
   - route:
     - destination:
         host: {{ template "couchdb.svcname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+    timeout: {{ .Values.virtual_service.timeout }}
     retries:
       attempts: {{ .Values.virtual_service.attempts }}
       perTryTimeout: {{ .Values.virtual_service.timeout }}
