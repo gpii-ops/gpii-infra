@@ -78,7 +78,9 @@ module "gke_cluster" {
   project_id         = "${var.project_id}"
   serviceaccount_key = "${var.serviceaccount_key}"
 
-  kubernetes_version = "${data.external.gke_version_assert.result.version}"
+  # kubernetes_version = "${data.external.gke_version_assert.result.version}"
+  # this is temporary till version below or newer is released as default
+  kubernetes_version = "1.12.9-gke.15"
 
   region = "${var.infra_region}"
 
