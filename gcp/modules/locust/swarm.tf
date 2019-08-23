@@ -48,7 +48,8 @@ resource "null_resource" "locust_swarm_session" {
       sleep 5
 
       echo
-      echo "Starting Locust swarm with ${var.locust_users} users and hatch rate of ${var.locust_hatch_rate}!"
+      echo "Starting Locust swarm with ${var.locust_users} users, hatch rate of ${var.locust_hatch_rate}, and duration of ${var.locust_swarm_duration}!"
+      date
       curl -s -XPOST $LOCUST_URL/swarm -d"locust_count=${var.locust_users}&hatch_rate=${var.locust_hatch_rate}"
 
       echo
@@ -63,6 +64,7 @@ resource "null_resource" "locust_swarm_session" {
       echo
       echo "Swarming complete!"
       curl -s $LOCUST_URL/stop
+      date
 
       echo
       echo "Processing stats..."
