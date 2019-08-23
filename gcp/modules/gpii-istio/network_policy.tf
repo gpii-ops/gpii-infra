@@ -7,8 +7,6 @@ resource "kubernetes_network_policy" "deny-default" {
   spec {
     pod_selector {}
 
-    ingress {}
-
     policy_types = ["Ingress"]
   }
 }
