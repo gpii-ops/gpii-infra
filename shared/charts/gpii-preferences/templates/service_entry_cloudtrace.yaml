@@ -3,14 +3,14 @@ apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
   namespace: {{ .Release.Namespace | quote }}
-  name: {{ template "preferences.name" . }}-cloudtrace
+  name: {{ template "preferences.name" . }}-newrelic
 spec:
   hosts:
-  - cloudtrace.googleapis.com
+  - "*.newrelic.com"
   ports:
   - number: 443
     name: https
     protocol: HTTPS
-  resolution: DNS
+  ###resolution: DNS
   location: MESH_EXTERNAL
 {{- end }}

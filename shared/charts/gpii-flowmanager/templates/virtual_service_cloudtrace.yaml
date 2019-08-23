@@ -3,15 +3,18 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   namespace: {{ .Release.Namespace | quote }}
-  name: {{ template "flowmanager.name" . }}-cloudtrace
+  name: {{ template "flowmanager.name" . }}-newrelic
 spec:
   hosts:
-  - cloudtrace.googleapis.com
+  - "*.newrelic.com"
   tls:
   - match:
-    - sniHosts:
-      - cloudtrace.googleapis.com
+    - port: 443
+      sniHosts:
+      - "*.newrelic.com"
     route:
     - destination:
-        host: cloudtrace.googleapis.com
+        host: "*.newrelic.com"
+        port:
+          number: 443
 {{- end }}
