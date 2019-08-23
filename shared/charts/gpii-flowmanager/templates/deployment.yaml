@@ -37,6 +37,15 @@ spec:
           value: '{{ .Values.datasourceListenPort }}'
         - name: GPII_FLOWMANAGER_TO_PREFERENCESSERVER_URL
           value: '{{ .Values.preferences.url }}'
+          # Things to do to really run New Relic:
+          # 1. Inject APP_NAME, probably with project_id, maybe with this component's name.
+          # 2. Convert LICENSE_KEY to a gpii-infra secret and kubernetes secret.
+          # 3. Change LOG to 'stdout' so Stackdriver Logging picks it up.
+          # 4. Wrap NEW_RELIC_* in an '{{- if }}' block so vars are only set when the feature is enabled.
+        - name: NEW_RELIC_APP_NAME
+          value: 'tyler-test-app'
+        - name: NEW_RELIC_LICENSE_KEY
+          value: 'put account license key here'
         {{- if .Values.enableStackdriverTrace }}
         - name: GPII_ENABLE_STACKDRIVER_TRACE
           value: 'true'
