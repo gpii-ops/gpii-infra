@@ -19,7 +19,7 @@ certmerge_operator:
     tag: 0.0.3-gpii.0
   generated:
     repository: gcr.io/gpii-common-prd/gpii__certmerge-operator
-    sha: sha256:96c435ee42bae821210e91430c18c0fd1cbe8cd33216175a77fbdc7622f5d535
+    sha: sha256:0b794c687b07b078b6f10d451c81c2fb83bd3c93cf7540fe863910fac1a6d101
     tag: 0.0.3-gpii.0
 cloud_sdk:
   upstream:
@@ -51,7 +51,7 @@ couchdb_prometheus_exporter:
     tag: 22
   generated:
     repository: gcr.io/gpii-common-prd/gesellix__couchdb-prometheus-exporter
-    sha: sha256:8184086713d28fc19f3d2ecd5eabd0cce23c21bd0daa9f8921fa0ce4acb912f6
+    sha: sha256:322da5dbf4837fac1284af6e2d7067e2a180ce4c15f4c109d4b2eda2e058e44c
     tag: 22
 prometheus_to_sd:
   upstream:
@@ -59,7 +59,7 @@ prometheus_to_sd:
     tag: v0.5.1
   generated:
     repository: gcr.io/gpii-common-prd/gcr.io__google-containers__prometheus-to-sd
-    sha: sha256:8e3679a6e059d1806daae335ab08b304fd1d8d35cdff457baded7306b5af9ba5
+    sha: sha256:14f37ba6eef9ca91cb1ffa71a7a23550f3b074003b60fc0974b4206dc81e0d85
     tag: v0.5.1
 couchdb:
   upstream:
@@ -67,7 +67,7 @@ couchdb:
     tag: 2.3.1
   generated:
     repository: gcr.io/gpii-common-prd/couchdb
-    sha: sha256:a7a7967643418a11bf42b86ad652cb01f4dc68b7872374b5e3c5219750817771
+    sha: sha256:247437cee08143ff255074bb63e77797bde10e33cd97ca95761d7739bf876d1c
     tag: 2.3.1
 dataloader:
   upstream:

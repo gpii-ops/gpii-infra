@@ -22,10 +22,13 @@ spec:
             image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
             command: [ "/bin/sh", "-c", "/app/scripts/dockerDeleteExpiredAccessTokens.sh" ]
             env:
-            - name: GPII_COUCHDB_URL
-              value: '{{ .Values.couchdbUrl }}'
             - name: MAX_DOCS_IN_BATCH_PER_REQUEST
               value: '{{ .Values.maxDocsInBatchPerRequest }}'
+            - name: GPII_COUCHDB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "flushtokens.name" . }}
+                  key: couchdbUrl
           - name: istio-proxy-manager
             image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
             securityContext:

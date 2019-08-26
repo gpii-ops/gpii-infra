@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-{{ template "flowmanager.name" . }}-to-preferences
+  labels:
+    app: {{ template "flowmanager.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  podSelector:
+    matchLabels:
+    {{- range $key, $value := .Values.preferences.labels }}
+      {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: {{ template "flowmanager.name" . }}
+    ports:
+    - port: {{ .Values.preferences.port }}
+      protocol: TCP
