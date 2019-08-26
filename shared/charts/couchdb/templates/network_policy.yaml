@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-{{ template "couchdb.fullname" . }}-to-{{ template "couchdb.fullname" . }}
+  labels:
+    app: {{ template "couchdb.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ template "couchdb.name" . }}
+      release: {{ .Release.Name }}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: {{ template "couchdb.name" . }}
+          release: {{ .Release.Name }}
+    ports:
+    - port: http-couchdb
+      protocol: TCP
+    - port: tcp-epmd
+      protocol: TCP
+    - port: tcp-erl
+      protocol: TCP

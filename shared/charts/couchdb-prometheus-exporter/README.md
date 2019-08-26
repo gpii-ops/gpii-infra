@@ -48,10 +48,12 @@ Parameter | Description | Default
 --- | --- | ---
 `replicaCount` | desired number of pods | `1`
 `exporterListenPort` | port for exporter service to listen on | `9984`
-`couchdbUri` | URI for couchdb | `http://couchdb-svc-couchdb.default.svc.cluster.local:5984`
-`couchdbUsername` | username for couchdb uri | `admin`
-`couchdbPassword` | password for couchdb uri | `password`
-`couchdbDatabases` | list of specific databases to monitor | `_all_dbs`
+`couchdb.labels` | CouchDB pod labels for `NetworkPolicy` | `{ app: "couchdb" }`
+`couchdb.port` | CouchDB port for `NetworkPolicy` (can either be a numerical or named port on a pod) | `http-couchdb`
+`couchdb.uri` | URI for couchdb | `http://couchdb-svc-couchdb.default.svc.cluster.local:5984`
+`couchdb.username` | username for couchdb uri | `admin`
+`couchdb.password` | password for couchdb uri | `password`
+`couchdb.databases` | list of specific databases to monitor | `_all_dbs`
 `image.repository` | container image repository | `gesellix/couchdb-prometheus-exporter`
 `image.tag` | container image checksum | `22`
 `image.pullPolicy` | container image pullPolicy | `IfNotPresent`

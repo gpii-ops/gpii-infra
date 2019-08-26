@@ -1,8 +1,9 @@
 replicaCount: ${replica_count}
 
-couchdbUri: http://couchdb-svc-couchdb.gpii.svc.cluster.local:5984
-couchdbUsername: ${couchdb_admin_username}
-couchdbPassword: ${couchdb_admin_password}
+couchdb:
+  uri: http://couchdb-svc-couchdb.gpii.svc.cluster.local:5984
+  username: ${couchdb_admin_username}
+  password: ${couchdb_admin_password}
 
 image:
   repository: ${couchdb_prometheus_exporter_repository}

@@ -5,10 +5,15 @@
 replicaCount: 1
 
 exporterListenPort: 9984
-couchdbUri: http://couchdb-svc-couchdb.default.svc.cluster.local:5984
-couchdbUsername: admin
-couchdbPassword: password
-couchdbDatabases: _all_dbs
+
+couchdb:
+  uri: http://couchdb-svc-couchdb.default.svc.cluster.local:5984
+  username: admin
+  password: password
+  databases: _all_dbs
+  labels:
+    app: couchdb
+  port: http-couchdb
 
 image:
   repository: gesellix/couchdb-prometheus-exporter

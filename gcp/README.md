@@ -437,6 +437,18 @@ You can run all `kubectl` commands mentioned below inside of an interactive shel
    curl http://ui:$password@localhost:35984/_up
    ```
 
+_Note: Temporary credentials from `couchdb_ui` rake task can be handy for
+executing ad hoc scripts against the database, however CouchDB does not
+replicate these across the cluster, therefore they will only work when querying
+the same node where they were created. This will not be an issue when running
+queries from your local machine (`kubectl port-forward` always terminates the
+connection at the same pod). If you need to run queries from within docker
+container, you can use `docker` with `--net host` to do so, e.g. `docker run -it
+--rm --net host --entrypoint /bin/sh
+gcr.io/gpii-common-prd/gpii__universal:20190801163411-26be63f`, and CouchDB will
+be accessible using the url printed by the `couchdb_ui` rake task._
+
+
 ### The CouchDB cluster won't converge because one of its disks is in the wrong zone
 
 Consider this scenario:

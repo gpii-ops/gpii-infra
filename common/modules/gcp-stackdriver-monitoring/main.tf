@@ -61,7 +61,7 @@ resource "null_resource" "apply_stackdriver_monitoring" {
       while [ "$STACKDRIVER_DEADLINE_EXCEEDED" != "false" ]; do
         STACKDRIVER_DEADLINE_EXCEEDED="false"
         echo "[Try $RETRY_COUNT of $RETRIES] Applying Stackdriver resources..."
-        ruby -e '
+        bundle exec ruby -e '
           require "/rakefiles/stackdriver.rb"
           resources = read_resources("${path.module}/resources_rendered")
           apply_resources(resources)
@@ -100,7 +100,7 @@ resource "null_resource" "destroy_stackdriver_monitoring" {
       while [ "$STACKDRIVER_DEADLINE_EXCEEDED" != "false" ]; do
         STACKDRIVER_DEADLINE_EXCEEDED="false"
         echo "[Try $RETRY_COUNT of $RETRIES] Destroying Stackdriver resources..."
-        ruby -e '
+        bundle exec ruby -e '
           require "/rakefiles/stackdriver.rb"
           destroy_resources({"alert_policies"=>[],"notification_channels"=>[]})
         '
