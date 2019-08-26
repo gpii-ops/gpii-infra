@@ -19,7 +19,7 @@ certmerge_operator:
     tag: 0.0.3-gpii.0
   generated:
     repository: gcr.io/gpii-common-prd/gpii__certmerge-operator
-    sha: sha256:96c435ee42bae821210e91430c18c0fd1cbe8cd33216175a77fbdc7622f5d535
+    sha: sha256:0b794c687b07b078b6f10d451c81c2fb83bd3c93cf7540fe863910fac1a6d101
     tag: 0.0.3-gpii.0
 cloud_sdk:
   upstream:
