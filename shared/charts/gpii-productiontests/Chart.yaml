@@ -2,7 +2,7 @@ name: gpii-productiontests
 version: 0.1.0
 appVersion: 
 home: https://github.com/gpii-ops/gpii-infra
-description: GPII Delete Expired Access Tokens Job.
+description: GPII Production Configuration Tests Job.
 icon: https://gpii.net/sites/all/themes/gpii_main/logo.png
 keywords:
   - gpii

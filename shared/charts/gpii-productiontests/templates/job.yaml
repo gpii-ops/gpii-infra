@@ -37,9 +37,9 @@ spec:
         - name: GPII_COUCHDB_URL
           value: '{{ .Values.couchdbUrl }}'
         - name: GPII_CLOUD_URL
-          value: '{{ .Values.flowmanagerUrl }}'
+          value: '{{ .Values.flowmanager.url }}'
         - name: GPII_FLOWMANAGER_LISTEN_PORT
-          value: '80'
+          value: '{{ .Values.flowmanager.port }}'
         - name: GPII_DATASOURCE_HOSTNAME
           value: '{{ .Values.datasourceHostname }}'
         - name: GPII_DATASOURCE_PORT
