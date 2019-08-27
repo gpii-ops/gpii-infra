@@ -12,3 +12,4 @@ spec:
   selector:
     matchLabels:
       app: {{ template "flowmanager.name" . }}
+      release: {{ .Release.Name }}
