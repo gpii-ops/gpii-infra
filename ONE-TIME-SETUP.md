@@ -35,6 +35,10 @@ This document describes manual steps needed for initial configuration when using
       * In spite of all those privileges, I can't Manage Payment Users for any Billing Accounts other than the one from my Free Trial Account.
    * Send billing emails to accounts-payable@rtf-us.org -- https://cloud.google.com/billing/docs/how-to/modify-contacts
       * Billing -> Official -> Payment Settings -> Payments Users -> Manage Payments Users -> Add a New User. Leave all Permissions unchecked. Leave Primary Contact unchecked (there can be only one, and it's Eugene). Confirm invitation email.
+* Remove default permissions assigned to any member of Organization
+  * https://cloud.google.com/resource-manager/docs/access-control-org#viewing-access
+    * Expand the role `Project Creator` and delete the record `raisingthefloor.org`
+    * Expand the role `Billing Account Creator` and delete the record `raisingthefloor.org`
 * https://support.google.com/code/contact/billing_quota_increase
    * @mrtyler requested a quota bump to 100 Projects.
       * He only authorized his own email for now, to see what it did. But it's possible other Ops team members will need to go through this step.

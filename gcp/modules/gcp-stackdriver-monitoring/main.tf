@@ -39,10 +39,7 @@ resource "template_dir" "resources" {
     domain_name        = "${var.domain_name}"
     notification_email = "${(var.use_auth_user_email && var.auth_user_email != "") ? var.auth_user_email : var.notification_email}"
 
-    # This variable is diabled until GPII-3917 is merged, only affects to
-    # backup-exporter alerts
-    # enabled            = "${(var.env == "prd" || var.env == "stg") ? true : false}"
-    enabled = "false"
+    enabled = "${(var.env == "prd" || var.env == "stg") ? true : false}"
   }
 }
 
@@ -64,7 +61,7 @@ resource "null_resource" "apply_stackdriver_monitoring" {
       while [ "$STACKDRIVER_DEADLINE_EXCEEDED" != "false" ]; do
         STACKDRIVER_DEADLINE_EXCEEDED="false"
         echo "[Try $RETRY_COUNT of $RETRIES] Applying Stackdriver resources..."
-        ruby -e '
+        bundle exec ruby -e '
           require "/rakefiles/stackdriver.rb"
           resources = read_resources("${path.module}/resources_rendered")
           apply_resources(resources)
@@ -104,7 +101,7 @@ resource "null_resource" "destroy_stackdriver_monitoring" {
       while [ "$STACKDRIVER_DEADLINE_EXCEEDED" != "false" ]; do
         STACKDRIVER_DEADLINE_EXCEEDED="false"
         echo "[Try $RETRY_COUNT of $RETRIES] Destroying Stackdriver resources..."
-        ruby -e '
+        bundle exec ruby -e '
           require "/rakefiles/stackdriver.rb"
           destroy_resources({"alert_policies"=>[],"notification_channels"=>[]})
           destroy_uptime_checks(["${join("\",\"", google_monitoring_uptime_check_config.this.*.name)}"])

@@ -49,6 +49,7 @@ module "gke_network" {
 
   static_ip_region         = "${var.infra_region}"
   create_static_ip_address = false
+  delete_default_network   = false
 }
 
 # ------------------------------------------------------------------------------

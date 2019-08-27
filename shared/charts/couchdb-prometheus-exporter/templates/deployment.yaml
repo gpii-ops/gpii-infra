@@ -8,7 +8,7 @@ spec:
   template:
     metadata:
       labels:
-        app: couchdb-prometheus-exporter
+        app: {{ template "couchdb_prometheus_exporter.name" . }}
       annotations:
         # This annotation is needed to allow traffic to metadata.google.internal
         # until Istio's issue with FQDNs in ServiceEntries is not resolved:
@@ -29,13 +29,19 @@ spec:
         - containerPort: {{ .Values.exporterListenPort }}
         env:
         - name: COUCHDB_URI
-          value: {{ .Values.couchdbUri }}
-        - name: COUCHDB_USERNAME
-          value: {{ .Values.couchdbUsername }}
-        - name: COUCHDB_PASSWORD
-          value: {{ .Values.couchdbPassword }}
+          value: {{ .Values.couchdb.uri }}
         - name: COUCHDB_DATABASES
-          value: {{ .Values.couchdbDatabases }}
+          value: {{ .Values.couchdb.databases }}
+        - name: COUCHDB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "couchdb_prometheus_exporter.name" . }}
+              key: couchdbUsername
+        - name: COUCHDB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "couchdb_prometheus_exporter.name" . }}
+              key: couchdbPassword
         resources:
 {{ toYaml .Values.resources | indent 10 }}
       - name: prometheus-to-sd

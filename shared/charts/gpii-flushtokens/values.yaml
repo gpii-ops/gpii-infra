@@ -1,0 +1,20 @@
+# Default values for gpii-flushtokens.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+couchdb:
+  url: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local:5984/gpii"
+  labels:
+    app: couchdb
+  port: http-couchdb
+
+maxDocsInBatchPerRequest: "10000"
+cronJobSchedule: "*/15 * * * *"
+
+image:
+  repository: cindyqili/universal
+  checksum: sha256:d41d5fa6ebb015f587a52555ad522cf001d1d1077b637e96fc887731896b7e27
+  pullPolicy: IfNotPresent
+
+nameOverride: flushtokens
+

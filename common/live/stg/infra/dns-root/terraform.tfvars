@@ -2,7 +2,7 @@
 
 terragrunt = {
   terraform {
-    source = "/project/modules//aws-gcp-dns"
+    source = "/project/modules//gcp-dns"
   }
 
   include = {

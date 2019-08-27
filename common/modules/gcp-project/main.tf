@@ -178,11 +178,20 @@ data "google_iam_policy" "combined" {
 
     members = [
       "${local.service_accounts}",
+      "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
     ]
   }
 
   binding {
     role = "roles/iam.serviceAccountActor"
+
+    members = [
+      "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
+    ]
+  }
+
+  binding {
+    role = "roles/iam.serviceAccountTokenCreator"
 
     members = [
       "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
@@ -301,6 +310,36 @@ data "google_iam_policy" "combined" {
 
     members = [
       "${local.project_owners}",
+    ]
+  }
+
+  # Needed for setting up monitoring
+  # GPII-2782
+  binding {
+    role = "roles/logging.configWriter"
+
+    members = [
+      "${local.service_accounts}",
+    ]
+  }
+
+  # Needed for setting up monitoring
+  # GPII-2782
+  binding {
+    role = "roles/monitoring.alertPolicyEditor"
+
+    members = [
+      "${local.service_accounts}",
+    ]
+  }
+
+  # Needed for setting up monitoring
+  # GPII-2782
+  binding {
+    role = "roles/monitoring.notificationChannelEditor"
+
+    members = [
+      "${local.service_accounts}",
     ]
   }
 
@@ -450,10 +489,11 @@ locals {
 }
 
 resource "google_project" "project" {
-  name            = "${var.organization_name}-gcp-${var.project_name}"
-  project_id      = "${var.organization_name}-gcp-${var.project_name}"
-  billing_account = "${var.billing_id}"
-  org_id          = "${var.organization_id}"
+  name                = "${var.organization_name}-gcp-${var.project_name}"
+  project_id          = "${var.organization_name}-gcp-${var.project_name}"
+  billing_account     = "${var.billing_id}"
+  org_id              = "${var.organization_id}"
+  auto_create_network = false
 }
 
 resource "google_project_services" "project" {
