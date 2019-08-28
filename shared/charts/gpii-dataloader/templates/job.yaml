@@ -16,7 +16,10 @@ spec:
         command: [ '/app/scripts/deleteAndLoadSnapsets.sh' ]
         env:
         - name: GPII_COUCHDB_URL
-          value: '{{ .Values.couchdbUrl }}'
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "dataloader.name" . }}
+              key: couchdbUrl
       - name: istio-proxy-manager
         image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
         securityContext:

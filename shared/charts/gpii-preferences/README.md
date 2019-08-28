@@ -45,6 +45,8 @@ The following table lists the configurable parameters of the gpii-preferences ch
 
 | *Parameter*                    | *Description*                                                                                | *Default*                                                                 |
 |--------------------------------|----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| `couchdb.labels`               | CouchDB pod labels for `NetworkPolicy`                                                       | `{ app: "couchdb" }`                                                      |
+| `couchdb.port`                 | CouchDB port for `NetworkPolicy` (can either be a numerical or named port on a pod)          | `http-couchdb`                                                            |
 | `datasourceHostname`           | Data source hostname for preferences service                                                 | `http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local`        |
 | `datasourceListenPort`         | Data source port for preferences service                                                     |  `5984`                                                                   |
 | `enableStackdriverTrace`       | Enable [GCP Stackdriver Trace](https://cloud.google.com/trace/)                              | `false`                                                                   |
