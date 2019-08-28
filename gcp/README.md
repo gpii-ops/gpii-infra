@@ -749,9 +749,18 @@ The destination buckets are created automatically by [Terraform code](https://gi
 #### Restoring a backup from outside of the organization.
 
 The process of the restore it's similar but the other way around. It uses the `gcloud compute images import` command. In order to make easier the process a rake task called `restore_snapshot_from_image_file`can be used. This task takes only one parameter with each snapshot to recover separated by one space. i.e:
-```
-rake restore_snapshot_from_image_file["gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-0-030519-205726.raw.gz gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-1-030519-205756.raw.gz"]
-```
-Once the task finished new restored snapshot files will appear with the string `external-` at the beginning of the name. This will help with the search when at the restoration of the disks using the snapshots.
 
-And follow the process [Data corruption on all replicas of CouchDB cluster](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#data-corruption-on-all-replicas-of-couchdb-cluster) using the snapshot files restored.
+1. Select the files to be restored.
+
+   ```
+   gsutil ls gs://gpii-backup-stg/**
+   ```
+
+1. Copy the full path of each file to be restored.
+
+   ```
+   rake restore_snapshot_from_image_file["gs://gpii-backup-stg/2019-05-03_210008-pv-database-storage-couchdb-couchdb-0-030519-205726.raw.gz gs://gpii-backup-stg/2019-05-03_210008-pv-database-storage-couchdb-couchdb-1-030519-205756.raw.gz gs://gpii-backup-stg/2019-05-03_210008-pv-database-storage-couchdb-couchdb-2-030519-205756.raw.gz"]
+   ```
+1. Once the task finished, check that the new restored snapshots will appear with the string `external-` at the beginning of the name. This will help with the search when at the restoration of the disks using the snapshots.
+
+1. Follow the process [Data corruption on all replicas of CouchDB cluster](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#data-corruption-on-all-replicas-of-couchdb-cluster) using the snapshot files restored.
