@@ -789,3 +789,11 @@ cd gcp/live/dev/
 rake deploy_module["k8s/kube-system/k8s-snapshots"]
 rake deploy_module["k8s/kube-system/backup-exporter"]
 ```
+
+### Good practices
+
+1. Always use ephemeral pairs (user/password) on each operation in a deployment if the access to the data is needed. The rotation of the credentials is more expensive that, for example, make use of [the couchdb_ui feature](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#accessing-couchdb-and-couchdb-web-ui).
+
+1. Be careful with the environment variables that are passed using `kubectl` commands, they can appear in plain text in the logs.
+
+1. Automate all the process as much as we can. Avoid any manual procedure if it is possible.
