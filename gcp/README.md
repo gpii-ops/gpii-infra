@@ -764,3 +764,28 @@ The process of the restore it's similar but the other way around. It uses the `g
 1. Once the task finished, check that the new restored snapshots will appear with the string `external-` at the beginning of the name. This will help with the search when at the restoration of the disks using the snapshots.
 
 1. Follow the process [Data corruption on all replicas of CouchDB cluster](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#data-corruption-on-all-replicas-of-couchdb-cluster) using the snapshot files restored.
+
+
+## Deployment considerations
+
+### Avoiding inconsistent backups during the deployment
+
+The cloud has two types of automatic backups: periodic snapshots and the export of the snapshots outside the GCP organization. If the deployment needs any kind of data migration the backups made from the middle of the process could have some inconsistencies. Because of this the automatic processes are not desirable in the time that the data migration is performed.
+
+Also the rotation policy of the k8s-snapshots can delete the latest snapshots made just before the deployment starts. Stoping the backup processes avoids this situation.
+
+To stop the backups of a particular environment execute the following commands:
+
+```
+cd gcp/live/dev/
+rake destroy_module["k8s/kube-system/k8s-snapshots"]
+rake destroy_module["k8s/kube-system/backup-exporter"]
+```
+
+Once the data migration has ended
+
+```
+cd gcp/live/dev/
+rake deploy_module["k8s/kube-system/k8s-snapshots"]
+rake deploy_module["k8s/kube-system/backup-exporter"]
+```
