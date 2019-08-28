@@ -792,8 +792,40 @@ rake deploy_module["k8s/kube-system/backup-exporter"]
 
 ### Good practices
 
-1. Always use ephemeral pairs (user/password) on each operation in a deployment if the access to the data is needed. The rotation of the credentials is more expensive that, for example, make use of [the couchdb_ui feature](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#accessing-couchdb-and-couchdb-web-ui).
+1. Always use ephemeral pairs (user/password) on each operation in a deployment if the access to the data is needed. The rotation of the credentials is more expensive that, for example, make use of [the couchdb_ui rake task](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#accessing-couchdb-and-couchdb-web-ui).
 
 1. Be careful with the environment variables that are passed using `kubectl` commands, they can appear in plain text in the logs.
 
 1. Automate all the process as much as we can. Avoid any manual procedure if it is possible.
+
+
+## Locust testing
+
+### Running Locust from your host
+
+From your environment directory run one of the two tests available:
+
+```
+rake test_flowmanager                         # [TEST] Run Locust swarm against Flowmanager service in current cluster
+rake test_preferences                         # [TEST] Run Locust swarm against Preferences service in current cluster
+```
+
+### Customize test parameters
+
+The settings of each test can be modified using environment variables. All the environment variables that modify the locust tests settings are:
+
+```
+TF_VAR_locust_desired_max_response_time
+TF_VAR_locust_desired_median_response_time
+TF_VAR_locust_desired_total_rps
+TF_VAR_locust_users
+TF_VAR_locust_workers
+```
+
+The default values can be found in the [variables file](modules/locust/variables.tf)
+
+For example, if you want to change the number of the workers prepend the rake command with the new value of the environment variable:
+
+```
+TF_VAR_locust_workers=4 rake test_flowmanager
+```
