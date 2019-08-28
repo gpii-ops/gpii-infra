@@ -20,6 +20,7 @@ spec:
     - podSelector:
         matchLabels:
           app: {{ template "dataloader.name" . }}
+          release: {{ .Release.Name }}
     ports:
     - port: {{ .Values.couchdb.port }}
       protocol: TCP
