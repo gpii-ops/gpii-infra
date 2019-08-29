@@ -1,5 +1,5 @@
 name: couchdb-prometheus-exporter
-version: 0.3.1
+version: 0.3.2
 appVersion: 77a019a7707f581f70239783d0b76500ba25b9382d9ee0702452b0381d5722c2
 home: https://github.com/gesellix/couchdb-prometheus-exporter
 description: CouchDB Prometheus Exporter
