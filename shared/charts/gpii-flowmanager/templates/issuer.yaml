@@ -4,6 +4,9 @@ metadata:
   name: letsencrypt-{{ template "flowmanager.name" . }}
   labels:
     app: {{ template "flowmanager.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   acme:
     server: {{ .Values.acme.server }}
