@@ -3,7 +3,7 @@ kind: NetworkPolicy
 metadata:
   name: allow-{{ template "couchdb_prometheus_exporter.name" . }}-to-couchdb
   labels:
-    app: couchdb-prometheus-exporter
+    app: {{ template "couchdb_prometheus_exporter.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -19,7 +19,8 @@ spec:
   - from:
     - podSelector:
         matchLabels:
-          app: couchdb-prometheus-exporter
+          app: {{ template "couchdb_prometheus_exporter.name" . }}
+          release: {{ .Release.Name }}
     ports:
     - port: {{ .Values.couchdb.port }}
       protocol: TCP

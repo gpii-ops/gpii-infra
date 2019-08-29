@@ -11,4 +11,5 @@ spec:
   maxUnavailable: 1
   selector:
     matchLabels:
-      app: preferences
+      app: {{ template "preferences.name" . }}
+      release: {{ .Release.Name }}

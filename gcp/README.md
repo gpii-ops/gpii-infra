@@ -345,6 +345,10 @@ This caused by locally missing helm certificates (similarly to previous error, i
 This some times happens during forceful cluster re-creation (for example when updating oauth scopes), and caused by Terraform failing to trigger `helm-initializer` module deployment.
 Solution is to run `rake deploy_module['k8s/kube-system/helm-initializer']`.
 
+### helm_release.release: rpc error: code = Unknown desc = PodDisruptionBudget.policy "DEPLOYMENT" is invalid
+
+This happens when we need to update immutable fields on `PodDisruptionBudget` resources for deployments. Solution is to destroy PDB resources and allow Helm to recreate them: `rake plain_sh['sh -c "for pdb in DEPLOYMENT1 DEPLOYMENT2; do kubectl -n gpii delete pdb \\$pdb; done"'] && rake`.
+
 ### The metric referenced by the provided filter is unknown. Check the metric name and labels. (Google::Gax::RetryError)
 
 This some times happens, when Stackdriver Ruby client is trying to apply alerting policy on newly created log-based metric. Solution is to wait 5-10 minutes and try again.

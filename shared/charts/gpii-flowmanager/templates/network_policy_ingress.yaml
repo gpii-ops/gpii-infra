@@ -11,6 +11,7 @@ spec:
   podSelector:
     matchLabels:
       app: {{ template "flowmanager.name" . }}
+      release: {{ .Release.Name }}
   policyTypes:
   - Ingress
   ingress:

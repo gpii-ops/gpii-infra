@@ -11,4 +11,5 @@ spec:
   maxUnavailable: 1
   selector:
     matchLabels:
-      app: flowmanager
+      app: {{ template "flowmanager.name" . }}
+      release: {{ .Release.Name }}
