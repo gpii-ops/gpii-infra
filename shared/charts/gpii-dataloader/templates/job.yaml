@@ -1,13 +1,18 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  namespace: {{ .Release.Namespace | quote }}
   name: {{ template "dataloader.name" . }}
+  labels:
+    app: {{ template "dataloader.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   template:
     metadata:
       labels:
         app: {{ template "dataloader.name" . }}
+        release: {{ .Release.Name }}
     spec:
       shareProcessNamespace: true
       containers:

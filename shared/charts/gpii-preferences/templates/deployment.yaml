@@ -1,8 +1,12 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  namespace: {{ .Release.Namespace | quote }}
   name: {{ template "preferences.name" . }}
+  labels:
+    app: {{ template "preferences.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.replicaCount }}
   strategy:
@@ -13,6 +17,7 @@ spec:
     metadata:
       labels:
         app: {{ template "preferences.name" . }}
+        release: {{ .Release.Name }}
       annotations:
         # This annotation is needed to allow traffic to metadata.google.internal
         # until Istio's issue with FQDNs in ServiceEntries is not resolved:

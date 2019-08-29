@@ -1,8 +1,12 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  namespace: {{ .Release.Namespace | quote }}
   name: {{ template "flushtokens.name" . }}
+  labels:
+    app: {{ template "flushtokens.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   schedule: "{{ .Values.cronJobSchedule }}"
   successfulJobsHistoryLimit: 5
@@ -15,6 +19,7 @@ spec:
         metadata:
           labels:
             app: {{ template "flushtokens.name" . }}
+            release: {{ .Release.Name }}
         spec:
           shareProcessNamespace: true
           containers:

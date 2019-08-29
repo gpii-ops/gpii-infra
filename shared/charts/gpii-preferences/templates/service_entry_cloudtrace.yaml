@@ -2,8 +2,12 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
-  namespace: {{ .Release.Namespace | quote }}
   name: {{ template "preferences.name" . }}-cloudtrace
+  labels:
+    app: {{ template "preferences.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   hosts:
   - cloudtrace.googleapis.com
