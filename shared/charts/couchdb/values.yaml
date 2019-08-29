@@ -89,9 +89,9 @@ service:
 
 ## Istio's virtual service to control the flow of ingress traffic
 virtual_service:
-  enabled: true
-  attempts: 3
-  timeout: 1s
+  enabled: false
+#  attempts: 3
+#  timeout: 2s
 
 ## An Ingress resource can provide name-based virtual hosting and TLS
 ## termination among other things for CouchDB deployments which are accessed
