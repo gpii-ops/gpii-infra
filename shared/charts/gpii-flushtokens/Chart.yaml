@@ -1,5 +1,5 @@
 name: gpii-flushtokens
-version: 0.4.0
+version: 0.4.1
 home: https://github.com/gpii-ops/gpii-infra
 description: GPII Delete Expired Access Tokens Job.
 icon: https://gpii.net/sites/all/themes/gpii_main/logo.png
