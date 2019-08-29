@@ -748,8 +748,13 @@ The destination buckets are created automatically by [Terraform code](https://gi
 
 #### Restoring a backup from outside of the organization.
 
-The process of the restore it's similar but the other way around. It uses the `gcloud compute images import` command. In order to make easier the process a rake task called `restore_snapshot_from_image_file`can be used. This task takes only one parameter with each snapshot to recover separated by one space. i.e:
+The process of the restore it's similar to the backup but the other way around. It uses the `gcloud compute images import` command. In order to make easier the process a rake task called `restore_snapshot_from_image_file`can be used. This task takes only one parameter where each snapshot file to recover is separated by one space. Also this proccess takes almost 9 min per snapshot to restore:
 
+1. Get in to the exekube shell
+
+   ```
+   rake plain_sh
+   ```
 1. Select the files to be restored.
 
    ```
