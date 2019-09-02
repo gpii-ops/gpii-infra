@@ -758,7 +758,7 @@ The process of the restore it's similar to the backup but the other way around. 
 1. Select the files to be restored.
 
    ```
-   gsutil ls gs://gpii-backup-stg/**
+   gsutil ls -l gs://gpii-backup-stg/** | sort -k 2
    ```
 
 1. Copy the full path of each file to be restored.
