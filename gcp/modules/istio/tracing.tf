@@ -4,11 +4,15 @@ data "external" "istio_tracing" {
     "-c",
     "MATCH=$$(kubectl get -n istio-system --request-timeout 5s rule stackdriver-tracing-rule -o jsonpath='{.spec.match}'); [ \"$$MATCH\" != 'context.protocol == \"http\" || context.protocol == \"grpc\"' ] && MATCH=\"$$RANDOM\"; jq -n --arg match \"$$MATCH\" '{match:$$match}'",
   ]
+
+  query = {
+    depends_on = "${null_resource.ingress_ip_wait.id}"
+  }
 }
 
 resource "null_resource" "istio_tracing" {
   triggers = {
-    match = "${data.external.istio_tracing.result.match}"
+    match = "${data.external.istio_tracing.result["match"]}"
   }
 
   provisioner "local-exec" {
