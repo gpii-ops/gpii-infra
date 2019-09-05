@@ -1,3 +1,28 @@
+# This resource waits till GKE creates Istio rule for tracing
+resource "null_resource" "istio_tracing_wait" {
+  triggers = {
+    nonce = "${var.nonce}"
+  }
+
+  provisioner "local-exec" {
+    command = <<EOF
+      COUNT=1
+      MAX_RETRIES=60
+      SLEEP_SEC=5
+      READY=false
+
+      while [ "$READY" != 'true' ] && [ "$COUNT" -le "$MAX_RETRIES" ]; do
+        echo "Waiting for stackdriver-tracing-rule rule ($COUNT/$MAX_RETRIES)"
+        kubectl -n istio-system get --request-timeout 5s rule stackdriver-tracing-rule 2>/dev/null
+        [ "$?" -eq 0 ] && READY=true
+        # Sleep only if we're not ready
+        [ "$READY" != 'true' ] && sleep "$SLEEP_SEC"
+        COUNT=$((COUNT+1))
+      done
+EOF
+  }
+}
+
 data "external" "istio_tracing" {
   program = [
     "bash",
@@ -6,7 +31,7 @@ data "external" "istio_tracing" {
   ]
 
   query = {
-    depends_on = "${null_resource.ingress_ip_wait.id}"
+    depends_on = "${null_resource.istio_tracing_wait.id}"
   }
 }
 
