@@ -8,7 +8,11 @@ resource "kubernetes_horizontal_pod_autoscaler" "istio-egressgateway" {
     namespace = "istio-system"
 
     labels = {
-      k8s-app = "istio"
+      k8s-app  = "istio"
+      app      = "egressgateway"
+      chart    = "gateways"
+      heritage = "Tiller"
+      release  = "istio"
     }
   }
 
@@ -32,7 +36,11 @@ resource "kubernetes_horizontal_pod_autoscaler" "istio-ingressgateway" {
     namespace = "istio-system"
 
     labels = {
-      k8s-app = "istio"
+      k8s-app  = "istio"
+      app      = "ingressgateway"
+      chart    = "gateways"
+      heritage = "Tiller"
+      release  = "istio"
     }
   }
 
@@ -56,7 +64,11 @@ resource "kubernetes_horizontal_pod_autoscaler" "istio-pilot" {
     namespace = "istio-system"
 
     labels = {
-      k8s-app = "istio"
+      k8s-app  = "istio"
+      app      = "pilot"
+      chart    = "pilot"
+      heritage = "Tiller"
+      release  = "istio"
     }
   }
 
@@ -80,7 +92,11 @@ resource "kubernetes_horizontal_pod_autoscaler" "istio-policy" {
     namespace = "istio-system"
 
     labels = {
-      k8s-app = "istio"
+      k8s-app  = "istio"
+      app      = "mixer"
+      chart    = "mixer"
+      heritage = "Tiller"
+      release  = "istio"
     }
   }
 
@@ -104,7 +120,11 @@ resource "kubernetes_horizontal_pod_autoscaler" "istio-telemetry" {
     namespace = "istio-system"
 
     labels = {
-      k8s-app = "istio"
+      k8s-app  = "istio"
+      app      = "mixer"
+      chart    = "mixer"
+      heritage = "Tiller"
+      release  = "istio"
     }
   }
 
