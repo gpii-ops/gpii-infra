@@ -28,7 +28,7 @@ data:
         gcloud -q compute images delete "image-disk-${snapshot}"
       fi
       gcloud -q compute images create "image-disk-${snapshot}" --source-snapshot "${snapshot}"
-      gcloud -q compute images export --log-location "gs://${LOG_BUCKET}/logs" --destination-uri "gs://${INTERMEDIATE_BUCKET}/${TIMESTAMP}-${snapshot}.tar.gz" --image "image-disk-${snapshot}" --network "network" --subnet "nodes" --zone "us-central1-a"
+      gcloud -q compute images export --log-location "gs://${LOG_BUCKET}/logs" --destination-uri "gs://${INTERMEDIATE_BUCKET}/${TIMESTAMP}-${snapshot}.tar.gz" --image "image-disk-${snapshot}" --network "{{ .Values.network }}" --subnet "{{ .Values.subnetwork }}" --zone "{{ .Values.infraRegion }}-{{ .Values.zone }}"
       gcloud -q compute images delete "image-disk-${snapshot}"
       gsutil -q mv "gs://${INTERMEDIATE_BUCKET}/${TIMESTAMP}-${snapshot}.tar.gz" "gs://${DESTINATION_BUCKET}/${TIMESTAMP}-${snapshot}.tar.gz"
     done

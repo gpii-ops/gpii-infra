@@ -20,3 +20,11 @@ replicaCount: 2
 schedule: "0 0 * * *"
 
 logBucket: ""
+
+# Region where the cluster is living
+infraRegion: ""
+zone: "a"
+
+# Network to attach the VM instance created by CloudBuild
+network: "network"
+subnetwork: "nodes"
