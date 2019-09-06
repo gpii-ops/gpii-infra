@@ -9,7 +9,7 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
   schedule: "{{ .Values.cronJobSchedule }}"
-  successfulJobsHistoryLimit: 5
+  successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   concurrencyPolicy: Replace
   startingDeadlineSeconds: 200
