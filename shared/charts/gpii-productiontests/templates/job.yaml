@@ -1,13 +1,18 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  namespace: {{ .Release.Namespace | quote }}
   name: {{ template "productiontests.name" . }}
+  labels:
+    app: {{ template "productiontests.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   template:
     metadata:
       labels:
         app: {{ template "productiontests.name" . }}
+        release: {{ .Release.Name }}
     spec:
       shareProcessNamespace: true
       containers:
@@ -18,7 +23,18 @@ spec:
           runAsUser: 1337
         command: [ "/bin/sh", "-c" ]
         args:
-          - while true;
+          - GPII_COUCHDB_URL_ROOT=$(echo "${GPII_COUCHDB_URL}" | sed 's/[^\/]*$//g');
+            echo "Checking that CouchDB ${GPII_COUCHDB_URL} is ready...";
+            while true;
+            do
+              echo "Waiting for couchdb...";
+              RET_CODE=$(curl --write-out '%{http_code}' --silent --output /dev/null ${GPII_COUCHDB_URL_ROOT}/_up);
+              if [ "$RET_CODE" = '200' ]; then
+                break;
+              fi;
+              sleep 30;
+            done;
+            while true;
             do
               echo "Waiting for flowmanager...";
               RET_CODE=$(curl -k --write-out '%{http_code}' --silent --output /dev/null https://flowmanager.clown.dev.gcp.gpii.net/health);
@@ -35,15 +51,14 @@ spec:
             done;
         env:
         - name: GPII_COUCHDB_URL
-          value: '{{ .Values.couchdbUrl }}'
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "productiontests.name" . }}
+              key: couchdbUrl
         - name: GPII_CLOUD_URL
           value: '{{ .Values.flowmanager.url }}'
         - name: GPII_FLOWMANAGER_LISTEN_PORT
           value: '{{ .Values.flowmanager.port }}'
-        - name: GPII_DATASOURCE_HOSTNAME
-          value: '{{ .Values.datasourceHostname }}'
-        - name: GPII_DATASOURCE_PORT
-          value: '{{ .Values.datasourceListenPort }}'
       - name: istio-proxy-manager
         image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
         securityContext:

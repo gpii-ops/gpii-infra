@@ -2,7 +2,5 @@ image:
   repository: ${productiontests_repository}
   checksum: ${productiontests_checksum}
 
-couchdbUrl: "http://${couchdb_admin_username}:${couchdb_admin_password}@couchdb-svc-couchdb.gpii.svc.cluster.local:5984/gpii"
-flowmanagerListenPort: 8081
-datasourceListenPort: 5984
-datasourceHostname: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local"
+couchdb:
+  url: "http://${couchdb_admin_username}:${couchdb_admin_password}@couchdb-svc-couchdb.gpii.svc.cluster.local:5984/gpii"
