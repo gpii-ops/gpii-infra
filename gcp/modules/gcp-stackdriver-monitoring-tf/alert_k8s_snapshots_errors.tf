@@ -10,9 +10,9 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_errors" {
       duration        = "900s"
 
       aggregations {
-        alignment_period     = "600s"
-        per_series_aligner   = "ALIGN_SUM"
-        group_by_fields      = []
+        alignment_period   = "600s"
+        per_series_aligner = "ALIGN_SUM"
+        group_by_fields    = []
       }
 
       denominator_filter       = ""
