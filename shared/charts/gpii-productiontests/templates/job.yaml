@@ -18,13 +18,10 @@ spec:
       containers:
       - name: gpii-productiontests
         image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
-        securityContext:
-          allowPrivilegeEscalation: false
-          runAsUser: 1337
         command: [ "/bin/sh", "-c" ]
         args:
           - GPII_COUCHDB_URL_ROOT=$(echo "${GPII_COUCHDB_URL}" | sed 's/[^\/]*$//g');
-            echo "Checking that CouchDB ${GPII_COUCHDB_URL} is ready...";
+            echo "Checking that CouchDB is ready...";
             while true;
             do
               echo "Waiting for couchdb...";
@@ -37,7 +34,9 @@ spec:
             while true;
             do
               echo "Waiting for flowmanager...";
-              RET_CODE=$(curl -k --write-out '%{http_code}' --silent --output /dev/null https://flowmanager.clown.dev.gcp.gpii.net/health);
+              echo "...by checking ${GPII_CLOUD_URL}/health";
+              RET_CODE=$(curl --write-out '%{http_code}' --silent --output /dev/null ${GPII_CLOUD_URL}/health);
+              echo "RET_CODE is $RET_CODE";
               if [ "$RET_CODE" = '200' ]; then
                 break;
               fi;

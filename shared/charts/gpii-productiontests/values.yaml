@@ -9,10 +9,10 @@ couchdb:
   port: http-couchdb
 
 flowmanager:
-    url: https://flowmanager.clown.dev.gcp.gpii.net
+    url: http://flowmanager.gpii.svc.cluster.local
     labels:
         app: flowmanager
-    port: http-flowmanager
+    port: 80
 
 image:
   repository: herrclown/prodtests-universal
