@@ -128,12 +128,16 @@ delete_firewall_rules() {
 }
 
 # Main
+#
+# Comment/uncomment functions below as needed. (This is not an especially
+# elegant interface, but the workflow when quarantining nodes due to a Security
+# Incident is hard to predict so we decided on a hands-on approach.)
 create_firewall_rules
 remove_node_from_instance_group
 quarantine_node
 remove_node_from_cluster
 #destroy_node
-delete_firewall_rules
+#delete_firewall_rules
 
 
 # vim: et ts=2 sw=2:
