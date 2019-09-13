@@ -76,6 +76,7 @@ Users who already had an RtF email address/Google account usually have performed
    * `rake sh` has some issues with interactive commands (e.g. `less` and `vi`) -- see https://issues.gpii.net/browse/GPII-3407.
 1. `rake plain_sh` is like `rake sh`, but not all configuration is performed. This can be helpful for debugging (e.g. when `rake sh` does not work) and with interactive commands.
 1. To `curl` a single couchdb instance: `kubectl exec --namespace gpii couchdb-couchdb-0 -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/`
+   * To talk to any instance in the couchdb cluster (i.e. the way that components inside the Kubernetes cluster do), use the URL for the Service: `http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@couchdb-svc-couchdb.gpii.svc.cluster.local:5984/`
 
 ### Tearing down an environment
 
