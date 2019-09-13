@@ -550,45 +550,6 @@ Here are the steps:
 1. Deploy `k8s-snapshots` module to resume regular snapshot process with `rake deploy_module["k8s/kube-system/k8s-snapshots"]`.
 1. To make sure that all systems are functional, run smoke tests with `rake test_preferences` and then `rake test_flowmanager`.
 
-### Hack: Adding data to CouchDB
-
-This is what I used to create a fake preference while verifying that volumes are restored correctly.
-
-1. Run a container inside the cluster: `cd aws/dev && rake run_interactive`
-1. From inside the container, install some tools: `apk update && apk add curl`
-1. Define a record:
-```
-# Copied and modified from vicky.json.
-data='
-{
-  "_id": "mrtyler",
-  "type": "prefsSafe",
-  "schemaVersion": "0.1",
-  "prefsSafeType": "user",
-  "name": "mrtyler",
-  "password": null,
-  "email": null,
-  "preferences": {
-    "flat": {
-      "contexts": {
-        "gpii-default": {
-          "name": "HI EVERYBODY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
-          "preferences": {
-            "http://registry.gpii.net/common/stickyKeys": true
-          }
-        }
-      }
-    }
-  },
-  "timestampCreated": "2018-04-27T20:41:01.850Z",
-  "timestampUpdated": null
-}
-'
-```
-1. Add the record: `curl -f -H 'Content-Type: application/json' -X POST http://couchdb.default.svc.cluster.local:5984/gpii -d "$data"`
-1. Before the restore: verify that the new record is present.
-1. After the restore: verify that the new record is no longer present.
-
 ### Manual processes: Users' data and client credentials
 
 #### Generating db data of user preferences
