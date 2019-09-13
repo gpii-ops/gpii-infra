@@ -64,3 +64,30 @@ To automatically scan publicly exposed endpointst for common vulnerabilities (XS
 ## CI
 
 See [CI-CD One-time setup steps](./CI-CD.md#one-time-setup-steps).
+
+## Slack
+
+1. RtF has a [Slack instance](https://raisingthefloor.slack.com). The Slackbot in #ops is manually configured with [`/remind`](https://get.slack.help/hc/en-us/articles/208423427-Setting-reminders) to tell the Ops team when it's time to perform certain key periodic functions (e.g. testing backups, testing the IR/DR Plan):
+   * `/remind` commands must be entered one at a time. Check the output of `/remind list` to ensure each reminder has been understood separately, not as a single reminder containing a big block of text containing blank lines.
+   * All times are US Mountain Time. You must adjust them to your Slack client's time zone (sorry, there is no way to specify time zone in `/remind`).
+```
+# End daily standup
+/remind #ops to "end standup" at 11:00 every Monday
+/remind #ops to "end standup" at 11:00 every Tuesday
+/remind #ops to "end standup" at 11:00 every Wednesday
+/remind #ops to "end standup" at 11:00 every Thursday
+/remind #ops to "end standup" at 11:00 every Friday
+
+# Before weekly
+/remind #ops to "Add Ops Weekly agenda items to the Pad
+https://pad.gpii.net/mypads/?/mypads/group/gpii-infrastructure-meetings-iqt4nbr/view
+1. Anything to demo this week?
+2. Review key metrics - https://pad.gpii.net/mypads/?/mypads/group/gpii-infrastructure-standups-lix4njm/pad/view/key-metrics-for-infrastructure-pc1g4nnd
+2a. If you are on top of the Standup list, prepare a browser with all Key Metrics loaded and ready to review" at 10:05 every Monday
+
+# Monthly backup test
+/remind #ops to "Perform monthly backup restoration test, following instructions from https://github.com/gpii-ops/gpii-infra/blob/master/gcp/README.md#data-corruption-on-all-replicas-of-couchdb-cluster" at 10:05 on the 1st of every month
+
+# Annual IR/DR Plan test
+/remind #ops to "Test IR/DR Plan: https://docs.google.com/document/d/1LQHKsRdh8m4oAu-b3tz29cK5ggMv6bdueUa5s6Hyg_I/edit#heading=h.jvejvz2o01ns" at 10:05 on Sep 13 of every year
+```
