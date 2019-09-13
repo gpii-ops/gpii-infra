@@ -238,7 +238,7 @@ These steps are ordered roughly by difficulty and disruptiveness.
 
 #### Easy, ordinary steps
 
-1. `rake unlock` - if you orphaned a Terraform lock file, e.g. by Ctrl-C during a Terraform run
+1. `rake unlock` - if you orphaned a Terraform lock file, e.g. by Ctrl-C during a Terraform run. See also [Error locking state](#error-locking-state-error-acquiring-the-state-lock)
 1. `rake destroy` - the cleanest way to terminate a cluster. However, it may fail in certain circumstances.
 1. `rake clobber` - cleans up generated files. You will have to authenticate again after clobbering
 
@@ -281,6 +281,27 @@ For example: a developer deleted their tfstate bucket in GCS and re-created it w
    * `gustil ...`
 4. The tfstate bucket contains entities with *both kinds* of encryption. When reconstructing the bucket, you must use (or not use, i.e. move out of the way) the custom `.boto` file described above.
 5. Some Google documentation for context, [Using Encryption Keys](https://cloud.google.com/storage/docs/gsutil/addlhelp/UsingEncryptionKeys).
+
+### Error locking state: Error acquiring the state lock
+
+If you see an error like this (usually because you orphaned a lock file by interrupting (Ctrl-C'd) a `rake`/`terraform` run):
+
+```
+Error: Error locking state: Error acquiring the state lock: writing "gs://gpii-gcp-dev-jj-tfstate/dev/k8s/cluster/default.tflock" failed: googleapi: Error 412: Precondition Failed, conditionNotMet
+Lock Info:
+  ID:        1564599692234628
+  Path:      gs://gpii-gcp-dev-jj-tfstate/dev/k8s/cluster/default.tflock
+  Operation: OperationTypeApply
+  Who:       root@52fec555531a
+  Version:   0.11.14
+  Created:   2019-07-31 19:01:32.102683134 +0000 UTC
+  Info:
+```
+
+1. Make sure you are the only person working in the environment.
+   * In your dev environment, this is almost always the case.
+   * In a shared environment like `prd`, this lock file prevents two people from attempting to make changes at the same time (which could lead to serious problems). Confirm in #ops that no one else is working there before you proceed.
+1. Run `rake unlock`.
 
 ### My deploy is stuck on `Waiting for all CouchDB pods to join the cluster... 1 of 2 pods have joined the cluster`
 
