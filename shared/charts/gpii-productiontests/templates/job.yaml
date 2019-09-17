@@ -34,8 +34,8 @@ spec:
             while true;
             do
               echo "Waiting for flowmanager...";
-              echo "...by checking ${GPII_CLOUD_URL}/health";
-              RET_CODE=$(curl --write-out '%{http_code}' --silent --output /dev/null ${GPII_CLOUD_URL}/health);
+              echo "...by checking https://flowmanager.clown.dev.gcp.gpii.net/ready";
+              RET_CODE=$(curl -k --write-out '%{http_code}' --silent --output /dev/null https://flowmanager.clown.dev.gcp.gpii.net/ready);
               echo "RET_CODE is $RET_CODE";
               if [ "$RET_CODE" = '200' ]; then
                 break;

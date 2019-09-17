@@ -9,7 +9,7 @@ couchdb:
   port: http-couchdb
 
 flowmanager:
-    url: http://flowmanager.gpii.svc.cluster.local
+    url: http://flowmanager.gpii.svc.cluster.local:80
     labels:
         app: flowmanager
     port: 80

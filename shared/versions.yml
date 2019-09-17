@@ -99,7 +99,7 @@ productiontests:
     tag: latest
   generated:
     repository: herrclown/prodtests-universal
-    sha: sha256:d7e8a868cf256bba3abb99abe8c34cb53a3233a443203aaa13bdebf1c9718d98
+    sha: sha256:4be19f0427605b017fbe1a6bd1ed67fb43e24f33915c2082fea90c120f8487e6
     tag: latest
 k8s_snapshots:
   upstream:
