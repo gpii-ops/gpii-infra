@@ -9,11 +9,11 @@ couchdb:
   port: http-couchdb
 
 flowmanager:
-    url: http://flowmanager.gpii.svc.cluster.local:80
+    url: http://flowmanager.gpii.svc.cluster.local:8080
     labels:
         app: flowmanager
     svcListenport: http
-    flowmanagerListenPort: 80
+    flowmanagerListenPort: 8080
 
 image:
   repository: herrclown/prodtests-universal
