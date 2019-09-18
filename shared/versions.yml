@@ -95,11 +95,11 @@ flowmanager:
     tag: 20190809170605-f8485e9
 productiontests:
   upstream:
-    repository: herrclown/prodtests-universal
+    repository: herrclown/vagrant-universal
     tag: latest
   generated:
-    repository: herrclown/prodtests-universal
-    sha: sha256:4be19f0427605b017fbe1a6bd1ed67fb43e24f33915c2082fea90c120f8487e6
+    repository: herrclown/vagrant-universal
+    sha: sha256:eb4fb5e9c2c02466717845e917af7bfe71f2ce8437f712cea2bc561f0b244ddf
     tag: latest
 k8s_snapshots:
   upstream:

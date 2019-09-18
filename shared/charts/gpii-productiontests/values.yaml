@@ -16,8 +16,8 @@ flowmanager:
     flowmanagerListenPort: 8080
 
 image:
-  repository: herrclown/prodtests-universal
-  checksum: sha256:d7e8a868cf256bba3abb99abe8c34cb53a3233a443203aaa13bdebf1c9718d98
+  repository: herrclown/vagrant-universal
+  checksum: sha256:eb4fb5e9c2c02466717845e917af7bfe71f2ce8437f712cea2bc561f0b244ddf
   pullPolicy: IfNotPresent
 
 nameOverride: productiontests
