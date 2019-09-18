@@ -18,3 +18,11 @@ localIntermediateBucket: "${local_intermediate_bucket}"
 schedule: "${schedule}"
 
 logBucket: "${log_bucket}"
+
+# Region where the cluster is living
+infraRegion: "${infra_region}"
+zone: "${zone}"
+
+# Network to attach the VM instance created by CloudBuild
+network: "${vm_network}"
+subnetwork: "${vm_subnetwork}"

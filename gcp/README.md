@@ -76,6 +76,7 @@ Users who already had an RtF email address/Google account usually have performed
    * `rake sh` has some issues with interactive commands (e.g. `less` and `vi`) -- see https://issues.gpii.net/browse/GPII-3407.
 1. `rake plain_sh` is like `rake sh`, but not all configuration is performed. This can be helpful for debugging (e.g. when `rake sh` does not work) and with interactive commands.
 1. To `curl` a single couchdb instance: `kubectl exec --namespace gpii couchdb-couchdb-0 -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/`
+   * To talk to any instance in the couchdb cluster (i.e. the way that components inside the Kubernetes cluster do), use the URL for the Service: `http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@couchdb-svc-couchdb.gpii.svc.cluster.local:5984/`
 
 ### Tearing down an environment
 
@@ -237,7 +238,7 @@ These steps are ordered roughly by difficulty and disruptiveness.
 
 #### Easy, ordinary steps
 
-1. `rake unlock` - if you orphaned a Terraform lock file, e.g. by Ctrl-C during a Terraform run
+1. `rake unlock` - if you orphaned a Terraform lock file, e.g. by Ctrl-C during a Terraform run. See also [Error locking state](#error-locking-state-error-acquiring-the-state-lock)
 1. `rake destroy` - the cleanest way to terminate a cluster. However, it may fail in certain circumstances.
 1. `rake clobber` - cleans up generated files. You will have to authenticate again after clobbering
 
@@ -280,6 +281,27 @@ For example: a developer deleted their tfstate bucket in GCS and re-created it w
    * `gustil ...`
 4. The tfstate bucket contains entities with *both kinds* of encryption. When reconstructing the bucket, you must use (or not use, i.e. move out of the way) the custom `.boto` file described above.
 5. Some Google documentation for context, [Using Encryption Keys](https://cloud.google.com/storage/docs/gsutil/addlhelp/UsingEncryptionKeys).
+
+### Error locking state: Error acquiring the state lock
+
+If you see an error like this (usually because you orphaned a lock file by interrupting (Ctrl-C'd) a `rake`/`terraform` run):
+
+```
+Error: Error locking state: Error acquiring the state lock: writing "gs://gpii-gcp-dev-jj-tfstate/dev/k8s/cluster/default.tflock" failed: googleapi: Error 412: Precondition Failed, conditionNotMet
+Lock Info:
+  ID:        1564599692234628
+  Path:      gs://gpii-gcp-dev-jj-tfstate/dev/k8s/cluster/default.tflock
+  Operation: OperationTypeApply
+  Who:       root@52fec555531a
+  Version:   0.11.14
+  Created:   2019-07-31 19:01:32.102683134 +0000 UTC
+  Info:
+```
+
+1. Make sure you are the only person working in the environment.
+   * In your dev environment, this is almost always the case.
+   * In a shared environment like `prd`, this lock file prevents two people from attempting to make changes at the same time (which could lead to serious problems). Confirm in #ops that no one else is working there before you proceed.
+1. Run `rake unlock`.
 
 ### My deploy is stuck on `Waiting for all CouchDB pods to join the cluster... 1 of 2 pods have joined the cluster`
 
@@ -550,45 +572,6 @@ Here are the steps:
 1. Deploy `k8s-snapshots` module to resume regular snapshot process with `rake deploy_module["k8s/kube-system/k8s-snapshots"]`.
 1. To make sure that all systems are functional, run smoke tests with `rake test_preferences` and then `rake test_flowmanager`.
 
-### Hack: Adding data to CouchDB
-
-This is what I used to create a fake preference while verifying that volumes are restored correctly.
-
-1. Run a container inside the cluster: `cd aws/dev && rake run_interactive`
-1. From inside the container, install some tools: `apk update && apk add curl`
-1. Define a record:
-```
-# Copied and modified from vicky.json.
-data='
-{
-  "_id": "mrtyler",
-  "type": "prefsSafe",
-  "schemaVersion": "0.1",
-  "prefsSafeType": "user",
-  "name": "mrtyler",
-  "password": null,
-  "email": null,
-  "preferences": {
-    "flat": {
-      "contexts": {
-        "gpii-default": {
-          "name": "HI EVERYBODY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
-          "preferences": {
-            "http://registry.gpii.net/common/stickyKeys": true
-          }
-        }
-      }
-    }
-  },
-  "timestampCreated": "2018-04-27T20:41:01.850Z",
-  "timestampUpdated": null
-}
-'
-```
-1. Add the record: `curl -f -H 'Content-Type: application/json' -X POST http://couchdb.default.svc.cluster.local:5984/gpii -d "$data"`
-1. Before the restore: verify that the new record is present.
-1. After the restore: verify that the new record is no longer present.
-
 ### Manual processes: Users' data and client credentials
 
 #### Generating db data of user preferences
@@ -752,10 +735,89 @@ The destination buckets are created automatically by [Terraform code](https://gi
 
 #### Restoring a backup from outside of the organization.
 
-The process of the restore it's similar but the other way around. It uses the `gcloud compute images import` command. In order to make easier the process a rake task called `restore_snapshot_from_image_file`can be used. This task takes only one parameter with each snapshot to recover separated by one space. i.e:
-```
-rake restore_snapshot_from_image_file["gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-0-030519-205726.raw.gz gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-1-030519-205756.raw.gz"]
-```
-Once the task finished new restored snapshot files will appear with the string `external-` at the beginning of the name. This will help with the search when at the restoration of the disks using the snapshots.
+The process of the restore it's similar to the backup but the other way around. It uses the `gcloud compute images import` command. In order to make easier the process a rake task called `restore_snapshot_from_image_file`can be used. This task takes only one parameter where each snapshot file to recover is separated by one space. Also this proccess takes almost 9 min per snapshot to restore:
 
-And follow the process [Data corruption on all replicas of CouchDB cluster](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#data-corruption-on-all-replicas-of-couchdb-cluster) using the snapshot files restored.
+1. Get in to the exekube shell
+
+   ```
+   rake plain_sh
+   ```
+1. Select the files to be restored.
+
+   ```
+   gsutil ls -l gs://gpii-backup-stg/** | sort -k 2
+   ```
+
+1. Copy the full path of each file to be restored.
+
+   ```
+   rake restore_snapshot_from_image_file["gs://gpii-backup-stg/2019-05-03_210008-pv-database-storage-couchdb-couchdb-0-030519-205726.raw.gz gs://gpii-backup-stg/2019-05-03_210008-pv-database-storage-couchdb-couchdb-1-030519-205756.raw.gz gs://gpii-backup-stg/2019-05-03_210008-pv-database-storage-couchdb-couchdb-2-030519-205756.raw.gz"]
+   ```
+1. Once the task finished, check that the new restored snapshots will appear with the string `external-` at the beginning of the name. This will help with the search when at the restoration of the disks using the snapshots.
+
+1. Follow the process [Data corruption on all replicas of CouchDB cluster](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#data-corruption-on-all-replicas-of-couchdb-cluster) using the snapshot files restored.
+
+
+## Deployment considerations
+
+### Avoiding inconsistent backups during the deployment
+
+The cloud has two types of automatic backups: periodic snapshots and the export of the snapshots outside the GCP organization. If the deployment needs any kind of data migration the backups made from the middle of the process could have some inconsistencies. Because of this the automatic processes are not desirable in the time that the data migration is performed.
+
+Also the rotation policy of the k8s-snapshots can delete the latest snapshots made just before the deployment starts. Stoping the backup processes avoids this situation.
+
+To stop the backups of a particular environment execute the following commands:
+
+```
+cd gcp/live/dev/
+rake destroy_module["k8s/kube-system/k8s-snapshots"]
+rake destroy_module["k8s/kube-system/backup-exporter"]
+```
+
+Once the data migration has ended
+
+```
+cd gcp/live/dev/
+rake deploy_module["k8s/kube-system/k8s-snapshots"]
+rake deploy_module["k8s/kube-system/backup-exporter"]
+```
+
+### Good practices
+
+1. Always use ephemeral pairs (user/password) on each operation in a deployment if the access to the data is needed. The rotation of the credentials is more expensive that, for example, make use of [the couchdb_ui rake task](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#accessing-couchdb-and-couchdb-web-ui).
+
+1. Be careful with the environment variables that are passed using `kubectl` commands, they can appear in plain text in the logs.
+
+1. Automate all the process as much as we can. Avoid any manual procedure if it is possible.
+
+
+## Locust testing
+
+### Running Locust from your host
+
+From your environment directory run one of the two tests available:
+
+```
+rake test_flowmanager                         # [TEST] Run Locust swarm against Flowmanager service in current cluster
+rake test_preferences                         # [TEST] Run Locust swarm against Preferences service in current cluster
+```
+
+### Customize test parameters
+
+The settings of each test can be modified using environment variables. All the environment variables that modify the locust tests settings are:
+
+```
+TF_VAR_locust_desired_max_response_time
+TF_VAR_locust_desired_median_response_time
+TF_VAR_locust_desired_total_rps
+TF_VAR_locust_users
+TF_VAR_locust_workers
+```
+
+The default values can be found in the [variables file](modules/locust/variables.tf)
+
+For example, if you want to change the number of the workers prepend the rake command with the new value of the environment variable:
+
+```
+TF_VAR_locust_workers=4 rake test_flowmanager
+```
