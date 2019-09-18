@@ -21,7 +21,6 @@ spec:
         command: [ "/bin/sh", "-c" ]
         args:
           - GPII_COUCHDB_URL_ROOT=$(echo "${GPII_COUCHDB_URL}" | sed 's/[^\/]*$//g');
-            echo "Checking that CouchDB is ready...";
             while true;
             do
               echo "Waiting for couchdb...";
@@ -34,20 +33,13 @@ spec:
             while true;
             do
               echo "Waiting for flowmanager...";
-              echo "...by checking ${GPII_CLOUD_URL}/ready";
               RET_CODE=$(curl --write-out '%{http_code}' --silent --output /dev/null ${GPII_CLOUD_URL}/ready);
-              echo "RET_CODE is $RET_CODE";
               if [ "$RET_CODE" = '200' ]; then
                 break;
               fi;
               sleep 30;
             done;
             npm run test:productionConfig;
-            while true;
-            do
-                echo "sleeping...";
-                sleep 2;
-            done;
         env:
         - name: GPII_COUCHDB_URL
           valueFrom:
@@ -77,6 +69,11 @@ spec:
               sleep 2;
             done;
             echo 'npm run test:productionConfig finished.';
-            echo 'Sending TERM to pilot-agent';
-            pkill pilot-agent;
+            while pgrep pilot-agent > /dev/null;
+            do
+              echo 'Sending TERM to pilot-agent';
+              pkill pilot-agent;
+              sleep 2;
+            done;
+            echo 'pilot-agent terminated';
       restartPolicy: Never
