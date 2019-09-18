@@ -45,8 +45,12 @@ couchdbConfig:
 
 virtual_service:
   enabled: true
-  attempts: 3
+  attempts: 1
   timeout: 2s
+
+lifecycle:
+  preStop:
+    sleep_seconds: 15
 
 resources:
   requests:
