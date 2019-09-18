@@ -22,5 +22,5 @@ spec:
           app: {{ template "productiontests.name" . }}
           release: {{ .Release.Name }}
     ports:
-    - port: {{ .Values.flowmanager.port }}
+    - port: {{ .Values.flowmanager.svcListenport }}
       protocol: TCP

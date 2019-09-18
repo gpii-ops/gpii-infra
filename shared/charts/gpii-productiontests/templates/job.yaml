@@ -34,8 +34,8 @@ spec:
             while true;
             do
               echo "Waiting for flowmanager...";
-              echo "...by checking https://flowmanager.clown.dev.gcp.gpii.net/ready";
-              RET_CODE=$(curl -k --write-out '%{http_code}' --silent --output /dev/null https://flowmanager.clown.dev.gcp.gpii.net/ready);
+              echo "...by checking ${GPII_CLOUD_URL}/ready";
+              RET_CODE=$(curl --write-out '%{http_code}' --silent --output /dev/null ${GPII_CLOUD_URL}/ready);
               echo "RET_CODE is $RET_CODE";
               if [ "$RET_CODE" = '200' ]; then
                 break;
@@ -57,7 +57,7 @@ spec:
         - name: GPII_CLOUD_URL
           value: '{{ .Values.flowmanager.url }}'
         - name: GPII_FLOWMANAGER_LISTEN_PORT
-          value: '{{ .Values.flowmanager.port }}'
+          value: '{{ .Values.flowmanager.flowmanagerListenPort }}'
       - name: istio-proxy-manager
         image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
         securityContext:
