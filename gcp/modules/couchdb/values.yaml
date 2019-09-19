@@ -43,11 +43,6 @@ couchdbConfig:
   httpd:
     WWW-Authenticate: "Basic realm=\"CouchDB\""
 
-virtual_service:
-  enabled: true
-  attempts: 1
-  timeout: 2s
-
 lifecycle:
   preStop:
     sleep_seconds: 15
