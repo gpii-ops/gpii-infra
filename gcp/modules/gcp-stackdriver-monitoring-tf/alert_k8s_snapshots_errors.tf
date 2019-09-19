@@ -1,5 +1,5 @@
 resource "google_monitoring_alert_policy" "k8s_snapshots_errors" {
-  display_name = "IAM audit logs do not contain policy modification events"
+  display_name = "K8s-snapshots logs do not contain errors"
   combiner     = "OR"
 
   conditions {
