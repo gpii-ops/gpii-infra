@@ -40,6 +40,12 @@ couchdbConfig:
     bind_address: any
     # http://docs.couchdb.org/en/stable/config/auth.html#authentication-configuration
     require_valid_user: true
+  httpd:
+    WWW-Authenticate: "Basic realm=\"CouchDB\""
+
+lifecycle:
+  preStop:
+    sleep_seconds: 15
 
 resources:
   requests:

@@ -1,5 +1,5 @@
 desc "[ONLY ADMIN] Initialize GCP provider where all the projects will live"
-task :apply_common_infra => [:set_vars, :configure_aws_restore] do
+task :apply_common_infra => [:set_vars] do
   # Steps to initialize GCP with a minimum set of resources to allow Terraform
   # create the rest of the infrastructure.
   # These steps are the same found in this tutorial:

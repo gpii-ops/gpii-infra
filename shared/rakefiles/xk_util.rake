@@ -186,22 +186,38 @@ task :display_universal_image_info => [:configure] do
   '", verbose: false
 end
 
+task :configure_project_admin_roles do
+  @project_admin_roles = ["roles/iam.serviceAccountTokenCreator"]
+  if ENV["TF_VAR_organization_name"] == "gpii"
+    @project_admin_roles.push("roles/owner")
+  else
+    # The owner role can not be granted using other method than the console for
+    # external users to a particular organization.
+    # https://cloud.google.com/iam/docs/understanding-roles#invitation_flow
+    @project_admin_roles.push("roles/editor", "roles/resourcemanager.projectIamAdmin")
+  end
+end
+
 # This task grants the owner role in the current project to the current user
-task :grant_project_admin => [@gcp_creds_file, :configure_extra_tf_vars] do
-  sh "
-    gcloud projects add-iam-policy-binding \"$TF_VAR_project_id\" \
-      --member user:\"$TF_VAR_auth_user_email\" \
-      --role roles/owner
-  "
+task :grant_project_admin => [@gcp_creds_file, :configure_extra_tf_vars, :configure_project_admin_roles] do
+  @project_admin_roles.each do |role|
+    sh "
+      gcloud projects add-iam-policy-binding \"$TF_VAR_project_id\" \
+        --member user:\"$TF_VAR_auth_user_email\" \
+        --role \"#{role}\"
+    "
+  end
 end
 
 # This task revokes the owner role in the current project from the current user
-task :revoke_project_admin => [@gcp_creds_file, :configure_extra_tf_vars] do
-  sh "
-    gcloud projects remove-iam-policy-binding \"$TF_VAR_project_id\" \
-      --member user:\"$TF_VAR_auth_user_email\" \
-      --role roles/owner
-  "
+task :revoke_project_admin => [@gcp_creds_file, :configure_extra_tf_vars, :configure_project_admin_roles] do
+  @project_admin_roles.each do |role|
+    sh "
+      gcloud projects remove-iam-policy-binding \"$TF_VAR_project_id\" \
+        --member user:\"$TF_VAR_auth_user_email\" \
+        --role \"#{role}\"
+    "
+  end
 end
 
 # This task grants organization roles declared in org_admin_roles to the current user
@@ -222,35 +238,64 @@ task :revoke_org_admin => [@gcp_creds_file, :configure_extra_tf_vars] do
   end
 end
 
-# This task restores a list of images in snapshots. 
+# This task restores a list of images in snapshots.
 task :restore_snapshot_from_image_file, [:snapshot_files] => [@gcp_creds_file, :configure_extra_tf_vars] do |taskname, args|
-  require 'csv'
+  if args[:snapshot_files].nil? || args[:snapshot_files].size == 0
+    puts "  ERROR: Argument :snapshot_files not present!"
+    raise
+  end
+
+  require 'json'
+
+  pv_hash = JSON.parse(%x{
+      #{@exekube_cmd} kubectl get pv -o json
+    })
 
   pv_zones = {}
-  CSV.parse(%x{
-              #{@exekube_cmd} kubectl get pv -o json | jq -r '.items[] | \"\\(.spec.claimRef.name),\\(.metadata.labels.\"failure-domain.beta.kubernetes.io/zone\")\"'
-           }.chomp).each do |line|
-             pv_zones[line[0]] = line[1]
-           end
+  pv_hash["items"].each do |item|
+    pv_zones[item["spec"]["claimRef"]["name"]] = item["metadata"]["labels"]["failure-domain.beta.kubernetes.io/zone"]
+  end
 
+  # The output of the above code should be a hash type object with the volumes and the zones
+  # where they are:
+  #
+  # pv_zones = {
+  #   "database-storage-couchdb-couchdb-0": "us-central1-f",
+  #   "database-storage-couchdb-couchdb-1": "us-central1-a"
+  # }
+  #
+  # that will be used later to know in which zone we need to restore the images.
   snapshot_files = args[:snapshot_files].split ' '
 
   snapshot_files.each do |snapshot_file|
     sh "#{@exekube_cmd} sh -c ' \
-      gsutil ls #{snapshot_file}
+      gsutil ls #{snapshot_file} 2>&1 >/dev/null || { echo \"File #{snapshot_file} not found\"; exit 1; }
     '", verbose: false
   end
 
   snapshot_files.each do |snapshot_file|
+    # The snapshot_name must be something like:
+    # database-storage-couchdb-couchdb-0-060619-195849 from the file name:
+    # 2019-06-27_154922-pv-database-storage-couchdb-couchdb-0-060619-195849.tar.gz
     snapshot_name = snapshot_file[/database-storage-couchdb-couchdb-\d-\d+-\d+/, 0]
+    pv_zone = pv_zones[snapshot_name[/(([A-Za-z]+-)+[\d])/,0]]
     sh "#{@exekube_cmd} sh -c ' \
-    gcloud compute images create image-disk-pv-#{snapshot_name} --source-uri=#{snapshot_file}
-    gcloud compute disks create disk-pv-#{snapshot_name} --zone=#{pv_zones[snapshot_name[/(([A-Za-z]+-)+[\d])/,0]]} --image=image-disk-pv-#{snapshot_name}
-    gcloud compute disks snapshot disk-pv-#{snapshot_name} --zone=#{pv_zones[snapshot_name[/(([A-Za-z]+-)+[\d])/,0]]} --snapshot-names external-pv-#{snapshot_name}
-    gcloud -q compute images delete image-disk-pv-#{snapshot_name}
-    gcloud -q compute disks delete disk-pv-#{snapshot_name} --zone=#{pv_zones[snapshot_name[/(([A-Za-z]+-)+[\d])/,0]]}
+      function cleanup {
+        gcloud -q compute disks delete disk-pv-#{snapshot_name} --zone=#{pv_zone} || true
+        gcloud -q compute images delete image-disk-pv-#{snapshot_name} || true
+      }
+      gcloud compute images create image-disk-pv-#{snapshot_name} --source-uri=#{snapshot_file} || { cleanup; return 1; }
+      gcloud compute disks create disk-pv-#{snapshot_name} --zone=#{pv_zone} --image=image-disk-pv-#{snapshot_name} || { cleanup; return 1; }
+      gcloud compute disks snapshot disk-pv-#{snapshot_name} --zone=#{pv_zone} --snapshot-names external-pv-#{snapshot_name} || { cleanup; return 1; }
+      cleanup
     '", verbose: false
   end
 
 end
+
+# This task forwards CouchDB port
+task :couchdb_ui => [:configure, :configure_secrets, :set_secrets] do
+  sh "/rakefiles/scripts/couchdb_ui.sh"
+end
+
 # vim: et ts=2 sw=2:

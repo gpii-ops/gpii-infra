@@ -6,13 +6,17 @@ terraform {
   backend "gcs" {}
 }
 
+provider "google" {
+  project     = "${var.project_id}"
+  credentials = "${var.serviceaccount_key}"
+}
+
 # ------------------------------------------------------------------------------
 # Input variables
 # ------------------------------------------------------------------------------
 
 variable "project_id" {}
 variable "serviceaccount_key" {}
-variable "create_static_ip_address" {}
 
 variable "cluster_subnets" {
   default = "10.16.0.0/20,10.17.0.0/16,10.18.0.0/16"
@@ -44,16 +48,13 @@ module "gke_network" {
   }
 
   static_ip_region         = "${var.infra_region}"
-  create_static_ip_address = "${var.create_static_ip_address}"
+  create_static_ip_address = false
+  delete_default_network   = false
 }
 
 # ------------------------------------------------------------------------------
 # Outputs
 # ------------------------------------------------------------------------------
-
-output "static_ip_address" {
-  value = "${module.gke_network.static_ip_address}"
-}
 
 output "dns_zones" {
   value = "${module.gke_network.dns_zones}"

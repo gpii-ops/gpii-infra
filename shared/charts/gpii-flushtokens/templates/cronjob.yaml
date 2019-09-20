@@ -1,0 +1,63 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ template "flushtokens.name" . }}
+  labels:
+    app: {{ template "flushtokens.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  schedule: "{{ .Values.cronJobSchedule }}"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  concurrencyPolicy: Replace
+  startingDeadlineSeconds: 200
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: {{ template "flushtokens.name" . }}
+            release: {{ .Release.Name }}
+        spec:
+          shareProcessNamespace: true
+          containers:
+          - name: gpii-flushtokens
+            image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
+            command: [ "/bin/sh", "-c", "/app/scripts/dockerDeleteExpiredAccessTokens.sh" ]
+            env:
+            - name: MAX_DOCS_IN_BATCH_PER_REQUEST
+              value: '{{ .Values.maxDocsInBatchPerRequest }}'
+            - name: GPII_COUCHDB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "flushtokens.name" . }}
+                  key: couchdbUrl
+          - name: istio-proxy-manager
+            image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsUser: 1337
+            command: [ "/bin/sh", "-c" ]
+            args:
+              - while ! ps -o user | grep node > /dev/null;
+                do
+                  echo 'Waiting for dockerDeleteExpiredAccessTokens.sh to start...';
+                  sleep 2;
+                done;
+                echo 'dockerDeleteExpiredAccessTokens.sh started.';
+                while ps -o user | grep node > /dev/null;
+                do
+                  echo 'Waiting for dockerDeleteExpiredAccessTokens.sh to finish...';
+                  sleep 2;
+                done;
+                echo 'dockerDeleteExpiredAccessTokens.sh finished.';
+                while pgrep pilot-agent > /dev/null;
+                do
+                  echo 'Sending TERM to pilot-agent';
+                  pkill pilot-agent;
+                  sleep 2;
+                done;
+                echo 'pilot-agent terminated';
+          restartPolicy: OnFailure

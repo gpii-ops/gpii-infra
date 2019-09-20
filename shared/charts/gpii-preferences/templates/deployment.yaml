@@ -1,19 +1,28 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  namespace: {{ .Release.Namespace | quote }}
   name: {{ template "preferences.name" . }}
+  labels:
+    app: {{ template "preferences.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.replicaCount }}
   strategy:
     rollingUpdate:
       maxSurge: {{ .Values.rollingUpdate.maxSurge }}
       maxUnavailable: {{ .Values.rollingUpdate.maxUnavailable }}
-    type: RollingUpdate
   template:
     metadata:
       labels:
-        app: preferences
+        app: {{ template "preferences.name" . }}
+        release: {{ .Release.Name }}
+      annotations:
+        # This annotation is needed to allow traffic to metadata.google.internal
+        # until Istio's issue with FQDNs in ServiceEntries is not resolved:
+        # https://github.com/istio/istio/issues/14404
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: "169.254.169.254/32"
     spec:
       containers:
       - name: preferences
@@ -21,15 +30,19 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.preferencesListenPort }}
+          name: http
         env:
         - name: NODE_ENV
           value: {{ .Values.nodeEnv }}
         - name: GPII_PREFERENCESSERVER_LISTEN_PORT
           value: '{{ .Values.preferencesListenPort }}'
-        - name: GPII_DATASOURCE_HOSTNAME
-          value:  '{{ .Values.datasourceHostname }}'
         - name: GPII_DATASOURCE_PORT
           value: '{{ .Values.datasourceListenPort }}'
+        - name: GPII_DATASOURCE_HOSTNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "preferences.name" . }}
+              key: datasourceHostname
         {{- if .Values.enableStackdriverTrace }}
         - name: GPII_ENABLE_STACKDRIVER_TRACE
           value: 'true'

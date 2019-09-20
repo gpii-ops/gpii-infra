@@ -231,7 +231,18 @@ describe Vars do
     Vars.set_versions()
     expect(ENV).to have_received(:[]=).with("TF_VAR_flowmanager_tag", "#{fake_tag}")
   end
-end
 
+  it "set_vars sets Helm TLS variables" do
+    allow(ENV).to receive(:[]).with("TF_VAR_project_id").and_return("fake-project-id")
+    env = "xyz"
+    project_type = "fake-project-type"
+    Vars.set_vars(env, project_type)
+    expect(ENV).to have_received(:[]=).with("HELM_TLS_CERT", "/project/live/#{env}/secrets/kube-system/helm-tls/helm.cert.pem")
+    expect(ENV).to have_received(:[]=).with("HELM_TLS_KEY", "/project/live/#{env}/secrets/kube-system/helm-tls/helm.key.pem")
+    expect(ENV).to have_received(:[]=).with("HELM_TLS_CA_CERT", "/project/live/#{env}/secrets/kube-system/helm-tls/ca.cert.pem")
+    expect(ENV).to have_received(:[]=).with("HELM_TLS_ENABLE", "true")
+    expect(ENV).to have_received(:[]=).with("HELM_TLS_VERIFY", "true")
+  end
+end
 
 # vim: set et ts=2 sw=2:

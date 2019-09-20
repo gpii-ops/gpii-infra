@@ -136,19 +136,10 @@ task :destroy_hard => [:set_vars] do
     Rake::Task["destroy"].invoke
     Rake::Task["destroy_secrets"].reenable
     Rake::Task["destroy_secrets"].invoke
-    # Iff destroy and destroy_secrets both succeed, we want to run all of these
-    # destroy_tfstate commands (regardless if any one destroy_tfstate fails).
+    # If destroy and destroy_secrets both succeed, we want to destroy_tfstate as well.
     begin
       Rake::Task["destroy_tfstate"].reenable
       Rake::Task["destroy_tfstate"].invoke("k8s")
-    rescue RuntimeError => err
-      puts "destroy_tfstate step failed:"
-      puts err
-      puts "Continuing."
-    end
-    begin
-      Rake::Task["destroy_tfstate"].reenable
-      Rake::Task["destroy_tfstate"].invoke("locust")
     rescue RuntimeError => err
       puts "destroy_tfstate step failed:"
       puts err
@@ -183,7 +174,7 @@ task :sh, [:cmd] => [:set_vars] do |taskname, args|
     puts "Argument :cmd -- the command to run inside the exekube container -- not present, defaulting to 'bash'"
     cmd = "bash"
   end
-  sh "#{@exekube_cmd} rake xk['#{cmd}',skip_secret_mgmt,preserve_stderr]"
+  sh "#{@exekube_cmd} rake xk['#{cmd}',true,true]"
 end
 
 desc "[ADVANCED] Run arbitrary command in exekube container via plain shell -- rake plain_sh['kubectl --namespace gpii get pods']"
@@ -327,7 +318,7 @@ task :destroy_module, [:module] => [:set_vars, :check_destroy_allowed, :fetch_he
     puts "  ERROR: args[:module] must point to Terragrunt directory!"
     raise
   end
-  sh "#{@exekube_cmd} rake xk['destroy live/#{@env}/#{args[:module]}',skip_secret_mgmt]"
+  sh "#{@exekube_cmd} rake xk['destroy live/#{@env}/#{args[:module]}',true]"
 end
 
 desc "[ADMIN ONLY] Grant owner role in the current project to the current user"
@@ -358,6 +349,11 @@ end
 desc "[ADMIN ONLY] Restore a snapshot from a remote file"
 task :restore_snapshot_from_image_file, [:files] => [:set_vars] do |taskname, args|
   sh "#{@exekube_cmd} rake restore_snapshot_from_image_file['#{args[:files]}']"
+end
+
+desc "CouchDB - access Fauxton Web UI"
+task :couchdb_ui => [:set_vars] do
+  sh "docker-compose run --rm -p 35984:35984 xk rake couchdb_ui"
 end
 
 # vim: et ts=2 sw=2:

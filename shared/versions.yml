@@ -10,31 +10,33 @@ cert_manager:
     repository: quay.io/jetstack/cert-manager-controller
     tag: v0.6.1
   generated:
-    repository: gcr.io/gpii-common-prd/quay.io/jetstack/cert-manager-controller
-    sha: sha256:3df11bc85fadeebab00c579a5b07d9c3bbf2fa7da181ac6060e88fb01e0cf856
+    repository: gcr.io/gpii-common-prd/quay.io__jetstack__cert-manager-controller
+    sha: sha256:5a4bc171592615ff78e024c8091e77e70179edba840989a203d49c088b6135a6
     tag: v0.6.1
 certmerge_operator:
   upstream:
     repository: gpii/certmerge-operator
     tag: 0.0.3-gpii.0
   generated:
-    repository: gcr.io/gpii-common-prd/gpii/certmerge-operator
-    sha: sha256:96c435ee42bae821210e91430c18c0fd1cbe8cd33216175a77fbdc7622f5d535
+    repository: gcr.io/gpii-common-prd/gpii__certmerge-operator
+    sha: sha256:0b794c687b07b078b6f10d451c81c2fb83bd3c93cf7540fe863910fac1a6d101
     tag: 0.0.3-gpii.0
 cloud_sdk:
-  upstream_image: google/cloud-sdk:242.0.0-alpine
+  upstream:
+    repository: google/cloud-sdk
+    tag: 253.0.0-alpine
   generated:
-    image: google/cloud-sdk
-    sha: sha256:6bda894b7ac4e733a305269379ff8f50329a0cd592f1d966854972bae591b9b5
-    tag: 242.0.0-alpine
+    repository: gcr.io/gpii-common-prd/google__cloud-sdk
+    sha: sha256:5080b4ac5c3f23af87f3c99179bcfaed155e3c71eda788cd60a157a9c8d72907
+    tag: 253.0.0-alpine
 couchdb_helper:
   upstream:
-    repository: kocolosk/couchdb-statefulset-assembler
-    tag: 1.2.0
+    repository: gpii/couchdb-statefulset-assembler
+    tag: 1.4.0-gpii.0
   generated:
-    repository: gcr.io/gpii-common-prd/kocolosk/couchdb-statefulset-assembler
-    sha: sha256:6effb982154ed2d480a8ea49f9aad0cd5fded721d024012165638991c71b1f97
-    tag: 1.2.0
+    repository: gcr.io/gpii-common-prd/gpii__couchdb-statefulset-assembler
+    sha: sha256:0bd8727ca2b0cb8f6d959f0c23edede3918651ec4f2b4f49e1121c7691d72ace
+    tag: 1.4.0-gpii.0
 couchdb_init:
   upstream:
     repository: alpine
@@ -48,78 +50,78 @@ couchdb_prometheus_exporter:
     repository: gesellix/couchdb-prometheus-exporter
     tag: 22
   generated:
-    repository: gcr.io/gpii-common-prd/gesellix/couchdb-prometheus-exporter
-    sha: sha256:015284630a4629755dd0d573ef19cee59a55d7c2fd70dbe66c2131244a4b616c
+    repository: gcr.io/gpii-common-prd/gesellix__couchdb-prometheus-exporter
+    sha: sha256:322da5dbf4837fac1284af6e2d7067e2a180ce4c15f4c109d4b2eda2e058e44c
     tag: 22
 prometheus_to_sd:
   upstream:
     repository: gcr.io/google-containers/prometheus-to-sd
     tag: v0.5.1
   generated:
-    repository: gcr.io/gpii-common-prd/gcr.io/google-containers/prometheus-to-sd
-    sha: sha256:8e3679a6e059d1806daae335ab08b304fd1d8d35cdff457baded7306b5af9ba5
+    repository: gcr.io/gpii-common-prd/gcr.io__google-containers__prometheus-to-sd
+    sha: sha256:14f37ba6eef9ca91cb1ffa71a7a23550f3b074003b60fc0974b4206dc81e0d85
     tag: v0.5.1
 couchdb:
   upstream:
     repository: couchdb
-    tag: 2.3.0
+    tag: 2.3.1
   generated:
     repository: gcr.io/gpii-common-prd/couchdb
-    sha: sha256:05ced582691f18a81a68b413b68e6f71a567e5442ff5b09454a8600d6aec249f
-    tag: 2.3.0
+    sha: sha256:091e855ec217eae3b42642074892039b20915c6ecc3f489cf463fd2902c99513
+    tag: 2.3.1
 dataloader:
   upstream:
     repository: gpii/universal
-    tag: 20190627203047-1262ac8
+    tag: 20190809170605-f8485e9
   generated:
+    repository: gcr.io/gpii-common-prd/gpii__universal
+    sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
+    tag: 20190809170605-f8485e9
+flushtokens:
+  upstream:
     repository: gpii/universal
-    sha: sha256:7af8e370b70c257e791c521e31ebfa233e5632c3a798ff5d8d83ab30c74bfa69
-    tag: 20190627203047-1262ac8
+    tag: 20190809170605-f8485e9
+  generated:
+    repository: gcr.io/gpii-common-prd/gpii__universal
+    sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
+    tag: 20190809170605-f8485e9
 flowmanager:
   upstream:
     repository: gpii/universal
-    tag: 20190627203047-1262ac8
+    tag: 20190809170605-f8485e9
   generated:
-    repository: gpii/universal
-    sha: sha256:7af8e370b70c257e791c521e31ebfa233e5632c3a798ff5d8d83ab30c74bfa69
-    tag: 20190627203047-1262ac8
+    repository: gcr.io/gpii-common-prd/gpii__universal
+    sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
+    tag: 20190809170605-f8485e9
 k8s_snapshots:
   upstream:
     repository: elsdoerfer/k8s-snapshots
     tag: v2.0
   generated:
-    repository: gcr.io/gpii-common-prd/elsdoerfer/k8s-snapshots
-    sha: sha256:a7c10c8054e801b354c43021a275bb4c97ea8aca3b9de2583820492377f26140
+    repository: gcr.io/gpii-common-prd/elsdoerfer__k8s-snapshots
+    sha: sha256:06ceb13d357ef689cd4ecfa17d20f6cd7874554c6da4dfad7bd56cd005e4e452
     tag: v2.0
 locust:
   upstream:
     repository: gpii/locust
     tag: 0.9.0-gpii.6
   generated:
-    repository: gcr.io/gpii-common-prd/gpii/locust
-    sha: sha256:107e1f2ac75e74e8f9c6dd47cdd1852a5efbe1f539ac34d6e8cf54e795741082
+    repository: gcr.io/gpii-common-prd/gpii__locust
+    sha: sha256:a6b8d742092af90248c379ba20755ebe9e980d753b1f3010841d133e9ff93b27
     tag: 0.9.0-gpii.6
-nginx_ingress:
-  upstream:
-    repository: quay.io/kubernetes-ingress-controller/nginx-ingress-controller
-    tag: 0.24.1
-  generated:
-    repository: gcr.io/gpii-common-prd/quay.io/kubernetes-ingress-controller/nginx-ingress-controller
-    sha: sha256:a805454d5fdc799d28011752b7da5bfa52a4b12dccef735f09c4b18f8598c488
-    tag: 0.24.1
 preferences:
   upstream:
     repository: gpii/universal
-    tag: 20190627203047-1262ac8
+    tag: 20190809170605-f8485e9
   generated:
-    repository: gpii/universal
-    sha: sha256:7af8e370b70c257e791c521e31ebfa233e5632c3a798ff5d8d83ab30c74bfa69
-    tag: 20190627203047-1262ac8
+    repository: gcr.io/gpii-common-prd/gpii__universal
+    sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
+    tag: 20190809170605-f8485e9
 service_account_assigner:
   upstream:
     repository: gpii/service-account-assigner
-    tag: 0.0.2-gpii.0
+    tag: 0.0.3-gpii.0
   generated:
-    repository: gcr.io/gpii-common-prd/gpii/service-account-assigner
-    sha: sha256:c464aceecdb83363ee8d339cfdcc6877210b881be1e8fa020ffaddf25a3c83bd
-    tag: 0.0.2-gpii.0
+    repository: gcr.io/gpii-common-prd/gpii__service-account-assigner
+    sha: sha256:5c6d9ed84af21d85a71af9e991c4e8adadcc7ccd792ce0472ea2a0378a27f8ca
+    tag: 0.0.3-gpii.0

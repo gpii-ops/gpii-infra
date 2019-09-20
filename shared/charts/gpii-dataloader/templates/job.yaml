@@ -1,19 +1,54 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  namespace: {{ .Release.Namespace | quote }}
   name: {{ template "dataloader.name" . }}
+  labels:
+    app: {{ template "dataloader.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   template:
     metadata:
       labels:
         app: {{ template "dataloader.name" . }}
+        release: {{ .Release.Name }}
     spec:
+      shareProcessNamespace: true
       containers:
       - name: gpii-dataloader
         image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
         command: [ '/app/scripts/deleteAndLoadSnapsets.sh' ]
         env:
         - name: GPII_COUCHDB_URL
-          value: '{{ .Values.couchdbUrl }}'
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "dataloader.name" . }}
+              key: couchdbUrl
+      - name: istio-proxy-manager
+        image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 1337
+        command: [ "/bin/sh", "-c" ]
+        args:
+          - while ! ps -o user | grep node > /dev/null;
+            do
+              echo 'Waiting for deleteAndLoadSnapsets.sh to start...';
+              sleep 2;
+            done;
+            echo 'deleteAndLoadSnapsets.sh started.';
+            while ps -o user | grep node > /dev/null;
+            do
+              echo 'Waiting for deleteAndLoadSnapsets.sh to finish...';
+              sleep 2;
+            done;
+            echo 'deleteAndLoadSnapsets.sh finished.';
+            while pgrep pilot-agent > /dev/null;
+            do
+              echo 'Sending TERM to pilot-agent';
+              pkill pilot-agent;
+              sleep 2;
+            done;
+            echo 'pilot-agent terminated';
       restartPolicy: OnFailure

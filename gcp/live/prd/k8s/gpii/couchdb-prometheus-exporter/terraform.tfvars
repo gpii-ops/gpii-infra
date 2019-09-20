@@ -7,6 +7,7 @@ terragrunt = {
   dependencies {
     paths = [
       "../couchdb",
+      "../istio",
     ]
   }
 

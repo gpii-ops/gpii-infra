@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-{{ template "flushtokens.name" . }}-to-couchdb
+  labels:
+    app: {{ template "flushtokens.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  podSelector:
+    matchLabels:
+    {{- range $key, $value := .Values.couchdb.labels }}
+      {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: {{ template "flushtokens.name" . }}
+          release: {{ .Release.Name }}
+    ports:
+    - port: {{ .Values.couchdb.port }}
+      protocol: TCP

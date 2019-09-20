@@ -1,0 +1,32 @@
+{{ if (index .Values.master.config "target-host" | regexMatch ".cluster.local")  }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-{{ template "locust.fullname" . }}-to-target
+  namespace: {{ .Values.worker.target.namespace }}
+  labels:
+    app: {{ template "locust.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  podSelector:
+    matchLabels:
+    {{- if .Values.worker.target.labels }}
+    {{- range $key, $value := .Values.worker.target.labels }}
+      {{ $key }}: {{ $value | quote }}
+    {{- end }}
+    {{- else }}
+      app: {{ index .Values.master.config "target-host" | regexFind "^(https?://)?[^.]+" | regexFind "[^./]+$" | quote }}
+    {{- end }}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: {{ template "locust.fullname" . }}
+      namespaceSelector:
+        matchLabels:
+          name: locust
+{{ end }}

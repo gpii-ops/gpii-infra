@@ -87,6 +87,19 @@ service:
   type: ClusterIP
   externalPort: 5984
 
+## Istio's virtual service to control the flow of ingress traffic
+virtual_service:
+  enabled: false
+#  attempts: 1
+#  timeout: 2s
+
+## To allow pods to handle existing connections gracefully on termination
+## lifecycle hook can be used to enable maintenance mode to fail readiness check
+## before terminating the pod.
+lifecycle:
+#  preStop:
+#    sleep_seconds: 15
+
 ## An Ingress resource can provide name-based virtual hosting and TLS
 ## termination among other things for CouchDB deployments which are accessed
 ## from outside the Kubernetes cluster.

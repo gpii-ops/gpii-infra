@@ -7,7 +7,8 @@ terragrunt = {
   dependencies {
     paths = [
       "../../kube-system/helm-initializer",
-      "../../kube-system/cert-manager"
+      "../../kube-system/cert-manager",
+      "../istio",
     ]
   }
 
@@ -21,7 +22,6 @@ terragrunt = {
 backup_deltas     = "PT5M PT15M PT45M"
 release_namespace = "gpii"
 
-replica_count        = 2
 requests_cpu         = "500m"
 requests_memory      = "512Mi"
 limits_cpu           = "1000m"

@@ -1,0 +1,17 @@
+{{- if .Values.virtual_service.enabled -}}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ template "couchdb.name" . }}-vs
+spec:
+  hosts:
+  - {{ template "couchdb.svcname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  http:
+  - route:
+    - destination:
+        host: {{ template "couchdb.svcname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+    timeout: {{ .Values.virtual_service.timeout }}
+    retries:
+      attempts: {{ .Values.virtual_service.attempts }}
+      perTryTimeout: {{ .Values.virtual_service.timeout }}
+{{- end -}}

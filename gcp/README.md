@@ -76,6 +76,7 @@ Users who already had an RtF email address/Google account usually have performed
    * `rake sh` has some issues with interactive commands (e.g. `less` and `vi`) -- see https://issues.gpii.net/browse/GPII-3407.
 1. `rake plain_sh` is like `rake sh`, but not all configuration is performed. This can be helpful for debugging (e.g. when `rake sh` does not work) and with interactive commands.
 1. To `curl` a single couchdb instance: `kubectl exec --namespace gpii couchdb-couchdb-0 -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/`
+   * To talk to any instance in the couchdb cluster (i.e. the way that components inside the Kubernetes cluster do), use the URL for the Service: `http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@couchdb-svc-couchdb.gpii.svc.cluster.local:5984/`
 
 ### Tearing down an environment
 
@@ -136,13 +137,14 @@ This is a shared, long-lived environment for staging / pre-production. It aims t
 
 Deploying to `stg` verifies that the gpii-infra code that worked to create a `dev-$USER` environment from scratch also works to update a pre-existing environment. This is important since we generally don't want to destroy and re-create the production environment from scratch.
 
-Because `stg` emulates production, it will (in the future) allow us to run realistic end-to-end tests before deploying to `prd`.
+Because `stg` emulates production, it will (in the future) allow us to run realistic end-to-end tests before deploying to `prd`. This fact also makes `stg` the proper environment to test some recovering procedures that the ops team must perform periodically.
 
 #### Service Level Objective
 
 * No guarantee of service for development environments (stg is a development environment).
 * Ops team receives alerts about problems, and addresses them when convenient for the team (i.e. we won't wake up an on-call engineer, but we will investigate during business hours)
 * Ops team makes an effort to keep stg stable and available for ad-hoc testing, but may disrupt the environment at any time for our own testing.
+* Ops team will perform a restoration of the persistence layer every first monday of the month at 13:00EDT as part of the backup testing process needed for the FERPA compliance, so expect an outage of about 30 min at that time of the services in `stg`.
 
 ### prd
 
@@ -198,8 +200,7 @@ See [CI-CD.md#running-in-non-dev-environments](../CI-CD.md#running-manually-in-n
 
 1. `cd gcp/live/dev` (or another environment)
 1. `rake sh`
-1. `helm --tiller-namespace kube-system list --tls --tls-verify --tls-ca-cert /project/live/dev/secrets/kube-system/helm-tls/ca.cert.pem --tls-cert /project/live/dev/secrets/kube-system/helm-tls/helm.cert.pem  --tls-key /project/live/dev/secrets/kube-system/helm-tls/helm.key.pem`
-   * Adjust paths for the environment you're using.
+1. `helm list` (or other command)
 
 ### I want to spin up my dev environment in a different region
 
@@ -237,7 +238,7 @@ These steps are ordered roughly by difficulty and disruptiveness.
 
 #### Easy, ordinary steps
 
-1. `rake unlock` - if you orphaned a Terraform lock file, e.g. by Ctrl-C during a Terraform run
+1. `rake unlock` - if you orphaned a Terraform lock file, e.g. by Ctrl-C during a Terraform run. See also [Error locking state](#error-locking-state-error-acquiring-the-state-lock)
 1. `rake destroy` - the cleanest way to terminate a cluster. However, it may fail in certain circumstances.
 1. `rake clobber` - cleans up generated files. You will have to authenticate again after clobbering
 
@@ -281,6 +282,27 @@ For example: a developer deleted their tfstate bucket in GCS and re-created it w
 4. The tfstate bucket contains entities with *both kinds* of encryption. When reconstructing the bucket, you must use (or not use, i.e. move out of the way) the custom `.boto` file described above.
 5. Some Google documentation for context, [Using Encryption Keys](https://cloud.google.com/storage/docs/gsutil/addlhelp/UsingEncryptionKeys).
 
+### Error locking state: Error acquiring the state lock
+
+If you see an error like this (usually because you orphaned a lock file by interrupting (Ctrl-C'd) a `rake`/`terraform` run):
+
+```
+Error: Error locking state: Error acquiring the state lock: writing "gs://gpii-gcp-dev-jj-tfstate/dev/k8s/cluster/default.tflock" failed: googleapi: Error 412: Precondition Failed, conditionNotMet
+Lock Info:
+  ID:        1564599692234628
+  Path:      gs://gpii-gcp-dev-jj-tfstate/dev/k8s/cluster/default.tflock
+  Operation: OperationTypeApply
+  Who:       root@52fec555531a
+  Version:   0.11.14
+  Created:   2019-07-31 19:01:32.102683134 +0000 UTC
+  Info:
+```
+
+1. Make sure you are the only person working in the environment.
+   * In your dev environment, this is almost always the case.
+   * In a shared environment like `prd`, this lock file prevents two people from attempting to make changes at the same time (which could lead to serious problems). Confirm in #ops that no one else is working there before you proceed.
+1. Run `rake unlock`.
+
 ### My deploy is stuck on `Waiting for all CouchDB pods to join the cluster... 1 of 2 pods have joined the cluster`
 
 1. Unfortunately, this is a [known issue](https://issues.gpii.net/browse/GPII-3624) that happens periodically. It is a result of "split brain" -- both couchdb instances think they are the leader of their own cluster.
@@ -291,6 +313,10 @@ For example: a developer deleted their tfstate bucket in GCS and re-created it w
 1. The easiest workaround is to destroy couchdb, then re-run the deployment:
    * `rake destroy_module"[k8s/gpii/couchdb]" && rake`
 1. If you need to, you may be able to repair the split brain manually using [CouchDB Cluster Management commands](https://docs.couchdb.org/en/stable/cluster/nodes.html).
+
+### My component won't start and the Event logs say `Error creating: pods "my-pod-name" is forbidden: image policy webhook backend denied one or more images: Denied by default admission rule. Overridden by evaluation mode`
+
+This means your component is trying to use a Docker image that is not hosted in our Google Container Registry instance, or which is otherwise not allowed by our Kubernetes Binary Authorization configuration. The Ops team will want to discuss next steps but [gke-cluster](https://github.com/gpii-ops/exekube/tree/master/modules/gke-cluster) is the relevant module. For development purposes, you may add an additional `binary_authorization_admission_whitelist_pattern_N` to allow your new image. You may want to re-deploy your component so that Kubernetes notices the change more quickly.
 
 ### Errors trying to enable/disable Google Cloud APIs
 
@@ -340,6 +366,10 @@ This caused by locally missing helm certificates (similarly to previous error, i
 
 This some times happens during forceful cluster re-creation (for example when updating oauth scopes), and caused by Terraform failing to trigger `helm-initializer` module deployment.
 Solution is to run `rake deploy_module['k8s/kube-system/helm-initializer']`.
+
+### helm_release.release: rpc error: code = Unknown desc = PodDisruptionBudget.policy "DEPLOYMENT" is invalid
+
+This happens when we need to update immutable fields on `PodDisruptionBudget` resources for deployments. Solution is to destroy PDB resources and allow Helm to recreate them: `rake plain_sh['sh -c "for pdb in DEPLOYMENT1 DEPLOYMENT2; do kubectl -n gpii delete pdb \\$pdb; done"'] && rake`.
 
 ### The metric referenced by the provided filter is unknown. Check the metric name and labels. (Google::Gax::RetryError)
 
@@ -422,6 +452,29 @@ See [Getting started: One-time Stackdriver Workspace setup](README.md#one-time-s
 
 You can run all `kubectl` commands mentioned below inside of an interactive shell started with `rake sh`.
 
+### Accessing CouchDB and CouchDB Web UI
+
+1. Running `rake couchdb_ui` task in corresponding environment direcotry (e.g.
+   `gcp/live/dev`) will set up port-forwarding of CouchDB port to your local
+   machine and print a link and credentials to access CouchDB Fauxton Web UI.
+1. *(optional)* You can also use the displayed credentials to interact with
+   CouchDB API directly via the forwarded port (`35984`), e.g.:
+   ```
+   curl http://ui:$password@localhost:35984/_up
+   ```
+
+_Note: Temporary credentials from `couchdb_ui` rake task can be handy for
+executing ad hoc scripts against the database, however CouchDB does not
+replicate these across the cluster, therefore they will only work when querying
+the same node where they were created. This will not be an issue when running
+queries from your local machine (`kubectl port-forward` always terminates the
+connection at the same pod). If you need to run queries from within docker
+container, you can use `docker` with `--net host` to do so, e.g. `docker run -it
+--rm --net host --entrypoint /bin/sh
+gcr.io/gpii-common-prd/gpii__universal:20190801163411-26be63f`, and CouchDB will
+be accessible using the url printed by the `couchdb_ui` rake task._
+
+
 ### The CouchDB cluster won't converge because one of its disks is in the wrong zone
 
 Consider this scenario:
@@ -502,8 +555,8 @@ Here are the steps:
 1. Collect CouchDB disk names from PVCs with `kubectl --namespace gpii get pvc -l app=couchdb -o json | jq -r .items[].spec.volumeName`.
 1. Choose a snapshot set that you want to restore, make sure that snapshots are present for all disks that are currently in use by CouchDB cluster.
    * In case of a backup restoration test, pick latest snapshot set available: you can do this with `for i in {0..N}; do gcloud compute snapshots list --sort-by=~creationTimestamp,STATUS --limit=1 --format="value[separator=';'](name,status)" --filter="name~'pv-database-storage-couchdb-couchdb-$i-*'" | cut -f1 -d\; ; done`
-1. Scale CouchDB stateful set to 0 replicas with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=0`. This will cause K8s to terminate all CouchDB pods, all PDs that were mounted into them will be released. **This will prevent flowmanager and preferences services from processing customer requests!**
-   * You may also want to scale `flowmanager` and `preferences` deployments to 0 replicas as well with `kubectl --namespace gpii scale deployment preferences --replicas=0` and `kubectl --namespace gpii scale deployment flowmanager --replicas=0`. This will give you time to verify that DB restoration is successful before allowing the DB to receive traffic again.
+1. Scale `flowmanager` and `preferences` deployments to 0 replicas with `kubectl --namespace gpii scale deployment preferences --replicas=0` and `kubectl --namespace gpii scale deployment flowmanager --replicas=0` to stop the flow of traffic to CouchDB. This will give you time to verify that DB restoration is successful before allowing the DB to receive traffic again. **WARNING! This will prevent flowmanager and preferences services from processing customer requests!**
+1. Scale CouchDB stateful set to 0 replicas with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=0`. This will cause K8s to terminate all CouchDB pods, all PDs that were mounted into them will be released.
 1. Destroy `k8s-snapshots` module with `rake destroy_module["k8s/kube-system/k8s-snapshots"]` to prevent new snapshots from being created while you working with disks.
 1. Open Google Cloud console, go to "Compute Engine" -> "Disks".
 1. Now, repeat for every CouchDB disk name you collected:
@@ -513,54 +566,15 @@ Here are the steps:
    * Create new PD from snapshot with the same name, type, size, zone and description.
 1. Scale CouchDB stateful set back to number of replicas it used to have before with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=N`
 1. Database is now restored to the state at the time of target snapshot.
-   * You can check the status of all nodes with `for i in {0..N}; do kubectl exec --namespace gpii -it couchdb-couchdb-$i -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/_up; done`, where N is a number of CouchDB replicas.
+   * You can check the status of all nodes with `for i in {0..N-1}; do kubectl exec --namespace gpii -it couchdb-couchdb-$i -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/_up; done`, where N is a number of CouchDB replicas.
    * You can also check CouchDB membership status with `kubectl exec --namespace gpii -it couchdb-couchdb-0 -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/_membership | jq`.
 1. Once DB state is verified and you sure that everything went as desired, you can scale `preferences` and `flowmanager` deployments back as well. From this point system functionality for the customer is fully restored.
 1. Deploy `k8s-snapshots` module to resume regular snapshot process with `rake deploy_module["k8s/kube-system/k8s-snapshots"]`.
 1. To make sure that all systems are functional, run smoke tests with `rake test_preferences_read` and then `rake test_flowmanager`.
 
-### Hack: Adding data to CouchDB
+### Manual processes: Users' data and client credentials
 
-This is what I used to create a fake preference while verifying that volumes are restored correctly.
-
-1. Run a container inside the cluster: `cd aws/dev && rake run_interactive`
-1. From inside the container, install some tools: `apk update && apk add curl`
-1. Define a record:
-```
-# Copied and modified from vicky.json.
-data='
-{
-  "_id": "mrtyler",
-  "type": "prefsSafe",
-  "schemaVersion": "0.1",
-  "prefsSafeType": "user",
-  "name": "mrtyler",
-  "password": null,
-  "email": null,
-  "preferences": {
-    "flat": {
-      "contexts": {
-        "gpii-default": {
-          "name": "HI EVERYBODY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
-          "preferences": {
-            "http://registry.gpii.net/common/stickyKeys": true
-          }
-        }
-      }
-    }
-  },
-  "timestampCreated": "2018-04-27T20:41:01.850Z",
-  "timestampUpdated": null
-}
-'
-```
-1. Add the record: `curl -f -H 'Content-Type: application/json' -X POST http://couchdb.default.svc.cluster.local:5984/gpii -d "$data"`
-1. Before the restore: verify that the new record is present.
-1. After the restore: verify that the new record is no longer present.
-
-### Manual process: Generating db data of user preferences and load it into a cluster's preferences server
-
-#### Generate the data
+#### Generating db data of user preferences
 
 1. `git clone git://github.com/gpii/universal.git && cd universal && npm install`
 1. Put the preferences set you want to load into a folder, i.e.: _testData/myPrefsSets_.
@@ -634,7 +648,13 @@ For the lazy:
 * `sed -i '1i { "docs": ' prefsSafes.json gpiiKeys.json`
 * `sed -i '$ a }' prefsSafes.json gpiiKeys.json`
 
-Congratulations, half of the work is done, now on to the load step.
+Congratulations, half of the work is done, now you have to load both json files by following the instructions described in the [load step section](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/README.md#load-the-data-into-a-cluster). Remember that you need to perform a POST request for every json file.
+
+#### Generating client credentials
+
+It's as easy as following the process described in the [generateCredentials.js script](https://github.com/GPII/universal/blob/master/scripts/generateCredentials.js) from universal.
+After running the script with the appropriate arguments, a new folder will be created with the _site name_ you provided when running the script, something like _my.site.com-credentials_.
+Then you need to load the _couchDBData.json_ file according to the instructions in the [load step section](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/README.md#load-the-data-into-a-cluster) below.
 
 #### Load the data into a cluster
 
@@ -645,17 +665,19 @@ Requirements:
 
 Note that we assume that you are going to perform these steps into an already up & running cluster. Also, remember that you always need to test the changes in your "dev" cluster first. In case that everything worked in your "dev" cluster, then proceed with "stg". If everything worked in "stg" too, then, proceed with "prd". In order for you to understand the differences beetween the different environments, check [this section](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/README.md#what-are-all-these-environments) from our documentation.
 
+Note that the following process is mostly for "dev" environments since the Ops team prefer to use the secrets from env vars when dealing with "stg" and "prd", so the process might differ a bit.
+
 The process:
 
 1. Go into the corresponding folder with the cluster name where you want to perform the process, "stg", "prd" or "dev". In this case We are going to perform the process in "dev": `cd gpii-infra/gcp/live/dev`.
 1. Set up the env you are going to deal with: `rake sh`
 __Note__ that if you are going to perform this in production (prd) you should do it from the _prd_ folder and remember to use the _RAKE_REALLY_RUN_IN_PRD=true_ variable when issuing the commands against the production cluster.
-1. Open a port forwarding between the cluster's couchdb host:port and your local machine: `kubectl --namespace gpii port-forward couchdb-couchdb-0 5984 &`
+1. Open a port forwarding between the cluster's couchdb host:port and your local machine: `rake couchdb_ui`. This command will provide you the user/password and url/port that you will need in the next step, something like: _http://ui:1xFA6vhGKCGiLRsZBnencvNqm1QEneMG@localhost:35984/_utils_, we will just need to remove the __utils_.
 
-Let's load the data, go back to the folder _testData/myDbData_ and run:
-1. `curl -d @gpiiKeys.json -H "Content-type: application/json" -X POST http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@localhost:5984/gpii/_bulk_docs`
+Let's load the data from your jsonData file by running:
+1. `curl -d @yourDataFile.json -H "Content-type: application/json" -X POST http://ui:1xFA6vhGKCGiLRsZBnencvNqm1QEneMG@localhost:35984/gpii/_bulk_docs`
 
-Unless you get errors, that's all. Now you can close the port forwarding as mentioned earlier.
+Unless you get errors, that's all. Now you can close the port forwarding by pressing _Enter_ in the terminal where you ran _rake couchdb_ui_.
 
 ### Downtime procedures
 
@@ -703,54 +725,100 @@ If this downtime will be disruptive to your work ("We're giving a demo for the
 Prime Minister at that time!"), please let me know immediately.
 ```
 
-#### External backups
+### External backups
 
-##### Setup.
+#### Sending backup outside of the organization.
 
-Create a Terragrunt definition like `gcp/live/prd/k8s/kube-system/backup-exporter/terraform.tfvars` inside the exekube project. This file contains 3 variables:
-   * `destination_bucket` - The destination GCS bucket, i.e "gs://gpii-backup-external-prd". 
-   * `replica_count` - the number of CouchDB replicas that the cluster has. This is important for copying all the snapshots of the cluster at the same time.
-   * `schedule` - Follows the same format as a Cron Job. i.e: `*/10 * * * *` to execute the task every 10 minutes.
+The process is mostly executed by the `gcloud compute images export` command, which uses Cloud Build service, which uses [Daisy](https://github.com/GoogleCloudPlatform/compute-image-tools/tree/master/daisy) to create a VM, attach the images based on the snapshots to backup, create a file from those images and send the result files to the external storage.
 
-i.e:
+The destination buckets are created automatically by [Terraform code](https://github.com/gpii-ops/gpii-infra/tree/master/common/modules/gcp-external-backup). These buckets live in the testing organization (gpii2test) rather than the main organization (gpii) to keep them safe if a disaster affects the main organization.
+
+#### Restoring a backup from outside of the organization.
+
+The process of the restore it's similar to the backup but the other way around. It uses the `gcloud compute images import` command. In order to make easier the process a rake task called `restore_snapshot_from_image_file`can be used. This task takes only one parameter where each snapshot file to recover is separated by one space. Also this proccess takes almost 9 min per snapshot to restore:
+
+1. Get in to the exekube shell
+
+   ```
+   rake plain_sh
+   ```
+1. Select the files to be restored.
+
+   ```
+   gsutil ls -l gs://gpii-backup-stg/** | sort -k 2
+   ```
+
+1. Copy the full path of each file to be restored.
+
+   ```
+   rake restore_snapshot_from_image_file["gs://gpii-backup-stg/2019-05-03_210008-pv-database-storage-couchdb-couchdb-0-030519-205726.raw.gz gs://gpii-backup-stg/2019-05-03_210008-pv-database-storage-couchdb-couchdb-1-030519-205756.raw.gz gs://gpii-backup-stg/2019-05-03_210008-pv-database-storage-couchdb-couchdb-2-030519-205756.raw.gz"]
+   ```
+1. Once the task finished, check that the new restored snapshots will appear with the string `external-` at the beginning of the name. This will help with the search when at the restoration of the disks using the snapshots.
+
+1. Follow the process [Data corruption on all replicas of CouchDB cluster](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#data-corruption-on-all-replicas-of-couchdb-cluster) using the snapshot files restored.
+
+
+## Deployment considerations
+
+### Avoiding inconsistent backups during the deployment
+
+The cloud has two types of automatic backups: periodic snapshots and the export of the snapshots outside the GCP organization. If the deployment needs any kind of data migration the backups made from the middle of the process could have some inconsistencies. Because of this the automatic processes are not desirable in the time that the data migration is performed.
+
+Also the rotation policy of the k8s-snapshots can delete the latest snapshots made just before the deployment starts. Stoping the backup processes avoids this situation.
+
+To stop the backups of a particular environment execute the following commands:
+
 ```
-# ↓ Module metadata
-
-terragrunt = {
-  terraform {
-    source = "/project/modules//backup-exporter"
-  }
-
-  dependencies {
-    paths = [
-      "../k8s-snapshots",
-    ]
-  }
-
-  include = {
-    path = "${find_in_parent_folders()}"
-  }
-}
-
-# ↓ Module configuration (empty means all default)
-
-destination_bucket = "gs://gpii-backup-dev-alfredo"
-replica_count      = 2
-schedule           = "*/30 * * * *"
+cd gcp/live/dev/
+rake destroy_module["k8s/kube-system/k8s-snapshots"]
+rake destroy_module["k8s/kube-system/backup-exporter"]
 ```
 
-##### Sending backup outside of the organization.
+Once the data migration has ended
 
-The process is mostly executed by the `gcloud compute images export` command, which uses Cloud Build service, which uses [Daisy](ttps://github.com/GoogleCloudPlatform/compute-image-tools/tree/master/daisy) to create a VM, attach the images based on the snapshots to backup, create a file from those images and send the result files to the external storage.
-
-The destination bucket must be created manually. This is a once time setup for STG and PRD, because it doesn't need to be recreated in the future. The bucket must have the following permissions for the service account `[Source_project_number_id]@cloudbuild.gserviceaccount.com` needs the `Storage Admin` roles, because the Cloud Build service needs to copy the final images in the GCS bucket. Note that such service account must exist in order to attach the role. The Cloud Build service account is created when the Cloud Build API is enabled.
-
-##### Restoring a backup from outside of the organization.
-
-The process of the restore it's similar but the other way around. It uses the `gcloud compute images import` command. In order to make easier the process a rake task called `restore_snapshot_from_image_file`can be used. This task takes only one parameter with each snapshot to recover separated by one space. i.e:
 ```
-rake restore_snapshot_from_image_file["gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-0-030519-205726.raw.gz gs://gpii-backup-dev-alfredo/2019-05-03_210008-pv-database-storage-couchdb-couchdb-1-030519-205756.raw.gz"]
+cd gcp/live/dev/
+rake deploy_module["k8s/kube-system/k8s-snapshots"]
+rake deploy_module["k8s/kube-system/backup-exporter"]
 ```
-Once the task finished new restored snapshots will appear with the leading in the name `external-`. This will help with the search when at the restoration of the disks using the snapshots.
 
-And follow the [restore a pv from snapshot procedure](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#data-corruption-on-a-single-couchdb-replica) using the snapshots restored.
+### Good practices
+
+1. Always use ephemeral pairs (user/password) on each operation in a deployment if the access to the data is needed. The rotation of the credentials is more expensive that, for example, make use of [the couchdb_ui rake task](https://github.com/gpii-ops/gpii-infra/tree/master/gcp#accessing-couchdb-and-couchdb-web-ui).
+
+1. Be careful with the environment variables that are passed using `kubectl` commands, they can appear in plain text in the logs.
+
+1. Automate all the process as much as we can. Avoid any manual procedure if it is possible.
+
+
+## Locust testing
+
+### Running Locust from your host
+
+From your environment directory run one of the three tests available:
+
+```
+rake test_flowmanager                         # [TEST] Run Locust swarm against Flowmanager service in current cluster
+rake test_preferences_read                    # [TEST] Run Locust swarm against Preferences service (READ) in current cluster
+rake test_preferences_write                   # [TEST] Run Locust swarm against Preferences service (WRITE) in current cluster
+```
+
+### Customize test parameters
+
+The settings of each test can be modified using environment variables. All the environment variables that modify the locust tests settings are:
+
+```
+TF_VAR_locust_desired_max_response_time
+TF_VAR_locust_desired_median_response_time
+TF_VAR_locust_desired_total_rps
+TF_VAR_locust_users
+TF_VAR_locust_workers
+```
+
+The default values can be found in the [variables file](modules/locust/variables.tf)
+
+For example, if you want to change the number of the workers prepend the rake command with the new value of the environment variable:
+
+```
+TF_VAR_locust_workers=4 rake test_flowmanager
+```

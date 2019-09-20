@@ -1,5 +1,5 @@
 name: gpii-dataloader
-version: 0.1.0
+version: 0.4.1
 appVersion: 57d0a17da505c8bc28c221c88b8de54447c78dc873c355d0bfd435d28f8b09ee
 home: https://github.com/gpii-ops/gpii-infra
 description: GPII Dataloader Job.

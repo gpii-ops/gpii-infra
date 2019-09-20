@@ -102,29 +102,33 @@ CouchDB chart and their default values:
 A variety of other parameters are also configurable. See the comments in the
 `values.yaml` file for further details:
 
-|           Parameter             |                Default                 |
-|---------------------------------|----------------------------------------|
-| `adminUsername`                 | admin                                  |
-| `adminPassword`                 | auto-generated                         |
-| `cookieAuthSecret`              | auto-generated                         |
-| `helperImage.repository`        | kocolosk/couchdb-statefulset-assembler |
-| `helperImage.tag`               | 1.1.0                                  |
-| `helperImage.pullPolicy`        | IfNotPresent                           |
-| `initImage.repository`          | busybox                                |
-| `initImage.tag`                 | latest                                 |
-| `image.repository`              | couchdb                                |
-| `image.tag`                     | 2.2.0                                  |
-| `image.pullPolicy`              | IfNotPresent                           |
-| `ingress.enabled`               | false                                  |
-| `ingress.hosts`                 | chart-example.local                    |
-| `ingress.annotations`           |                                        |
-| `ingress.tls`                   |                                        |
-| `persistentVolume.accessModes`  | ReadWriteOnce                          |
-| `persistentVolume.storageClass` | Default for the Kube cluster           |
-| `persistentVolume.provisioner`  | Default for the Kube cluster           |
-| `podManagementPolicy`           | Parallel                               |
-| `affinity`                      |                                        |
-| `resources`                     |                                        |
-| `service.enabled`               | true                                   |
-| `service.type`                  | ClusterIP                              |
-| `service.externalPort`          | 5984                                   |
+|           Parameter              |                Default                 |
+|----------------------------------|----------------------------------------|
+| `adminUsername`                  | admin                                  |
+| `adminPassword`                  | auto-generated                         |
+| `cookieAuthSecret`               | auto-generated                         |
+| `helperImage.repository`         | kocolosk/couchdb-statefulset-assembler |
+| `helperImage.tag`                | 1.1.0                                  |
+| `helperImage.pullPolicy`         | IfNotPresent                           |
+| `initImage.repository`           | busybox                                |
+| `initImage.tag`                  | latest                                 |
+| `image.repository`               | couchdb                                |
+| `image.tag`                      | 2.2.0                                  |
+| `image.pullPolicy`               | IfNotPresent                           |
+| `ingress.enabled`                | false                                  |
+| `ingress.hosts`                  | chart-example.local                    |
+| `ingress.annotations`            |                                        |
+| `ingress.tls`                    |                                        |
+| `persistentVolume.accessModes`   | ReadWriteOnce                          |
+| `persistentVolume.storageClass`  | Default for the Kube cluster           |
+| `persistentVolume.provisioner`   | Default for the Kube cluster           |
+| `podManagementPolicy`            | Parallel                               |
+| `affinity`                       |                                        |
+| `resources`                      |                                        |
+| `service.enabled`                | true                                   |
+| `service.type`                   | ClusterIP                              |
+| `service.externalPort`           | 5984                                   |
+| `virtual_service.enabled`        | false                                  |
+| `virtual_service.timeout`        | 2s                                     |
+| `virtual_service.attempts`       | 1                                      |
+| `lifecycle.preStop.sleep_seconds`| 15                                     |

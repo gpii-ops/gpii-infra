@@ -1,7 +1,7 @@
 # https://circleci.com/blog/circleci-hacks-reuse-yaml-in-your-circleci-config-with-yaml/
 default_docker: &default_docker
   docker:
-  - image: gpii/exekube:0.5.1-google_gpii.0
+  - image: gpii/exekube:0.9.6-google_gpii.0
 
 version: 2
 jobs:
@@ -27,22 +27,19 @@ jobs:
           command: |
             echo "Running GCP unit tests...";
             cd /workspace/shared/rakefiles/tests;
-            gem install bundler --no-ri --no-rdoc -v 2.0.1;
-            bundle install;
+            bundle install --with test;
             rake
 
-  aws-unit-tests:
+  exekube-versions-check:
     <<: *default_docker
     working_directory: /workspace
     steps:
       - checkout
       - run:
-          name: AWS Unit Tests
+          name: Exekube Versions Check
           command: |
-            echo "Running AWS unit tests...";
-            cd /workspace/aws/rakefiles/tests;
-            gem install test-unit --no-ri --no-rdoc;
-            rake
+            echo "Running Exekube Versions Check...";
+            cd /workspace && shared/rakefiles/scripts/check_exekube_versions.sh
 
 workflows:
   version: 2
@@ -50,4 +47,4 @@ workflows:
     jobs:
       - terraform-fmt-check
       - gcp-unit-tests
-      - aws-unit-tests
+      - exekube-versions-check

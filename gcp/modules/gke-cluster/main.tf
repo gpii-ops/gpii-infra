@@ -24,7 +24,7 @@ variable "node_count" {
 }
 
 variable "expected_gke_version_prefix" {
-  default = "1.12"
+  default = "1."
 }
 
 variable "infra_region" {}
@@ -33,8 +33,17 @@ variable "prevent_destroy_cluster" {
   default = false
 }
 
-variable "enable_binary_authorization" {
-  default = false
+variable "binary_authorization_evaluation_mode" {
+  default = "ALWAYS_ALLOW"
+}
+
+variable "binary_authorization_enforcement_mode" {
+  default = "ENFORCED_BLOCK_AND_AUDIT_LOG"
+}
+
+variable "binary_authorization_admission_whitelist_patterns" {
+  # Allow images from our GCR.
+  default = ["gcr.io/gpii-common-prd/*"]
 }
 
 data "google_service_account" "gke_cluster_node" {
@@ -69,7 +78,9 @@ module "gke_cluster" {
   project_id         = "${var.project_id}"
   serviceaccount_key = "${var.serviceaccount_key}"
 
-  kubernetes_version = "${data.external.gke_version_assert.result.version}"
+  # kubernetes_version = "${data.external.gke_version_assert.result.version}"
+  # this is temporary till version below or newer is released as default
+  kubernetes_version = "1.12.9-gke.15"
 
   region = "${var.infra_region}"
 
@@ -80,7 +91,8 @@ module "gke_cluster" {
   istio_disabled = false
   istio_auth     = "AUTH_MUTUAL_TLS"
 
-  dashboard_disabled = true
+  dashboard_disabled           = true
+  http_load_balancing_disabled = true
 
   # empty password and username disables legacy basic authentication
   master_auth_username = ""
@@ -89,6 +101,7 @@ module "gke_cluster" {
   issue_client_certificate = false
 
   update_timeout = "30m"
+  delete_timeout = "30m"
 
   primary_pool_min_node_count     = "${var.node_count}"
   primary_pool_max_node_count     = "${var.node_count}"
@@ -97,7 +110,10 @@ module "gke_cluster" {
   primary_pool_oauth_scopes       = ["cloud-platform"]
   primary_pool_service_account    = "${data.google_service_account.gke_cluster_node.email}"
 
-  enable_binary_authorization = "${var.enable_binary_authorization}"
+  enable_binary_authorization                       = "true"
+  binary_authorization_evaluation_mode              = "${var.binary_authorization_evaluation_mode}"
+  binary_authorization_enforcement_mode             = "${var.binary_authorization_enforcement_mode}"
+  binary_authorization_admission_whitelist_patterns = "${var.binary_authorization_admission_whitelist_patterns}"
 }
 
 # Workaround from

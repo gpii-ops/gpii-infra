@@ -58,6 +58,7 @@ variable "service_apis" {
     "cloudkms.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "cloudtrace.googleapis.com",
+    "containeranalysis.googleapis.com",
     "compute.googleapis.com",
     "container.googleapis.com",
     "containerregistry.googleapis.com",
@@ -82,6 +83,22 @@ variable "service_apis" {
 }
 
 data "google_iam_policy" "combined" {
+  binding {
+    role = "roles/binaryauthorization.serviceAgent"
+
+    members = [
+      "serviceAccount:service-${google_project.project.number}@gcp-sa-binaryauthorization.iam.gserviceaccount.com",
+    ]
+  }
+
+  binding {
+    role = "roles/binaryauthorization.policyAdmin"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_bin_auth.email}",
+    ]
+  }
+
   binding {
     role = "roles/cloudkms.admin"
 
@@ -124,6 +141,14 @@ data "google_iam_policy" "combined" {
   }
 
   binding {
+    role = "roles/containeranalysis.ServiceAgent"
+
+    members = [
+      "serviceAccount:service-${google_project.project.number}@container-analysis.iam.gserviceaccount.com",
+    ]
+  }
+
+  binding {
     role = "roles/dns.admin"
 
     members = [
@@ -141,7 +166,7 @@ data "google_iam_policy" "combined" {
   }
 
   binding {
-    role = "roles/iam.serviceAccountUser"
+    role = "roles/iam.serviceAccountTokenCreator"
 
     members = [
       "${local.service_accounts}",
@@ -149,7 +174,24 @@ data "google_iam_policy" "combined" {
   }
 
   binding {
+    role = "roles/iam.serviceAccountUser"
+
+    members = [
+      "${local.service_accounts}",
+      "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
+    ]
+  }
+
+  binding {
     role = "roles/iam.serviceAccountActor"
+
+    members = [
+      "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
+    ]
+  }
+
+  binding {
+    role = "roles/iam.serviceAccountTokenCreator"
 
     members = [
       "serviceAccount:${google_project.project.number}@cloudbuild.gserviceaccount.com",
@@ -246,11 +288,58 @@ data "google_iam_policy" "combined" {
     ]
   }
 
+  # Google IAM requires a special "invite" workflow for the Owner
+  # role when the account is not part of the Organization. This
+  # comes up when using user@rtf named accounts in the test
+  # Organization. The error might (unhelpfully) look like this,
+  # followed by a bunch of Go structs:
+  #
+  # googleapi: Error 400: Request contains an invalid argument., badRequest
   binding {
     role = "roles/owner"
 
     members = [
       "${local.project_owners}",
+    ]
+  }
+
+  # Needed so that ADCs can impersonate the dedicated binary auth SA. See
+  # GPII-3860.
+  binding {
+    role = "roles/iam.serviceAccountTokenCreator"
+
+    members = [
+      "${local.project_owners}",
+    ]
+  }
+
+  # Needed for setting up monitoring
+  # GPII-2782
+  binding {
+    role = "roles/logging.configWriter"
+
+    members = [
+      "${local.service_accounts}",
+    ]
+  }
+
+  # Needed for setting up monitoring
+  # GPII-2782
+  binding {
+    role = "roles/monitoring.alertPolicyEditor"
+
+    members = [
+      "${local.service_accounts}",
+    ]
+  }
+
+  # Needed for setting up monitoring
+  # GPII-2782
+  binding {
+    role = "roles/monitoring.notificationChannelEditor"
+
+    members = [
+      "${local.service_accounts}",
     ]
   }
 
@@ -281,6 +370,14 @@ data "google_iam_policy" "combined" {
       "serviceAccount:${google_service_account.gke_cluster_node.email}",
       "serviceAccount:${google_service_account.gke_cluster_pod_default.email}",
       "serviceAccount:${google_service_account.gke_cluster_pod_backup_exporter.email}",
+    ]
+  }
+
+  binding {
+    role = "roles/websecurityscanner.serviceAgent"
+
+    members = [
+      "serviceAccount:service-${google_project.project.number}@gcp-sa-websecurityscanner.iam.gserviceaccount.com",
     ]
   }
 
@@ -392,10 +489,11 @@ locals {
 }
 
 resource "google_project" "project" {
-  name            = "${var.organization_name}-gcp-${var.project_name}"
-  project_id      = "${var.organization_name}-gcp-${var.project_name}"
-  billing_account = "${var.billing_id}"
-  org_id          = "${var.organization_id}"
+  name                = "${var.organization_name}-gcp-${var.project_name}"
+  project_id          = "${var.organization_name}-gcp-${var.project_name}"
+  billing_account     = "${var.billing_id}"
+  org_id              = "${var.organization_id}"
+  auto_create_network = false
 }
 
 resource "google_project_services" "project" {

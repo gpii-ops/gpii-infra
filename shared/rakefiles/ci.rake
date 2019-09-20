@@ -5,10 +5,6 @@ task :set_vars_ci => [:set_vars] do
     " run ",
     " run --volume #{@secrets_backup_volume}:/secrets-backup ",
   )
-  @exekube_cmd_with_aws_volume = @exekube_cmd.sub(
-    " run ",
-    " run --volume #{ENV["HOME"]}/.aws:/aws-backup ",
-  )
   # This duplicates information from xk_config.rake,
   # see corresponding :configure_serviceaccount task for more info.
   @serviceaccount_key_file = "/project/live/#{@env}/secrets/kube-system/owner.json"
@@ -39,13 +35,6 @@ task :configure_serviceaccount_ci_restore => [:set_vars_ci] do
   '"
 end
 
-task :configure_aws_restore => [:set_vars_ci] do
-  # Puts the AWS credentials a Docker volume to be consumed by the apps inside the container
-  sh "#{@exekube_cmd_with_aws_volume} sh -c '\
-    cp -av /aws-backup/* /root/.aws/ \
-  '"
-end
-
 desc "[CI ONLY] Save GCP credentials to local backup on CI worker"
 task :configure_serviceaccount_ci_save => [:set_vars_ci] do
   sh "#{@exekube_cmd_with_backups} sh -c '\
@@ -64,7 +53,7 @@ task :destroy_hard_and_deploy_ci => [:set_vars_ci] do
   Rake::Task["destroy_hard"].invoke
   begin
     Rake::Task["deploy"].invoke
-    Rake::Task["test_preferences"].invoke
+    Rake::Task["test_preferences_read"].invoke
     Rake::Task["test_flowmanager"].invoke
     Rake::Task["display_cluster_state"].invoke
     Rake::Task["destroy_hard"].reenable
