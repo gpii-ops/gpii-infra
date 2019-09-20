@@ -484,7 +484,7 @@ In this scenario we rely on CouchDB ability to recover from loss of one or more 
 1. CouchDB cluster will replicate data to recreated node automatically.
 1. Corrupted node is now recovered.
    * You can check DB status on recovered node with `kubectl exec --namespace gpii -it couchdb-couchdb-N -c couchdb -- curl -s http://$TF_VAR_couchdb_admin_username:$TF_VAR_couchdb_admin_password@127.0.0.1:5984/gpii/`, where N is node index.
-1. To make sure that all systems are functional, run smoke tests with `rake test_preferences` and then `rake test_flowmanager`.
+1. To make sure that all systems are functional, run smoke tests with `rake test_preferences_read` and then `rake test_flowmanager`.
 
 ### Data corruption on all replicas of CouchDB cluster
 
@@ -517,7 +517,7 @@ Here are the steps:
    * You can also check CouchDB membership status with `kubectl exec --namespace gpii -it couchdb-couchdb-0 -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/_membership | jq`.
 1. Once DB state is verified and you sure that everything went as desired, you can scale `preferences` and `flowmanager` deployments back as well. From this point system functionality for the customer is fully restored.
 1. Deploy `k8s-snapshots` module to resume regular snapshot process with `rake deploy_module["k8s/kube-system/k8s-snapshots"]`.
-1. To make sure that all systems are functional, run smoke tests with `rake test_preferences` and then `rake test_flowmanager`.
+1. To make sure that all systems are functional, run smoke tests with `rake test_preferences_read` and then `rake test_flowmanager`.
 
 ### Hack: Adding data to CouchDB
 

@@ -1,0 +1,184 @@
+ {
+    "OS": {
+        "id": "win32"
+    },
+    "solutions": [
+
+        {
+            "id": "com.android.activitymanager"
+        },
+
+        {
+            "id": "com.android.audioManager"
+        },
+
+        {
+            "id": "com.android.freespeech"
+        },
+
+        {
+            "id": "com.android.persistentConfiguration"
+        },
+
+        {
+            "id": "com.android.settings.secure"
+        },
+
+        {
+            "id": "com.android.settings.system"
+        },
+
+        {
+            "id": "com.android.talkback"
+        },
+
+        {
+            "id": "com.freedomscientific.jaws"
+        },
+
+        {
+            "id": "com.freedomscientific.magic"
+        },
+
+        {
+            "id": "com.microsoft.windows.cursors"
+        },
+
+        {
+            "id": "com.microsoft.windows.filterKeys"
+        },
+
+        {
+            "id": "com.microsoft.windows.highContrast"
+        },
+
+        {
+            "id": "com.microsoft.windows.highContrastTheme"
+        },
+
+        {
+            "id": "com.microsoft.windows.language"
+        },
+
+        {
+            "id": "com.microsoft.windows.magnifier"
+        },
+
+        {
+            "id": "com.microsoft.windows.mouseKeys"
+        },
+
+        {
+            "id": "com.microsoft.windows.mouseSettings"
+        },
+
+        {
+            "id": "com.microsoft.windows.mouseTrailing"
+        },
+
+        {
+            "id": "com.microsoft.windows.narrator"
+        },
+
+        {
+            "id": "com.microsoft.windows.nightScreen"
+        },
+
+        {
+            "id": "com.microsoft.windows.onscreenKeyboard"
+        },
+
+        {
+            "id": "com.microsoft.windows.screenDPI"
+        },
+
+        {
+            "id": "com.microsoft.windows.screenResolution"
+        },
+
+        {
+            "id": "com.microsoft.windows.stickyKeys"
+        },
+
+        {
+            "id": "com.microsoft.windows.touchPadSettings"
+        },
+
+        {
+            "id": "com.microsoft.windows.typingEnhancement"
+        },
+
+        {
+            "id": "com.microsoft.windows.volumeControl"
+        },
+
+        {
+            "id": "com.microsoft.windows.desktopBackground"
+        },
+
+        {
+            "id": "com.microsoft.windows.desktopBackgroundColor"
+        },
+
+        {
+            "id": "fakemag2"
+        },
+
+        {
+            "id": "fakescreenreader1"
+        },
+
+        {
+            "id": "net.gpii.explode"
+        },
+
+        {
+            "id": "net.gpii.test.speechControl"
+        },
+
+        {
+            "id": "net.gpii.uioPlus"
+        },
+
+        {
+            "id": "org.alsa-project"
+        },
+
+        {
+            "id": "org.freedesktop.xrandr"
+        },
+
+        {
+            "id": "org.gnome.desktop.a11y.applications.onscreen-keyboard"
+        },
+
+        {
+            "id": "org.gnome.desktop.a11y.keyboard"
+        },
+
+        {
+            "id": "org.gnome.desktop.a11y.magnifier"
+        },
+
+        {
+            "id": "org.gnome.desktop.interface"
+        },
+
+        {
+            "id": "org.gnome.nautilus"
+        },
+
+        {
+            "id": "org.gnome.orca"
+        },
+
+        {
+            "id": "org.nvda-project"
+        },
+
+        {
+            "id": "com.microsoft.office"
+        }
+    ]
+
+}

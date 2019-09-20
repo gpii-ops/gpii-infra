@@ -1,7 +1,7 @@
 from locust import HttpLocust, TaskSet, task
 import random
 
-class PreferencesTasks(TaskSet):
+class PreferencesReadTasks(TaskSet):
 
   _keys = ["carla", "vladimir", "wayne", "omar", "nvda"]
 
@@ -10,7 +10,7 @@ class PreferencesTasks(TaskSet):
       self.client.get("/preferences/" + random.choice(self._keys))
 
 
-class PreferencesWarmer(HttpLocust):
-  task_set = PreferencesTasks
+class PreferencesReadWarmer(HttpLocust):
+  task_set = PreferencesReadTasks
   min_wait = 1000
   max_wait = 3000
