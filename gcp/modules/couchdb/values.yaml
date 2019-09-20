@@ -43,10 +43,6 @@ couchdbConfig:
   httpd:
     WWW-Authenticate: "Basic realm=\"CouchDB\""
 
-lifecycle:
-  preStop:
-    sleep_seconds: 15
-
 resources:
   requests:
     cpu: ${requests_cpu}
