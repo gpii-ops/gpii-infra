@@ -9,7 +9,7 @@ couchdb:
   port: http-couchdb
 
 flowmanager:
-    url: http://flowmanager.gpii.svc.cluster.local:8080
+    url: http://flowmanager.gpii.svc.cluster.local:80
     labels:
         app: flowmanager
     svcListenport: http
@@ -17,7 +17,7 @@ flowmanager:
 
 image:
   repository: herrclown/vagrant-universal
-  checksum: sha256:eb4fb5e9c2c02466717845e917af7bfe71f2ce8437f712cea2bc561f0b244ddf
+  checksum: sha256:eb9e8edba96586ae9a9d8a17103c6226ddba374457b636faf1eebb9da4ac775f
   pullPolicy: IfNotPresent
 
 nameOverride: productiontests

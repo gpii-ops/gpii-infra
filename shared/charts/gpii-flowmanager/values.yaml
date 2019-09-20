@@ -4,7 +4,7 @@
 
 replicaCount: 1
 
-svcListenPort: 8080
+svcListenPort: 80
 flowmanagerListenPort: 8081
 datasourceListenPort: 5984
 datasourceHostname: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local"

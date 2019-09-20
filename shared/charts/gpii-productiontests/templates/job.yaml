@@ -46,9 +46,9 @@ spec:
             secretKeyRef:
               name: {{ template "productiontests.name" . }}
               key: couchdbUrl
-        - name: GPII_CLOUD_URL
+        - name: GPII_CLOUD_URL # Cloud based flowmanager
           value: '{{ .Values.flowmanager.url }}'
-        - name: GPII_FLOWMANAGER_LISTEN_PORT
+        - name: GPII_FLOWMANAGER_LISTEN_PORT # Local flowmanager
           value: '{{ .Values.flowmanager.flowmanagerListenPort }}'
       - name: istio-proxy-manager
         image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
