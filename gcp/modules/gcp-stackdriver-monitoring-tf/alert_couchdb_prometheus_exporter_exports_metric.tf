@@ -4,13 +4,14 @@ resource "google_monitoring_alert_policy" "couchdb_prometheus_exporter_exports_m
 
   conditions {
     condition_absent {
-      filter   = "metric.type=\"custom.googleapis.com/couchdb/httpd_node_up\" resource.type=\"gke_container\""
-      duration = "300s"
+      filter          = "metric.type=\"custom.googleapis.com/couchdb/httpd_node_up\" resource.type=\"gke_container\""
+      duration        = "600s"
+      threshold_value = 1.0
 
       aggregations {
         alignment_period     = "600s"
         per_series_aligner   = "ALIGN_MEAN"
-        cross_series_reducer = "REDUCE_SUM"
+        cross_series_reducer = "REDUCE_MEAN"
         group_by_fields      = []
       }
     }
