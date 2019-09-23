@@ -3,9 +3,10 @@ resource "google_monitoring_alert_policy" "couchdb_prometheus_exporter_exports_m
   combiner     = "OR"
 
   conditions {
-    condition_absent {
+    condition_threshold {
       filter          = "metric.type=\"custom.googleapis.com/couchdb/httpd_node_up\" resource.type=\"gke_container\""
       duration        = "600s"
+      comparison      = "COMPARISON_LT"
       threshold_value = 1.0
 
       aggregations {
