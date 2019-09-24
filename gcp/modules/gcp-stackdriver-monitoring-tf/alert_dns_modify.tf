@@ -29,7 +29,7 @@ resource "google_monitoring_alert_policy" "dns_modify" {
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
   user_labels           = {}
-  enabled               = "true"
+  enabled               = "${(var.env == "prd" || var.env == "stg") ? true : false}"
 
   depends_on = ["google_logging_metric.dns_modify"]
 }

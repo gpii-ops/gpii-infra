@@ -18,6 +18,7 @@ resource "google_monitoring_alert_policy" "couchdb_prometheus_exporter_exports_m
     }
 
     display_name = "Metric `custom/couchdb/httpd_node_up` is absent"
+    display_name = "Metric `custom/couchdb/httpd_node_up` is absent"
   }
 
   documentation = {
@@ -27,5 +28,5 @@ resource "google_monitoring_alert_policy" "couchdb_prometheus_exporter_exports_m
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
   user_labels           = {}
-  enabled               = "true"
+  enabled               = "${(var.env == "prd" || var.env == "stg") ? true : false}"
 }
