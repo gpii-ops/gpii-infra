@@ -70,9 +70,11 @@ resource "null_resource" "apply_stackdriver_lbm" {
 }
 
 resource "null_resource" "destroy_stackdriver_lbm" {
-  provisioner "local-exec" {
-    when = "destroy"
+  triggers = {
+    nonce = "${var.nonce}"
+  }
 
+  provisioner "local-exec" {
     command = <<EOF
       export PROJECT_ID=${var.project_id}
       export GOOGLE_CLOUD_KEYFILE=${var.serviceaccount_key}

@@ -89,9 +89,11 @@ resource "null_resource" "apply_stackdriver_monitoring" {
 resource "null_resource" "destroy_stackdriver_monitoring" {
   depends_on = ["template_dir.resources"]
 
-  provisioner "local-exec" {
-    when = "destroy"
+  triggers = {
+    nonce = "${var.nonce}"
+  }
 
+  provisioner "local-exec" {
     command = <<EOF
       export PROJECT_ID=${var.project_id}
       export GOOGLE_CLOUD_KEYFILE=${var.serviceaccount_key}
