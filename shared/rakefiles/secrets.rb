@@ -372,8 +372,8 @@ class Secrets
 
     key_versions.each do |version|
       version_id = get_crypto_key_version(version["name"])
-      if version["state"] == "ENABLED" or versions_to_keep > 0
-        puts "[secret-mgmt] Skipping version #{version_id}, because need to keep #{versions_to_keep} most recent versions!"
+      if versions_to_keep > 0
+        puts "[secret-mgmt] Skipping version #{version_id}, because need to keep #{versions_to_keep} most recent disabled versions!"
         versions_to_keep = versions_to_keep - 1
         next
       end
