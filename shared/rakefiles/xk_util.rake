@@ -53,6 +53,9 @@ task :rotate_secrets_key, [:encryption_key] => [:configure, :configure_secrets] 
   rotate_secrets = true
   @secrets.set_secrets(rotate_secrets)
   @secrets.disable_non_primary_key_versions(args[:encryption_key], new_version_id)
+
+  versions_to_keep = 10
+  @secrets.destroy_disabled_non_primary_key_versions(args[:encryption_key], versions_to_keep)
 end
 
 # This is an EXPERIMENTAL helper for moving between regions, but it is not very smart and it
