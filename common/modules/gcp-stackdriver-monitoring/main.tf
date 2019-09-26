@@ -42,29 +42,22 @@ resource "template_dir" "resources" {
     enabled = "true"
   }
 }
-
-resource "null_resource" "apply_stackdriver_monitoring" {
-  depends_on = ["template_dir.resources"]
-
-  triggers = {
-    nonce = "${var.nonce}"
-  }
-
+resource "null_resource" "destroy_stackdriver_lbm" {
   provisioner "local-exec" {
+    when = "destroy"
+
     command = <<EOF
       export PROJECT_ID=${var.project_id}
       export GOOGLE_CLOUD_KEYFILE=${var.serviceaccount_key}
-      export STACKDRIVER_DEBUG=${var.stackdriver_debug}
 
-      RETRIES=10
+      RETRIES=5
       RETRY_COUNT=1
       while [ "$STACKDRIVER_DEADLINE_EXCEEDED" != "false" ]; do
         STACKDRIVER_DEADLINE_EXCEEDED="false"
-        echo "[Try $RETRY_COUNT of $RETRIES] Applying Stackdriver resources..."
+        echo "[Try $RETRY_COUNT of $RETRIES] Destroying Stackdriver resources..."
         bundle exec ruby -e '
           require "/rakefiles/stackdriver.rb"
-          resources = read_resources("${path.module}/resources_rendered")
-          apply_resources(resources)
+          destroy_resources({"log_based_metrics"=>[]})
         '
         STACKDRIVER_EXIT_STATUS="$?"
         if [ "$STACKDRIVER_EXIT_STATUS" == "120" ]; then
@@ -85,8 +78,9 @@ resource "null_resource" "apply_stackdriver_monitoring" {
   }
 }
 
+
 resource "null_resource" "destroy_stackdriver_monitoring" {
-  depends_on = ["template_dir.resources"]
+  depends_on = ["template_dir.resources", "null_resource.destroy_stackdriver_lbm"]
 
   provisioner "local-exec" {
     when = "destroy"

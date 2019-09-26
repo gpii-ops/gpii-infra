@@ -1,4 +1,0 @@
-{
-  "name": "backup-exporter.snapshot_created_prd",
-  "filter": "resource.type=\"gcs_bucket\" AND resource.labels.bucket_name=\"gpii-backup-prd\" AND resource.labels.location=\"us\" AND protoPayload.methodName=\"storage.objects.create\""
-}
