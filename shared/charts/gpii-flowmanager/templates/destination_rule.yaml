@@ -1,0 +1,20 @@
+# This is temporary until underlying Envoy issue is fixed
+# https://github.com/envoyproxy/envoy/pull/6578
+# Should not be required with Istio 1.1.8 and newer
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ template "flowmanager.name" . }}
+  labels:
+    app: {{ template "flowmanager.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  host: {{ template "flowmanager.name" . }}.{{ $.Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      http:
+        maxRequestsPerConnection: 1
+    tls:
+      mode: ISTIO_MUTUAL
