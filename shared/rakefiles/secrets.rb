@@ -311,7 +311,7 @@ class Secrets
 
   # This method disables all versions except primary for target encryption_key
   def disable_non_primary_key_versions(encryption_key, primary_version_id)
-    puts "[secret-mgmt] Retrieving versions for key '#{encryption_key}'..."
+    puts "[secret-mgmt] Retrieving versions for key '#{encryption_key}' to disable..."
     key_versions = %x{
       gcloud kms keys versions list \
       --location #{@infra_region} \
@@ -345,6 +345,53 @@ class Secrets
         raise unless version_disabled['state'] == "DISABLED"
       rescue
         debug_output "ERROR: Unable to disable version #{version_id} for key '#{encryption_key}', terminating!", version_disabled
+        raise
+      end
+    end
+  end
+
+  # This method destroys disabled versions except N latest versions_to_keep for target encryption_key
+  def destroy_disabled_non_primary_key_versions(encryption_key, versions_to_keep = 10)
+    puts "[secret-mgmt] Retrieving disabled versions for key '#{encryption_key}' to destroy..."
+    key_versions = %x{
+      gcloud kms keys versions list \
+      --location #{@infra_region} \
+      --keyring #{Secrets::KMS_KEYRING_NAME} \
+      --key #{encryption_key} \
+      --filter=state=DISABLED \
+      --sort-by=~createTime \
+      --format json
+    }
+
+    begin
+      key_versions = JSON.parse(key_versions)
+    rescue
+      debug_output "ERROR: Unable to retrieve versions for key '#{encryption_key}', terminating!", key_versions
+      raise
+    end
+
+    key_versions.each do |version|
+      version_id = get_crypto_key_version(version["name"])
+      if version["state"] == "ENABLED" or versions_to_keep > 0
+        puts "[secret-mgmt] Skipping version #{version_id}, because need to keep #{versions_to_keep} most recent versions!"
+        versions_to_keep = versions_to_keep - 1
+        next
+      end
+
+      puts "[secret-mgmt] Destroying version #{version_id} for key '#{encryption_key}'..."
+      version_destroyed = %x{
+        gcloud kms keys versions destroy #{version_id} \
+        --location #{@infra_region} \
+        --keyring #{Secrets::KMS_KEYRING_NAME} \
+        --key #{encryption_key} \
+        --format json
+      }
+
+      begin
+        version_destroyed = JSON.parse(version_destroyed)
+        raise unless version_destroyed['state'] == "DESTROY_SCHEDULED"
+      rescue
+        debug_output "ERROR: Unable to destroy version #{version_id} for key '#{encryption_key}', terminating!", version_destroyed
         raise
       end
     end
