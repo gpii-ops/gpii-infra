@@ -85,6 +85,21 @@ spec:
               path: /_up
               port: 5984
 {{- end }}
+          lifecycle:
+{{- if .Values.lifecycle.preStop }}
+            preStop:
+              exec:
+                command:
+                  - sh
+                  - -c
+                  - |
+                    curl -X PUT \
+                         -H "Content-type: application/json" \
+                         -d "\"true\"" \
+                         -u ${COUCHDB_USER}:${COUCHDB_PASSWORD} \
+                      http://localhost:5984/_node/couchdb@${HOSTNAME}.{{ template "couchdb.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local/_config/couchdb/maintenance_mode \
+                      && sleep {{ .Values.lifecycle.preStop.sleep_seconds }}
+{{- end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
           volumeMounts:
