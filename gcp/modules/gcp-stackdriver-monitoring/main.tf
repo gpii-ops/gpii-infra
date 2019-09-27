@@ -83,6 +83,7 @@ resource "null_resource" "destroy_stackdriver_monitoring" {
 
       RETRIES=5
       RETRY_COUNT=1
+      unset STACKDRIVER_DEADLINE_EXCEEDED
       while [ "$STACKDRIVER_DEADLINE_EXCEEDED" != "false" ]; do
         STACKDRIVER_DEADLINE_EXCEEDED="false"
         echo "[Try $RETRY_COUNT of $RETRIES] Destroying Stackdriver resources..."
