@@ -18,7 +18,6 @@ resource "google_monitoring_alert_policy" "couchdb_prometheus_exporter_exports_m
     }
 
     display_name = "Metric `custom/couchdb/httpd_node_up` is absent"
-    display_name = "Metric `custom/couchdb/httpd_node_up` is absent"
   }
 
   documentation = {
