@@ -10,11 +10,12 @@ resource "google_monitoring_alert_policy" "container_restart_rate" {
       duration        = "300s"
 
       aggregations {
-        alignment_period   = "60s"
+        alignment_period     = "60s"
         cross_series_reducer = "REDUCE_SUM"
-        per_series_aligner = "ALIGN_DELTA"
-        group_by_fields    = [
-          "resource.label.container_name"
+        per_series_aligner   = "ALIGN_DELTA"
+
+        group_by_fields = [
+          "resource.label.container_name",
         ]
       }
 
