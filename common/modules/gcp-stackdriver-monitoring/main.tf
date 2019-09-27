@@ -42,10 +42,9 @@ resource "template_dir" "resources" {
     enabled = "true"
   }
 }
+
 resource "null_resource" "destroy_stackdriver_lbm" {
   provisioner "local-exec" {
-    when = "destroy"
-
     command = <<EOF
       export PROJECT_ID=${var.project_id}
       export GOOGLE_CLOUD_KEYFILE=${var.serviceaccount_key}
@@ -57,7 +56,8 @@ resource "null_resource" "destroy_stackdriver_lbm" {
         echo "[Try $RETRY_COUNT of $RETRIES] Destroying Stackdriver resources..."
         bundle exec ruby -e '
           require "/rakefiles/stackdriver.rb"
-          destroy_resources({"log_based_metrics"=>[]})
+          destroy_resources({"alert_policies"=>[],"notification_channels"=>[]})
+          destroy_uptime_checks(["${join("\",\"", google_monitoring_uptime_check_config.this.*.name)}"])
         '
         STACKDRIVER_EXIT_STATUS="$?"
         if [ "$STACKDRIVER_EXIT_STATUS" == "120" ]; then
@@ -74,29 +74,16 @@ resource "null_resource" "destroy_stackdriver_lbm" {
         fi
         RETRY_COUNT=$(($RETRY_COUNT+1))
       done
-    EOF
-  }
-}
-
-
-resource "null_resource" "destroy_stackdriver_monitoring" {
-  depends_on = ["template_dir.resources", "null_resource.destroy_stackdriver_lbm"]
-
-  provisioner "local-exec" {
-    when = "destroy"
-
-    command = <<EOF
-      export PROJECT_ID=${var.project_id}
-      export GOOGLE_CLOUD_KEYFILE=${var.serviceaccount_key}
 
       RETRIES=5
       RETRY_COUNT=1
+      unset STACKDRIVER_DEADLINE_EXCEEDED
       while [ "$STACKDRIVER_DEADLINE_EXCEEDED" != "false" ]; do
         STACKDRIVER_DEADLINE_EXCEEDED="false"
         echo "[Try $RETRY_COUNT of $RETRIES] Destroying Stackdriver resources..."
         bundle exec ruby -e '
           require "/rakefiles/stackdriver.rb"
-          destroy_resources({"alert_policies"=>[],"notification_channels"=>[]})
+          destroy_resources({"log_based_metrics"=>[]})
         '
         STACKDRIVER_EXIT_STATUS="$?"
         if [ "$STACKDRIVER_EXIT_STATUS" == "120" ]; then
