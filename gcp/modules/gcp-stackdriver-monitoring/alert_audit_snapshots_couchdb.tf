@@ -15,8 +15,7 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_couchdb" {
     }
 
     display_name = "Snapshot creation events are missing in audit logs of GCE snapshot"
-  }
-  ]
+  }]
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
   user_labels           = {}
