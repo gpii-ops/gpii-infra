@@ -83,6 +83,7 @@ Users who already had an RtF email address/Google account usually have performed
 1. `cd gpii-infra/gcp/live/dev`
 1. `rake destroy`
    * This is the important one since it shuts down the expensive bits (VMs in the Kubernetes cluster, mostly)
+1. (Optional) Use `rake destroy_hard` in case you want to destroy not only infra resources, but also secrets, secrets encryption key and TF state data, so new environment would start from scratch and regenerate all of the above.
 1. (Optional) `rake clean`
    * This command is optional, but is recommended after `rake destroy`. It removes temporary and cache files that can cause trouble after an unfinished deployment.
 1. (Optional) `rake clobber`
