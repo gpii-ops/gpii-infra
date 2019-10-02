@@ -129,25 +129,29 @@ class Secrets
         decrypted_secrets.each do |secret_name, secret_value|
           ENV["TF_VAR_#{secret_name}"] = secret_value
         end
+
+        # If new secrets added into configuration, but encrypted secrets are already present
+        new_secrets = secrets - decrypted_secrets.keys
+        unless new_secrets.empty?
+          puts "[secret-mgmt] Populating new secrets for key '#{encryption_key}': #{new_secrets.join(",")}..."
+          populated_secrets = populate_secrets(new_secrets)
+          updated_secrets = populated_secrets.merge(decrypted_secrets)
+          push_secrets(updated_secrets, encryption_key)
+        end
+
+        # If some secrets been removed from configuration, but still exist as encrypted secrets
+        removed_secrets = decrypted_secrets.keys - secrets
+        unless removed_secrets.empty?
+          puts "[secret-mgmt] Found removed secrets for key '#{encryption_key}': #{removed_secrets.join(",")}..."
+          removed_secrets.each do |removed_secret|
+            decrypted_secrets.delete(removed_secret)
+          end
+          push_secrets(decrypted_secrets, encryption_key)
+        end
       else
         next if secrets.empty?
         puts "[secret-mgmt] Populating secrets for key '#{encryption_key}'..."
-        populated_secrets = {}
-        secrets.each do |secret_name|
-          if ENV["TF_VAR_#{secret_name}"].to_s.empty?
-            if secret_name.start_with?("key_")
-              key = OpenSSL::Cipher::AES256.new.encrypt.random_key
-              secret_value = Base64.strict_encode64(key)
-            else
-              secret_value = SecureRandom.hex
-            end
-            ENV["TF_VAR_#{secret_name}"] = secret_value
-          else
-            secret_value = ENV["TF_VAR_#{secret_name}"]
-          end
-          populated_secrets[secret_name] = secret_value
-        end
-
+        populated_secrets = populate_secrets(secrets)
         push_secrets(populated_secrets, encryption_key)
       end
     end
@@ -155,6 +159,27 @@ class Secrets
     # TODO: Next line should be removed once Terraform issue with GCS backend encryption is fixed
     # https://issues.gpii.net/browse/GPII-3329
     ENV['GOOGLE_ENCRYPTION_KEY'] = ENV['TF_VAR_key_tfstate_encryption_key']
+  end
+
+  def populate_secrets(secrets)
+    populated_secrets = {}
+
+    secrets.each do |secret_name|
+      if ENV["TF_VAR_#{secret_name}"].to_s.empty?
+        if secret_name.start_with?("key_")
+          key = OpenSSL::Cipher::AES256.new.encrypt.random_key
+          secret_value = Base64.strict_encode64(key)
+        else
+          secret_value = SecureRandom.hex
+        end
+        ENV["TF_VAR_#{secret_name}"] = secret_value
+      else
+        secret_value = ENV["TF_VAR_#{secret_name}"]
+      end
+      populated_secrets[secret_name] = secret_value
+    end
+
+    return populated_secrets
   end
 
   def push_secrets(secrets, encryption_key)
