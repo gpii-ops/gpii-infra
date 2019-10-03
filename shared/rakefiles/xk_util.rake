@@ -340,4 +340,10 @@ task :display_scc_assets_changed, [:projects, :compare_duration] do |taskname, a
     --format json | jq '.[] | select(.stateChange == \"REMOVED\" or .stateChange == \"ADDED\")'
   "
 end
+
+# This task displays added or removed assets in target projects (comma separated) for the compare duration in seconds
+task :display_scc_findings do
+  sh "gcloud alpha scc findings list #{ENV["ORGANIZATION_ID"]} --filter 'state = \"ACTIVE\"'"
+end
+
 # vim: et ts=2 sw=2:

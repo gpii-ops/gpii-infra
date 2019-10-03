@@ -34,3 +34,8 @@ desc "[ONLY ADMIN] Display added or removed assets in target projects (comma sep
 task :display_scc_assets_changed, [:projects, :compare_duration] => [:set_vars] do |taskname, args|
   sh "#{@exekube_cmd} rake display_scc_assets_changed['#{args[:projects]}','#{args[:compare_duration]}']"
 end
+
+desc "[ONLY ADMIN] Display SCC findings"
+task :display_scc_findings => [:set_vars] do
+  sh "#{@exekube_cmd} rake display_scc_findings"
+end
