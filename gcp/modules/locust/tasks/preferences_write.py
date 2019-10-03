@@ -1,107 +1,65 @@
-from locust import HttpLocust, TaskSet, task
-import json
+from locust import HttpLocust, TaskSet, task, events
 import random
+import os
 
+import on_failure
+events.request_failure += on_failure
 
-dev_rep = open("../data/device-reporter.json")
-dev_rep_json = json.load(dev_rep)
-dev_rep_serialised = json.dumps(dev_rep_json)
+def generate_random_username():
+    username_bases = ["rando", "chancey", "extra"]
+    username_prefix = random.choice(username_bases)
+    username_suffix = str(random.randrange(0,9999,1)).rjust(4,'0')
+    return username_prefix + username_suffix
 
-users = json.load(open("../data/users.json"))
+def exercise_settings_endpoints(l):
+    prefs_keyed_url_template = "/preferences/{}"
+    prefs_unkeyed_url = "/preferences/"
 
-def flip_booleans(originalDict):
-    flippedDict = {}
-    for key in originalDict:
-        value = originalDict[key]
-        if isinstance(value, bool):
-            flippedDict[key] = not value
-        elif isinstance(value, dict):
-            flippedDict[key] = flip_booleans(value)
-        else:
-            flippedDict[key] = value
-    return flippedDict
-
-def get_access_token(l, username, nameTemplate):
-    headers = {
-        "Content-Type":"application/x-www-form-urlencoded",
+    random_brightness = random.randrange(1,100,1)
+    prefs_payload = {
+        "contexts": {
+            "gpii-default": {
+                "name": "Default preferences",
+                "preferences": {
+                    "http://registry.gpii.net/common/screenBrightness": random_brightness
+                }
+            }
+        }
     }
-    body = {
-        "grant_type": "password",
-        "username": username,
-        "password": "test",
-        "client_id": "pilot-computer",
-        "client_secret": "pilot-computer-secret"
-    }
-    name = nameTemplate.format(username)
-    auth_response = l.client.post("/access_token", name=name, data=body, headers=headers, verify=False)
-    return auth_response.json()["access_token"]
 
-def auth_headers(access_token):
-    auth_template = 'Bearer {}'
-    headers = { 'Authorization': '', }
+    # PUT a valid payload.
+    random_username = generate_random_username()
+    prefs_random_keyed_url = prefs_keyed_url_template.format(random_username)
+    settings_put_response = l.client.put(prefs_random_keyed_url, name="1. PUT valid prefs with a GPII key.", data=prefs_payload, verify=False)
 
-    # Create the auth header
-    headers["Authorization"] = auth_template.format(access_token)
-    return headers
+    # TODO: Try to PUT an invalid payload once we have validation again.
 
-def exercise_settings_endpoints(l, login_username, snapset_name):
-    snapset_access_token = get_access_token(l, snapset_name, "1. Snapset user login.")
-    snapset_headers = auth_headers(snapset_access_token)
+    # GET the data we just PUT up.
+    settings_get_response = l.client.get(prefs_random_keyed_url, name="2. GET the prefs we just PUT.", verify=False)
 
-    get_url_template = "/{}/settings/%s"
-    put_url_template = "/{}/settings"
-
-    # Full URL includes the serialised device reporter data.
-    snapset_get_url = get_url_template.format(snapset_name) % dev_rep_serialised
-
-    snapset_get_response = l.client.get(snapset_get_url, name="2. Read snapset", headers=snapset_headers, verify=False)
-
-    original_settings = snapset_get_response.json()
-
-    # Attempt to update a read-only snapset.
-    put_snapset_url = put_url_template.format(snapset_name)
-    with l.client.put(put_snapset_url, name="3. Attempt to update snapset", headers=snapset_headers, verify=False, catch_response=True) as snapset_update_response:
-        snapset_update_response_body = snapset_update_response.json()
-        if snapset_update_response_body["isError"]:
-            snapset_update_response.success()
+    # POST a valid payload
+    new_gpii_key = "not-found-at-all"
+    # We need to catch the results ourselves to pick up the system-generated gpiiKey.
+    with l.client.post(prefs_unkeyed_url, name="3. POST valid prefs without a GPII key.", data=prefs_payload, verify=False, catch_response=True) as valid_post_response:
+        if valid_post_response.status_code == 200:
+            new_gpii_key = valid_post_response.json()["gpiiKey"]
+            valid_post_response.success()
         else:
-            snapset_update_response.failure("Updating a read-only snapset should not be allowed.")
+            valid_post_response.failure("A valid prefs payload should have been POSTed (error follows):\n" + valid_post_response.text)
 
-    user_access_token = get_access_token(l, login_username, "4. Normal user login.")
-    user_headers = auth_headers(user_access_token)
 
-    updated_settings = {}
-    updated_settings["contexts"] = flip_booleans(original_settings["preferences"]["contexts"])
+    # GET the data we just POSTed and check it.
+    new_key_url = prefs_keyed_url_template.format(new_gpii_key)
+    settings_get_response = l.client.get(new_key_url, name="4. GET the prefs we just POSTed.", verify=False)
 
-    settings_put_url = put_url_template.format(login_username)
-    settings_put_response = l.client.put(settings_put_url, name="5. Valid settings save", data=updated_settings, headers=user_headers, verify=False)
-
-    # Attempt to PUT an invalid payload
-    with l.client.put(settings_put_url, name="6. Attempt to save an invalid settings payload", headers=user_headers, data={}, verify=False, catch_response=True) as invalid_settings_response:
-        if invalid_settings_response.status_code == 400:
-            invalid_settings_response.success()
-        else:
-            invalid_settings_response.failure("Invalid settings payload should have been rejected.")
-
-    # Test retrieving someone else's settings.
-    with l.client.get(snapset_get_url, name="7. Read someone else's snapset", headers=user_headers, verify=False, catch_response=True) as unauthorised_settings_response:
-        if unauthorised_settings_response.status_code == 401:
-            unauthorised_settings_response.success()
-        else:
-            unauthorised_settings_response.failure("Unauthorized snapset read should have been rejected.")
+    # TODO: Add a check for invalid POSTs once we support validation.
 
 class PreferencesWriteTasks(TaskSet):
-    login_username = "settingsUser"
-    prefs_to_clone = "carla"
-
-    def on_start(self):
-        self.prefs_to_clone = random.choice(users)
-
     @task
     def my_task(self):
-        exercise_settings_endpoints(self, self.login_username, self.prefs_to_clone)
+        exercise_settings_endpoints(self)
 
-class WebsiteUser(HttpLocust):
+class PreferencesWriteWarmer(HttpLocust):
     task_set = PreferencesWriteTasks
     min_wait = 5000
     max_wait = 9000
