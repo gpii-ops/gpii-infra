@@ -12,3 +12,4 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
+bucket_versioning_enabled = true
