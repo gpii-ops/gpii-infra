@@ -130,24 +130,27 @@ class Secrets
           ENV["TF_VAR_#{secret_name}"] = secret_value
         end
 
+        push_secrets = false
         # If new secrets added into configuration, but encrypted secrets are already present
         new_secrets = secrets - decrypted_secrets.keys
         unless new_secrets.empty?
-          puts "[secret-mgmt] Populating new secrets for key '#{encryption_key}': #{new_secrets.join(",")}..."
+          puts "[secret-mgmt] Populating new secrets for key '#{encryption_key}': #{new_secrets.join(", ")}..."
           populated_secrets = populate_secrets(new_secrets)
-          updated_secrets = populated_secrets.merge(decrypted_secrets)
-          push_secrets(updated_secrets, encryption_key)
+          decrypted_secrets = populated_secrets.merge(decrypted_secrets)
+          push_secrets = true
         end
 
         # If some secrets been removed from configuration, but still exist as encrypted secrets
         removed_secrets = decrypted_secrets.keys - secrets
         unless removed_secrets.empty?
-          puts "[secret-mgmt] Found removed secrets for key '#{encryption_key}': #{removed_secrets.join(",")}..."
+          puts "[secret-mgmt] Found removed secrets for key '#{encryption_key}': #{removed_secrets.join(", ")}..."
           removed_secrets.each do |removed_secret|
             decrypted_secrets.delete(removed_secret)
           end
-          push_secrets(decrypted_secrets, encryption_key)
+          push_secrets = true
         end
+
+        push_secrets(decrypted_secrets, encryption_key) if push_secrets
       else
         next if secrets.empty?
         puts "[secret-mgmt] Populating secrets for key '#{encryption_key}'..."
