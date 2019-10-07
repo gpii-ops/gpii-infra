@@ -13,7 +13,7 @@ variable "encryption_keys" {
 variable "infra_region" {}
 
 variable "bucket_versioning_enabled" {
-  default = false
+  default = true
 }
 
 module "gcp-secret-mgmt" {
