@@ -355,4 +355,8 @@ task :couchdb_ui => [:set_vars] do
   sh "docker-compose run --rm -p 35984:35984 xk rake couchdb_ui"
 end
 
+desc "Clean all the Stackdriver alerts, lbm and uptime checks"
+task :clean_lbm_alerts => [:set_vars] do
+  sh "docker-compose run --rm xk rake clean_lbm_alerts"
+end
 # vim: et ts=2 sw=2:
