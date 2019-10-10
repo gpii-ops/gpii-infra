@@ -8,7 +8,7 @@
 cert_manager:
   upstream:
     repository: quay.io/jetstack/cert-manager-controller
-    tag: v0.6.1
+    tag: v0.11.0-beta.0
   generated:
     repository: gcr.io/gpii-common-prd/quay.io__jetstack__cert-manager-controller
     sha: sha256:5a4bc171592615ff78e024c8091e77e70179edba840989a203d49c088b6135a6
