@@ -449,6 +449,13 @@ See [Getting started: One-time Stackdriver Workspace setup](README.md#one-time-s
 1. Enter channel name including "#". Click "Test Connection" and then "Save".
 1. Now you can use new notification channel in `gcp-stackdriver-monitoring` module. Here is example json: `{"type":"slack","labels":{"channel_name":"#alerts"},"user_labels":{},"enabled":{"value":true},"immutable":{"value":true}}`.
 
+### Fixing errors related to the Stackdriver deployment
+
+If during a deployment any error is raised because either a log based metric or an alert already exist. It is possible to remove all the Stackdriver resources and let GPII-infra to recreate them.
+
+1. `rake clean_lbm_alerts`
+1. `rake`
+
 ## Working with CouchDB data
 
 You can run all `kubectl` commands mentioned below inside of an interactive shell started with `rake sh`.
@@ -728,13 +735,13 @@ Prime Minister at that time!"), please let me know immediately.
 
 ### External backups
 
-#### Sending backup outside of the organization.
+#### Sending backup outside of the organization
 
 The process is mostly executed by the `gcloud compute images export` command, which uses Cloud Build service, which uses [Daisy](https://github.com/GoogleCloudPlatform/compute-image-tools/tree/master/daisy) to create a VM, attach the images based on the snapshots to backup, create a file from those images and send the result files to the external storage.
 
 The destination buckets are created automatically by [Terraform code](https://github.com/gpii-ops/gpii-infra/tree/master/common/modules/gcp-external-backup). These buckets live in the testing organization (gpii2test) rather than the main organization (gpii) to keep them safe if a disaster affects the main organization.
 
-#### Restoring a backup from outside of the organization.
+#### Restoring a backup from outside of the organization
 
 The process of the restore it's similar to the backup but the other way around. It uses the `gcloud compute images import` command. In order to make easier the process a rake task called `restore_snapshot_from_image_file`can be used. This task takes only one parameter where each snapshot file to recover is separated by one space. Also this proccess takes almost 9 min per snapshot to restore:
 
