@@ -30,7 +30,7 @@ spec:
     spec:
       serviceAccountName: kiali-service-account
       containers:
-      - image: "{{ .Values.hub }}/{{ .Values.image }}:{{ .Values.tag }}"
+      - image: "{{ .Values.image }}:{{ .Values.tag }}"
         imagePullPolicy: "{{ .Values.imagePullPolicy }}"
         name: kiali
         command:

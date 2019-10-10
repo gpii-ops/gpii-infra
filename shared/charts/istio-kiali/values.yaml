@@ -3,8 +3,7 @@
 #
 enabled: false # Note that if using the demo or demo-auth yaml when installing via Helm, this default will be `true`.
 replicaCount: 1
-hub: quay.io/kiali
-image: kiali
+image: quay.io/kiali/kiali
 imagePullPolicy: IfNotPresent
 tag: v1.5.0
 contextPath: /kiali # The root context path to access the Kiali UI.

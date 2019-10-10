@@ -125,3 +125,11 @@ service_account_assigner:
     repository: gcr.io/gpii-common-prd/gpii__service-account-assigner
     sha: sha256:5c6d9ed84af21d85a71af9e991c4e8adadcc7ccd792ce0472ea2a0378a27f8ca
     tag: 0.0.3-gpii.0
+kiali:
+  upstream:
+    repository: quay.io/kiali/kiali
+    tag: v1.5.0
+  generated:
+    repository: quay.io/kiali/kiali
+    sha: placeholder
+    tag: v1.5.0
