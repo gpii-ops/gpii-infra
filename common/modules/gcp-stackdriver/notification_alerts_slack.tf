@@ -1,21 +1,10 @@
-resource "google_monitoring_notification_channel" "alerts_slack_stg" {
+resource "google_monitoring_notification_channel" "alerts_slack" {
+  count        = "${length(var.common_environments)}"
   type         = "slack"
-  display_name = "Alerts STG Slack"
+  display_name = "Alerts ${element(local.common_environments, count.index)} Slack"
 
   labels = {
-    channel_name = "#alerts-stg"
-  }
-
-  user_labels = {}
-  enabled     = "true"
-}
-
-resource "google_monitoring_notification_channel" "alerts_slack_prd" {
-  type         = "slack"
-  display_name = "Alerts PRD Slack"
-
-  labels = {
-    channel_name = "#alerts-prd"
+    channel_name = "#alerts-${element(local.common_environments, count.index)}"
   }
 
   user_labels = {}

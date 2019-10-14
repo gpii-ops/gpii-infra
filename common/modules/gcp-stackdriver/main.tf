@@ -12,6 +12,10 @@ provider "google-beta" {
   credentials = "${var.serviceaccount_key}"
 }
 
+variable "common_environments" {
+  default = ["prd", "stg"]
+}
+
 variable "project_id" {}
 variable "organization_id" {}
 variable "notification_email" {}
