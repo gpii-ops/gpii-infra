@@ -1,11 +1,11 @@
 resource "google_monitoring_alert_policy" "backup_exporter_snapshots" {
   display_name = "Backup-exporter snapshots are ok for 12 hours"
   combiner     = "OR"
-  depends_on   = ["google_logging_metric.backup-exporter_snapshot_created"]
+  depends_on   = ["google_logging_metric.backup_exporter_snapshot_created"]
 
   conditions {
     condition_absent {
-      filter   = "metric.type=\"logging.googleapis.com/user/backup-exporter.snapshot_created\" resource.type=\"k8s_container\""
+      filter   = "metric.type=\"logging.googleapis.com/user/backup_exporter.snapshot_created\" resource.type=\"k8s_container\""
       duration = "43200s"
 
       aggregations {
@@ -26,5 +26,5 @@ resource "google_monitoring_alert_policy" "backup_exporter_snapshots" {
   user_labels           = {}
   enabled               = "${(var.env == "prd" || var.env == "stg") ? true : false}"
 
-  depends_on = ["google_logging_metric.backup-exporter_snapshot_created"]
+  depends_on = ["google_logging_metric.backup_exporter_snapshot_created"]
 }

@@ -4,7 +4,7 @@ resource "google_monitoring_alert_policy" "backup_exporter_errors" {
 
   conditions {
     condition_threshold {
-      filter          = "metric.type=\"logging.googleapis.com/user/backup-exporter.error\" resource.type=\"k8s_container\""
+      filter          = "metric.type=\"logging.googleapis.com/user/backup_exporter.error\" resource.type=\"k8s_container\""
       comparison      = "COMPARISON_GT"
       threshold_value = 0.0
       duration        = "900s"
@@ -30,5 +30,5 @@ resource "google_monitoring_alert_policy" "backup_exporter_errors" {
   user_labels           = {}
   enabled               = "${(var.env == "prd" || var.env == "stg") ? true : false}"
 
-  depends_on = ["google_logging_metric.backup-exporter_error"]
+  depends_on = ["google_logging_metric.backup_exporter_error"]
 }
