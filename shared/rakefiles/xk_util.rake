@@ -352,7 +352,6 @@ task :clean_lbm_alerts => [:configure, :configure_secrets, :set_secrets] do
   require_relative "./stackdriver.rb"
   destroy_resources({"alert_policies"=>[],"notification_channels"=>[]})
   destroy_resources({"log_based_metrics"=>[]})
-  destroy_uptime_checks([])
 end
 
 # vim: et ts=2 sw=2:
