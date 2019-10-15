@@ -346,4 +346,9 @@ task :display_scc_findings do
   sh "gcloud alpha scc findings list #{ENV["ORGANIZATION_ID"]} --filter 'state = \"ACTIVE\"'"
 end
 
+# This task forwards Kiali port
+task :kiali_ui => [:configure] do
+  sh "/rakefiles/scripts/kiali_ui.sh"
+end
+
 # vim: et ts=2 sw=2:
