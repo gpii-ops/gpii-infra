@@ -347,7 +347,7 @@ task :display_scc_findings do
 end
 
 # This task clean all the alerts, lbm and uptime checks
-task :clean_lbm_alerts => [:configure, :configure_secrets, :set_secrets] do
+task :clean_stackdriver_resources => [:configure, :configure_secrets, :set_secrets] do
   ENV["PROJECT_ID"] = ENV["TF_VAR_project_id"]
   require_relative "./stackdriver.rb"
   destroy_resources({"alert_policies"=>[],"notification_channels"=>[]})
