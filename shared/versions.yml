@@ -130,6 +130,6 @@ kiali:
     repository: quay.io/kiali/kiali
     tag: v1.5.0
   generated:
-    repository: quay.io/kiali/kiali
-    sha: placeholder
+    repository: gcr.io/gpii-common-prd/quay.io__kiali__kiali
+    sha: sha256:e073c23ab674b65e366f61a19a9722806ca2a7d6ddac5845fae78a7013adfba4
     tag: v1.5.0
