@@ -380,6 +380,15 @@ This some times happens, when Stackdriver Ruby client is trying to apply alertin
 
 The most common solution for this is to [create your Stackdriver Workspace](README.md#one-time-stackdriver-workspace-setup).
 
+### Error: "app.kubernetes.io/name":"cert-manager", MatchExpressions:[]v1.LabelSelectorRequirement(nil)}: field is immutable
+
+Check running cert-manager version with `rake plain_sh['kubectl -n kube-system get deployment cert-manager -o json | jq .metadata.labels.chart']`. For everything `< v0.11.0` you'll need to follow the upgrade scenario:
+1. Run `rake plain_sh['kubectl -n gpii delete certificate\,issuer --all']` to destroy cert-manager resources in GPII namespace. This operation does not affect existing secrets with certificates and required so we can destroy cert-manager CRDs later.
+1. Run `rake destroy_module['k8s/kube-system/cert-manager']`.
+1. Run `rake plain_sh` in opened exekube shell run `for crd in $(kubectl get crd -o json | jq -r '.items[] | select(.metadata.labels.app == "cert-manager") | .spec.names.plural'); do kubectl delete crd ${crd}.certmanager.k8s.io; done` to delete any leftover CRDs.
+1. Run `rake` again, cert-manager should now be successfully upgraded.
+
+
 ## Common plumbing
 
 The environments that run in GCP need some initial resources that must be created by an administrator first. The [common part of this repository](../common) has the code and the instructions to do so.
