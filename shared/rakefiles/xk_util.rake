@@ -302,7 +302,7 @@ task :couchdb_ui => [:configure, :configure_secrets, :set_secrets] do
 end
 
 # This task displays added or removed assets in target projects (comma separated) for the compare duration in seconds
-task :display_scc_assets_changed, [:projects, :compare_duration] do |taskname, args|
+task :display_scc_assets_changed, [:projects, :compare_duration] => [:configure] do |taskname, args|
   unless args[:projects]
     # In case projects list is empty, we are interested in assets from:
     projects = [
@@ -342,8 +342,13 @@ task :display_scc_assets_changed, [:projects, :compare_duration] do |taskname, a
 end
 
 # This task displays scc findings for the target organization
-task :display_scc_findings do
+task :display_scc_findings => [:configure] do
   sh "gcloud alpha scc findings list #{ENV["ORGANIZATION_ID"]} --filter 'state = \"ACTIVE\"'"
+end
+
+# This task forwards Kiali port
+task :kiali_ui => [:configure] do
+  sh "/rakefiles/scripts/kiali_ui.sh"
 end
 
 # vim: et ts=2 sw=2:
