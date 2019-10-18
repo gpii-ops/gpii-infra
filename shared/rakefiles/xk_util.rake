@@ -337,7 +337,19 @@ task :display_scc_assets_changed, [:projects, :compare_duration] => [:configure]
       AND NOT security_center_properties.resource_type = \"google.cloud.kms.cryptokeyversion\" \
     ' \
     --compare-duration #{compare_duration} \
-    --format json | jq '.[] | select(.stateChange == \"REMOVED\" or .stateChange == \"ADDED\")'
+    --format json \
+    | jq -s '
+      def group_by_first:
+        if first | type == \"array\" and length > 1
+          then group_by(.[0])
+          | map({(first[0]): map(.[1:]) | group_by_first | add })
+          else .
+         end;
+
+      .[]
+      | map(select(.stateChange == \"REMOVED\" or .stateChange == \"ADDED\"))
+      | map_values([.stateChange, .asset.securityCenterProperties.resourceType, .asset.resourceProperties.name])
+      | group_by_first | add'
   "
 end
 
