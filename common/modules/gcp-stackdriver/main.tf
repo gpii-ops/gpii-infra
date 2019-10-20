@@ -7,11 +7,6 @@ provider "google" {
   credentials = "${var.serviceaccount_key}"
 }
 
-provider "google-beta" {
-  project     = "${var.project_id}"
-  credentials = "${var.serviceaccount_key}"
-}
-
 variable "common_environments" {
   default = ["prd", "stg"]
 }
