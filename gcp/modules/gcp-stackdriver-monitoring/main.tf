@@ -25,11 +25,6 @@ variable "serviceaccount_key" {}
 variable "env" {}
 
 resource "null_resource" "destroy_old_stackdriver_resources" {
-  # this script is only needed to run once to migrate the resources from json to TF
-  triggers = {
-    nonce = "1"
-  }
-
   provisioner "local-exec" {
     command = <<EOF
       export PROJECT_ID=${var.project_id}
