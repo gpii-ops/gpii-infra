@@ -27,7 +27,7 @@ resource "google_monitoring_alert_policy" "backup_exporter_errors_prd" {
   user_labels           = {}
   enabled               = true
 
-  depends_on = ["google_logging_metric.backup-exporter_snapshot_created_prd"]
+  depends_on = ["google_logging_metric.backup_exporter_snapshot_created_prd"]
 }
 
 resource "google_monitoring_alert_policy" "backup_exporter_errors_stg" {
@@ -59,5 +59,5 @@ resource "google_monitoring_alert_policy" "backup_exporter_errors_stg" {
   user_labels           = {}
   enabled               = true
 
-  depends_on = ["google_logging_metric.backup-exporter_snapshot_created_stg"]
+  depends_on = ["google_logging_metric.backup_exporter_snapshot_created_stg"]
 }
