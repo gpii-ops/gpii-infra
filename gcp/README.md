@@ -453,7 +453,7 @@ See [Getting started: One-time Stackdriver Workspace setup](README.md#one-time-s
 
 If during a deployment any error is raised because either a log based metric or an alert already exist. It is possible to remove all the Stackdriver resources and let GPII-infra to recreate them.
 
-1. `rake clean_stackdriver_resource`
+1. `rake clean_stackdriver_resources`
 1. `rake`
 
 ## Working with CouchDB data
