@@ -8,7 +8,7 @@ resource "google_monitoring_alert_policy" "couchdb_prometheus_exporter_exports_m
       duration = "300s"
 
       aggregations {
-        alignment_period     = "600s"
+        alignment_period     = "60s"
         per_series_aligner   = "ALIGN_MEAN"
         cross_series_reducer = "REDUCE_SUM"
         group_by_fields      = []

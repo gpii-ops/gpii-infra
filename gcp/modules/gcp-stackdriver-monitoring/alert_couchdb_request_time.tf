@@ -11,7 +11,7 @@ resource "google_monitoring_alert_policy" "couchdb_request_time" {
 
       aggregations {
         alignment_period   = "60s"
-        per_series_aligner = "ALIGN_SUM"
+        per_series_aligner = "ALIGN_MEAN"
         group_by_fields    = []
       }
 

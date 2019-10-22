@@ -19,7 +19,12 @@ resource "google_monitoring_alert_policy" "couchdb_membership_errors" {
       denominator_aggregations = []
     }
 
-    display_name = "K8s container restarting more often than 1.5 times per minute"
+    display_name = "Error found in CouchDB membership check logs"
+  }
+
+  documentation = {
+    content   = "[Use this link to explore policy events in Logs Viewer](https://console.cloud.google.com/logs/viewer?project=${var.project_id}&minLogLevel=0&expandAll=false&interval=PT1H&advancedFilter=resource.type%3D%22k8s_container%22%20AND%20resource.labels.container_name%3D%22couchdb-statefulset-assembler%22%20AND%20severity%3E%3D%22ERROR%22)"
+    mime_type = "text/markdown"
   }
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
