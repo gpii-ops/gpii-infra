@@ -1,6 +1,6 @@
 resource "google_dns_managed_zone" "gpii_net" {
   name        = "gpii.net"
-  dns_name    = "${var.organization_domain}."
+  dns_name    = "gpii.net."
   description = "GPII.net DNS zone"
 
   lifecycle {
