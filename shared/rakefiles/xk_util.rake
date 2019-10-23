@@ -301,4 +301,66 @@ task :couchdb_ui => [:configure, :configure_secrets, :set_secrets] do
   sh "/rakefiles/scripts/couchdb_ui.sh"
 end
 
+# This task displays added or removed assets in target projects (comma separated) for the compare duration in seconds
+task :display_scc_assets_changed, [:projects, :compare_duration] => [:configure] do |taskname, args|
+  unless args[:projects]
+    # In case projects list is empty, we are interested in assets from:
+    projects = [
+      360407405272, # 360407405272 – gpii-gcp-prd
+      180717459583 # 180717459583 - gpii-common-prd
+    ]
+  else
+    projects = args[:projects].split(",")
+  end
+
+  unless args[:compare_duration]
+    # Default comparison duration is 7 days
+    compare_duration = "604800s"
+  else
+    compare_duration = "#{args[:compare_duration]}s"
+  end
+
+  projects_filter = ["("]
+  projects.each do |project_id|
+    projects_filter << " OR " if projects_filter.length > 1
+    projects_filter << "security_center_properties.resource_project = \"//cloudresourcemanager.googleapis.com/projects/"
+    projects_filter << project_id
+    projects_filter << "\""
+  end
+  projects_filter << ")"
+  projects_filter = projects_filter.join
+
+  sh "gcloud alpha scc assets list #{ENV["ORGANIZATION_ID"]} \
+    --filter ' \
+      #{projects_filter} \
+      AND NOT security_center_properties.resource_type = \"google.compute.snapshot\" \
+      AND NOT security_center_properties.resource_type = \"google.cloud.kms.cryptokeyversion\" \
+    ' \
+    --compare-duration #{compare_duration} \
+    --format json \
+    | jq -s '
+      def group_by_first:
+        if first | type == \"array\" and length > 1
+          then group_by(.[0])
+          | map({(first[0]): map(.[1:]) | group_by_first | add })
+          else .
+         end;
+
+      .[]
+      | map(select(.stateChange == \"REMOVED\" or .stateChange == \"ADDED\"))
+      | map_values([.stateChange, .asset.securityCenterProperties.resourceType, .asset.resourceProperties.name])
+      | group_by_first | add'
+  "
+end
+
+# This task displays scc findings for the target organization
+task :display_scc_findings => [:configure] do
+  sh "gcloud alpha scc findings list #{ENV["ORGANIZATION_ID"]} --filter 'state = \"ACTIVE\"'"
+end
+
+# This task forwards Kiali port
+task :kiali_ui => [:configure] do
+  sh "/rakefiles/scripts/kiali_ui.sh"
+end
+
 # vim: et ts=2 sw=2:

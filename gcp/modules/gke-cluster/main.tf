@@ -24,7 +24,7 @@ variable "node_count" {
 }
 
 variable "expected_gke_version_prefix" {
-  default = "1."
+  default = "1.13"
 }
 
 variable "infra_region" {}
@@ -78,9 +78,7 @@ module "gke_cluster" {
   project_id         = "${var.project_id}"
   serviceaccount_key = "${var.serviceaccount_key}"
 
-  # kubernetes_version = "${data.external.gke_version_assert.result.version}"
-  # this is temporary till version below or newer is released as default
-  kubernetes_version = "1.12.9-gke.15"
+  kubernetes_version = "${data.external.gke_version_assert.result.version}"
 
   region = "${var.infra_region}"
 

@@ -1,8 +1,14 @@
 # ↓ Module metadata
-
 terragrunt = {
   terraform {
-    source = "/project/modules//gcp-secret-mgmt"
+    source = "/project/modules//kiali"
+  }
+
+  dependencies {
+    paths = [
+      "../cluster",
+      "../kube-system/helm-initializer",
+    ]
   }
 
   include = {

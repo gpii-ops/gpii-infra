@@ -67,6 +67,21 @@ describe Secrets do
     expect { secrets.set_secrets() }.to raise_error(RuntimeError, "Called set_secrets() without first calling collect_secrets()")
   end
 
+  it "populate_secrets populates secrets correctly" do
+    fake_project_id = "fakeorg-fakecloud-fakeenv-fakeuser"
+    fake_infra_region = "mars-north1"
+    secrets = Secrets.new(fake_project_id, fake_infra_region)
+    secrets.populate_secrets(["secret_foo", "key_bar"])
+
+    expect(ENV["TF_VAR_secret_foo"].length).to be(32)
+
+    expect {
+      decipher = OpenSSL::Cipher::AES.new(256, :CBC)
+      decipher.decrypt
+      decipher.key = Base64.strict_decode64(ENV["TF_VAR_key_bar"])
+    }.not_to raise_error
+  end
+
 end
 
 
