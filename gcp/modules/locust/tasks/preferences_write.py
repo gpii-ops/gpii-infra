@@ -80,7 +80,7 @@ def exercise_settings_endpoints(l):
 
 class PreferencesWriteTasks(TaskSet):
     # We need to pause between writing and reading material, see:
-    hard_pause_seconds = .375
+    hard_pause_seconds = .5
     @task
     def my_task(self):
         exercise_settings_endpoints(self)
