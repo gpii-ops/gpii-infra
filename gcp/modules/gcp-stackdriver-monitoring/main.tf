@@ -24,6 +24,8 @@ variable "domain_name" {}
 variable "serviceaccount_key" {}
 variable "env" {}
 
+variable "secret_slack_auth_token" {}
+
 resource "null_resource" "destroy_old_stackdriver_resources" {
   provisioner "local-exec" {
     command = <<EOF

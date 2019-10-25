@@ -12,12 +12,9 @@ variable "common_environments" {
 }
 
 variable "project_id" {}
-variable "organization_id" {}
 variable "notification_email" {}
-variable "common_project_id" {}
-variable "domain_name" {}
 variable "serviceaccount_key" {}
-variable "env" {}
+variable "secret_slack_auth_token" {}
 
 resource "null_resource" "destroy_old_stackdriver_resources" {
   provisioner "local-exec" {

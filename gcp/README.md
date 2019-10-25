@@ -421,20 +421,6 @@ Due to the lack of Terraform integration we use [Ruby client](https://github.com
 
 See [Getting started: One-time Stackdriver Workspace setup](README.md#one-time-stackdriver-workspace-setup)
 
-### To add new resource / debug existing resources:
-1. Add new resource / modify existing resource using corresponding Stackdriver Dashboard. **Supported resources are:**
-   * [Notification channels](https://app.google.stackdriver.com/settings/accounts/notifications/email) (only email notification channel type is currently supported, all notification channels are being applied to every alert policy).
-   * [Uptime checks](https://app.google.stackdriver.com/uptime).
-   * [Alert policies](https://app.google.stackdriver.com/policies).
-1. Run `TF_VAR_stackdriver_debug=1 rake deploy_module['k8s/stackdriver/monitoring']`.
-1. You will find json blobs for all supported Stackdriver resources in the output.
-1. To add new resource config into `gcp-stackdriver-monitoring` module:
-   * Copy json blob that you obtained on previous step into proper [resource directory](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/modules/gcp-stackdriver-monitoring/resources). Give a meaningful name to a new resource file. You can use `jq` to help with formatting.
-   * Remove all `name`, `creation_record`, and `mutation_record` attributes.
-   * Set `notification_channels` to `[]` (this value will be populated dynamically later).
-   * Repeat from **step 2.** All newly configured resources will be synced with Stackriver.
-1. In case you added new email notification channel, you may want to authorize new sender to post to [Alerts Group](https://groups.google.com/a/raisingthefloor.org/forum/#!pendingmsg/alerts). Follow the link, select new message and click "Post and always allow future messages from author(s)" button.
-
 ### To configure Dashboards for your project:
 1. Go to [Metrics Explorer](https://app.google.stackdriver.com/metrics-explorer).
 1. Select resource type, metric and configure other parameters for the chart that you want to add to your Dashboard.
@@ -446,8 +432,22 @@ See [Getting started: One-time Stackdriver Workspace setup](README.md#one-time-s
 1. Click "Add Slack Channel".
 1. Click "Authorize Stackdriver" – this will redirect to Slack's authentication page.
 1. Click "Authorize".
+1. Save the URL after the authentication is done, the parameter "auth_token" of the url is the value you have to use in the next step.
+1. Export the variable: `export TF_VAR_secret_slack_auth_token=XXXXX-xxxx-XXXXX-xxxxx-XXXX`.
+1. Run `rake` to save the secret.
 1. Enter channel name including "#". Click "Test Connection" and then "Save".
-1. Now you can use new notification channel in `gcp-stackdriver-monitoring` module. Here is example json: `{"type":"slack","labels":{"channel_name":"#alerts"},"user_labels":{},"enabled":{"value":true},"immutable":{"value":true}}`.
+1. Now you can use new notification channel in `gcp-stackdriver-monitoring` module. Here is an example:
+   ```
+   resource "google_monitoring_notification_channel" "alerts_slack_channel" {
+     type         = "slack"
+     display_name = "Alerts #${var.env} Slack"
+
+     labels = {
+       channel_name = "#alerts-${var.env}"
+       auth_token   = "${var.secret_slack_auth_token}"
+     }
+   }
+   ```
 
 ### Fixing errors related to the Stackdriver deployment
 
