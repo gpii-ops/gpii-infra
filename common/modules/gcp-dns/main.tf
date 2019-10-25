@@ -25,61 +25,40 @@ provider "google" {
   region      = "${var.infra_region}"
 }
 
-resource "google_dns_managed_zone" "gpii_net" {
-  name        = "gpii-net"
-  dns_name    = "gpii.net."
-  description = "gpii.net DNS zone"
+resource "google_dns_managed_zone" "root_zone" {
+  name        = "${replace(var.organization_domain, ".", "-")}"
+  dns_name    = "${var.organization_domain}."
+  description = "root ${var.organization_domain} DNS zone"
 
   lifecycle {
     prevent_destroy = "true"
   }
 }
 
-resource "google_dns_record_set" "ns_test1_gpii_net" {
-  name         = "test1.gpii.net."
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
-  type         = "NS"
-  ttl          = 3600
-  rrdatas      = ["${google_dns_managed_zone.test1_gpii_net.name_servers}"]
+# Only needed to create the NS registry of test1.gpii.net in gpii.net zone
+data "google_dns_managed_zone" "test1_gpii_net" {
+  count = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  name  = "test1-gpii-net"
 }
 
-resource "google_dns_record_set" "ns_gcp_gpii_net" {
-  name         = "gcp.gpii.net."
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+resource "google_dns_record_set" "ns_test1_gpii_net" {
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  name         = "test1.gpii.net."
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
+  type         = "NS"
+  ttl          = 3600
+  rrdatas      = ["${data.google_dns_managed_zone.test1_gpii_net.*.name_servers}"]
+}
+
+resource "google_dns_record_set" "ns_main" {
+  name         = "gcp.${var.organization_domain}."
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   type         = "NS"
   ttl          = 3600
   rrdatas      = ["${google_dns_managed_zone.main.name_servers}"]
 }
 
-resource "google_dns_managed_zone" "test1_gpii_net" {
-  name        = "test1-gpii-net"
-  dns_name    = "test1.gpii.net."
-  description = "test1.gpii.net DNS zone"
-
-  lifecycle {
-    prevent_destroy = "true"
-  }
-}
-
-resource "google_dns_record_set" "ns_gcp_test1_gpii_net" {
-  name         = "gcp.test1.gpii.net."
-  managed_zone = "${google_dns_managed_zone.test1_gpii_net.name}"
-  type         = "NS"
-  ttl          = 3600
-  rrdatas      = ["${google_dns_managed_zone.gcp_test1_gpii_net.name_servers}"]
-}
-
-resource "google_dns_managed_zone" "gcp_test1_gpii_net" {
-  name        = "gcp-test1-gpii-net"
-  dns_name    = "gcp.test1.gpii.net."
-  description = "gcp.test1.gpii.net DNS zone"
-
-  lifecycle {
-    prevent_destroy = "true"
-  }
-}
-
-# This resource should be named "gcp_gpii_net" but we are going to preserve this in order to avoid missmatching between AWS and GCP.
+# This resource should be named "gcp_zone" but we are going to preserve this in order to avoid missmatching between AWS and GCP.
 # Once all the DNS is set at GCP we can rename this resource and apply the plan being sure that all the zones are well referenced.
 resource "google_dns_managed_zone" "main" {
   name        = "gcp-${replace(var.organization_domain, ".", "-")}"
