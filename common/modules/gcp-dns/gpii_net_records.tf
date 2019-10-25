@@ -1,7 +1,8 @@
 ### A ###
 
 resource "google_dns_record_set" "a-api-ul-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "api.ul.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -13,7 +14,8 @@ resource "google_dns_record_set" "a-api-ul-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-build-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "build.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -24,7 +26,8 @@ resource "google_dns_record_set" "a-build-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-ci--int-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "ci-int.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -35,7 +38,8 @@ resource "google_dns_record_set" "a-ci--int-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-ci--ws-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "ci-ws.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -46,7 +50,8 @@ resource "google_dns_record_set" "a-ci--ws-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-ci-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "ci.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -58,7 +63,8 @@ resource "google_dns_record_set" "a-ci-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-easyone-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "easyone.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -69,7 +75,8 @@ resource "google_dns_record_set" "a-easyone-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-flowmanager-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "flowmanager.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -81,7 +88,8 @@ resource "google_dns_record_set" "a-flowmanager-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-get-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "get.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -93,7 +101,8 @@ resource "google_dns_record_set" "a-get-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-gitlab-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "gitlab.gpii.net."
   type         = "A"
   ttl          = "300"
@@ -104,7 +113,8 @@ resource "google_dns_record_set" "a-gitlab-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -115,7 +125,8 @@ resource "google_dns_record_set" "a-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-issues-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "issues.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -127,7 +138,8 @@ resource "google_dns_record_set" "a-issues-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-jenkins--internal-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "jenkins-internal.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -138,7 +150,8 @@ resource "google_dns_record_set" "a-jenkins--internal-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-lists-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "lists.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -150,7 +163,8 @@ resource "google_dns_record_set" "a-lists-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-npgatheringtool-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "npgatheringtool.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -161,7 +175,8 @@ resource "google_dns_record_set" "a-npgatheringtool-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-pad-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "pad.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -173,7 +188,8 @@ resource "google_dns_record_set" "a-pad-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-personabrowser-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "personabrowser.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -184,7 +200,8 @@ resource "google_dns_record_set" "a-personabrowser-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-preferences-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "preferences.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -196,7 +213,8 @@ resource "google_dns_record_set" "a-preferences-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-qi--backend-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "qi-backend.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -208,7 +226,8 @@ resource "google_dns_record_set" "a-qi--backend-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-qi-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "qi.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -220,7 +239,8 @@ resource "google_dns_record_set" "a-qi-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-rbmm-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "rbmm.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -232,7 +252,8 @@ resource "google_dns_record_set" "a-rbmm-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-sat-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "sat.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -243,7 +264,8 @@ resource "google_dns_record_set" "a-sat-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-satdata-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "satdata.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -254,7 +276,8 @@ resource "google_dns_record_set" "a-satdata-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-seizure-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "seizure.gpii.net."
   type         = "A"
   ttl          = "300"
@@ -266,7 +289,8 @@ resource "google_dns_record_set" "a-seizure-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-sst-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "sst.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -277,7 +301,8 @@ resource "google_dns_record_set" "a-sst-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-staging--flowmanager-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "staging-flowmanager.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -289,7 +314,8 @@ resource "google_dns_record_set" "a-staging--flowmanager-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-staging--issues-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "staging-issues.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -301,7 +327,8 @@ resource "google_dns_record_set" "a-staging--issues-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-staging--preferences-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "staging-preferences.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -313,7 +340,8 @@ resource "google_dns_record_set" "a-staging--preferences-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-staging--rbmm-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "staging-rbmm.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -324,7 +352,8 @@ resource "google_dns_record_set" "a-staging--rbmm-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-staging--secureflowmanager-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "staging-secureflowmanager.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -335,7 +364,8 @@ resource "google_dns_record_set" "a-staging--secureflowmanager-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-staging--stmm-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "staging-stmm.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -346,7 +376,8 @@ resource "google_dns_record_set" "a-staging--stmm-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-staging--terms-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "staging-terms.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -357,7 +388,8 @@ resource "google_dns_record_set" "a-staging--terms-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-staging--ul-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "staging-ul.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -368,7 +400,8 @@ resource "google_dns_record_set" "a-staging--ul-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-staging--wiki-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "staging-wiki.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -379,7 +412,8 @@ resource "google_dns_record_set" "a-staging--wiki-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-stmm-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "stmm.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -391,7 +425,8 @@ resource "google_dns_record_set" "a-stmm-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-surveyserver-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "surveyserver.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -402,7 +437,8 @@ resource "google_dns_record_set" "a-surveyserver-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-terms-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "terms.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -414,7 +450,8 @@ resource "google_dns_record_set" "a-terms-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-tools-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "tools.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -425,7 +462,8 @@ resource "google_dns_record_set" "a-tools-gpii-net" {
 }
 
 resource "google_dns_record_set" "a-wiki-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "wiki.gpii.net."
   type         = "A"
   ttl          = "3600"
@@ -439,7 +477,8 @@ resource "google_dns_record_set" "a-wiki-gpii-net" {
 ### CNAME ###
 
 resource "google_dns_record_set" "cname-dev-developerspace-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "dev.developerspace.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -450,7 +489,8 @@ resource "google_dns_record_set" "cname-dev-developerspace-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-dev-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "dev.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -461,7 +501,8 @@ resource "google_dns_record_set" "cname-dev-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-dev-saa-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "dev.saa.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -472,7 +513,8 @@ resource "google_dns_record_set" "cname-dev-saa-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-developerspace-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "developerspace.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -483,7 +525,8 @@ resource "google_dns_record_set" "cname-developerspace-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-ds-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "ds.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -494,7 +537,8 @@ resource "google_dns_record_set" "cname-ds-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-ftp-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "ftp.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -505,7 +549,8 @@ resource "google_dns_record_set" "cname-ftp-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-metrics-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "metrics.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -516,7 +561,8 @@ resource "google_dns_record_set" "cname-metrics-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-pp-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "pp.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -527,7 +573,8 @@ resource "google_dns_record_set" "cname-pp-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-preview-developerspace-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "preview.developerspace.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -538,7 +585,8 @@ resource "google_dns_record_set" "cname-preview-developerspace-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-preview-ds-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "preview.ds.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -549,7 +597,8 @@ resource "google_dns_record_set" "cname-preview-ds-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-preview-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "preview.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -560,7 +609,8 @@ resource "google_dns_record_set" "cname-preview-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-preview-saa-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "preview.saa.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -571,7 +621,8 @@ resource "google_dns_record_set" "cname-preview-saa-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-preview-ul-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "preview.ul.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -582,7 +633,8 @@ resource "google_dns_record_set" "cname-preview-ul-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-saa-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "saa.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -593,7 +645,8 @@ resource "google_dns_record_set" "cname-saa-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-staging-developerspace-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "staging.developerspace.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -604,7 +657,8 @@ resource "google_dns_record_set" "cname-staging-developerspace-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-staging-ds-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "staging.ds.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -615,7 +669,8 @@ resource "google_dns_record_set" "cname-staging-ds-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-staging-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "staging.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -626,7 +681,8 @@ resource "google_dns_record_set" "cname-staging-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-staging-saa-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "staging.saa.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -637,7 +693,8 @@ resource "google_dns_record_set" "cname-staging-saa-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-staging-ul-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "staging.ul.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -648,7 +705,8 @@ resource "google_dns_record_set" "cname-staging-ul-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-survey-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "survey.gpii.net."
   type         = "CNAME"
   ttl          = "300"
@@ -659,7 +717,8 @@ resource "google_dns_record_set" "cname-survey-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-testing-developerspace-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "testing.developerspace.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -670,7 +729,8 @@ resource "google_dns_record_set" "cname-testing-developerspace-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-testing-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "testing.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -681,7 +741,8 @@ resource "google_dns_record_set" "cname-testing-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-testing-saa-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "testing.saa.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -692,7 +753,8 @@ resource "google_dns_record_set" "cname-testing-saa-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-ul-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "ul.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -703,7 +765,8 @@ resource "google_dns_record_set" "cname-ul-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-unifiedlisting-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "unifiedlisting.gpii.net."
   type         = "CNAME"
   ttl          = "300"
@@ -714,7 +777,8 @@ resource "google_dns_record_set" "cname-unifiedlisting-gpii-net" {
 }
 
 resource "google_dns_record_set" "cname-www-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "www.gpii.net."
   type         = "CNAME"
   ttl          = "3600"
@@ -727,7 +791,8 @@ resource "google_dns_record_set" "cname-www-gpii-net" {
 ### TXT ###
 
 resource "google_dns_record_set" "txt-_dmarc-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "_dmarc.gpii.net."
   type         = "TXT"
   ttl          = "300"
@@ -738,7 +803,8 @@ resource "google_dns_record_set" "txt-_dmarc-gpii-net" {
 }
 
 resource "google_dns_record_set" "txt-ci-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "ci.gpii.net."
   type         = "TXT"
   ttl          = "300"
@@ -749,7 +815,8 @@ resource "google_dns_record_set" "txt-ci-gpii-net" {
 }
 
 resource "google_dns_record_set" "txt-google-_domainkey-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "google._domainkey.gpii.net."
   type         = "TXT"
   ttl          = "300"
@@ -760,7 +827,8 @@ resource "google_dns_record_set" "txt-google-_domainkey-gpii-net" {
 }
 
 resource "google_dns_record_set" "txt-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "gpii.net."
   type         = "TXT"
   ttl          = "3600"
@@ -772,7 +840,8 @@ resource "google_dns_record_set" "txt-gpii-net" {
 }
 
 resource "google_dns_record_set" "txt-lists-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "lists.gpii.net."
   type         = "TXT"
   ttl          = "300"
@@ -783,7 +852,8 @@ resource "google_dns_record_set" "txt-lists-gpii-net" {
 }
 
 resource "google_dns_record_set" "txt-test1-gpii-net" {
-  managed_zone = "${google_dns_managed_zone.gpii_net.name}"
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "test1.gpii.net."
   type         = "TXT"
   ttl          = "300"
