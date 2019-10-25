@@ -1,13 +1,3 @@
-resource "google_dns_managed_zone" "gpii_net" {
-  name        = "gpii.net"
-  dns_name    = "gpii.net."
-  description = "GPII.net DNS zone"
-
-  lifecycle {
-    prevent_destroy = "true"
-  }
-}
-
 ### A ###
 
 resource "google_dns_record_set" "a-api-ul-gpii-net" {
