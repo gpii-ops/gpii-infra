@@ -851,10 +851,10 @@ resource "google_dns_record_set" "txt-lists-gpii-net" {
   ]
 }
 
-resource "google_dns_record_set" "txt-test1-gpii-net" {
+resource "google_dns_record_set" "txt-test-gpii-net" {
   count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
   managed_zone = "${google_dns_managed_zone.root_zone.name}"
-  name         = "test1.gpii.net."
+  name         = "test.gpii.net."
   type         = "TXT"
   ttl          = "300"
 

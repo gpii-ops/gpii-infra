@@ -35,20 +35,20 @@ resource "google_dns_managed_zone" "root_zone" {
   }
 }
 
-# Only needed to create the NS registry of test1.gpii.net in gpii.net zone
-data "google_dns_managed_zone" "test1_gpii_net" {
+# Only needed to create the NS registry of test.gpii.net in gpii.net zone
+data "google_dns_managed_zone" "test_gpii_net" {
   count   = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
-  name    = "test1-gpii-net"
+  name    = "test-gpii-net"
   project = "gpii2test-common-stg"
 }
 
-resource "google_dns_record_set" "ns_test1_gpii_net" {
+resource "google_dns_record_set" "ns_test_gpii_net" {
   count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
-  name         = "test1.gpii.net."
+  name         = "test.gpii.net."
   managed_zone = "${google_dns_managed_zone.root_zone.name}"
   type         = "NS"
   ttl          = 3600
-  rrdatas      = ["${data.google_dns_managed_zone.test1_gpii_net.0.name_servers}"]
+  rrdatas      = ["${data.google_dns_managed_zone.test_gpii_net.0.name_servers}"]
 }
 
 resource "google_dns_record_set" "ns_main" {
