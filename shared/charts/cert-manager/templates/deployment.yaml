@@ -1,19 +1,22 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "cert-manager.fullname" . }}
   namespace: {{ .Release.Namespace | quote }}
   labels:
     app: {{ template "cert-manager.name" . }}
-    chart: {{ template "cert-manager.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ template "cert-manager.name" . }}
+    app.kubernetes.io/instance:  {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ template "cert-manager.chart" . }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: {{ template "cert-manager.name" . }}
-      release: {{ .Release.Name }}
+      app.kubernetes.io/name: {{ template "cert-manager.name" . }}
+      app.kubernetes.io/instance:  {{ .Release.Name }}
+      app.kubernetes.io/managed-by: {{ .Release.Service }}
   {{- with .Values.strategy }}
   strategy:
     {{- . | toYaml | nindent 4 }}
@@ -22,13 +25,21 @@ spec:
     metadata:
       labels:
         app: {{ template "cert-manager.name" . }}
-        release: {{ .Release.Name }}
+        app.kubernetes.io/name: {{ template "cert-manager.name" . }}
+        app.kubernetes.io/instance:  {{ .Release.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        helm.sh/chart: {{ template "cert-manager.chart" . }}
 {{- if .Values.podLabels }}
 {{ toYaml .Values.podLabels | indent 8 }}
 {{- end }}
       annotations:
       {{- if .Values.podAnnotations }}
 {{ toYaml .Values.podAnnotations | indent 8 }}
+      {{- end }}
+      {{- if and .Values.prometheus.enabled (not .Values.prometheus.servicemonitor.enabled) }}
+        prometheus.io/path: "/metrics"
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9402'
       {{- end }}
     spec:
       serviceAccountName: {{ template "cert-manager.serviceAccountName" . }}
@@ -42,16 +53,19 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
+        {{- if .Values.global.logLevel }}
+          - --v={{ .Values.global.logLevel }}
+        {{- end }}
         {{- if .Values.clusterResourceNamespace }}
           - --cluster-resource-namespace={{ .Values.clusterResourceNamespace }}
         {{- else }}
           - --cluster-resource-namespace=$(POD_NAMESPACE)
         {{- end }}
-        {{- if .Values.leaderElection.namespace }}
-          - --leader-election-namespace={{ .Values.leaderElection.namespace }}
+        {{- if .Values.global.leaderElection.namespace }}
+          - --leader-election-namespace={{ .Values.global.leaderElection.namespace }}
         {{- else }}
           - --leader-election-namespace=$(POD_NAMESPACE)
         {{- end }}
@@ -65,6 +79,9 @@ spec:
           {{- if .defaultIssuerKind }}
           - --default-issuer-kind={{ .defaultIssuerKind }}
           {{- end }}
+          {{- if .defaultIssuerGroup }}
+          - --default-issuer-group={{ .defaultIssuerGroup }}
+          {{- end }}
           {{- if .defaultACMEChallengeType }}
           - --default-acme-issuer-challenge-type={{ .defaultACMEChallengeType }}
           {{- end }}
@@ -72,6 +89,12 @@ spec:
           - --default-acme-issuer-dns01-provider-name={{ .defaultACMEDNS01ChallengeProvider }}
           {{- end }}
           {{- end }}
+          - --webhook-namespace=$(POD_NAMESPACE)
+          - --webhook-ca-secret={{ include "webhook.rootCACertificate" . }}
+          - --webhook-serving-secret={{ include "webhook.servingCertificate" . }}
+          - --webhook-dns-names={{ include "webhook.fullname" . }},{{ include "webhook.fullname" . }}.{{ .Release.Namespace }},{{ include "webhook.fullname" . }}.{{ .Release.Namespace }}.svc
+          ports:
+          - containerPort: 9402
           env:
           - name: POD_NAMESPACE
             valueFrom:

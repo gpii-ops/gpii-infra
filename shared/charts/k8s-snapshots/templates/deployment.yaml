@@ -10,6 +10,10 @@ spec:
       labels:
         app: {{ template "k8s-snapshots.name" . }}
       annotations:
+        # This annotation is needed to allow traffic to metadata.google.internal
+        # until Istio's issue with FQDNs in ServiceEntries is not resolved:
+        # https://github.com/istio/istio/issues/14404
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: "169.254.169.254/32"
         {{ if .Values.serviceAccount }}accounts.google.com/service-account: {{ .Values.serviceAccount }}{{ end }}
         {{ if .Values.scopes }}accounts.google.com/scopes: {{ .Values.scopes }}{{ end }}
     spec:
@@ -18,6 +22,10 @@ spec:
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
+          - name: CLOUD_PROVIDER
+            value: "google"
+          - name: GCLOUD_CREDENTIALS_FILE
+            value: ""
         {{- if .Values.useClaimName }}
           - name: USE_CLAIM_NAME
             value: "true"

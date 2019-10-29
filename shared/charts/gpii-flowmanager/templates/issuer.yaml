@@ -1,4 +1,4 @@
-apiVersion: certmanager.k8s.io/v1alpha1
+apiVersion: cert-manager.io/v1alpha2
 kind: Issuer
 metadata:
   name: letsencrypt-{{ template "flowmanager.name" . }}
@@ -13,8 +13,7 @@ spec:
     email: {{ .Values.acme.email }}
     privateKeySecretRef:
       name: letsencrypt-{{ template "flowmanager.name" . }}
-    dns01:
-      providers:
-      - name: default
+    solvers:
+    - dns01:
         clouddns:
           project: {{ required "A valid GCP Project id required for acme.clouddnsProject!" .Values.acme.clouddnsProject }}
