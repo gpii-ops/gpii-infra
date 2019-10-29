@@ -484,7 +484,7 @@ resource "google_dns_record_set" "cname-dev-developerspace-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "gpii-dev.pushing7.com",
+    "gpii-dev.pushing7.com.",
   ]
 }
 
@@ -496,7 +496,7 @@ resource "google_dns_record_set" "cname-dev-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "gpii-dev.pushing7.com",
+    "gpii-dev.pushing7.com.",
   ]
 }
 
@@ -508,7 +508,7 @@ resource "google_dns_record_set" "cname-dev-saa-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "gpii-dev.pushing7.com",
+    "gpii-dev.pushing7.com.",
   ]
 }
 
@@ -520,7 +520,7 @@ resource "google_dns_record_set" "cname-developerspace-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "gpii-prod.pushing7.com",
+    "gpii-prod.pushing7.com.",
   ]
 }
 
@@ -532,7 +532,7 @@ resource "google_dns_record_set" "cname-ds-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "gpii-prod.pushing7.com",
+    "gpii-prod.pushing7.com.",
   ]
 }
 
@@ -556,7 +556,7 @@ resource "google_dns_record_set" "cname-metrics-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "6fc0765023c599b0c3e26479fe9c0895.us-east-1.aws.found.io",
+    "6fc0765023c599b0c3e26479fe9c0895.us-east-1.aws.found.io.",
   ]
 }
 
@@ -580,7 +580,7 @@ resource "google_dns_record_set" "cname-preview-developerspace-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "gpii-prod.pushing7.com",
+    "gpii-prod.pushing7.com.",
   ]
 }
 
@@ -592,7 +592,7 @@ resource "google_dns_record_set" "cname-preview-ds-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "gpii-prod.pushing7.com",
+    "gpii-prod.pushing7.com.",
   ]
 }
 
@@ -604,7 +604,7 @@ resource "google_dns_record_set" "cname-preview-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "gpii-prod.pushing7.com",
+    "gpii-prod.pushing7.com.",
   ]
 }
 
@@ -616,7 +616,7 @@ resource "google_dns_record_set" "cname-preview-saa-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "gpii.pushing7.com",
+    "gpii.pushing7.com.",
   ]
 }
 
@@ -628,7 +628,7 @@ resource "google_dns_record_set" "cname-preview-ul-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "gpii-prod.pushing7.com",
+    "gpii-prod.pushing7.com.",
   ]
 }
 
@@ -640,7 +640,7 @@ resource "google_dns_record_set" "cname-saa-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "gpii-prod.pushing7.com",
+    "gpii-prod.pushing7.com.",
   ]
 }
 
@@ -652,7 +652,7 @@ resource "google_dns_record_set" "cname-staging-developerspace-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "gpii-stg.pushing7.com",
+    "gpii-stg.pushing7.com.",
   ]
 }
 
@@ -664,7 +664,7 @@ resource "google_dns_record_set" "cname-staging-ds-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "gpii-stg.pushing7.com",
+    "gpii-stg.pushing7.com.",
   ]
 }
 
@@ -676,7 +676,7 @@ resource "google_dns_record_set" "cname-staging-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "gpii-stg.pushing7.com",
+    "gpii-stg.pushing7.com.",
   ]
 }
 
@@ -688,7 +688,7 @@ resource "google_dns_record_set" "cname-staging-saa-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "gpii-stg.pushing7.com",
+    "gpii-stg.pushing7.com.",
   ]
 }
 
@@ -700,7 +700,7 @@ resource "google_dns_record_set" "cname-staging-ul-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "gpii-stg.pushing7.com",
+    "gpii-stg.pushing7.com.",
   ]
 }
 
@@ -712,7 +712,7 @@ resource "google_dns_record_set" "cname-survey-gpii-net" {
   ttl          = "300"
 
   rrdatas = [
-    "gpii-ops.github.io",
+    "gpii-ops.github.io.",
   ]
 }
 
@@ -724,7 +724,7 @@ resource "google_dns_record_set" "cname-testing-developerspace-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "gpii-prod.pushing7.com",
+    "gpii-prod.pushing7.com.",
   ]
 }
 
@@ -736,7 +736,7 @@ resource "google_dns_record_set" "cname-testing-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "gpii-prod.pushing7.com",
+    "gpii-prod.pushing7.com.",
   ]
 }
 
@@ -748,7 +748,7 @@ resource "google_dns_record_set" "cname-testing-saa-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "golf.pushing7.com",
+    "golf.pushing7.com.",
   ]
 }
 
@@ -760,7 +760,7 @@ resource "google_dns_record_set" "cname-ul-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "gpii-prod.pushing7.com",
+    "gpii-prod.pushing7.com.",
   ]
 }
 
@@ -772,7 +772,7 @@ resource "google_dns_record_set" "cname-unifiedlisting-gpii-net" {
   ttl          = "300"
 
   rrdatas = [
-    "gpii-prod.pushing7.com",
+    "gpii-prod.pushing7.com.",
   ]
 }
 
@@ -784,7 +784,7 @@ resource "google_dns_record_set" "cname-www-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "gpii-prod.pushing7.com",
+    "gpii-prod.pushing7.com.",
   ]
 }
 
