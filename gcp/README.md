@@ -380,6 +380,14 @@ This some times happens, when Stackdriver Ruby client is trying to apply alertin
 
 The most common solution for this is to [create your Stackdriver Workspace](README.md#one-time-stackdriver-workspace-setup).
 
+### Error: "app.kubernetes.io/name":"cert-manager", MatchExpressions:[]v1.LabelSelectorRequirement(nil)}: field is immutable
+
+Check running cert-manager version with `rake plain_sh['kubectl -n kube-system get deployment cert-manager -o json | jq .metadata.labels.chart']`. For everything `< v0.11.0` you'll need to follow the upgrade scenario:
+1. Run `rake plain_sh['kubectl -n gpii delete certificate\,issuer --all']` to destroy cert-manager resources in GPII namespace. This operation does not affect existing secrets with certificates and required so we can destroy cert-manager CRDs later.
+1. Run `rake destroy_module['k8s/kube-system/cert-manager']`.
+1. Run `rake` again, cert-manager should now be successfully upgraded.
+1. Run `rake plain_sh` in opened exekube shell run `for crd in $(kubectl get crd -o json | jq -r '.items[] | select(.metadata.labels.app == "cert-manager") | .spec.names.plural'); do kubectl delete crd ${crd}.certmanager.k8s.io; done` to delete any leftover CRDs from previous cert-manager versions.
+
 ## Common plumbing
 
 The environments that run in GCP need some initial resources that must be created by an administrator first. The [common part of this repository](../common) has the code and the instructions to do so.
@@ -403,7 +411,7 @@ There are number of infrastructure components that require access tokens to inte
 
 The permissions in this project are set in three different levels: at organization level, at project level and at resource level.
 
-At the organization level we have the group _cloud-admin@raisingthefloor.org_ which contains the list of users that will manage the projects of the organization and has the high level permissions to do so. Also we have a Service Account (SA) dedicated for the project creation and the billing association: _projectowner@gpii-common-prd.iam.gserviceaccount.com_. This SA only has the enough permissions to create projects, assciate them to the billing account and create the IAMs needed in such project to allow the owner to create the resources inside it. The SA _projectowner@gpii2test-common-stg.iam.gserviceaccount.com_ must also be in the organization level, as the billing account is associated to this organization and it is used to attach it to the testing organization _test1.gpii.net_.
+At the organization level we have the group _cloud-admin@raisingthefloor.org_ which contains the list of users that will manage the projects of the organization and has the high level permissions to do so. Also we have a Service Account (SA) dedicated for the project creation and the billing association: _projectowner@gpii-common-prd.iam.gserviceaccount.com_. This SA only has the enough permissions to create projects, assciate them to the billing account and create the IAMs needed in such project to allow the owner to create the resources inside it. The SA _projectowner@gpii2test-common-stg.iam.gserviceaccount.com_ must also be in the organization level, as the billing account is associated to this organization and it is used to attach it to the testing organization _test.gpii.net_.
 
 Each project has a SA which performs almost all the actions over the resources of such project. This SA only has the permissions needed to deploy GPII cloud. This SA doesn't have permissions to make changes outside the project which owns it.
 
