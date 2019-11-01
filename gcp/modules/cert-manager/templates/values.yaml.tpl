@@ -1,6 +1,9 @@
 image:
   repository: ${cert_manager_repository}
   tag: ${cert_manager_tag}
+  prometheusToSdExporter:
+    repository: ${prometheus_to_sd_repository}
+    tag: ${prometheus_to_sd_tag}
 
 webhook:
   enabled: false
