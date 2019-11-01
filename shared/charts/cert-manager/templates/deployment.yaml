@@ -117,6 +117,24 @@ spec:
           {{- end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+        - name: prometheus-to-sd
+          image: "{{ .Values.image.prometheusToSdExporter.repository }}:{{ .Values.image.prometheusToSdExporter.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /monitor
+            - --stackdriver-prefix=custom.googleapis.com
+            - --source=cert-manager:http://localhost:{{ .Values.prometheus.servicemonitor.targetPort }}?auto-whitelist-metrics=true
+            - --pod-id=$(POD_NAME)
+            - --namespace-id=$(POD_NAMESPACE)
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
     {{- with .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
