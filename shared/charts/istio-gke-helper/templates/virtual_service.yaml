@@ -1,0 +1,42 @@
+{{- range $host := .Values.egress.httpsHosts }}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: egress-{{ $host | replace "." "-" }}
+  labels:
+    app: {{ include "istio-gke-helper.name" $ }}
+    chart: {{ $.Chart.Name }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+spec:
+  gateways:
+  - istio-egressgateway
+  - mesh
+  hosts:
+  - {{ $host }}
+  tcp:
+  - match:
+    - gateways:
+      - istio-egressgateway
+      port: 443
+    route:
+    - destination:
+        host: {{ $host }}
+        port:
+          number: 443
+      weight: 100
+  tls:
+  - match:
+    - gateways:
+      - mesh
+      port: 443
+      sni_hosts:
+      - {{ $host }}
+    route:
+    - destination:
+        host: istio-egressgateway.istio-system.svc.cluster.local
+        port:
+          number: 443
+        subset: tls-{{ $host | replace "." "-" }}
+{{- end }}
