@@ -358,6 +358,14 @@ task :display_scc_findings => [:configure] do
   sh "gcloud alpha scc findings list #{ENV["ORGANIZATION_ID"]} --filter 'state = \"ACTIVE\"'"
 end
 
+# This task clean all the alerts, lbm and uptime checks
+task :clean_stackdriver_resources => [:configure, :configure_secrets, :set_secrets] do
+  ENV["PROJECT_ID"] = ENV["TF_VAR_project_id"]
+  require_relative "./stackdriver.rb"
+  destroy_resources({"alert_policies"=>[],"notification_channels"=>[]})
+  destroy_resources({"log_based_metrics"=>[]})
+end
+
 # This task forwards Kiali port
 task :kiali_ui => [:configure] do
   sh "/rakefiles/scripts/kiali_ui.sh"

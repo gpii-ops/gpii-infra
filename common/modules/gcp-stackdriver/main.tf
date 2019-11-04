@@ -7,24 +7,13 @@ provider "google" {
   credentials = "${var.serviceaccount_key}"
 }
 
-provider "google-beta" {
-  project     = "${var.project_id}"
-  credentials = "${var.serviceaccount_key}"
-}
-
-# Cloud Resource Manager system account to exclude in IAM modification LBM
-variable "crm_sa" {
-  default = "one-platform-tenant-manager@system.gserviceaccount.com"
+variable "common_environments" {
+  default = ["prd", "stg"]
 }
 
 variable "project_id" {}
-variable "organization_id" {}
 variable "notification_email" {}
-variable "common_project_id" {}
-variable "domain_name" {}
 variable "serviceaccount_key" {}
-variable "env" {}
-
 variable "secret_slack_auth_token" {}
 
 resource "null_resource" "destroy_old_stackdriver_resources" {

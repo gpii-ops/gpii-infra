@@ -1,7 +1,7 @@
 # ↓ Module metadata
 terragrunt = {
   terraform {
-    source = "/project/modules//gcp-stackdriver-monitoring"
+    source = "/project/modules//gcp-stackdriver"
   }
 
   dependencies {

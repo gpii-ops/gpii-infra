@@ -1,4 +1,0 @@
-{
-  "name": "stackdriver.alertpolicy.modify",
-  "filter": "protoPayload.serviceName=\"monitoring.googleapis.com\" AND (protoPayload.methodName:\"AlertPolicyService.DeleteAlertPolicy\" OR protoPayload.methodName:\"AlertPolicyService.UpdateAlertPolicy\")"
-}
