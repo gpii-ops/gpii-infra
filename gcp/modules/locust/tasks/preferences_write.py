@@ -3,6 +3,7 @@ import random
 import os
 import json
 import time
+import string
 
 import on_failure
 events.request_failure += on_failure
@@ -10,7 +11,10 @@ events.request_failure += on_failure
 def generate_random_username():
     username_bases = ["rando", "chancey", "extra"]
     username_prefix = random.choice(username_bases)
-    username_suffix = str(random.randrange(0,9999,1)).rjust(4,'0')
+    username_suffix = "-"
+    for x in range(0,10):
+        username_suffix += random.choice(string.ascii_letters)
+
     return username_prefix + username_suffix
 
 def json_deep_eq(expected, actual):
