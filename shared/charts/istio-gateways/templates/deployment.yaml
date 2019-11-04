@@ -1,0 +1,244 @@
+{{- range $key, $spec := .Values.gateways }}
+{{- if ne $key "enabled" }}
+{{- if $spec.enabled }}
+
+{{- $labels := merge (dict "release" $.Release.Name "chart" (include "gateway.chart" $) "heritage" $.Release.Service) $spec.labels }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $key }}
+  namespace: {{ $spec.namespace | default $.Release.Namespace }}
+  labels:
+{{ $labels | toYaml | indent 4 }}
+spec:
+{{- if not $spec.autoscaleEnabled }}
+{{- if $spec.replicaCount }}
+  replicas: {{ $spec.replicaCount }}
+{{- else }}
+  replicas: 1
+{{- end }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- range $key, $val := $spec.labels }}
+      {{ $key }}: {{ $val }}
+      {{- end }}
+  strategy:
+    rollingUpdate:
+      maxSurge: {{ $spec.rollingMaxSurge }}
+      maxUnavailable: {{ $spec.rollingMaxUnavailable }}
+  template:
+    metadata:
+      labels:
+{{ $labels | toYaml | indent 8 }}
+      annotations:
+        sidecar.istio.io/inject: "false"
+{{- if $spec.podAnnotations }}
+{{ toYaml $spec.podAnnotations | indent 8 }}
+{{ end }}
+    spec:
+      serviceAccountName: {{ $key }}-service-account
+      containers:
+        - name: istio-proxy
+{{- if contains "/" $.Values.proxy.image }}
+          image: "{{ $.Values.proxy.image }}"
+{{- else }}
+          image: "{{ $.Values.hub }}/{{ $.Values.proxy.image }}:{{ $.Values.tag }}"
+{{- end }}
+          imagePullPolicy: {{ $.Values.imagePullPolicy }}
+          ports:
+            {{- range $key, $val := $spec.ports }}
+            - containerPort: {{ $val.port }}
+            {{- end }}
+            - containerPort: 15090
+              protocol: TCP
+              name: http-envoy-prom
+          args:
+          - proxy
+          - router
+          - --domain
+          - $(POD_NAMESPACE).svc.{{ $.Values.proxy.clusterDomain }}
+        {{- if $.Values.proxy.logLevel }}
+          - --proxyLogLevel={{ $.Values.proxy.logLevel }}
+        {{- end}}
+        {{- if $.Values.proxy.componentLogLevel }}
+          - --proxyComponentLogLevel={{ $.Values.proxy.componentLogLevel }}
+        {{- end}}
+        {{- if $.Values.logging.level }}
+          - --log_output_level={{ $.Values.logging.level }}
+        {{- end}}
+          - --drainDuration
+          - '45s' #drailnDuration
+          - --parentShutdownDuration
+          - '1m0s' #parentShutdownDuration
+          - --connectTimeout
+          - '10s' #connectTimeout
+          - --serviceCluster
+          - {{ $key }}
+        {{- if eq $.Values.proxy.tracer "zipkin" }}
+          - --zipkinAddress
+          {{- if $.Values.tracer.zipkin.address }}
+          - {{ $.Values.tracer.zipkin.address }}
+          {{- else if $.Values.istioNamespace }}
+          - zipkin.{{ $.Values.istioNamespace }}:9411
+          {{- else }}
+          - zipkin:9411
+          {{- end }}
+        {{- end }}
+        {{- if $.Values.proxy.envoyMetricsService.enabled }}
+          - --envoyMetricsService
+          {{- with  $.Values.proxy.envoyMetricsService }}
+          - '{"address":"{{ .host }}:{{.port }}"{{ if .tlsSettings }},"tlsSettings":{{ .tlsSettings | toJson }}{{- end }}{{ if .tcpKeepalive }},"tcpKeepalive":{{ .tcpKeepalive | toJson }}{{- end }}}'
+          {{- end }}
+        {{- end}}
+        {{- if $.Values.proxy.envoyAccessLogService.enabled }}
+          - --envoyAccessLogService
+          {{- with  $.Values.proxy.envoyAccessLogService }}
+          - '{"address":"{{ .host }}:{{.port }}"{{ if .tlsSettings }},"tlsSettings":{{ .tlsSettings | toJson }}{{- end }}{{ if .tcpKeepalive }},"tcpKeepalive":{{ .tcpKeepalive | toJson }}{{- end }}}'
+          {{- end }}
+        {{- end }}
+          - --proxyAdminPort
+          - "15000"
+          - --statusPort
+          - "15020"
+        {{- if $.Values.controlPlaneSecurityEnabled }}
+          - --controlPlaneAuthPolicy
+          - MUTUAL_TLS
+          - --discoveryAddress
+          {{- if $.Values.istioNamespace }}
+          - istio-pilot.{{ $.Values.istioNamespace }}:15011
+          {{- else }}
+          - istio-pilot:15011
+          {{- end }}
+        {{- else }}
+          - --controlPlaneAuthPolicy
+          - NONE
+          - --discoveryAddress
+          {{- if $.Values.istioNamespace }}
+          - istio-pilot.{{ $.Values.istioNamespace }}:15010
+          {{- else }}
+          - istio-pilot:15010
+          {{- end }}
+          {{- if $spec.applicationPorts }}
+          - --applicationPorts
+          - "{{ $spec.applicationPorts }}"
+          {{- end }}
+        {{- end }}
+        {{- if $.Values.trustDomain }}
+          - --trust-domain={{ $.Values.trustDomain }}
+        {{- end }}
+          readinessProbe:
+            failureThreshold: 30
+            httpGet:
+              path: /healthz/ready
+              port: 15020
+              scheme: HTTP
+            initialDelaySeconds: 1
+            periodSeconds: 2
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+{{- if $spec.resources }}
+{{ toYaml $spec.resources | indent 12 }}
+{{- end }}
+          env:
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: spec.nodeName
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+          - name: INSTANCE_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+          - name: HOST_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.hostIP
+          - name: SERVICE_ACCOUNT
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.serviceAccountName
+          - name: ISTIO_META_POD_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+          - name: ISTIO_META_CONFIG_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: ISTIO_METAJSON_LABELS
+            value: |
+              {{ $labels | toJson}}
+          - name: ISTIO_META_WORKLOAD_NAME
+            value: {{ $key }}
+          - name: ISTIO_META_OWNER
+            value: kubernetes://api/apps/v1/namespaces/{{ $spec.namespace | default $.Release.Namespace }}/deployments/{{ $key }}
+          {{- if eq $.Values.proxy.tracer "stackdriver" }}
+          - name: STACKDRIVER_TRACING_ENABLED
+            value: "true"
+          - name: STACKDRIVER_TRACING_DEBUG
+            value: "{{ $.Values.tracer.stackdriver.debug }}"
+          - name: STACKDRIVER_TRACING_MAX_NUMBER_OF_ANNOTATIONS
+            value: "{{ $.Values.tracer.stackdriver.maxNumberOfAnnotations }}"
+          - name: STACKDRIVER_TRACING_MAX_NUMBER_OF_ATTRIBUTES
+            value: "{{ $.Values.tracer.stackdriver.maxNumberOfAttributes }}"
+          - name: STACKDRIVER_TRACING_MAX_NUMBER_OF_MESSAGE_EVENTS
+            value: "{{ $.Values.tracer.stackdriver.maxNumberOfMessageEvents }}"
+          {{- end }}
+          {{- if $spec.env }}
+          {{- range $key, $val := $spec.env }}
+          - name: {{ $key }}
+            value: {{ $val }}
+          {{- end }}
+          {{- end }}
+          volumeMounts:
+          - name: istio-certs
+            mountPath: /etc/certs
+            readOnly: true
+          {{- range $spec.secretVolumes }}
+          - name: {{ .name }}
+            mountPath: {{ .mountPath | quote }}
+            readOnly: true
+          {{- end }}
+      volumes:
+      - name: istio-certs
+        secret:
+          secretName: istio.{{ $key }}-service-account
+          optional: true
+      {{- range $spec.secretVolumes }}
+      - name: {{ .name }}
+        secret:
+          secretName: {{ .secretName | quote }}
+          optional: true
+      {{- end }}
+      {{- range $spec.configVolumes }}
+      - name: {{ .name }}
+        configMap:
+          name: {{ .configMapName | quote }}
+          optional: true
+      {{- end }}
+      affinity:
+      {{- include "gatewaynodeaffinity" (dict "root" $ "nodeSelector" $spec.nodeSelector) | indent 6 }}
+      {{- include "gatewaypodAntiAffinity" (dict "podAntiAffinityLabelSelector" $spec.podAntiAffinityLabelSelector "podAntiAffinityTermLabelSelector" $spec.podAntiAffinityTermLabelSelector) | indent 6 }}
+      {{- if $spec.tolerations }}
+      tolerations:
+{{ toYaml $spec.tolerations | indent 6 }}
+      {{- end }}
+---
+{{- end }}
+{{- end }}
+{{- end }}
