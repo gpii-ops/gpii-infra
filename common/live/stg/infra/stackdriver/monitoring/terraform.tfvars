@@ -4,12 +4,6 @@ terragrunt = {
     source = "/project/modules//gcp-stackdriver"
   }
 
-  dependencies {
-    paths = [
-      "../lbm"
-    ]
-  }
-
   include = {
     path = "${find_in_parent_folders()}"
   }
