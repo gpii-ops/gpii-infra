@@ -89,7 +89,7 @@ common-stg-test-gcp-dev:
     # These variables are duplicated in common/live/stg/Rakefile
     ORGANIZATION_ID: "327626828918"
     TF_VAR_organization_name: "gpii2test"
-    TF_VAR_organization_domain: "test1.gpii.net"
+    TF_VAR_organization_domain: "test.gpii.net"
     TF_VAR_common_project_id: "gpii2test-common-stg"
     # We override default infra region for dev environments
     # due to GCP resource exhaustion issues:
