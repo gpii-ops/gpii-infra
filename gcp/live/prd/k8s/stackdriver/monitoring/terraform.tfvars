@@ -7,8 +7,7 @@ terragrunt = {
   dependencies {
     paths = [
       "../../gpii/preferences",
-      "../../gpii/flowmanager",
-      "../lbm"
+      "../../gpii/flowmanager"
     ]
   }
 
