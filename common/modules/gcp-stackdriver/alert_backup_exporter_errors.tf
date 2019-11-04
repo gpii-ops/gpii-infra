@@ -26,7 +26,6 @@ resource "google_monitoring_alert_policy" "backup_exporter_errors" {
 
   notification_channels = [
     "${google_monitoring_notification_channel.email.name}",
-    "${element(google_monitoring_notification_channel.alerts_slack.*.name, count.index)}",
   ]
 
   user_labels = {}

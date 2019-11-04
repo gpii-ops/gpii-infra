@@ -14,7 +14,6 @@ variable "common_environments" {
 variable "project_id" {}
 variable "notification_email" {}
 variable "serviceaccount_key" {}
-variable "secret_slack_auth_token" {}
 
 resource "null_resource" "destroy_old_stackdriver_resources" {
   provisioner "local-exec" {
