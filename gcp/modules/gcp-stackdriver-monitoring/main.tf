@@ -12,6 +12,7 @@ provider "google-beta" {
   credentials = "${var.serviceaccount_key}"
 }
 
+# Cloud Resource Manager system account to exclude in IAM modification LBM
 variable "crm_sa" {
   default = "one-platform-tenant-manager@system.gserviceaccount.com"
 }
