@@ -131,5 +131,5 @@ kiali:
     tag: v1.5.0
   generated:
     repository: gcr.io/gpii-common-prd/quay.io__kiali__kiali
-    sha: sha256:e073c23ab674b65e366f61a19a9722806ca2a7d6ddac5845fae78a7013adfba4
+    sha: sha256:8304fc943df04168c68f0e6098b968337c36229c6dc9341286a27179d03b2767
     tag: v1.5.0
