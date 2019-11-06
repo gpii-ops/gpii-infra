@@ -93,7 +93,8 @@ task :display_cluster_info => [:set_vars] do
   puts "Flowmanager endpoint:"
   puts "  curl -k https://flowmanager.#{ENV["TF_VAR_domain_name"] }"
   puts
-  puts "Run `rake test_preferences` to execute Locust tests for Preferences."
+  puts "Run `rake test_preferences_read` to execute Locust read tests for Preferences."
+  puts "Run `rake test_preferences_write` to execute Locust write tests for Preferences."
   puts "Run `rake test_flowmanager` to execute Locust tests for Flowmanager."
   puts
   puts "Run `rake destroy` to delete all the expensive resources created by the deployment."

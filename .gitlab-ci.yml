@@ -233,7 +233,7 @@ gcp-stg:
     - rake rotate_tfstate_key
     - rake rotate_secrets_key
     - rake
-    - rake test_preferences
+    - rake test_preferences_read
     - rake test_flowmanager
   after_script:
     # Clean up even if something failed.
@@ -302,7 +302,7 @@ gcp-prd:
     - rake rotate_tfstate_key RAKE_REALLY_DESTROY_IN_PRD=true
     - rake rotate_secrets_key RAKE_REALLY_DESTROY_IN_PRD=true
     - rake
-    - rake test_preferences RAKE_REALLY_DESTROY_IN_PRD=true
+    - rake test_preferences_read RAKE_REALLY_DESTROY_IN_PRD=true
     - rake test_flowmanager RAKE_REALLY_DESTROY_IN_PRD=true
   after_script:
     # Clean up even if something failed.
