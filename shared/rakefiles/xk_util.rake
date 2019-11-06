@@ -371,4 +371,10 @@ task :kiali_ui => [:configure] do
   sh "/rakefiles/scripts/kiali_ui.sh"
 end
 
+# This task restores CouchDB disks from snapshots
+task :couchdb_backup_restore, [:snapshots] => [:configure, :configure_secrets, :set_secrets] do |taskname, args|
+  ENV["COUCHDB_SOURCE_SNAPSHOTS"] = args[:snapshots] unless args[:snapshots].nil?
+  sh "/rakefiles/scripts/couchdb_backup_restore.sh"
+end
+
 # vim: et ts=2 sw=2:
