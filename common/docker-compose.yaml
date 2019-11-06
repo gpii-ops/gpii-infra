@@ -2,7 +2,7 @@ version: "3.4"
 
 services:
   xk:
-    image: gpii/exekube:0.9.7-google_gpii.0
+    image: gpii/exekube:0.9.8-google_gpii.0
     working_dir: /project
     environment:
       USER: ${USER:?err}
