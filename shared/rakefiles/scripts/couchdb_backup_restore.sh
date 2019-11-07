@@ -31,6 +31,13 @@ REQUIRED_BINARIES=${REQUIRED_BINARIES:='kubectl gcloud jq awk'}
 MAX_RETRIES=${MAX_RETRIES:='30'}
 SLEEP=${SLEEP:='10'}
 PRINT_PREFIX=${PRINT_PREFIX="${THIS_SCRIPT}: "}
+PAUSE_BEFORE_SCALING_UP=${PAUSE_BEFORE_SCALING_UP:='true'}
+ENV=${ENV:='unknown'}
+
+# If we're in a known env, we can skip the pause
+if [ "${ENV}" = 'dev' ] || [ "${ENV}" = 'stg' ]; then
+  PAUSE_BEFORE_SCALING_UP='false'
+fi
 
 # Check if we have colors available, it looks good
 check_colors(){
@@ -235,8 +242,8 @@ kubectl wait pods -l="${COUCHDB_POD_FILTER}" -n "${COUCHDB_NAMESPACE}" --for=del
 print_header "Scaling down k8s-snapshots"
 scale_and_wait deployment "${K8S_SNAPSHOTS_DEPLOYMENT_NAME}" "${K8S_SNAPSHOTS_NAMESPACE}" 0
 
-print_header "Restoring disks"
 # Restore individual CouchDB disks
+print_header "Restoring disks"
 restore_disks
 
 # Scale CouchDB back
@@ -246,6 +253,14 @@ scale_and_wait statefulset "${COUCHDB_STATEFULSET_NAME}" "${COUCHDB_NAMESPACE}" 
 # Check CouchDB Health
 print_header "Checking CouchDB health"
 check_couchdb_health
+
+# Give a user chance to make additional checks
+if [ "${PAUSE_BEFORE_SCALING_UP}" != 'false' ]; then
+  print ''
+  print 'If you want to make additional checks of CouchDB before scaling the services up,'
+  print 'now is the time (press ENTER to continue).'
+  read -r
+fi
 
 # Scale services back
 print_header "Scaling up services"
