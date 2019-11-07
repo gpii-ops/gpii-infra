@@ -562,8 +562,8 @@ another point in the past. This operation is disruptive and requires bringing
 entire CouchDB cluster down.
 
 Ops team performs backup restoration test on `gpii-gcp-stg` cluster monthly, to
-make sure that automated backups are being created as expected and can be used
-to restore functional and consistent DB.
+make sure that automated backups are being created as expected, can be used to
+restore functional and consistent DB and that this documentation is correct.
 
 This operation requires admin permissions on the project, use `rake
 grant_project_admin`.
@@ -581,6 +581,9 @@ order, starting from node `0`).
 ```
 rake 'couchdb_backup_restore[snapshot-0 snapshot-1 snapshot-2]'
 ```
+
+To make sure that all systems are functional, run smoke tests using the `rake
+test_*` tasks.
 
 ### Manual processes: Users' data and client credentials
 
