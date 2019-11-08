@@ -871,11 +871,11 @@ resource "google_dns_record_set" "mx-gpii-net" {
   ttl          = 3600
 
   rrdatas = [
-    "1	ASPMX.L.GOOGLE.COM.",
-    "5	ALT1.ASPMX.L.GOOGLE.COM.",
-    "5	ALT2.ASPMX.L.GOOGLE.COM.",
-    "10	ALT3.ASPMX.L.GOOGLE.COM.",
-    "10	ALT4.ASPMX.L.GOOGLE.COM.",
+    "1 aspmx.l.google.com.",
+    "5 alt1.aspmx.l.google.com.",
+    "5 alt2.aspmx.l.google.com.",
+    "10 alt3.aspmx.l.google.com.",
+    "10 alt4.aspmx.l.google.com.",
   ]
 }
 
