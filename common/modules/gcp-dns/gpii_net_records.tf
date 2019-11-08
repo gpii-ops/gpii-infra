@@ -887,9 +887,9 @@ resource "google_dns_record_set" "mx-lists-gpii-net" {
   ttl          = 3600
 
   rrdatas = [
-    "10 lists-gpii-net.p10.spamhero.com",
-    "20 lists-gpii-net.p20.spamhero.net",
-    "30 lists-gpii-net.p30.spamhero.net",
-    "40 lists-gpii-net.p40.spamhero.net",
+    "10 lists-gpii-net.p10.spamhero.com.",
+    "20 lists-gpii-net.p20.spamhero.net.",
+    "30 lists-gpii-net.p30.spamhero.net.",
+    "40 lists-gpii-net.p40.spamhero.net.",
   ]
 }
