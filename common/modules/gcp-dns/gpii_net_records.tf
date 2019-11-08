@@ -862,3 +862,34 @@ resource "google_dns_record_set" "txt-test-gpii-net" {
     "\"google-site-verification=t52ERdrOu7-_ZRE58am48DhsOIQhpx4MwCGCHl7_LeI\"",
   ]
 }
+
+resource "google_dns_record_set" "mx" {
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
+  name         = "gpii.net."
+  type         = "MX"
+  ttl          = 3600
+
+  rrdatas = [
+    "1	ASPMX.L.GOOGLE.COM.",
+    "5	ALT1.ASPMX.L.GOOGLE.COM.",
+    "5	ALT2.ASPMX.L.GOOGLE.COM.",
+    "10	ALT3.ASPMX.L.GOOGLE.COM.",
+    "10	ALT4.ASPMX.L.GOOGLE.COM.",
+  ]
+}
+
+resource "google_dns_record_set" "mx" {
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
+  name         = "lists.gpii.net."
+  type         = "MX"
+  ttl          = 3600
+
+  rrdatas = [
+    "10 lists-gpii-net.p10.spamhero.com",
+    "20 lists-gpii-net.p20.spamhero.net",
+    "30 lists-gpii-net.p30.spamhero.net",
+    "40 lists-gpii-net.p40.spamhero.net",
+  ]
+}
