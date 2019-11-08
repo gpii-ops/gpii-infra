@@ -863,7 +863,7 @@ resource "google_dns_record_set" "txt-test-gpii-net" {
   ]
 }
 
-resource "google_dns_record_set" "mx" {
+resource "google_dns_record_set" "mx-gpii-net" {
   count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
   managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "gpii.net."
@@ -879,7 +879,7 @@ resource "google_dns_record_set" "mx" {
   ]
 }
 
-resource "google_dns_record_set" "mx" {
+resource "google_dns_record_set" "mx-lists-gpii-net" {
   count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
   managed_zone = "${google_dns_managed_zone.root_zone.name}"
   name         = "lists.gpii.net."
