@@ -366,4 +366,8 @@ task :kiali_ui => [:set_vars] do
   sh "docker-compose run --rm -p 20001:20001 xk rake kiali_ui"
 end
 
+desc "CouchDB - restore from backup"
+task :couchdb_backup_restore, [:snapshots] => [:set_vars] do |taskname, args|
+  sh "#{@exekube_cmd} rake couchdb_backup_restore['#{args[:snapshots]}']"
+end
 # vim: et ts=2 sw=2:
