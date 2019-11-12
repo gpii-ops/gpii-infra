@@ -29,7 +29,7 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_errors" {
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
   user_labels           = {}
-  enabled               = "true"
+  enabled               = "false"
 
   depends_on = ["google_logging_metric.k8s_snapshots_error"]
 }
