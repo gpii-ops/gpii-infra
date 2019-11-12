@@ -23,3 +23,14 @@ resources:
   limits:
     cpu: ${limits_cpu}
     memory: ${limits_memory}
+
+sslCertCheck:
+  host: flowmanager.${domain_name}
+  image:
+    repository: ${ssl_cert_check_repository}
+    tag: ${ssl_cert_check_tag}
+
+prometheusToSdExporter:
+  image:
+    repository: ${prometheus_to_sd_repository}
+    tag: ${prometheus_to_sd_tag}

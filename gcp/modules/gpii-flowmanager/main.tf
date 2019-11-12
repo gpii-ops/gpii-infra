@@ -15,6 +15,12 @@ variable "domain_name" {}
 variable "flowmanager_repository" {}
 variable "flowmanager_checksum" {}
 
+variable "prometheus_to_sd_repository" {}
+variable "prometheus_to_sd_tag" {}
+
+variable "ssl_cert_check_repository" {}
+variable "ssl_cert_check_tag" {}
+
 variable "replica_count" {}
 variable "requests_cpu" {}
 variable "requests_memory" {}
@@ -40,19 +46,23 @@ data "template_file" "flowmanager_values" {
   template = "${file("${path.module}/templates/values.yaml.tpl")}"
 
   vars {
-    domain_name            = "${var.domain_name}"
-    flowmanager_repository = "${var.flowmanager_repository}"
-    flowmanager_checksum   = "${var.flowmanager_checksum}"
-    couchdb_admin_username = "${var.secret_couchdb_admin_username}"
-    couchdb_admin_password = "${var.secret_couchdb_admin_password}"
-    replica_count          = "${var.replica_count}"
-    requests_cpu           = "${var.requests_cpu}"
-    requests_memory        = "${var.requests_memory}"
-    limits_cpu             = "${var.limits_cpu}"
-    limits_memory          = "${var.limits_memory}"
-    project_id             = "${var.project_id}"
-    acme_server            = "${var.env == "prd" || var.env == "stg" ? "https://acme-v02.api.letsencrypt.org/directory" : "https://acme-staging-v02.api.letsencrypt.org/directory"}"
-    acme_email             = "${local.acme_email}"
+    domain_name                 = "${var.domain_name}"
+    flowmanager_repository      = "${var.flowmanager_repository}"
+    flowmanager_checksum        = "${var.flowmanager_checksum}"
+    prometheus_to_sd_repository = "${var.prometheus_to_sd_repository}"
+    prometheus_to_sd_tag        = "${var.prometheus_to_sd_tag}"
+    ssl_cert_check_repository   = "${var.ssl_cert_check_repository}"
+    ssl_cert_check_tag          = "${var.ssl_cert_check_tag}"
+    couchdb_admin_username      = "${var.secret_couchdb_admin_username}"
+    couchdb_admin_password      = "${var.secret_couchdb_admin_password}"
+    replica_count               = "${var.replica_count}"
+    requests_cpu                = "${var.requests_cpu}"
+    requests_memory             = "${var.requests_memory}"
+    limits_cpu                  = "${var.limits_cpu}"
+    limits_memory               = "${var.limits_memory}"
+    project_id                  = "${var.project_id}"
+    acme_server                 = "${var.env == "prd" || var.env == "stg" ? "https://acme-v02.api.letsencrypt.org/directory" : "https://acme-staging-v02.api.letsencrypt.org/directory"}"
+    acme_email                  = "${local.acme_email}"
   }
 }
 
