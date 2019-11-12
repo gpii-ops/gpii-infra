@@ -1,0 +1,29 @@
+{{- if .Values.egress.httpsHosts }}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: istio-egressgateway
+  labels:
+    app: {{ include "istio-gke-helper.name" $ }}
+    chart: {{ $.Chart.Name }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+spec:
+  selector:
+    istio: egressgateway
+  servers:
+  - hosts:
+    {{- range $host := .Values.egress.httpsHosts }}
+    - {{ $host }}
+    {{- end }}
+    port:
+      name: tls-https
+      number: 443
+      protocol: TLS
+    tls:
+      caCertificates: /etc/certs/root-cert.pem
+      mode: MUTUAL
+      privateKey: /etc/certs/key.pem
+      serverCertificate: /etc/certs/cert-chain.pem
+{{- end }}

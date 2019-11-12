@@ -17,3 +17,8 @@ components:
     istio: mixer
 
 maxUnavailable: 1
+
+egress:
+  httpsHosts:
+    - cloudtrace.googleapis.com
+    - monitoring.googleapis.com

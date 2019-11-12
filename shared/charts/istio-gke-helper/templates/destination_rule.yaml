@@ -1,0 +1,25 @@
+{{- range $host := .Values.egress.httpsHosts }}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: egress-{{ $host | replace "." "-" }}
+  labels:
+    app: {{ include "istio-gke-helper.name" $ }}
+    chart: {{ $.Chart.Name }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+spec:
+  host: istio-egressgateway.istio-system.svc.cluster.local
+  subsets:
+  - name: tls-{{ $host | replace "." "-" }}
+    trafficPolicy:
+      loadBalancer:
+        simple: ROUND_ROBIN
+      portLevelSettings:
+      - port:
+          number: 443
+        tls:
+          mode: ISTIO_MUTUAL
+          sni: {{ $host }}
+{{- end }}
