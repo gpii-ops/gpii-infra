@@ -11,7 +11,7 @@ cert_manager:
     tag: v0.11.0
   generated:
     repository: gcr.io/gpii-common-prd/quay.io__jetstack__cert-manager-controller
-    sha: sha256:f7a1add1958ec48d96a417336fb4c62a80c3a0f71906e1b1e5b719b6f2d2d4dc
+    sha: sha256:cfca8506a0b8685472950f6558983f2f4ac112d4669bed29b215a96d32136300
     tag: v0.11.0
 certmerge_operator:
   upstream:
