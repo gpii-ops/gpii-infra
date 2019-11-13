@@ -66,8 +66,8 @@ sslCertCheck:
   ## Renewal window for Let's Encrypt certificates starts 30 days before expiration,
   ## So if it is not renewed 29 days before, there is a high chance that something went wrong
   renewalWindow: 29
-  # Default run schedule is daily at 8am
-  cronJobSchedule: "0 8 * * *"
+  # Default run schedule is twice a day at 0:00 and 12:00
+  cronJobSchedule: "0 */12 * * *"
   image:
     repository: gpii/ssl-cert-check
     tag: 0.0.1-gpii.0
