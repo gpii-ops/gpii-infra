@@ -16,7 +16,7 @@ spec:
   startingDeadlineSeconds: 200
   jobTemplate:
     spec:
-      activeDeadlineSeconds: 100
+      activeDeadlineSeconds: 45
       template:
         metadata:
           labels:
@@ -32,6 +32,10 @@ spec:
           containers:
           - name: ssl-cert-check
             image: "{{ .Values.sslCertCheck.image.repository }}:{{ .Values.sslCertCheck.image.tag }}"
+            command:
+              - /bin/sh
+              - -c
+              - timeout 30 /entrypoint.sh || true
             env:
               - name: TARGET_HOST
                 value: "{{ .Values.sslCertCheck.host }}"
@@ -50,6 +54,8 @@ spec:
               - /monitor
               - --stackdriver-prefix=custom.googleapis.com
               - --source=ssl-cert-check:http://localhost:{{ .Values.prometheusToSdExporter.port }}?auto-whitelist-metrics=true
+              - --scrape-interval=10s
+              - --export-interval=10s
               - --pod-id=$(POD_NAME)
               - --namespace-id=$(POD_NAMESPACE)
             env:
@@ -61,5 +67,31 @@ spec:
                 valueFrom:
                   fieldRef:
                     fieldPath: metadata.namespace
+          - name: istio-proxy-manager
+            image: "{{ .Values.sslCertCheck.image.repository }}:{{ .Values.sslCertCheck.image.tag }}"
+            command:
+              - /bin/sh
+              - -c
+              - |
+                PROCESS="timeout";
+                while ! pgrep "${PROCESS}" > /dev/null;
+                do
+                  echo 'Waiting for process to start...';
+                  sleep 2;
+                done;
+                echo 'Process started.';
+                while pgrep "${PROCESS}" > /dev/null;
+                do
+                  echo 'Waiting for process to finish...';
+                  sleep 2;
+                done;
+                echo 'Process finished.';
+                while pgrep pilot-agent > /dev/null;
+                do
+                  echo 'Sending TERM to pilot-agent...';
+                  pkill pilot-agent;
+                  sleep 2;
+                done;
+                echo 'pilot-agent terminated!';
           restartPolicy: OnFailure
 {{- end }}
