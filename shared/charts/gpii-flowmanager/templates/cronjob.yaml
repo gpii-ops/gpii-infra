@@ -14,9 +14,9 @@ spec:
   failedJobsHistoryLimit: 1
   concurrencyPolicy: Replace
   startingDeadlineSeconds: 200
-  activeDeadlineSeconds: 45
   jobTemplate:
     spec:
+      activeDeadlineSeconds: 100
       template:
         metadata:
           labels:
