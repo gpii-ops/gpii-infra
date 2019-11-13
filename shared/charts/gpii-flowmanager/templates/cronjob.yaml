@@ -2,7 +2,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: {{ template "flowmanager.name" . }}
+  name: {{ template "flowmanager.name" . }}-ssl-check
   labels:
     app: {{ template "flowmanager.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
