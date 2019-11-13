@@ -37,7 +37,7 @@ resource "google_monitoring_alert_policy" "ssl_cert_check_absense" {
 
   conditions {
     condition_absent {
-      filter          = "metric.type=\"custom.googleapis.com/ssl-cert-check/certificate_days_left\" resource.type=\"gke_container\""
+      filter   = "metric.type=\"custom.googleapis.com/ssl-cert-check/certificate_days_left\" resource.type=\"gke_container\""
       duration = "86400s"
 
       aggregations {
@@ -45,7 +45,7 @@ resource "google_monitoring_alert_policy" "ssl_cert_check_absense" {
         per_series_aligner   = "ALIGN_MEAN"
         cross_series_reducer = "REDUCE_MIN"
 
-        group_by_fields      = [
+        group_by_fields = [
           "metric.labels.name",
         ]
       }
