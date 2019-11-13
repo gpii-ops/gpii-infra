@@ -37,7 +37,7 @@ resource "google_monitoring_alert_policy" "ssl_cert_check_absense" {
 
   conditions {
     condition_absent {
-      filter          = "metric.type=\"custom.googleapis.com/ssl-cert-check/certificate_days_left\" AND resource.type=\"gke_container\" AND metric.labels.name=\"flowmanager.${var.domain_name}:443\""
+      filter   = "metric.type=\"custom.googleapis.com/ssl-cert-check/certificate_days_left\" AND resource.type=\"gke_container\" AND metric.labels.name=\"flowmanager.${var.domain_name}:443\""
       duration = "86400s"
 
       aggregations {
