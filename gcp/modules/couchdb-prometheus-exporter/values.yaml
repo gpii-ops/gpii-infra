@@ -8,6 +8,8 @@ couchdb:
 image:
   repository: ${couchdb_prometheus_exporter_repository}
   tag: ${couchdb_prometheus_exporter_tag}
-  prometheusToSdExporter:
+
+prometheusToSdExporter:
+  image:
     repository: ${prometheus_to_sd_repository}
     tag: ${prometheus_to_sd_tag}
