@@ -66,24 +66,24 @@ resource "kubernetes_network_policy" "allow-promsd-to-istio" {
   }
 
   spec {
-    pod_selector = {}
+    pod_selector {}
 
-    ingress = {
-      from = {
-        namespace_selector = {
-          match_labels {
+    ingress {
+      from {
+        namespace_selector {
+          match_labels = {
             k8s-app = "istio"
           }
         }
 
-        pod_selector = {
-          match_labels {
+        pod_selector {
+          match_labels = {
             app = "promsd"
           }
         }
       }
 
-      ports = {
+      ports {
         port     = "http-envoy-prom"
         protocol = "TCP"
       }
