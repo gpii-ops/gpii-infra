@@ -49,7 +49,7 @@ terraform-fmt-check:
   tags:
     - common
   script:
-    - docker run --rm -v "$(pwd):/data" -w /data gpii/exekube:0.9.6-google_gpii.0 -- terraform fmt --check=true
+    - docker run --rm -v "$(pwd):/data" -w /data gpii/exekube:0.9.8-google_gpii.0 -- terraform fmt --check=true
   only:
     - master@gpii-ops/gpii-infra
 
@@ -58,7 +58,7 @@ gcp-unit-tests:
   tags:
     - gcp
   script:
-    - docker run --rm -v "$(pwd):/data" -w /data/shared/rakefiles/tests gpii/exekube:0.9.6-google_gpii.0 -- sh -c "bundle install --with test && rake"
+    - docker run --rm -v "$(pwd):/data" -w /data/shared/rakefiles/tests gpii/exekube:0.9.8-google_gpii.0 -- sh -c "bundle install --with test && rake"
   only:
     - master@gpii-ops/gpii-infra
 
@@ -89,7 +89,7 @@ common-stg-test-gcp-dev:
     # These variables are duplicated in common/live/stg/Rakefile
     ORGANIZATION_ID: "327626828918"
     TF_VAR_organization_name: "gpii2test"
-    TF_VAR_organization_domain: "test1.gpii.net"
+    TF_VAR_organization_domain: "test.gpii.net"
     TF_VAR_common_project_id: "gpii2test-common-stg"
     # We override default infra region for dev environments
     # due to GCP resource exhaustion issues:
@@ -233,7 +233,7 @@ gcp-stg:
     - rake rotate_tfstate_key
     - rake rotate_secrets_key
     - rake
-    - rake test_preferences
+    - rake test_preferences_read
     - rake test_flowmanager
   after_script:
     # Clean up even if something failed.
@@ -302,7 +302,7 @@ gcp-prd:
     - rake rotate_tfstate_key RAKE_REALLY_DESTROY_IN_PRD=true
     - rake rotate_secrets_key RAKE_REALLY_DESTROY_IN_PRD=true
     - rake
-    - rake test_preferences RAKE_REALLY_DESTROY_IN_PRD=true
+    - rake test_preferences_read RAKE_REALLY_DESTROY_IN_PRD=true
     - rake test_flowmanager RAKE_REALLY_DESTROY_IN_PRD=true
   after_script:
     # Clean up even if something failed.

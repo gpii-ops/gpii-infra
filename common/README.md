@@ -30,7 +30,7 @@ The DNS zones are:
 - dev.gcp.gpii.net
 - ${user}.dev.gcp.gpii.net
 
-The zones "gpii.net", "gcp.gpii.net", "test1.gpii.net" and "gcp.test1.gpii.net" need to be created manually before this code creates the rest of the resources.
+The zones "gpii.net", "gcp.gpii.net", "test.gpii.net" and "gcp.test.gpii.net" need to be created manually before this code creates the rest of the resources.
 
 This code will use the following zones stored in the following projects:
 
@@ -38,8 +38,8 @@ This code will use the following zones stored in the following projects:
 * id: gcp-gpii-net
 * project: gpii-common-prd
 
-* DNS: "gcp.test1.gpii.net"
-* id: gcp-test1-gpii-net
+* DNS: "gcp.test.gpii.net"
+* id: gcp-test-gpii-net
 * project: gpii2test-common-prd (testing organization)
 
 ## Creating the initial infrastructure
@@ -71,12 +71,12 @@ From the root of the repository:
 ```
  export ORGANIZATION_ID=327626828918
  export TF_VAR_organization_name=gpii2test
- export TF_VAR_organization_domain=test1.gpii.net
+ export TF_VAR_organization_domain=test.gpii.net
  export USER=doe
  cd gcp/live/dev
  rake
  # (wait until all the resources are created)
- curl -k https://preferences.doe.dev.gcp.test1.gpii.net/preferences/carla
+ curl -k https://preferences.doe.dev.gcp.test.gpii.net/preferences/carla
  rake destroy
 ```
 

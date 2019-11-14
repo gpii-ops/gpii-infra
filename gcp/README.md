@@ -380,6 +380,14 @@ This some times happens, when Stackdriver Ruby client is trying to apply alertin
 
 The most common solution for this is to [create your Stackdriver Workspace](README.md#one-time-stackdriver-workspace-setup).
 
+### Error: "app.kubernetes.io/name":"cert-manager", MatchExpressions:[]v1.LabelSelectorRequirement(nil)}: field is immutable
+
+Check running cert-manager version with `rake plain_sh['kubectl -n kube-system get deployment cert-manager -o json | jq .metadata.labels.chart']`. For everything `< v0.11.0` you'll need to follow the upgrade scenario:
+1. Run `rake plain_sh['kubectl -n gpii delete certificate\,issuer --all']` to destroy cert-manager resources in GPII namespace. This operation does not affect existing secrets with certificates and required so we can destroy cert-manager CRDs later.
+1. Run `rake destroy_module['k8s/kube-system/cert-manager']`.
+1. Run `rake` again, cert-manager should now be successfully upgraded.
+1. Run `rake plain_sh` in opened exekube shell run `for crd in $(kubectl get crd -o json | jq -r '.items[] | select(.metadata.labels.app == "cert-manager") | .spec.names.plural'); do kubectl delete crd ${crd}.certmanager.k8s.io; done` to delete any leftover CRDs from previous cert-manager versions.
+
 ## Common plumbing
 
 The environments that run in GCP need some initial resources that must be created by an administrator first. The [common part of this repository](../common) has the code and the instructions to do so.
@@ -403,7 +411,7 @@ There are number of infrastructure components that require access tokens to inte
 
 The permissions in this project are set in three different levels: at organization level, at project level and at resource level.
 
-At the organization level we have the group _cloud-admin@raisingthefloor.org_ which contains the list of users that will manage the projects of the organization and has the high level permissions to do so. Also we have a Service Account (SA) dedicated for the project creation and the billing association: _projectowner@gpii-common-prd.iam.gserviceaccount.com_. This SA only has the enough permissions to create projects, assciate them to the billing account and create the IAMs needed in such project to allow the owner to create the resources inside it. The SA _projectowner@gpii2test-common-stg.iam.gserviceaccount.com_ must also be in the organization level, as the billing account is associated to this organization and it is used to attach it to the testing organization _test1.gpii.net_.
+At the organization level we have the group _cloud-admin@raisingthefloor.org_ which contains the list of users that will manage the projects of the organization and has the high level permissions to do so. Also we have a Service Account (SA) dedicated for the project creation and the billing association: _projectowner@gpii-common-prd.iam.gserviceaccount.com_. This SA only has the enough permissions to create projects, assciate them to the billing account and create the IAMs needed in such project to allow the owner to create the resources inside it. The SA _projectowner@gpii2test-common-stg.iam.gserviceaccount.com_ must also be in the organization level, as the billing account is associated to this organization and it is used to attach it to the testing organization _test.gpii.net_.
 
 Each project has a SA which performs almost all the actions over the resources of such project. This SA only has the permissions needed to deploy GPII cloud. This SA doesn't have permissions to make changes outside the project which owns it.
 
@@ -421,20 +429,6 @@ Due to the lack of Terraform integration we use [Ruby client](https://github.com
 
 See [Getting started: One-time Stackdriver Workspace setup](README.md#one-time-stackdriver-workspace-setup)
 
-### To add new resource / debug existing resources:
-1. Add new resource / modify existing resource using corresponding Stackdriver Dashboard. **Supported resources are:**
-   * [Notification channels](https://app.google.stackdriver.com/settings/accounts/notifications/email) (only email notification channel type is currently supported, all notification channels are being applied to every alert policy).
-   * [Uptime checks](https://app.google.stackdriver.com/uptime).
-   * [Alert policies](https://app.google.stackdriver.com/policies).
-1. Run `TF_VAR_stackdriver_debug=1 rake deploy_module['k8s/stackdriver/monitoring']`.
-1. You will find json blobs for all supported Stackdriver resources in the output.
-1. To add new resource config into `gcp-stackdriver-monitoring` module:
-   * Copy json blob that you obtained on previous step into proper [resource directory](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/modules/gcp-stackdriver-monitoring/resources). Give a meaningful name to a new resource file. You can use `jq` to help with formatting.
-   * Remove all `name`, `creation_record`, and `mutation_record` attributes.
-   * Set `notification_channels` to `[]` (this value will be populated dynamically later).
-   * Repeat from **step 2.** All newly configured resources will be synced with Stackriver.
-1. In case you added new email notification channel, you may want to authorize new sender to post to [Alerts Group](https://groups.google.com/a/raisingthefloor.org/forum/#!pendingmsg/alerts). Follow the link, select new message and click "Post and always allow future messages from author(s)" button.
-
 ### To configure Dashboards for your project:
 1. Go to [Metrics Explorer](https://app.google.stackdriver.com/metrics-explorer).
 1. Select resource type, metric and configure other parameters for the chart that you want to add to your Dashboard.
@@ -446,8 +440,29 @@ See [Getting started: One-time Stackdriver Workspace setup](README.md#one-time-s
 1. Click "Add Slack Channel".
 1. Click "Authorize Stackdriver" – this will redirect to Slack's authentication page.
 1. Click "Authorize".
+1. Save the URL after the authentication is done, the parameter "auth_token" of the url is the value you have to use in the next step.
+1. Export the variable: `export TF_VAR_secret_slack_auth_token=XXXXX-xxxx-XXXXX-xxxxx-XXXX`.
+1. Run `rake` to save the secret.
 1. Enter channel name including "#". Click "Test Connection" and then "Save".
-1. Now you can use new notification channel in `gcp-stackdriver-monitoring` module. Here is example json: `{"type":"slack","labels":{"channel_name":"#alerts"},"user_labels":{},"enabled":{"value":true},"immutable":{"value":true}}`.
+1. Now you can use new notification channel in `gcp-stackdriver-monitoring` module. Here is an example:
+   ```
+   resource "google_monitoring_notification_channel" "alerts_slack_channel" {
+     type         = "slack"
+     display_name = "Alerts #${var.env} Slack"
+
+     labels = {
+       channel_name = "#alerts-${var.env}"
+       auth_token   = "${var.secret_slack_auth_token}"
+     }
+   }
+   ```
+
+### Fixing errors related to the Stackdriver deployment
+
+If during a deployment any error is raised because either a log based metric or an alert already exist. It is possible to remove all the Stackdriver resources and let GPII-infra to recreate them.
+
+1. `rake clean_stackdriver_resources`
+1. `rake`
 
 ## Working with CouchDB data
 
@@ -538,40 +553,37 @@ In this scenario we rely on CouchDB ability to recover from loss of one or more 
 1. CouchDB cluster will replicate data to recreated node automatically.
 1. Corrupted node is now recovered.
    * You can check DB status on recovered node with `kubectl exec --namespace gpii -it couchdb-couchdb-N -c couchdb -- curl -s http://$TF_VAR_couchdb_admin_username:$TF_VAR_couchdb_admin_password@127.0.0.1:5984/gpii/`, where N is node index.
-1. To make sure that all systems are functional, run smoke tests with `rake test_preferences` and then `rake test_flowmanager`.
+1. To make sure that all systems are functional, run smoke tests with `rake test_preferences_read` and then `rake test_flowmanager`.
 
-### Data corruption on all replicas of CouchDB cluster
+### Restoring Entire CouchDB Cluster from Snapshots
 
-There may be a situation, when we want to roll back entire DB data set to another point in the past. Current solution is disruptive, requires bringing entire CouchDB cluster down and some manual actions (we'll most likely automate this in future).
+There may be a situation, when we want to roll back entire DB data set to
+another point in the past. This operation is disruptive and requires bringing
+entire CouchDB cluster down.
 
-Ops team must perform backup restoration test using this scenario on `gpii-gcp-stg` cluster monthly, to make sure that:
-* Automated backups are being created as expected.
-* Existing backups can be used to restore functional and consistent DB.
-* Restoration guide (this scenario) is accurate.
+Ops team performs backup restoration test on `gpii-gcp-stg` cluster monthly, to
+make sure that automated backups are being created as expected, can be used to
+restore functional and consistent DB and that this documentation is correct.
 
-Here are the steps:
+This operation requires admin permissions on the project, use `rake
+grant_project_admin`.
 
-1. Grant yourself admin permissions in the project you are working on with `rake grant_project_admin`.
-1. Get current number of CouchDB stateful set replicas N with `kubectl --namespace gpii get statefulset couchdb-couchdb -o json | jq ".status.replicas"`.
-1. Collect CouchDB disk names from PVCs with `kubectl --namespace gpii get pvc -l app=couchdb -o json | jq -r .items[].spec.volumeName`.
-1. Choose a snapshot set that you want to restore, make sure that snapshots are present for all disks that are currently in use by CouchDB cluster.
-   * In case of a backup restoration test, pick latest snapshot set available: you can do this with `for i in {0..N}; do gcloud compute snapshots list --sort-by=~creationTimestamp,STATUS --limit=1 --format="value[separator=';'](name,status)" --filter="name~'pv-database-storage-couchdb-couchdb-$i-*'" | cut -f1 -d\; ; done`
-1. Scale `flowmanager` and `preferences` deployments to 0 replicas with `kubectl --namespace gpii scale deployment preferences --replicas=0` and `kubectl --namespace gpii scale deployment flowmanager --replicas=0` to stop the flow of traffic to CouchDB. This will give you time to verify that DB restoration is successful before allowing the DB to receive traffic again. **WARNING! This will prevent flowmanager and preferences services from processing customer requests!**
-1. Scale CouchDB stateful set to 0 replicas with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=0`. This will cause K8s to terminate all CouchDB pods, all PDs that were mounted into them will be released.
-1. Destroy `k8s-snapshots` module with `rake destroy_module["k8s/kube-system/k8s-snapshots"]` to prevent new snapshots from being created while you working with disks.
-1. Open Google Cloud console, go to "Compute Engine" -> "Disks".
-1. Now, repeat for every CouchDB disk name you collected:
-   * Save disk name, type, size, zone and description.
-   * Pick proper snapshot.
-   * Delete PD.
-   * Create new PD from snapshot with the same name, type, size, zone and description.
-1. Scale CouchDB stateful set back to number of replicas it used to have before with `kubectl --namespace gpii scale statefulset couchdb-couchdb --replicas=N`
-1. Database is now restored to the state at the time of target snapshot.
-   * You can check the status of all nodes with `for i in {0..N-1}; do kubectl exec --namespace gpii -it couchdb-couchdb-$i -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/_up; done`, where N is a number of CouchDB replicas.
-   * You can also check CouchDB membership status with `kubectl exec --namespace gpii -it couchdb-couchdb-0 -c couchdb -- curl -s http://$TF_VAR_secret_couchdb_admin_username:$TF_VAR_secret_couchdb_admin_password@127.0.0.1:5984/_membership | jq`.
-1. Once DB state is verified and you sure that everything went as desired, you can scale `preferences` and `flowmanager` deployments back as well. From this point system functionality for the customer is fully restored.
-1. Deploy `k8s-snapshots` module to resume regular snapshot process with `rake deploy_module["k8s/kube-system/k8s-snapshots"]`.
-1. To make sure that all systems are functional, run smoke tests with `rake test_preferences` and then `rake test_flowmanager`.
+Restoring from the latest set of snapshots (mainly used when performing monthly
+exercise):
+
+```
+rake 'couchdb_backup_restore'
+```
+
+Restoring from a specific set of snapshots (the snapshots have to be listed in
+order, starting from node `0`).
+
+```
+rake 'couchdb_backup_restore[snapshot-0 snapshot-1 snapshot-2]'
+```
+
+To make sure that all systems are functional, run smoke tests using the `rake
+test_*` tasks.
 
 ### Manual processes: Users' data and client credentials
 
@@ -728,13 +740,13 @@ Prime Minister at that time!"), please let me know immediately.
 
 ### External backups
 
-#### Sending backup outside of the organization.
+#### Sending backup outside of the organization
 
 The process is mostly executed by the `gcloud compute images export` command, which uses Cloud Build service, which uses [Daisy](https://github.com/GoogleCloudPlatform/compute-image-tools/tree/master/daisy) to create a VM, attach the images based on the snapshots to backup, create a file from those images and send the result files to the external storage.
 
 The destination buckets are created automatically by [Terraform code](https://github.com/gpii-ops/gpii-infra/tree/master/common/modules/gcp-external-backup). These buckets live in the testing organization (gpii2test) rather than the main organization (gpii) to keep them safe if a disaster affects the main organization.
 
-#### Restoring a backup from outside of the organization.
+#### Restoring a backup from outside of the organization
 
 The process of the restore it's similar to the backup but the other way around. It uses the `gcloud compute images import` command. In order to make easier the process a rake task called `restore_snapshot_from_image_file`can be used. This task takes only one parameter where each snapshot file to recover is separated by one space. Also this proccess takes almost 9 min per snapshot to restore:
 
@@ -796,11 +808,12 @@ rake deploy_module["k8s/kube-system/backup-exporter"]
 
 ### Running Locust from your host
 
-From your environment directory run one of the two tests available:
+From your environment directory run one of the three tests available:
 
 ```
 rake test_flowmanager                         # [TEST] Run Locust swarm against Flowmanager service in current cluster
-rake test_preferences                         # [TEST] Run Locust swarm against Preferences service in current cluster
+rake test_preferences_read                    # [TEST] Run Locust swarm against Preferences service (READ) in current cluster
+rake test_preferences_write                   # [TEST] Run Locust swarm against Preferences service (WRITE) in current cluster
 ```
 
 ### Customize test parameters

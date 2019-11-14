@@ -6,10 +6,22 @@ global:
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
   ##
   imagePullSecrets: []
+  isOpenshift: false
   # - name: "image-pull-secret"
 
   # Optional priority class to be used for the cert-manager pods
   priorityClassName: ""
+  rbac:
+    create: true
+
+  podSecurityPolicy:
+    enabled: false
+
+  logLevel: 2
+
+  leaderElection:
+    # Override the namespace used to store the ConfigMap for leader election
+    namespace: ""
 
 replicaCount: 1
 
@@ -19,9 +31,12 @@ strategy: {}
   #   maxSurge: 0
   #   maxUnavailable: 1
 
+
 image:
   repository: quay.io/jetstack/cert-manager-controller
-  tag: v0.6.1
+  # Override the image tag to deploy by setting this variable.
+  # If no value is set, the chart's appVersion will be used.
+  # tag: canary
   pullPolicy: IfNotPresent
 
 # Override the namespace used to store DNS provider credentials etc. for ClusterIssuer
@@ -29,35 +44,30 @@ image:
 # used. This namespace will not be automatically created by the Helm chart.
 clusterResourceNamespace: ""
 
-leaderElection:
-  # Override the namespace used to store the ConfigMap for leader election
-  namespace: ""
-
-rbac:
-  # Specifies whether RBAC resources should be created
-  create: true
-
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name:
+  annotations: {}
 
 # Optional additional arguments
 extraArgs: []
   # Use this flag to set a namespace that cert-manager will use to store
   # supporting resources required for each ClusterIssuer (default is kube-system)
   # - --cluster-resource-namespace=kube-system
+  # When this flag is enabled, secrets will be automatically removed when the certificate resource is deleted
+  # - --enable-certificate-owner-ref=true
 
 extraEnv: []
 # - name: SOME_VAR
 #   value: 'some value'
 
-resources:
-  requests:
-    cpu: 10m
-    memory: 32Mi
+resources: {}
+  # requests:
+  #   cpu: 10m
+  #   memory: 32Mi
 
 # Pod Security Context
 # ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
@@ -85,10 +95,62 @@ nodeSelector: {}
 ingressShim: {}
   # defaultIssuerName: ""
   # defaultIssuerKind: ""
+  # defaultIssuerGroup: ""
   # defaultACMEChallengeType: ""
   # defaultACMEDNS01ChallengeProvider: ""
 
+prometheus:
+  enabled: true
+  servicemonitor:
+    enabled: false
+    prometheusInstance: default
+    targetPort: 9402
+    path: /metrics
+    interval: 60s
+    scrapeTimeout: 30s
+    labels: {}
+
 webhook:
+  enabled: true
+  replicaCount: 1
+
+  strategy: {}
+    # type: RollingUpdate
+    # rollingUpdate:
+    #   maxSurge: 0
+    #   maxUnavailable: 1
+
+  podAnnotations: {}
+
+  # Optional additional arguments for webhook
+  extraArgs: []
+
+  resources: {}
+    # requests:
+    #   cpu: 10m
+    #   memory: 32Mi
+
+  nodeSelector: {}
+
+  affinity: {}
+
+  tolerations: []
+
+  image:
+    repository: quay.io/jetstack/cert-manager-webhook
+    # Override the image tag to deploy by setting this variable.
+    # If no value is set, the chart's appVersion will be used.
+    # tag: canary
+    pullPolicy: IfNotPresent
+
+  # If true, the apiserver's cabundle will be automatically injected into the
+  # webhook's ValidatingWebhookConfiguration resource by the CA injector.
+  # in future this will default to false, as the apiserver can use the loopback
+  # configuration caBundle to talk to itself in kubernetes 1.11+
+  # see https://github.com/kubernetes/kubernetes/pull/62649
+  injectAPIServerCA: true
+
+cainjector:
   enabled: true
 
 # Use these variables to configure the HTTP_PROXY environment variables
@@ -117,7 +179,3 @@ affinity: {}
 #     value: master
 #     effect: NoSchedule
 tolerations: []
-
-# CRDs
-createCustomResource: false
-useCrdInstallHook: true

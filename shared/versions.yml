@@ -8,11 +8,11 @@
 cert_manager:
   upstream:
     repository: quay.io/jetstack/cert-manager-controller
-    tag: v0.6.1
+    tag: v0.11.0
   generated:
     repository: gcr.io/gpii-common-prd/quay.io__jetstack__cert-manager-controller
-    sha: sha256:5a4bc171592615ff78e024c8091e77e70179edba840989a203d49c088b6135a6
-    tag: v0.6.1
+    sha: sha256:cfca8506a0b8685472950f6558983f2f4ac112d4669bed29b215a96d32136300
+    tag: v0.11.0
 certmerge_operator:
   upstream:
     repository: gpii/certmerge-operator
@@ -67,7 +67,7 @@ couchdb:
     tag: 2.3.1
   generated:
     repository: gcr.io/gpii-common-prd/couchdb
-    sha: sha256:091e855ec217eae3b42642074892039b20915c6ecc3f489cf463fd2902c99513
+    sha: sha256:829dab08574c97bd56d8042bfa3de9614efe0ca49d2248e915fb144f3aa17c9e
     tag: 2.3.1
 dataloader:
   upstream:
@@ -104,11 +104,11 @@ productiontests:
 k8s_snapshots:
   upstream:
     repository: elsdoerfer/k8s-snapshots
-    tag: v2.0
+    tag: latest
   generated:
     repository: gcr.io/gpii-common-prd/elsdoerfer__k8s-snapshots
-    sha: sha256:06ceb13d357ef689cd4ecfa17d20f6cd7874554c6da4dfad7bd56cd005e4e452
-    tag: v2.0
+    sha: sha256:5c9a27ae0a37e0d4d0a6cb2d89e6b859af7a01ef9d9864b647fb4927e11c741e
+    tag: latest
 locust:
   upstream:
     repository: gpii/locust
@@ -133,3 +133,11 @@ service_account_assigner:
     repository: gcr.io/gpii-common-prd/gpii__service-account-assigner
     sha: sha256:5c6d9ed84af21d85a71af9e991c4e8adadcc7ccd792ce0472ea2a0378a27f8ca
     tag: 0.0.3-gpii.0
+kiali:
+  upstream:
+    repository: quay.io/kiali/kiali
+    tag: v1.5.0
+  generated:
+    repository: gcr.io/gpii-common-prd/quay.io__kiali__kiali
+    sha: sha256:8304fc943df04168c68f0e6098b968337c36229c6dc9341286a27179d03b2767
+    tag: v1.5.0

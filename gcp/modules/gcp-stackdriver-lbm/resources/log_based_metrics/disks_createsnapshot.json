@@ -1,4 +1,0 @@
-{
-  "name": "compute.disks.createSnapshot",
-  "filter": "resource.type=\"gce_disk\" AND protoPayload.methodName=\"v1.compute.disks.createSnapshot\""
-}

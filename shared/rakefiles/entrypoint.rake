@@ -93,7 +93,8 @@ task :display_cluster_info => [:set_vars] do
   puts "Flowmanager endpoint:"
   puts "  curl -k https://flowmanager.#{ENV["TF_VAR_domain_name"] }"
   puts
-  puts "Run `rake test_preferences` to execute Locust tests for Preferences."
+  puts "Run `rake test_preferences_read` to execute Locust read tests for Preferences."
+  puts "Run `rake test_preferences_write` to execute Locust write tests for Preferences."
   puts "Run `rake test_flowmanager` to execute Locust tests for Flowmanager."
   puts
   puts "Run `rake destroy` to delete all the expensive resources created by the deployment."
@@ -355,4 +356,18 @@ task :couchdb_ui => [:set_vars] do
   sh "docker-compose run --rm -p 35984:35984 xk rake couchdb_ui"
 end
 
+desc "Clean all the Stackdriver alerts, lbm and uptime checks"
+task :clean_stackdriver_resources => [:set_vars] do
+  sh "docker-compose run --rm xk rake clean_stackdriver_resources"
+end
+
+desc "Kiali - access network monitoring dashboard"
+task :kiali_ui => [:set_vars] do
+  sh "docker-compose run --rm -p 20001:20001 xk rake kiali_ui"
+end
+
+desc "CouchDB - restore from backup"
+task :couchdb_backup_restore, [:snapshots] => [:set_vars] do |taskname, args|
+  sh "#{@exekube_cmd} rake couchdb_backup_restore['#{args[:snapshots]}']"
+end
 # vim: et ts=2 sw=2:

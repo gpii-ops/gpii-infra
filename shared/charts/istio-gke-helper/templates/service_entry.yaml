@@ -1,0 +1,20 @@
+{{- range $host := .Values.egress.httpsHosts }}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: {{ $host | replace "." "-" }}
+  labels:
+    app: {{ include "istio-gke-helper.name" $ }}
+    chart: {{ $.Chart.Name }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+spec:
+  hosts:
+  - {{ $host }}
+  ports:
+  - name: https
+    number: 443
+    protocol: HTTPS
+  resolution: DNS
+{{- end }}

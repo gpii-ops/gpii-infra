@@ -3,7 +3,7 @@ import "../../../shared/rakefiles/entrypoint_common.rake"
 
 ENV["ORGANIZATION_ID"] = "327626828918"
 ENV["TF_VAR_organization_name"] = "gpii2test"
-ENV["TF_VAR_organization_domain"] = "test1.gpii.net"
+ENV["TF_VAR_organization_domain"] = "test.gpii.net"
 
 @env = File.basename(File.dirname(__FILE__))
 @project_type = File.basename(File.expand_path("../../../", __FILE__))

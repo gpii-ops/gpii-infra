@@ -141,11 +141,13 @@ task :set_org_perms => [@gcp_creds_file] do
         --role #{role}"
     end
   end
-  # Enforce org-level roles for cloud-admin, common SA, and Eugene's account
+  # Enforce org-level roles for cloud-admin, common SA
+  # Eugene's and Serpan's (common support) accounts
   members = {
     "group:cloud-admin@raisingthefloor.org" => cloud_admin_org_roles,
     "serviceAccount:projectowner@#{ENV["TF_VAR_project_id"]}.iam.gserviceaccount.com" => common_sa_org_roles,
-    "user:eugene@raisingthefloor.org" => ["roles/billing.admin"]
+    "user:eugene@raisingthefloor.org" => ["roles/billing.admin"],
+    "user:serpan@raisingthefloor.org" => ["roles/resourcemanager.organizationViewer"]
   }
   members.each do |member, expected_roles|
     existing_roles = %x{

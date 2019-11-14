@@ -46,7 +46,7 @@ deletes the release.
 
 ## Configuration
 
-The following table lists the configurable parameters of the gpii-dataloader
+The following table lists the configurable parameters of the k8s-snapshots
 chart and their default values.
 
 | Parameter          | Description                                                       | Default                    |
