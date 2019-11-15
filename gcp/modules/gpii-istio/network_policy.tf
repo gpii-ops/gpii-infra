@@ -35,6 +35,7 @@ resource "kubernetes_network_policy" "deny-default" {
             name = "kube-system"
           }
         }
+
         pod_selector {
           match_labels = {
             k8s-app = "kube-dns"
@@ -50,12 +51,12 @@ resource "kubernetes_network_policy" "deny-default" {
           cidr = "10.16.0.0/20"
         }
       }
+
       ports {
         port     = "8181"
         protocol = "TCP"
       }
     }
-
   }
 }
 
