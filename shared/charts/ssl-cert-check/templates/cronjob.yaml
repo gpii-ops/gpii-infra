@@ -1,0 +1,113 @@
+{{ $app_name := include "ssl-cert-check.name" . }}
+{{ $chart_name := .Chart.Name }}
+{{ $chart_version := .Chart.Version }}
+{{ $release_name := .Release.Name }}
+{{ $release_service := .Release.Service }}
+{{ $values := .Values }}
+{{- range .Values.certificates }}
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ $app_name }}-{{ .name }}
+  labels:
+    app: {{ $app_name }}
+    chart: {{ $chart_name }}-{{ $chart_version | replace "+" "_" }}
+    release: {{ $release_name }}
+    heritage: {{ $release_service }}
+spec:
+  schedule: "{{ $values.cronJobSchedule }}"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  concurrencyPolicy: Replace
+  startingDeadlineSeconds: 200
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: {{ $values.activeDeadlineSeconds }}
+      template:
+        metadata:
+          labels:
+            app: {{ $app_name }}
+            release: {{ $release_name }}
+          {{- if $values.istio.enabled }}
+          annotations:
+            # This annotation is needed to allow traffic to metadata.google.internal
+            # until Istio's issue with FQDNs in ServiceEntries is not resolved:
+            # https://github.com/istio/istio/issues/14404
+            traffic.sidecar.istio.io/excludeOutboundIPRanges: "169.254.169.254/32"
+          {{- end }}
+        spec:
+          shareProcessNamespace: true
+          containers:
+          - name: ssl-cert-check
+            image: "{{ $values.image.repository }}:{{ $values.image.tag }}"
+            imagePullPolicy: {{ $values.image.pullPolicy }}
+            command:
+              - /bin/sh
+              - -c
+              - timeout 30 /entrypoint.sh || true
+            env:
+              - name: TARGET_HOST
+                value: "{{ .host }}"
+              - name: TARGET_PORT
+                value: "{{ .port }}"
+              - name: RENEWAL_WINDOW
+                value: "{{ .renewalWindow }}"
+              {{- if $values.istio.enabled }}
+              # Sleep is needed to give istio-proxy time to start,
+              # otherwise ssl-cert-check will fail with connection refused error.
+              - name: SLEEP
+                value: "10"
+              {{- end }}
+          {{- if $values.prometheusToSdExporter.enabled }}
+          - name: prometheus-to-sd
+            image: "{{ $values.prometheusToSdExporter.image.repository }}:{{ $values.prometheusToSdExporter.image.tag }}"
+            imagePullPolicy: {{ $values.image.pullPolicy }}
+            command:
+              - /monitor
+              - --stackdriver-prefix=custom.googleapis.com
+              - --source=ssl-cert-check:http://localhost:{{ $values.prometheusToSdExporter.port }}?auto-whitelist-metrics=true
+              - --scrape-interval=10s
+              - --export-interval=10s
+              - --pod-id=$(POD_NAME)
+              - --namespace-id=$(POD_NAMESPACE)
+            env:
+              - name: POD_NAME
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.name
+              - name: POD_NAMESPACE
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.namespace
+          {{- end }}
+          {{- if $values.istio.enabled }}
+          - name: istio-proxy-manager
+            image: "{{ $values.image.repository }}:{{ $values.image.tag }}"
+            command:
+              - /bin/sh
+              - -c
+              - |
+                PROCESS="timeout";
+                while ! pgrep "${PROCESS}" > /dev/null;
+                do
+                  echo 'Waiting for process to start...';
+                  sleep 2;
+                done;
+                echo 'Process started.';
+                while pgrep "${PROCESS}" > /dev/null;
+                do
+                  echo 'Waiting for process to finish...';
+                  sleep 2;
+                done;
+                echo 'Process finished.';
+                while pgrep pilot-agent > /dev/null;
+                do
+                  echo 'Sending TERM to pilot-agent...';
+                  pkill pilot-agent;
+                  sleep 2;
+                done;
+                echo 'pilot-agent terminated!';
+          {{- end }}
+          restartPolicy: OnFailure
+{{- end }}
