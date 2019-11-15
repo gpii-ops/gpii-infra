@@ -388,6 +388,22 @@ Check running cert-manager version with `rake plain_sh['kubectl -n kube-system g
 1. Run `rake` again, cert-manager should now be successfully upgraded.
 1. Run `rake plain_sh` in opened exekube shell run `for crd in $(kubectl get crd -o json | jq -r '.items[] | select(.metadata.labels.app == "cert-manager") | .spec.names.plural'); do kubectl delete crd ${crd}.certmanager.k8s.io; done` to delete any leftover CRDs from previous cert-manager versions.
 
+### Flowmanger module has been deployed successfully, but `kubectl -n gpii get certificate,issuer` still says that no resources found
+
+This is happening, because after upgrade to GKE 1.13 and Istio 1.1.16, old cert-manager CRDs are being deployed as part of Istio:
+```
+bash-4.4# kubectl get crd certificates.certmanager.k8s.io -o yaml
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    helm.sh/resource-policy: keep
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apiextensions.k8s.io/v1beta1","kind":"CustomResourceDefinition","metadata":{"annotations":{"helm.sh/resource-policy":"keep"},"labels":{"addonmanager.kubernetes.io/mode":"Reconcile","app":"certmanager","chart":"certmanager","heritage":"Tiller","k8s-app":"istio","release":"istio"},"name":"certificates.certmanager.k8s.io","namespace":""}
+```
+
+Addon manager `Reconcile` mode prevents us from making any modifications, so we can not delete them. Luckily, it does not affect new cert-manager functionality in any way. To get CRD-based resources, please use full CRD name instead of singular definition. i.e. `kubectl -n gpii get certificate.cert-manager.io,issuer.cert-manager.io`.
+
 ## Common plumbing
 
 The environments that run in GCP need some initial resources that must be created by an administrator first. The [common part of this repository](../common) has the code and the instructions to do so.
