@@ -50,7 +50,7 @@ spec:
         resources:
 {{ toYaml .Values.resources | indent 10 }}
       - name: prometheus-to-sd
-        image: "{{ .Values.image.prometheusToSdExporter.repository }}:{{ .Values.image.prometheusToSdExporter.tag }}"
+        image: "{{ .Values.prometheusToSdExporter.image.repository }}:{{ .Values.prometheusToSdExporter.image.tag }}"
         imagePullPolicy: {{ .Values.prometheusToSdExporter.image.pullPolicy }}
         command:
           - /monitor

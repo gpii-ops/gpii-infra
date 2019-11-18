@@ -179,3 +179,9 @@ affinity: {}
 #     value: master
 #     effect: NoSchedule
 tolerations: []
+
+prometheusToSdExporter:
+  image:
+    repository: gcr.io/google-containers/prometheus-to-sd
+    tag: v0.5.1
+    pullPolicy: IfNotPresent
