@@ -330,13 +330,13 @@ task :display_scc_assets_changed, [:projects, :compare_duration] => [:configure]
   projects_filter << ")"
   projects_filter = projects_filter.join
 
-  # Default filter excludes snapshots, KMS key versions, and system managed SA keys
+  # Default gcloud filter excludes snapshots and KMS key versions
+  # And later with jq we exclude system managed SA keys
   sh "gcloud alpha scc assets list #{ENV["ORGANIZATION_ID"]} \
     --filter ' \
       #{projects_filter} \
       AND NOT security_center_properties.resource_type = \"google.compute.snapshot\" \
       AND NOT security_center_properties.resource_type = \"google.cloud.kms.cryptokeyversion\" \
-      AND NOT resource_properties.keyType = \"SYSTEM_MANAGED\" \
     ' \
     --compare-duration #{compare_duration} \
     --format json \
@@ -349,7 +349,7 @@ task :display_scc_assets_changed, [:projects, :compare_duration] => [:configure]
          end;
 
       .[]
-      | map(select(.stateChange == \"REMOVED\" or .stateChange == \"ADDED\"))
+      | map(select((.stateChange == \"REMOVED\" or .stateChange == \"ADDED\") and .asset.resourceProperties.keyType != \"SYSTEM_MANAGED\"))
       | map_values([.stateChange, .asset.securityCenterProperties.resourceType, .asset.resourceProperties.name])
       | group_by_first | add'
   "
