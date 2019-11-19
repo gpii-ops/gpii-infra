@@ -46,8 +46,6 @@ spec:
                 value: "{{ .Values.renewalWindow }}"
               - name: SLEEP
                 value: "10"
-              - name: DEBUG
-                value: "true"
               {{- end }}
               - name: TARGET_FILE
                 value: /config.cfg
