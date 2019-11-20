@@ -2,27 +2,14 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_couchdb" {
   display_name = "Snapshots are being created for persistent volumes of CouchDB stateful set"
   combiner     = "OR"
 
-  conditions = [{
-    condition_absent {
-      filter   = "metric.type=\"logging.googleapis.com/user/k8s_snapshots.couchdb.snapshot_created\" resource.type=\"k8s_container\""
-      duration = "300s"
-
-      aggregations {
-        alignment_period   = "600s"
-        per_series_aligner = "ALIGN_SUM"
-        group_by_fields    = []
-      }
-    }
-
-    display_name = "Snapshot creation events are missing in K8s-snapshot logs for CouchDB"
-  },
+  conditions = [
     {
       condition_absent {
         filter   = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\""
         duration = "300s"
 
         aggregations {
-          alignment_period   = "600s"
+          alignment_period   = "300s"
           per_series_aligner = "ALIGN_SUM"
           group_by_fields    = []
         }
@@ -30,11 +17,34 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_couchdb" {
 
       display_name = "Snapshot creation events are missing for CouchDB GCE disks"
     },
+    {
+      condition_threshold {
+        filter   = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\""
+
+        comparison      = "COMPARISON_LT"
+        threshold_value = 1.0
+        duration        = "300s"
+
+        aggregations {
+          alignment_period   = "300s"
+          per_series_aligner = "ALIGN_SUM"
+
+          group_by_fields = [
+            "metric.labels.zone"
+          ]
+        }
+
+        denominator_filter       = ""
+        denominator_aggregations = []
+      }
+
+      display_name = "Snapshot creation events are occuring too infrequently for CouchDB GCE disks"
+    },
   ]
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
   user_labels           = {}
-  enabled               = "false"
+  enabled               = "true"
 
   depends_on = ["google_logging_metric.disks_createsnapshot", "google_logging_metric.k8s_snapshots_couchdb_snapshot_created"]
 }
