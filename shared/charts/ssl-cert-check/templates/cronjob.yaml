@@ -37,7 +37,7 @@ spec:
             command:
               - /bin/sh
               - -c
-              - timeout 30 /entrypoint.sh || true
+              - timeout {{ sub .Values.activeDeadlineSeconds 15 }} /entrypoint.sh || true
             env:
               {{- if .Values.istio.enabled }}
               # Sleep is needed to give istio-proxy time to start,

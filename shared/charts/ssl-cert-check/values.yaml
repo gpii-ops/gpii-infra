@@ -7,7 +7,7 @@ image:
 ## Default run schedule is twice a day
 cronJobSchedule: "0 */12 * * *"
 
-## Max amount of time for cron job to run
+## Max amount of time for cron job to run, can't be less than 45 seconds
 activeDeadlineSeconds: 45
 
 ## Renewal window for Let's Encrypt certificates starts 30 days before expiration,
