@@ -96,7 +96,7 @@ flowmanager:
 k8s_snapshots:
   upstream:
     repository: elsdoerfer/k8s-snapshots
-    tag: latest
+    tag: v2.0
   generated:
     repository: gcr.io/gpii-common-prd/elsdoerfer__k8s-snapshots
     sha: sha256:5c9a27ae0a37e0d4d0a6cb2d89e6b859af7a01ef9d9864b647fb4927e11c741e
