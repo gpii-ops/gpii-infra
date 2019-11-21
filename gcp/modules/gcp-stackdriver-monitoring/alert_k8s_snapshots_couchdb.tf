@@ -19,7 +19,7 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_couchdb" {
     },
     {
       condition_threshold {
-        filter   = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\""
+        filter = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\""
 
         comparison      = "COMPARISON_LT"
         threshold_value = 1.0
@@ -30,7 +30,7 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_couchdb" {
           per_series_aligner = "ALIGN_SUM"
 
           group_by_fields = [
-            "metric.labels.zone"
+            "metric.labels.zone",
           ]
         }
 
