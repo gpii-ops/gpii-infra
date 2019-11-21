@@ -5,7 +5,7 @@ resource "google_monitoring_notification_channel" "email" {
   type         = "email"
 
   labels = {
-    email_address = "${var.notification_email}"
+    email_address = "${(var.use_auth_user_email && var.auth_user_email != "") ? var.auth_user_email : var.notification_email}"
   }
 
   user_labels = {}

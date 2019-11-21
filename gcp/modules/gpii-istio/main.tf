@@ -8,6 +8,7 @@ resource "kubernetes_namespace" "gpii" {
 
     labels {
       istio-injection = "enabled"
+      name            = "gpii"
     }
   }
 }
