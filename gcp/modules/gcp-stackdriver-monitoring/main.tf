@@ -25,6 +25,11 @@ variable "domain_name" {}
 variable "serviceaccount_key" {}
 variable "env" {}
 
+variable "use_auth_user_email" {
+  default = false
+}
+
+variable "auth_user_email" {}
 variable "secret_slack_auth_token" {}
 
 resource "null_resource" "destroy_old_stackdriver_resources" {

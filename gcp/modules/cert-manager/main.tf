@@ -9,6 +9,8 @@ variable "project_id" {}
 variable "serviceaccount_key" {}
 variable "cert_manager_repository" {}
 variable "cert_manager_tag" {}
+variable "prometheus_to_sd_repository" {}
+variable "prometheus_to_sd_tag" {}
 
 provider "google" {
   project     = "${var.project_id}"
@@ -19,9 +21,11 @@ data "template_file" "release_values" {
   template = "${file("${path.module}/templates/values.yaml.tpl")}"
 
   vars = {
-    service_account         = "${data.google_service_account.gke_cluster_pod_cert_manager.email}"
-    cert_manager_repository = "${var.cert_manager_repository}"
-    cert_manager_tag        = "${var.cert_manager_tag}"
+    service_account             = "${data.google_service_account.gke_cluster_pod_cert_manager.email}"
+    cert_manager_repository     = "${var.cert_manager_repository}"
+    cert_manager_tag            = "${var.cert_manager_tag}"
+    prometheus_to_sd_repository = "${var.prometheus_to_sd_repository}"
+    prometheus_to_sd_tag        = "${var.prometheus_to_sd_tag}"
   }
 }
 
