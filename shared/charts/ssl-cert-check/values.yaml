@@ -3,12 +3,14 @@ image:
   tag: 0.0.1-gpii.0
   pullPolicy: IfNotPresent
 
+## Set project_id for Stackdriver target project
+project_id: fake-project
 
 ## Default run schedule is twice a day
 cronJobSchedule: "0 */12 * * *"
 
-## Max amount of time for cron job to run, can't be less than 45 seconds
-activeDeadlineSeconds: 45
+## Max amount of time for cron job to run
+activeDeadlineSeconds: 60
 
 ## Renewal window for Let's Encrypt certificates starts 30 days before expiration,
 ## So if it is not renewed 29 days before, there is a high chance that something went wrong
@@ -18,15 +20,3 @@ certificates:
   ## Example certificate block
   #- host: google.com
   #  port: 443
-
-## Deploy components needed for the chart to work properly on clusters with Istio
-istio:
-  enabled: true
-
-## Deploy prometheus-to-sd to send metrics to Stackdriver
-prometheusToSdExporter:
-  enabled: true
-  port: 9402
-  image:
-    repository: gcr.io/google-containers/prometheus-to-sd
-    tag: v0.5.1

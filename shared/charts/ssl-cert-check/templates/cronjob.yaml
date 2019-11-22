@@ -12,7 +12,6 @@ spec:
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   concurrencyPolicy: Replace
-  startingDeadlineSeconds: 200
   jobTemplate:
     spec:
       activeDeadlineSeconds: {{ .Values.activeDeadlineSeconds }}
@@ -21,91 +20,28 @@ spec:
           labels:
             app: {{ template "ssl-cert-check.name" . }}
             release: {{ .Release.Name }}
-          {{- if .Values.istio.enabled }}
-          annotations:
-            # This annotation is needed to allow traffic to metadata.google.internal
-            # until Istio's issue with FQDNs in ServiceEntries is not resolved:
-            # https://github.com/istio/istio/issues/14404
-            traffic.sidecar.istio.io/excludeOutboundIPRanges: "169.254.169.254/32"
-          {{- end }}
         spec:
-          shareProcessNamespace: true
           containers:
           - name: ssl-cert-check
             image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
             imagePullPolicy: {{ .Values.image.pullPolicy }}
-            command:
-              - /bin/sh
-              - -c
-              - timeout {{ sub .Values.activeDeadlineSeconds 15 }} /entrypoint.sh || true
             env:
-              {{- if .Values.istio.enabled }}
-              # Sleep is needed to give istio-proxy time to start,
-              # otherwise ssl-cert-check will fail with connection refused error.
-              - name: RENEWAL_WINDOW
-                value: "{{ .Values.renewalWindow }}"
+              - name: STACKDRIVER_CLIENT
+                value: "true"
+              # Without sleep Stackdriver client some times fails to fetch
+              # app-default credentials on first try.
               - name: SLEEP
                 value: "10"
-              {{- end }}
+              - name: RENEWAL_WINDOW
+                value: "{{ .Values.renewalWindow }}"
               - name: TARGET_FILE
                 value: /config.cfg
+              - name: PROJECT_ID
+                value: {{ .Values.project_id }}
             volumeMounts:
             - name: config
               mountPath: /config.cfg
               subPath: config
-          {{- if .Values.prometheusToSdExporter.enabled }}
-          - name: prometheus-to-sd
-            image: "{{ .Values.prometheusToSdExporter.image.repository }}:{{ .Values.prometheusToSdExporter.image.tag }}"
-            imagePullPolicy: {{ .Values.image.pullPolicy }}
-            command:
-              - /monitor
-              - --stackdriver-prefix=custom.googleapis.com
-              - --source=ssl-cert-check:http://localhost:{{ .Values.prometheusToSdExporter.port }}?auto-whitelist-metrics=true
-              - --scrape-interval=10s
-              - --export-interval=10s
-              - --pod-id=$(POD_NAME)
-              - --namespace-id=$(POD_NAMESPACE)
-            env:
-              - name: POD_NAME
-                valueFrom:
-                  fieldRef:
-                    fieldPath: metadata.name
-              - name: POD_NAMESPACE
-                valueFrom:
-                  fieldRef:
-                    fieldPath: metadata.namespace
-          {{- end }}
-          {{- if .Values.istio.enabled }}
-          - name: istio-proxy-manager
-            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-            securityContext:
-              allowPrivilegeEscalation: false
-              runAsUser: 1337
-            command:
-              - /bin/sh
-              - -c
-              - |
-                PROCESS="timeout";
-                while ! pgrep "${PROCESS}" > /dev/null;
-                do
-                  echo 'Waiting for process to start...';
-                  sleep 2;
-                done;
-                echo 'Process started.';
-                while pgrep "${PROCESS}" > /dev/null;
-                do
-                  echo 'Waiting for process to finish...';
-                  sleep 2;
-                done;
-                echo 'Process finished.';
-                while pgrep pilot-agent > /dev/null;
-                do
-                  echo 'Sending TERM to pilot-agent...';
-                  pkill pilot-agent;
-                  sleep 2;
-                done;
-                echo 'pilot-agent terminated!';
-          {{- end }}
           volumes:
             - name: config
               configMap:
