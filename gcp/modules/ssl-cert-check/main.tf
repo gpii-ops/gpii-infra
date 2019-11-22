@@ -6,9 +6,7 @@ variable "charts_dir" {}
 variable "secrets_dir" {}
 
 variable "domain_name" {}
-
-variable "prometheus_to_sd_repository" {}
-variable "prometheus_to_sd_tag" {}
+variable "project_id" {}
 
 variable "ssl_cert_check_repository" {}
 variable "ssl_cert_check_tag" {}
@@ -17,11 +15,10 @@ data "template_file" "ssl_cert_check_values" {
   template = "${file("values.yaml")}"
 
   vars {
-    domain_name                 = "${var.domain_name}"
-    prometheus_to_sd_repository = "${var.prometheus_to_sd_repository}"
-    prometheus_to_sd_tag        = "${var.prometheus_to_sd_tag}"
-    ssl_cert_check_repository   = "${var.ssl_cert_check_repository}"
-    ssl_cert_check_tag          = "${var.ssl_cert_check_tag}"
+    domain_name               = "${var.domain_name}"
+    project_id                = "${var.project_id}"
+    ssl_cert_check_repository = "${var.ssl_cert_check_repository}"
+    ssl_cert_check_tag        = "${var.ssl_cert_check_tag}"
   }
 }
 
