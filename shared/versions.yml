@@ -72,7 +72,7 @@ couchdb:
 dataloader:
   upstream:
     repository: gpii/universal
-    tag: 20190809170605-f8485e9
+    tag: 20191122122513-d141625
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
     sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
@@ -80,7 +80,7 @@ dataloader:
 flushtokens:
   upstream:
     repository: gpii/universal
-    tag: 20190809170605-f8485e9
+    tag: 20191122122513-d141625
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
     sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
@@ -88,7 +88,7 @@ flushtokens:
 flowmanager:
   upstream:
     repository: gpii/universal
-    tag: 20190809170605-f8485e9
+    tag: 20191122122513-d141625
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
     sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
@@ -112,7 +112,7 @@ locust:
 preferences:
   upstream:
     repository: gpii/universal
-    tag: 20190809170605-f8485e9
+    tag: 20191122122513-d141625
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
     sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
