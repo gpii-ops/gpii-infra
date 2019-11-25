@@ -49,4 +49,5 @@ resource "google_monitoring_alert_policy" "ssl_cert_check" {
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
   user_labels           = {}
   enabled               = "true"
+  count                 = "${(var.env == "prd" || var.env == "stg") ? 1 : 0}"
 }
