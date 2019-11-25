@@ -50,9 +50,9 @@ ssl_cert_check:
     repository: gpii/ssl-cert-check
     tag: 0.0.1-gpii.0
   generated:
-    repository: gcr.io/gpii-gcp-dev-natarajaya/ssl-cert-check
-    sha: sha256:51adfde524f9699ce32e5c48328a5d5b5aa982a8973dac66293d6f136159778e
-    tag: latest
+    repository: gcr.io/gpii-common-prd/gpii__ssl-cert-check
+    sha: sha256:d0d1bdcf16380cf3a077caef1d72d03393fa4c0a256770711c429b46f9f9a3b3
+    tag: 0.0.1-gpii.0
 couchdb_prometheus_exporter:
   upstream:
     repository: gesellix/couchdb-prometheus-exporter
