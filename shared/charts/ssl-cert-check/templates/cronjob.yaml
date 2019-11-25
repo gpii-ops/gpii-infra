@@ -28,10 +28,6 @@ spec:
             env:
               - name: STACKDRIVER_CLIENT
                 value: "true"
-              # Without sleep Stackdriver client some times fails to fetch
-              # app-default credentials on first try.
-              - name: SLEEP
-                value: "10"
               - name: RENEWAL_WINDOW
                 value: "{{ .Values.renewalWindow }}"
               - name: TARGET_FILE
