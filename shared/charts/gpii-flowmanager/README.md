@@ -41,7 +41,7 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ## Configuration
 
-The following table lists the configurable parameters of the gpii-flowmanager chart and their default values.
+The following table lists the configurable parameters of the gpii-flowmanager chart and their default values. You can find more information in default values file.
 
 | Parameter                      | Description                                                                                  | Default                                                                   |
 |--------------------------------|----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
