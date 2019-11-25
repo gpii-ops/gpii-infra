@@ -43,7 +43,7 @@ resource "google_monitoring_alert_policy" "ssl_cert_check" {
       }
 
       display_name = "Flowmanager TLS cert metric is absent"
-    }
+    },
   ]
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
