@@ -4,7 +4,7 @@ image:
   pullPolicy: IfNotPresent
 
 ## Set project_id for Stackdriver target project
-project_id: fake-project
+# project_id: fake-project
 
 ## Default run schedule is twice a day
 cronJobSchedule: "0 */12 * * *"
