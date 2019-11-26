@@ -45,6 +45,4 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_couchdb" {
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
   user_labels           = {}
   enabled               = "true"
-
-  depends_on = ["google_logging_metric.disks_createsnapshot", "google_logging_metric.k8s_snapshots_couchdb_snapshot_created"]
 }
