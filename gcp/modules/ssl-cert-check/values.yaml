@@ -1,0 +1,9 @@
+image:
+  repository: ${ssl_cert_check_repository}
+  tag: ${ssl_cert_check_tag}
+
+project_id: ${project_id}
+
+certificates:
+  - host: flowmanager.${domain_name}
+    port: 443

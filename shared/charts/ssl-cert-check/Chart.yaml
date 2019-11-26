@@ -1,0 +1,17 @@
+name: ssl-cert-check
+version: 0.0.1
+home: https://github.com/gpii-ops/ssl-cert-check
+description: Utility to validate SSL certificates
+icon: https://gpii.net/sites/all/themes/gpii_main/logo.png
+keywords:
+  - gpii
+  - ssl-cert-check
+sources:
+  - https://github.com/gpii-ops/ssl-cert-check
+maintainers:
+  - name: amatas
+    email: alfredo@raisingthefloor.org
+  - name: natarajaya
+    email: sergey@raisingthefloor.org
+  - name: mrtyler
+    email: tyler@raisingthefloor.org

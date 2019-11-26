@@ -1,0 +1,45 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ template "ssl-cert-check.name" . }}
+  labels:
+    app: {{ template "ssl-cert-check.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  schedule: "{{ .Values.cronJobSchedule }}"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  concurrencyPolicy: Replace
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: {{ .Values.activeDeadlineSeconds }}
+      template:
+        metadata:
+          labels:
+            app: {{ template "ssl-cert-check.name" . }}
+            release: {{ .Release.Name }}
+        spec:
+          containers:
+          - name: ssl-cert-check
+            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            env:
+              - name: STACKDRIVER_CLIENT
+                value: "true"
+              - name: RENEWAL_WINDOW
+                value: "{{ .Values.renewalWindow }}"
+              - name: TARGET_FILE
+                value: /config.cfg
+              - name: PROJECT_ID
+                value: {{ .Values.project_id }}
+            volumeMounts:
+            - name: config
+              mountPath: /config.cfg
+              subPath: config
+          volumes:
+            - name: config
+              configMap:
+                name: {{ template "ssl-cert-check.name" . }}
+          restartPolicy: OnFailure

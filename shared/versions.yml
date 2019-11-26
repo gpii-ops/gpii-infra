@@ -45,6 +45,14 @@ couchdb_init:
     repository: gcr.io/gpii-common-prd/alpine
     sha: sha256:bf1684a6e3676389ec861c602e97f27b03f14178e5bc3f70dce198f9f160cce9
     tag: 3.9
+ssl_cert_check:
+  upstream:
+    repository: gpii/ssl-cert-check
+    tag: 0.0.1-gpii.0
+  generated:
+    repository: gcr.io/gpii-common-prd/gpii__ssl-cert-check
+    sha: sha256:d0d1bdcf16380cf3a077caef1d72d03393fa4c0a256770711c429b46f9f9a3b3
+    tag: 0.0.1-gpii.0
 couchdb_prometheus_exporter:
   upstream:
     repository: gesellix/couchdb-prometheus-exporter
@@ -67,7 +75,7 @@ couchdb:
     tag: 2.3.1
   generated:
     repository: gcr.io/gpii-common-prd/couchdb
-    sha: sha256:829dab08574c97bd56d8042bfa3de9614efe0ca49d2248e915fb144f3aa17c9e
+    sha: sha256:d5e34de969f1eae6793b6b6e319b36ed96badf2617d0ce26c8e247494b1e4ead
     tag: 2.3.1
 dataloader:
   upstream:
