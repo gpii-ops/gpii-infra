@@ -45,6 +45,14 @@ couchdb_init:
     repository: gcr.io/gpii-common-prd/alpine
     sha: sha256:bf1684a6e3676389ec861c602e97f27b03f14178e5bc3f70dce198f9f160cce9
     tag: 3.9
+ssl_cert_check:
+  upstream:
+    repository: gpii/ssl-cert-check
+    tag: 0.0.1-gpii.0
+  generated:
+    repository: gcr.io/gpii-common-prd/gpii__ssl-cert-check
+    sha: sha256:d0d1bdcf16380cf3a077caef1d72d03393fa4c0a256770711c429b46f9f9a3b3
+    tag: 0.0.1-gpii.0
 couchdb_prometheus_exporter:
   upstream:
     repository: gesellix/couchdb-prometheus-exporter
@@ -67,40 +75,40 @@ couchdb:
     tag: 2.3.1
   generated:
     repository: gcr.io/gpii-common-prd/couchdb
-    sha: sha256:829dab08574c97bd56d8042bfa3de9614efe0ca49d2248e915fb144f3aa17c9e
+    sha: sha256:d5e34de969f1eae6793b6b6e319b36ed96badf2617d0ce26c8e247494b1e4ead
     tag: 2.3.1
 dataloader:
   upstream:
     repository: gpii/universal
-    tag: 20190809170605-f8485e9
+    tag: 20191122122513-d141625
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
-    tag: 20190809170605-f8485e9
+    sha: sha256:cdd2768a5804ee5314043d404aaf95d8a43fbd36b2170566c354e4201b4a2a27
+    tag: 20191122122513-d141625
 flushtokens:
   upstream:
     repository: gpii/universal
-    tag: 20190809170605-f8485e9
+    tag: 20191122122513-d141625
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
-    tag: 20190809170605-f8485e9
+    sha: sha256:cdd2768a5804ee5314043d404aaf95d8a43fbd36b2170566c354e4201b4a2a27
+    tag: 20191122122513-d141625
 flowmanager:
   upstream:
     repository: gpii/universal
-    tag: 20190809170605-f8485e9
+    tag: 20191122122513-d141625
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
-    tag: 20190809170605-f8485e9
+    sha: sha256:cdd2768a5804ee5314043d404aaf95d8a43fbd36b2170566c354e4201b4a2a27
+    tag: 20191122122513-d141625
 k8s_snapshots:
   upstream:
     repository: elsdoerfer/k8s-snapshots
-    tag: latest
+    tag: v2.0
   generated:
     repository: gcr.io/gpii-common-prd/elsdoerfer__k8s-snapshots
-    sha: sha256:5c9a27ae0a37e0d4d0a6cb2d89e6b859af7a01ef9d9864b647fb4927e11c741e
-    tag: latest
+    sha: sha256:06ceb13d357ef689cd4ecfa17d20f6cd7874554c6da4dfad7bd56cd005e4e452
+    tag: v2.0
 locust:
   upstream:
     repository: gpii/locust
@@ -112,11 +120,11 @@ locust:
 preferences:
   upstream:
     repository: gpii/universal
-    tag: 20190809170605-f8485e9
+    tag: 20191122122513-d141625
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
-    tag: 20190809170605-f8485e9
+    sha: sha256:cdd2768a5804ee5314043d404aaf95d8a43fbd36b2170566c354e4201b4a2a27
+    tag: 20191122122513-d141625
 service_account_assigner:
   upstream:
     repository: gpii/service-account-assigner
