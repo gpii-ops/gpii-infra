@@ -11,7 +11,10 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_couchdb" {
         aggregations {
           alignment_period   = "300s"
           per_series_aligner = "ALIGN_SUM"
-          group_by_fields    = []
+
+          group_by_fields = [
+            "metric.labels.zone",
+          ]
         }
       }
 
