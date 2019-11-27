@@ -376,6 +376,9 @@ This happens when we need to update immutable fields on `PodDisruptionBudget` re
 
 This some times happens, when Stackdriver Ruby client is trying to apply alerting policy on newly created log-based metric. Solution is to wait 5-10 minutes and try again.
 
+### Error reading Metric: googleapi: Error 400: Cannot delete metric METRIC. That metric is still used in an alerting policy.
+There is a data propagation delay between logging and monitoring parts of Stackdriver. Some times Stackriver sees recently orphaned (not used by any alert policy) LBMs as still in-use and refuses to delete them. Solution is to wait 5-10 minutes and try again.
+
 ### [ERROR]: Deadline exceeded while destroying resources!
 
 The most common solution for this is to [create your Stackdriver Workspace](README.md#one-time-stackdriver-workspace-setup).
