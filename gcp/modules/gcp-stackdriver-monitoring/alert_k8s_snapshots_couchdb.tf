@@ -13,7 +13,7 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_couchdb" {
           per_series_aligner = "ALIGN_SUM"
 
           group_by_fields = [
-            "metric.labels.zone",
+            "resource.label.zone",
           ]
         }
       }
@@ -33,7 +33,7 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_couchdb" {
           per_series_aligner = "ALIGN_SUM"
 
           group_by_fields = [
-            "metric.labels.zone",
+            "resource.label.zone",
           ]
         }
 
