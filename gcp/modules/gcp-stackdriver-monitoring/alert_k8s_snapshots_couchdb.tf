@@ -38,7 +38,7 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_couchdb" {
         }
       }
 
-      display_name = "Snapshot creation events are occuring too infrequently for CouchDB GCE disks"
+      display_name = "Snapshot creation events are occurring too infrequently for CouchDB GCE disks"
     },
   ]
 
