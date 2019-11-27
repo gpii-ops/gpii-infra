@@ -36,9 +36,6 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_couchdb" {
             "resource.label.zone",
           ]
         }
-
-        denominator_filter       = ""
-        denominator_aggregations = []
       }
 
       display_name = "Snapshot creation events are occuring too infrequently for CouchDB GCE disks"
