@@ -6,7 +6,7 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_couchdb" {
     {
       condition_absent {
         filter   = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\""
-        duration = "300s"
+        duration = "600s"
 
         aggregations {
           alignment_period     = "300s"
@@ -27,7 +27,7 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_couchdb" {
 
         comparison      = "COMPARISON_LT"
         threshold_value = 1.0
-        duration        = "300s"
+        duration        = "600s"
 
         aggregations {
           alignment_period     = "300s"
