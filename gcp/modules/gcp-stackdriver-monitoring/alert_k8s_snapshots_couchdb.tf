@@ -9,8 +9,9 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_couchdb" {
         duration = "300s"
 
         aggregations {
-          alignment_period   = "300s"
-          per_series_aligner = "ALIGN_SUM"
+          alignment_period     = "300s"
+          per_series_aligner   = "ALIGN_SUM"
+          cross_series_reducer = "REDUCE_SUM"
 
           group_by_fields = [
             "resource.label.zone",
@@ -29,8 +30,9 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_couchdb" {
         duration        = "300s"
 
         aggregations {
-          alignment_period   = "300s"
-          per_series_aligner = "ALIGN_SUM"
+          alignment_period     = "300s"
+          per_series_aligner   = "ALIGN_SUM"
+          cross_series_reducer = "REDUCE_SUM"
 
           group_by_fields = [
             "resource.label.zone",
