@@ -103,7 +103,7 @@ flowmanager:
     tag: 20191122122513-d141625
 k8s_snapshots:
   upstream:
-    repository: gpii-ops/k8s-snapshots
+    repository: gpii/k8s-snapshots
     tag: 0.2.1-gpii.0
   generated:
     repository: gcr.io/gpii-common-prd/elsdoerfer__k8s-snapshots
