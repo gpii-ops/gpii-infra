@@ -5,7 +5,7 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_couchdb" {
   conditions = [
     {
       condition_absent {
-        filter   = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\""
+        filter   = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot.couchdb\" resource.type=\"gce_disk\""
         duration = "600s"
 
         aggregations {
@@ -23,7 +23,7 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_couchdb" {
     },
     {
       condition_threshold {
-        filter = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\""
+        filter = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot.couchdb\" resource.type=\"gce_disk\""
 
         comparison      = "COMPARISON_LT"
         threshold_value = 1.0
@@ -47,4 +47,6 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_couchdb" {
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
   user_labels           = {}
   enabled               = "true"
+
+  depends_on = ["google_logging_metric.disks_createsnapshot_couchdb"]
 }
