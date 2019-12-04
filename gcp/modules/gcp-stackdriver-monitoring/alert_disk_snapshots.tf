@@ -1,9 +1,5 @@
-data "external" "pvcs" {
-  program = [
-    "bash",
-    "-c",
-    "PVCS=$$(kubectl get --all-namespaces pvc --request-timeout 5s -o json | jq -cr \"[.items[].metadata.name] | join(\\\"|\\\")\"); jq -n --arg pvcs \"$$PVCS\" '{pvcs:$$pvcs}'",
-  ]
+locals {
+  pv_regexp = "^pv-database-storage-couchdb-couchdb-[0-9]+$"
 }
 
 resource "google_monitoring_alert_policy" "disk_snapshots" {
@@ -13,11 +9,11 @@ resource "google_monitoring_alert_policy" "disk_snapshots" {
   conditions = [
     {
       condition_absent {
-        filter   = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\" AND metric.label.pv_name=monitoring.regex.full_match(\"pv-(${data.external.pvcs.result.pvcs})\") AND metric.label.severity=\"NOTICE\""
+        filter   = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\" AND metric.label.pv_name=monitoring.regex.full_match(\"${local.pv_regexp}\") AND metric.label.severity=\"NOTICE\""
         duration = "600s"
 
         aggregations {
-          alignment_period     = "600s"
+          alignment_period     = "300s"
           per_series_aligner   = "ALIGN_SUM"
           cross_series_reducer = "REDUCE_SUM"
 
@@ -31,14 +27,14 @@ resource "google_monitoring_alert_policy" "disk_snapshots" {
     },
     {
       condition_threshold {
-        filter = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\" AND metric.label.pv_name=monitoring.regex.full_match(\"pv-(${data.external.pvcs.result.pvcs})\") AND metric.label.severity=\"NOTICE\""
+        filter = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\" AND metric.label.pv_name=monitoring.regex.full_match(\"${local.pv_regexp}\") AND metric.label.severity=\"NOTICE\""
 
         comparison      = "COMPARISON_LT"
         threshold_value = 1.0
         duration        = "600s"
 
         aggregations {
-          alignment_period     = "600s"
+          alignment_period     = "300s"
           per_series_aligner   = "ALIGN_SUM"
           cross_series_reducer = "REDUCE_SUM"
 
@@ -55,14 +51,14 @@ resource "google_monitoring_alert_policy" "disk_snapshots" {
         filter = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\" AND metric.label.severity=\"ERROR\""
 
         aggregations {
-          alignment_period   = "600s"
+          alignment_period   = "300s"
           per_series_aligner = "ALIGN_SUM"
         }
 
         denominator_filter = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\" AND metric.label.severity!=\"ERROR\""
 
         denominator_aggregations {
-          alignment_period   = "600s"
+          alignment_period   = "300s"
           per_series_aligner = "ALIGN_SUM"
         }
 
