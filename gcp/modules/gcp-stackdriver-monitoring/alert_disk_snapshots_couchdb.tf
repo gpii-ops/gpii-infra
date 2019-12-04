@@ -1,11 +1,11 @@
-resource "google_monitoring_alert_policy" "k8s_snapshots_couchdb" {
+resource "google_monitoring_alert_policy" "disk_snapshots_couchdb" {
   display_name = "Snapshots are being created for persistent volumes of CouchDB stateful set"
   combiner     = "OR"
 
   conditions = [
     {
       condition_absent {
-        filter   = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot.couchdb\" resource.type=\"gce_disk\""
+        filter   = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\" AND metric.label.pv_name=monitoring.regex.full_match(\"pv-database-storage-couchdb-couchdb.*\") AND metric.label.severity=\"NOTICE\""
         duration = "600s"
 
         aggregations {
@@ -23,7 +23,7 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_couchdb" {
     },
     {
       condition_threshold {
-        filter = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot.couchdb\" resource.type=\"gce_disk\""
+        filter = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\" AND metric.label.pv_name=monitoring.regex.full_match(\"pv-database-storage-couchdb-couchdb.*\") AND metric.label.severity=\"NOTICE\""
 
         comparison      = "COMPARISON_LT"
         threshold_value = 1.0
@@ -48,5 +48,5 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_couchdb" {
   user_labels           = {}
   enabled               = "true"
 
-  depends_on = ["google_logging_metric.disks_createsnapshot_couchdb"]
+  depends_on = ["google_logging_metric.disks_createsnapshot"]
 }
