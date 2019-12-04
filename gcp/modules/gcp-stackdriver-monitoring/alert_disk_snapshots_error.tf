@@ -4,18 +4,26 @@ resource "google_monitoring_alert_policy" "disk_snapshots_error" {
 
   conditions {
     condition_threshold {
-      filter          = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\" AND metric.label.severity=\"ERROR\""
-      comparison      = "COMPARISON_GT"
-      threshold_value = 1.0
-      duration        = "600s"
+      filter = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\" AND metric.label.severity=\"ERROR\""
 
       aggregations {
         alignment_period   = "300s"
         per_series_aligner = "ALIGN_SUM"
       }
+
+      denominator_filter = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\" AND metric.label.severity!=\"ERROR\""
+
+      denominator_aggregations {
+        alignment_period   = "300s"
+        per_series_aligner = "ALIGN_SUM"
+      }
+
+      comparison      = "COMPARISON_GT"
+      threshold_value = 0.05
+      duration        = "0s"
     }
 
-    display_name = "Error found in snapshot creation audit log"
+    display_name = "Error ratio exceeds 5% for events in snapshot creation audit log"
   }
 
   documentation = {
