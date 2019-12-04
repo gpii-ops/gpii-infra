@@ -6,15 +6,16 @@ resource "google_logging_metric" "disks_createsnapshot" {
   metric_descriptor {
     metric_kind = "DELTA"
     value_type  = "INT64"
+
     labels = [
       {
-        key         = "pv_name"
-        value_type  = "STRING"
+        key        = "pv_name"
+        value_type = "STRING"
       },
       {
-        key         = "severity"
-        value_type  = "STRING"
-      }
+        key        = "severity"
+        value_type = "STRING"
+      },
     ]
   }
 
