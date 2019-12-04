@@ -1,5 +1,5 @@
 locals {
-  pv_regexp = "^pv-database-storage-couchdb-couchdb-[0-9]+$"
+  pv_name_regexp = "^pv-database-storage-couchdb-couchdb-[0-9]+$"
 }
 
 resource "google_monitoring_alert_policy" "disk_snapshots" {
@@ -9,7 +9,7 @@ resource "google_monitoring_alert_policy" "disk_snapshots" {
   conditions = [
     {
       condition_absent {
-        filter   = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\" AND metric.label.pv_name=monitoring.regex.full_match(\"${local.pv_regexp}\") AND metric.label.severity=\"NOTICE\""
+        filter   = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\" AND metric.label.pv_name=monitoring.regex.full_match(\"${local.pv_name_regexp}\") AND metric.label.severity=\"NOTICE\""
         duration = "600s"
 
         aggregations {
@@ -27,7 +27,7 @@ resource "google_monitoring_alert_policy" "disk_snapshots" {
     },
     {
       condition_threshold {
-        filter = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\" AND metric.label.pv_name=monitoring.regex.full_match(\"${local.pv_regexp}\") AND metric.label.severity=\"NOTICE\""
+        filter = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\" AND metric.label.pv_name=monitoring.regex.full_match(\"${local.pv_name_regexp}\") AND metric.label.severity=\"NOTICE\""
 
         comparison      = "COMPARISON_LT"
         threshold_value = 1.0
