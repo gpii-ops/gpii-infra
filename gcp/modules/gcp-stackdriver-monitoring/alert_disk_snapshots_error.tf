@@ -4,13 +4,13 @@ resource "google_monitoring_alert_policy" "disk_snapshots_error" {
 
   conditions {
     condition_threshold {
-      filter          = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot.error\" resource.type=\"gce_disk\""
+      filter          = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\" AND metric.label.severity=\"ERROR\""
       comparison      = "COMPARISON_GT"
-      threshold_value = 0.0
-      duration        = "0s"
+      threshold_value = 1.0
+      duration        = "600s"
 
       aggregations {
-        alignment_period   = "60s"
+        alignment_period   = "300s"
         per_series_aligner = "ALIGN_SUM"
       }
     }
@@ -27,5 +27,5 @@ resource "google_monitoring_alert_policy" "disk_snapshots_error" {
   user_labels           = {}
   enabled               = "true"
 
-  depends_on = ["google_logging_metric.disks_createsnapshot_error"]
+  depends_on = ["google_logging_metric.disks_createsnapshot"]
 }
