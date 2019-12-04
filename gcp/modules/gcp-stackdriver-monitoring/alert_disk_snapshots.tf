@@ -72,7 +72,7 @@ resource "google_monitoring_alert_policy" "disk_snapshots" {
       }
 
       display_name = "Error ratio exceeds 5% for events in snapshot creation audit log"
-    }
+    },
   ]
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
