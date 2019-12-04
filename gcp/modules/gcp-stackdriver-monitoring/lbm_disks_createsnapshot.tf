@@ -20,7 +20,7 @@ resource "google_logging_metric" "disks_createsnapshot" {
   }
 
   label_extractors = {
-    "pv_name"  = "EXTRACT(protoPayload.request.name)"
+    "pv_name"  = "REGEXP_EXTRACT(protoPayload.request.description, \".*\\\"name.:..([^\\\"]+).*\")"
     "severity" = "EXTRACT(severity)"
   }
 }
