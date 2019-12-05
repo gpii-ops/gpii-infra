@@ -51,23 +51,23 @@ resource "google_monitoring_alert_policy" "disk_snapshots" {
         filter = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\" AND metric.label.severity=\"ERROR\""
 
         aggregations {
-          alignment_period   = "300s"
+          alignment_period   = "600s"
           per_series_aligner = "ALIGN_SUM"
         }
 
         denominator_filter = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\" AND metric.label.severity!=\"ERROR\""
 
         denominator_aggregations {
-          alignment_period   = "300s"
+          alignment_period   = "600s"
           per_series_aligner = "ALIGN_SUM"
         }
 
         comparison      = "COMPARISON_GT"
-        threshold_value = 0.05
+        threshold_value = 0.1
         duration        = "0s"
       }
 
-      display_name = "Error ratio exceeds 5% for events in snapshot creation audit log"
+      display_name = "Error ratio exceeds 10% for events in snapshot creation audit log"
     },
   ]
 
