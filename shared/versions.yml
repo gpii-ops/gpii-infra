@@ -106,9 +106,9 @@ k8s_snapshots:
     repository: gpii/k8s-snapshots
     tag: 0.2.1-gpii.0
   generated:
-    repository: gcr.io/gpii-common-prd/elsdoerfer__k8s-snapshots
-    sha: sha256:06ceb13d357ef689cd4ecfa17d20f6cd7874554c6da4dfad7bd56cd005e4e452
-    tag: v2.0
+    repository: gcr.io/gpii-common-prd/gpii__k8s-snapshots
+    sha: sha256:f30a6252ef9fbce23c1eda437b60dd4c114555f172795a8e4b454d04edbec8c3
+    tag: 0.2.1-gpii.0
 locust:
   upstream:
     repository: gpii/locust
