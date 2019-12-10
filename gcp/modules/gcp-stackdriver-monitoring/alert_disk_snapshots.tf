@@ -46,29 +46,6 @@ resource "google_monitoring_alert_policy" "disk_snapshots" {
 
       display_name = "Snapshot creation events are occurring too infrequently for some persistent volumes"
     },
-    {
-      condition_threshold {
-        filter = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\" AND metric.label.severity=\"ERROR\""
-
-        aggregations {
-          alignment_period   = "600s"
-          per_series_aligner = "ALIGN_SUM"
-        }
-
-        denominator_filter = "metric.type=\"logging.googleapis.com/user/compute.disks.createSnapshot\" resource.type=\"gce_disk\" AND metric.label.severity!=\"ERROR\""
-
-        denominator_aggregations {
-          alignment_period   = "600s"
-          per_series_aligner = "ALIGN_SUM"
-        }
-
-        comparison      = "COMPARISON_GT"
-        threshold_value = 0.1
-        duration        = "0s"
-      }
-
-      display_name = "Error ratio exceeds 10% for events in snapshot creation audit log"
-    },
   ]
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
