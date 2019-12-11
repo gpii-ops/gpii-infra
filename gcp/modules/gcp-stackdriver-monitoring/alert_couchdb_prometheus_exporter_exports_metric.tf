@@ -5,7 +5,7 @@ resource "google_monitoring_alert_policy" "couchdb_prometheus_exporter_exports_m
   conditions {
     condition_absent {
       filter   = "metric.type=\"custom.googleapis.com/couchdb/httpd_node_up\" resource.type=\"gke_container\""
-      duration = "300s"
+      duration = "${(var.env == "prd" || var.env == "stg") ? "300" : "600"}s"
 
       aggregations {
         alignment_period     = "60s"
