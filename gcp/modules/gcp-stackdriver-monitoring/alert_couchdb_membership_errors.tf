@@ -7,7 +7,7 @@ resource "google_monitoring_alert_policy" "couchdb_membership_errors" {
       filter          = "metric.type=\"logging.googleapis.com/user/couchdb_membership.error\" resource.type=\"k8s_container\""
       comparison      = "COMPARISON_GT"
       threshold_value = 1.0
-      duration        = "0s"
+      duration        = "3600s"
 
       aggregations {
         alignment_period   = "600s"
