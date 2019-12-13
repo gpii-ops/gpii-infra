@@ -376,6 +376,9 @@ This happens when we need to update immutable fields on `PodDisruptionBudget` re
 
 This some times happens, when Stackdriver Ruby client is trying to apply alerting policy on newly created log-based metric. Solution is to wait 5-10 minutes and try again.
 
+### Error reading Metric: googleapi: Error 400: Cannot delete metric METRIC. That metric is still used in an alerting policy.
+There is a data propagation delay between logging and monitoring parts of Stackdriver. Some times Stackriver sees recently orphaned (not used by any alert policy) LBMs as still in-use and refuses to delete them. Solution is to wait 5-10 minutes and try again.
+
 ### [ERROR]: Deadline exceeded while destroying resources!
 
 The most common solution for this is to [create your Stackdriver Workspace](README.md#one-time-stackdriver-workspace-setup).
@@ -403,6 +406,10 @@ metadata:
 ```
 
 Addon manager `Reconcile` mode prevents us from making any modifications, so we can not delete them. Luckily, it does not affect new cert-manager functionality in any way. To get CRD-based resources, please use full CRD name instead of singular definition. i.e. `kubectl -n gpii get certificate.cert-manager.io,issuer.cert-manager.io`.
+
+### Internal error occurred: failed calling webhook "sidecar-injector.istio.io": x509: certificate signed by unknown authority
+
+In case any of your new deployments fail with the error above, the reason is configuration drift in Istio sidecar injector. The solution is to restart sidecard injector pods, following [instructions](https://doc.istio.cn/en/help/ops/setup/injection/#x509-certificate-related-errors) from Istio documentation.
 
 ## Common plumbing
 

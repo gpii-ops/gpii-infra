@@ -7,7 +7,7 @@ resource "google_monitoring_alert_policy" "flowmanager_uptime" {
       filter          = "metric.type=\"monitoring.googleapis.com/uptime_check/check_passed\" AND resource.label.host=\"flowmanager.${var.domain_name}\" AND resource.type=\"uptime_url\""
       comparison      = "COMPARISON_GT"
       threshold_value = 1.0
-      duration        = "300s"
+      duration        = "${(var.env == "prd" || var.env == "stg") ? "300" : "600"}s"
 
       aggregations {
         alignment_period     = "1200s"
