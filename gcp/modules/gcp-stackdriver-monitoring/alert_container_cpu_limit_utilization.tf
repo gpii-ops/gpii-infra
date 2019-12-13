@@ -14,7 +14,7 @@ resource "google_monitoring_alert_policy" "container_cpu_limit_utilization" {
         per_series_aligner = "ALIGN_MEAN"
       }
 
-      denominator_filter       = ""
+      denominator_filter = ""
     }
 
     display_name = "K8s container utilizes more than 85% of allowed CPU"

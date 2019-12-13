@@ -8,5 +8,5 @@ resource "google_monitoring_notification_channel" "email" {
     email_address = "${(var.use_auth_user_email && var.auth_user_email != "") ? var.auth_user_email : var.notification_email}"
   }
 
-  enabled     = "true"
+  enabled = "true"
 }

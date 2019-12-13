@@ -9,5 +9,5 @@ resource "google_monitoring_notification_channel" "alerts_slack" {
     auth_token   = "${var.secret_slack_auth_token}"
   }
 
-  enabled     = "true"
+  enabled = "true"
 }

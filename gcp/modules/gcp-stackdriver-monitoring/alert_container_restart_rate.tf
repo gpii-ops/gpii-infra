@@ -14,7 +14,7 @@ resource "google_monitoring_alert_policy" "container_restart_rate" {
         per_series_aligner = "ALIGN_DELTA"
       }
 
-      denominator_filter       = ""
+      denominator_filter = ""
     }
 
     display_name = "K8s container restarting more often than 1.5 times per minute"

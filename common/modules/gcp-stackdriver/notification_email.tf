@@ -7,5 +7,5 @@ resource "google_monitoring_notification_channel" "email" {
     email_address = "${var.notification_email}"
   }
 
-  enabled     = "true"
+  enabled = "true"
 }
