@@ -407,6 +407,10 @@ metadata:
 
 Addon manager `Reconcile` mode prevents us from making any modifications, so we can not delete them. Luckily, it does not affect new cert-manager functionality in any way. To get CRD-based resources, please use full CRD name instead of singular definition. i.e. `kubectl -n gpii get certificate.cert-manager.io,issuer.cert-manager.io`.
 
+### Internal error occurred: failed calling webhook "sidecar-injector.istio.io": x509: certificate signed by unknown authority
+
+In case any of your new deployments fail with the error above, the reason is configuration drift in Istio sidecar injector. The solution is to restart sidecard injector pods, following [instructions](https://doc.istio.cn/en/help/ops/setup/injection/#x509-certificate-related-errors) from Istio documentation.
+
 ## Common plumbing
 
 The environments that run in GCP need some initial resources that must be created by an administrator first. The [common part of this repository](../common) has the code and the instructions to do so.
