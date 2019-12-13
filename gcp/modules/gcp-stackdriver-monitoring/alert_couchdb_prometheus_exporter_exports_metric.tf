@@ -11,7 +11,6 @@ resource "google_monitoring_alert_policy" "couchdb_prometheus_exporter_exports_m
         alignment_period     = "60s"
         per_series_aligner   = "ALIGN_MEAN"
         cross_series_reducer = "REDUCE_SUM"
-        group_by_fields      = []
       }
     }
 
@@ -24,6 +23,5 @@ resource "google_monitoring_alert_policy" "couchdb_prometheus_exporter_exports_m
   }
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
-  user_labels           = {}
   enabled               = "true"
 }

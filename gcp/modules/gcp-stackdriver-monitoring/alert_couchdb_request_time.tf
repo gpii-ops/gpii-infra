@@ -12,11 +12,9 @@ resource "google_monitoring_alert_policy" "couchdb_request_time" {
       aggregations {
         alignment_period   = "60s"
         per_series_aligner = "ALIGN_MEAN"
-        group_by_fields    = []
       }
 
-      denominator_filter       = ""
-      denominator_aggregations = []
+      denominator_filter = ""
     }
 
     display_name = "CouchDB request time exceeded 100ms"
@@ -28,6 +26,5 @@ resource "google_monitoring_alert_policy" "couchdb_request_time" {
   }
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
-  user_labels           = {}
   enabled               = "true"
 }

@@ -12,11 +12,9 @@ resource "google_monitoring_alert_policy" "couchdb_missing_node" {
       aggregations {
         alignment_period   = "60s"
         per_series_aligner = "ALIGN_SUM"
-        group_by_fields    = []
       }
 
-      denominator_filter       = ""
-      denominator_aggregations = []
+      denominator_filter = ""
     }
 
     display_name = "CouchDB node is missing in the cluster"
@@ -28,7 +26,6 @@ resource "google_monitoring_alert_policy" "couchdb_missing_node" {
   }
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
-  user_labels           = {}
   enabled               = "true"
 
   depends_on = ["google_logging_metric.couchdb_missing_node"]

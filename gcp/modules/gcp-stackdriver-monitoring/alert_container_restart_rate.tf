@@ -12,17 +12,14 @@ resource "google_monitoring_alert_policy" "container_restart_rate" {
       aggregations {
         alignment_period   = "60s"
         per_series_aligner = "ALIGN_DELTA"
-        group_by_fields    = []
       }
 
       denominator_filter       = ""
-      denominator_aggregations = []
     }
 
     display_name = "K8s container restarting more often than 1.5 times per minute"
   }
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
-  user_labels           = {}
   enabled               = "true"
 }

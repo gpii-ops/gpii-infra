@@ -20,8 +20,7 @@ resource "google_monitoring_alert_policy" "cluster_resource_allocatable_utilizat
           ]
         }
 
-        denominator_filter       = ""
-        denominator_aggregations = []
+        denominator_filter = ""
       }
 
       display_name = "K8s cluster allocated more than 85% of available CPU"
@@ -43,8 +42,7 @@ resource "google_monitoring_alert_policy" "cluster_resource_allocatable_utilizat
           ]
         }
 
-        denominator_filter       = ""
-        denominator_aggregations = []
+        denominator_filter = ""
       }
 
       display_name = "K8s cluster allocated more than 85% of available RAM"
@@ -52,6 +50,5 @@ resource "google_monitoring_alert_policy" "cluster_resource_allocatable_utilizat
   ]
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
-  user_labels           = {}
   enabled               = "true"
 }

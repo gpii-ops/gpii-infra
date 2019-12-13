@@ -12,11 +12,9 @@ resource "google_monitoring_alert_policy" "couchdb_membership_errors" {
       aggregations {
         alignment_period   = "600s"
         per_series_aligner = "ALIGN_SUM"
-        group_by_fields    = []
       }
 
-      denominator_filter       = ""
-      denominator_aggregations = []
+      denominator_filter = ""
     }
 
     display_name = "Error found in CouchDB membership check logs"
@@ -28,8 +26,6 @@ resource "google_monitoring_alert_policy" "couchdb_membership_errors" {
   }
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
-  user_labels           = {}
   enabled               = "true"
-
-  depends_on = ["google_logging_metric.couchdb_membership_error"]
+  depends_on            = ["google_logging_metric.couchdb_membership_error"]
 }

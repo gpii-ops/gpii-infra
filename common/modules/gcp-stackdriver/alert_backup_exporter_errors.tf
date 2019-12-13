@@ -28,8 +28,6 @@ resource "google_monitoring_alert_policy" "backup_exporter_errors" {
     "${google_monitoring_notification_channel.email.name}",
   ]
 
-  user_labels = {}
-  enabled     = true
-
+  enabled    = true
   depends_on = ["google_logging_metric.backup_exporter_snapshot_created"]
 }

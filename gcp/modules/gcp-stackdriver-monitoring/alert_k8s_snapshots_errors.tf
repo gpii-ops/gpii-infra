@@ -12,11 +12,9 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_errors" {
       aggregations {
         alignment_period   = "600s"
         per_series_aligner = "ALIGN_SUM"
-        group_by_fields    = []
       }
 
-      denominator_filter       = ""
-      denominator_aggregations = []
+      denominator_filter = ""
     }
 
     display_name = "Error found in K8s-snapshots logs"
@@ -28,7 +26,6 @@ resource "google_monitoring_alert_policy" "k8s_snapshots_errors" {
   }
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
-  user_labels           = {}
   enabled               = "false"
 
   depends_on = ["google_logging_metric.k8s_snapshots_error"]
