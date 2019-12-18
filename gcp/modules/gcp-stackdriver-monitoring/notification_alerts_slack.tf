@@ -12,3 +12,11 @@ resource "google_monitoring_notification_channel" "alerts_slack" {
   user_labels = {}
   enabled     = "true"
 }
+
+output "slack_notification_channel" {
+  value = "${google_monitoring_notification_channel.alerts_slack.*.name}"
+}
+
+output "mail_notification_channel" {
+  value = "${google_monitoring_notification_channel.email.name}"
+}

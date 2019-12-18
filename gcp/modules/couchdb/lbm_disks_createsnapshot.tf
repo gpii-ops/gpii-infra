@@ -1,7 +1,7 @@
 resource "google_logging_metric" "disks_createsnapshot" {
-  name       = "compute.disks.createSnapshot"
-  depends_on = ["null_resource.destroy_old_stackdriver_resources"]
-  filter     = "resource.type=\"gce_disk\" AND protoPayload.methodName=\"v1.compute.disks.createSnapshot\""
+  name    = "compute.disks.createSnapshot"
+  filter  = "resource.type=\"gce_disk\" AND protoPayload.methodName=\"v1.compute.disks.createSnapshot\""
+  project = "${var.project_id}"
 
   metric_descriptor {
     metric_kind = "DELTA"

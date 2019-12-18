@@ -2,6 +2,9 @@ terraform {
   backend "gcs" {}
 }
 
+variable "env" {}
+variable "project_id" {}
+variable "serviceaccount_key" {}
 variable "secrets_dir" {}
 variable "charts_dir" {}
 variable "nonce" {}
@@ -32,7 +35,7 @@ variable "execute_recover_pvcs" {}
 variable "secret_couchdb_admin_password" {}
 variable "secret_couchdb_admin_username" {}
 variable "secret_couchdb_auth_cookie" {}
-
+variable "key_tfstate_encryption_key" {}
 # Default variables
 
 variable "replica_count" {
@@ -190,5 +193,16 @@ resource "null_resource" "couchdb_destroy_pvcs" {
         timeout -t 600 kubectl -n ${var.release_namespace} delete --ignore-not-found --grace-period=300 pvc $PVC
       done
     EOF
+  }
+}
+
+data "terraform_remote_state" "alert_notification_channel" {
+  backend = "gcs"
+
+  config {
+    credentials    = "${var.serviceaccount_key}"
+    bucket         = "${var.project_id}-tfstate"
+    prefix         = "${var.env}/k8s/stackdriver/monitoring"
+    encryption_key = "${var.key_tfstate_encryption_key}"
   }
 }
