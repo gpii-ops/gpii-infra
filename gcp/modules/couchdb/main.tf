@@ -36,6 +36,7 @@ variable "secret_couchdb_admin_password" {}
 variable "secret_couchdb_admin_username" {}
 variable "secret_couchdb_auth_cookie" {}
 variable "key_tfstate_encryption_key" {}
+
 # Default variables
 
 variable "replica_count" {
