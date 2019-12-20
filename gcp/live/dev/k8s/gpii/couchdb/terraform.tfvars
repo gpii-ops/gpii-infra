@@ -8,6 +8,7 @@ terragrunt = {
     paths = [
       "../../kube-system/helm-initializer",
       "../../kube-system/cert-manager",
+      "../../stackdriver/monitoring",
       "../istio",
     ]
   }
