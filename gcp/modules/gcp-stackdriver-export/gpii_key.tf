@@ -17,6 +17,6 @@ resource "google_logging_project_sink" "this" {
 }
 
 resource "google_project_iam_member" "this" {
-  member  = "${google_logging_project_sink.this.writer_identity}"
-  role    = "roles/bigquery.dataEditor"
+  member = "${google_logging_project_sink.this.writer_identity}"
+  role   = "roles/bigquery.dataEditor"
 }
