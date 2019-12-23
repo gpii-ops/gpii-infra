@@ -51,7 +51,7 @@ variable "ci_dev_project_regex" {
 
 variable "service_apis" {
   default = [
-    "bigquery-json.googleapis.com",
+    "bigquery.googleapis.com",
     "bigquerystorage.googleapis.com",
     "binaryauthorization.googleapis.com",
     "cloudbilling.googleapis.com",
