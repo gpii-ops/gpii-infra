@@ -1,3 +1,7 @@
+# The resources below are temporary and needed so we can collect
+# and analyze some data about individual GPII keys usage.
+# More info: https://issues.gpii.net/browse/GPII-4158
+
 provider "google" {
   project     = "${var.project_id}"
   credentials = "${var.serviceaccount_key}"
