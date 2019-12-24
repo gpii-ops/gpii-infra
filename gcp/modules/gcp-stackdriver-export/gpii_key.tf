@@ -10,6 +10,8 @@ provider "google" {
 resource "google_bigquery_dataset" "gpii_key" {
   dataset_id = "exported_logs_with_gpii_key"
   location   = "US"
+
+  delete_contents_on_destroy = "${var.env == "dev" ? true : false}"
 }
 
 resource "google_logging_project_sink" "gpii_key" {
