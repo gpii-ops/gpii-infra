@@ -443,13 +443,21 @@ data "google_iam_policy" "combined" {
     ]
   }
 
-  # This permission should be removed once the ticket is closed.
+  # Permissions below should be removed once the ticket is closed.
   # More info: https://issues.gpii.net/browse/GPII-4158
   binding {
     role = "roles/bigquery.admin"
 
     members = [
       "${local.service_accounts}",
+    ]
+  }
+
+  binding {
+    role = "roles/bigquery.dataEditor"
+
+    members = [
+      "serviceAccount:cloud-logs@system.gserviceaccount.com",
     ]
   }
 
