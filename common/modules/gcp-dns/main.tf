@@ -28,7 +28,7 @@ provider "google" {
 resource "google_dns_managed_zone" "root_zone" {
   name        = "${replace(var.organization_domain, ".", "-")}"
   dns_name    = "${var.organization_domain}."
-  description = "root ${var.organization_domain} DNS zone"
+  description = "Root ${var.organization_domain} DNS zone"
 
   lifecycle {
     prevent_destroy = "true"
@@ -76,7 +76,7 @@ resource "google_dns_record_set" "ns_main" {
 resource "google_dns_managed_zone" "main" {
   name        = "gcp-${replace(var.organization_domain, ".", "-")}"
   dns_name    = "gcp.${var.organization_domain}."
-  description = "gcp DNS zone"
+  description = "Main GCP part DNS zone"
 
   lifecycle {
     prevent_destroy = "true"
