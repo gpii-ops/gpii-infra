@@ -57,18 +57,6 @@ Examples of things that get credentials this way include: CouchDB, Alertmanager.
       * The [internal ansible repo](https://github.com/inclusive-design/ops) has a playbook to do this: `config_host_gpii_version_updater.yml`.
       * You'll need the ssh key you [configured with Github](#configure-github).
 
-### Configure AWS (DEPRECATED)
-
-   * One design goal of this infrastructure is to use the same code to spin up clusters for development and production. This model bumps up against some of Amazon's (fairly conservative) default limits for various resource types. Usually this kind of failure is obvious from the error message returned by AWS ("Your quota allows for 0 more running instance(s).").
-      * The general procedure for increasing a limit is: web search "aws <name of thing> limit", find Amazon documentation about the limit, click link in documentation to service request form for increasing said limit, wait for response from Amazon support.
-      * Limits we've hit and increased: number of VPCs, number of ASGs, number of EC2 Instances (t2.micro through t2.large).
-
-### Set up credentials (DEPRECATED)
-
-   * [Set up .ssh with gpii-key.pem](README.md#configure-ssh).
-      * Make sure the private key associated with the gitlab-runner Github account is available at `~gitlab-runner/.ssh/id_rsa.gpii-ci`.
-   * [Configure AWS creds](README.md#install-packages) for `gitlab-runner`.
-
 ## Running manually in non-dev environments (stg, prd)
 
 **Note: this is an advanced workflow.** User discretion is advised.
