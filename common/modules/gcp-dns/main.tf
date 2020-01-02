@@ -35,6 +35,18 @@ resource "google_dns_managed_zone" "root_zone" {
   }
 }
 
+# Override NS record created by google_dns_managed_zone
+# to set proper TTL
+resource "google_dns_record_set" "root_zone" {
+  name         = "${google_dns_managed_zone.root_zone.dns_name}."
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
+  type         = "NS"
+  ttl          = 3600
+  project      = "${var.project_id}"
+  rrdatas      = ["${google_dns_managed_zone.root_zone.name_servers}"]
+  depends_on   = ["google_dns_managed_zone.root_zone"]
+}
+
 # Only needed to create the NS registry of test.gpii.net in gpii.net zone
 data "google_dns_managed_zone" "test_gpii_net" {
   count   = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
@@ -69,6 +81,18 @@ resource "google_dns_managed_zone" "main" {
   lifecycle {
     prevent_destroy = "true"
   }
+}
+
+# Override NS record created by google_dns_managed_zone
+# to set proper TTL
+resource "google_dns_record_set" "main" {
+  name         = "${google_dns_managed_zone.main.dns_name}."
+  managed_zone = "${google_dns_managed_zone.main.name}"
+  type         = "NS"
+  ttl          = 3600
+  project      = "${var.project_id}"
+  rrdatas      = ["${google_dns_managed_zone.main.name_servers}"]
+  depends_on   = ["google_dns_managed_zone.main"]
 }
 
 output "gcp_name_servers" {
