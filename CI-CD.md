@@ -4,7 +4,6 @@ This repo is designed to fit into a CI/CD scheme: new commits are automatically 
 
 * [GPII Build and Release Overview](https://docs.google.com/presentation/d/1l8qQEvFaml_qgc0fynHScVhWseu0loytcYaFP_m0tBs) - overview of how GPII is built, tested, and deployed to the public cloud
 * [A more detailed view of CI/CD](https://docs.google.com/presentation/d/1vkVi1iCDSqdfC9YPmpd-xyUJORFtXE72soLtFLHEEcg/view) - this one has more about gpii-version-updater
-* DEPRECATED [GPII Build and Release Overview (AWS Version)](https://docs.google.com/presentation/d/1yXGCHBDtb07Gw0do2ZcnUQ0R-g6z4w6uDlqxBnr8Yxo) - overview of the AWS-based infrastructure
 
 ## One-time setup steps
 
