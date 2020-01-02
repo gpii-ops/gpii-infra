@@ -38,7 +38,7 @@ resource "google_dns_managed_zone" "root_zone" {
 # Override NS record created by google_dns_managed_zone
 # to set proper TTL
 resource "google_dns_record_set" "root_zone" {
-  name         = "${google_dns_managed_zone.root_zone.dns_name}."
+  name         = "${google_dns_managed_zone.root_zone.dns_name}"
   managed_zone = "${google_dns_managed_zone.root_zone.name}"
   type         = "NS"
   ttl          = 3600
@@ -86,7 +86,7 @@ resource "google_dns_managed_zone" "main" {
 # Override NS record created by google_dns_managed_zone
 # to set proper TTL
 resource "google_dns_record_set" "main" {
-  name         = "${google_dns_managed_zone.main.dns_name}."
+  name         = "${google_dns_managed_zone.main.dns_name}"
   managed_zone = "${google_dns_managed_zone.main.name}"
   type         = "NS"
   ttl          = 3600
