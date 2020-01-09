@@ -1,3 +1,5 @@
+variable "nonce" {}
+
 resource "google_monitoring_alert_policy" "dns_modify" {
   display_name = "CloudDNS audit log does not contain zone modification events"
   combiner     = "OR"
@@ -31,5 +33,31 @@ resource "google_monitoring_alert_policy" "dns_modify" {
   user_labels           = {}
   enabled               = "true"
 
+  depends_on = ["null_resource.wait_for_dns_modify_lbm"]
+}
+
+resource "null_resource" "wait_for_dns_modify_lbm" {
   depends_on = ["google_logging_metric.dns_modify"]
+
+  triggers = {
+    nonce = "${var.nonce}"
+  }
+
+  provisioner "local-exec" {
+    command = <<EOF
+      COUNT=1
+      MAX_RETRIES=60
+      SLEEP_SEC=5
+      ALERT_READY=false
+
+      while [ "$ALERT_READY" != 'true' ] && [ "$COUNT" -le "$MAX_RETRIES" ]; do
+        echo "Waiting for log based metric dns.modify to be ready ($COUNT/$MAX_RETRIES)"
+        gcloud logging metrics describe dns.modify > /dev/null
+        [ "$?" -eq 0 ] && ALERT_READY=true
+        # Sleep only if we're not ready
+        [ "$ALERT_READY" != 'true' ] && sleep "$SLEEP_SEC"
+        COUNT=$((COUNT+1))
+      done
+    EOF
+  }
 }
