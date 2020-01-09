@@ -4,6 +4,12 @@ terragrunt = {
     source = "/project/modules//gcp-stackdriver-monitoring"
   }
 
+  dependencies {
+    paths = [
+      "../../cluster"
+    ]
+  }
+
   include = {
     path = "${find_in_parent_folders()}"
   }

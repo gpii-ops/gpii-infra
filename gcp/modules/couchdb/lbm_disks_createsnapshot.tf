@@ -1,4 +1,6 @@
 resource "google_logging_metric" "disks_createsnapshot" {
+  depends_on = ["null_resource.couchdb_enable_pv_backups"]
+
   name    = "compute.disks.createSnapshot"
   filter  = "resource.type=\"gce_disk\" AND protoPayload.methodName=\"v1.compute.disks.createSnapshot\""
   project = "${var.project_id}"

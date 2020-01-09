@@ -1,4 +1,6 @@
 resource "google_monitoring_alert_policy" "couchdb_prometheus_exporter_exports_metric" {
+  depends_on = ["module.couchdb"]
+
   display_name = "Pod `couchdb-prometheus-exporter` exports a metric"
   combiner     = "OR"
   project      = "${var.project_id}"
