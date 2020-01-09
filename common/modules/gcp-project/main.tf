@@ -544,6 +544,18 @@ resource "google_dns_managed_zone" "project" {
   ]
 }
 
+# Override NS record created by google_dns_managed_zone
+# to set proper TTL
+resource "google_dns_record_set" "project" {
+  name         = "${local.dnsname}."
+  managed_zone = "${google_dns_managed_zone.project.name}"
+  type         = "NS"
+  ttl          = 3600
+  project      = "${google_project.project.project_id}"
+  rrdatas      = ["${google_dns_managed_zone.project.name_servers}"]
+  depends_on   = ["google_dns_managed_zone.project"]
+}
+
 # Set the NS records in the parent zone of the parent project if the
 # project_name has the pattern ${env}-${user}
 resource "google_dns_record_set" "ns" {
