@@ -64,7 +64,7 @@ Examples of things that get credentials this way include: CouchDB, Alertmanager.
 
 `dev-*` environments are built with code from `master`, but other environments (e.g. `stg`, `prd`) are controlled with version tags. The CD process handles versioning automatically, but in case manual intervention is required:
    * Make sure any local changes are committed or stashed (`git status`).
-   * `git checkout $(git tag | grep ^deploy-aws-stg- | sort | tail -1)`
+   * `git checkout $(git tag | grep ^deploy-stg- | sort | tail -1)`
    * `cd stg`
    * If you will `rake deploy` (or just `rake`, as `rake deploy` is the default operation) or otherwise make changes to anything that uses credentials, you will need to manually configure your local environment. See [Configure Gitlab Secret Variables](#configure-gitlab-secret-variables).
    * `rake ...`
