@@ -788,6 +788,7 @@ resource "google_dns_record_set" "cname-www-gpii-net" {
   ]
 }
 
+# Requested in GPII-4299
 resource "google_dns_record_set" "cname-email-mg-gpii-net" {
   count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
   managed_zone = "${google_dns_managed_zone.root_zone.name}"
@@ -875,6 +876,7 @@ resource "google_dns_record_set" "txt-test-gpii-net" {
   ]
 }
 
+# Requested in GPII-4299
 resource "google_dns_record_set" "txt-mg-gpii-net" {
   count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
   managed_zone = "${google_dns_managed_zone.root_zone.name}"
@@ -887,6 +889,7 @@ resource "google_dns_record_set" "txt-mg-gpii-net" {
   ]
 }
 
+# Requested in GPII-4299
 resource "google_dns_record_set" "txt_domainkey-mg-gpii-net" {
   count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
   managed_zone = "${google_dns_managed_zone.root_zone.name}"
@@ -930,6 +933,7 @@ resource "google_dns_record_set" "mx-lists-gpii-net" {
   ]
 }
 
+# Requested in GPII-4299
 resource "google_dns_record_set" "mg-gpii-net" {
   count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
   managed_zone = "${google_dns_managed_zone.root_zone.name}"
