@@ -4,7 +4,6 @@ This repo is designed to fit into a CI/CD scheme: new commits are automatically 
 
 * [GPII Build and Release Overview](https://docs.google.com/presentation/d/1l8qQEvFaml_qgc0fynHScVhWseu0loytcYaFP_m0tBs) - overview of how GPII is built, tested, and deployed to the public cloud
 * [A more detailed view of CI/CD](https://docs.google.com/presentation/d/1vkVi1iCDSqdfC9YPmpd-xyUJORFtXE72soLtFLHEEcg/view) - this one has more about gpii-version-updater
-* DEPRECATED [GPII Build and Release Overview (AWS Version)](https://docs.google.com/presentation/d/1yXGCHBDtb07Gw0do2ZcnUQ0R-g6z4w6uDlqxBnr8Yxo) - overview of the AWS-based infrastructure
 
 ## One-time setup steps
 
@@ -57,18 +56,6 @@ Examples of things that get credentials this way include: CouchDB, Alertmanager.
       * The [internal ansible repo](https://github.com/inclusive-design/ops) has a playbook to do this: `config_host_gpii_version_updater.yml`.
       * You'll need the ssh key you [configured with Github](#configure-github).
 
-### Configure AWS (DEPRECATED)
-
-   * One design goal of this infrastructure is to use the same code to spin up clusters for development and production. This model bumps up against some of Amazon's (fairly conservative) default limits for various resource types. Usually this kind of failure is obvious from the error message returned by AWS ("Your quota allows for 0 more running instance(s).").
-      * The general procedure for increasing a limit is: web search "aws <name of thing> limit", find Amazon documentation about the limit, click link in documentation to service request form for increasing said limit, wait for response from Amazon support.
-      * Limits we've hit and increased: number of VPCs, number of ASGs, number of EC2 Instances (t2.micro through t2.large).
-
-### Set up credentials (DEPRECATED)
-
-   * [Set up .ssh with gpii-key.pem](README.md#configure-ssh).
-      * Make sure the private key associated with the gitlab-runner Github account is available at `~gitlab-runner/.ssh/id_rsa.gpii-ci`.
-   * [Configure AWS creds](README.md#install-packages) for `gitlab-runner`.
-
 ## Running manually in non-dev environments (stg, prd)
 
 **Note: this is an advanced workflow.** User discretion is advised.
@@ -77,7 +64,7 @@ Examples of things that get credentials this way include: CouchDB, Alertmanager.
 
 `dev-*` environments are built with code from `master`, but other environments (e.g. `stg`, `prd`) are controlled with version tags. The CD process handles versioning automatically, but in case manual intervention is required:
    * Make sure any local changes are committed or stashed (`git status`).
-   * `git checkout $(git tag | grep ^deploy-aws-stg- | sort | tail -1)`
+   * `git checkout $(git tag | grep ^deploy-stg- | sort | tail -1)`
    * `cd stg`
    * If you will `rake deploy` (or just `rake`, as `rake deploy` is the default operation) or otherwise make changes to anything that uses credentials, you will need to manually configure your local environment. See [Configure Gitlab Secret Variables](#configure-gitlab-secret-variables).
    * `rake ...`

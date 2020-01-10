@@ -71,8 +71,6 @@ resource "google_dns_record_set" "ns_main" {
   rrdatas      = ["${google_dns_managed_zone.main.name_servers}"]
 }
 
-# This resource should be named "gcp_zone" but we are going to preserve this in order to avoid missmatching between AWS and GCP.
-# Once all the DNS is set at GCP we can rename this resource and apply the plan being sure that all the zones are well referenced.
 resource "google_dns_managed_zone" "main" {
   name        = "gcp-${replace(var.organization_domain, ".", "-")}"
   dns_name    = "gcp.${var.organization_domain}."
