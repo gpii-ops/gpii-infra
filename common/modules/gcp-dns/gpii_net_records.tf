@@ -898,7 +898,7 @@ resource "google_dns_record_set" "txt_domainkey-mg-gpii-net" {
   ttl          = "300"
 
   rrdatas = [
-    "\"k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA76K9JTgnLmp1+uvJB8wlmEx0PZBo84U/Bom0HnUPCUQtFTHu5N5yEqeg56sPI6rJb/maRsJSZ1LYU6o9mqBzumBJBzxESgB+PoVEbHjpx18Bj+cpFNkxsENJLNWTSSn0hxDB4Hk38rST3kn9M7+L6W/kDuQ+wGM3PCbiUs1Sw3X+olAwirAiscLUnwhKLHd/NobKNETjC5aokbak9O4+3GtKwXS3kY54DQx6fWKSvdcDvZMKnguklIG0twBPZ0y3ZSS7FFcHB2gfjJz+uvRo8hviOxqJT9smQ/P9AzfXp3m9Gwk73i850OooAMCZN5l3FIoBG7dV9iQiAPqhg2pbewIDAQAB\"",
+    "\"v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA76K9JTgnLmp1+uvJB8wlmEx0PZBo84U/Bom0HnUPCUQtFTHu5N5yEqeg56sPI6rJb/maRsJSZ1LYU6o9mqBzumBJBzxESgB+PoVEbHjpx18Bj+cpFNkxsENJL\" \"NWTSSn0hxDB4Hk38rST3kn9M7+L6W/kDuQ+wGM3PCbiUs1Sw3X+olAwirAiscLUnwhKLHd/NobKNETjC5aokbak9O4+3GtKwXS3kY54DQx6fWKSvdcDvZMKnguklIG0twBPZ0y3ZSS7FFcHB2gfjJz+uvRo8hviOxqJT9smQ/P9AzfXp3m9Gwk73i850OooAMCZN5l3FIoBG7dV9iQiAPqhg2pbewIDAQAB\"",
   ]
 }
 
