@@ -5,6 +5,14 @@
 # See the README for details on how to modify which images are used or to add
 # components.
 ---
+exekube:
+  upstream:
+    # The following comment is needed, so exekube version checker script
+    # can properly process this file as well, since it mentions image in different format:
+    #
+    # gpii/exekube:0.9.11-google_gpii.0
+    repository: gpii/exekube
+    tag: 0.9.11-google_gpii.0
 cert_manager:
   upstream:
     repository: quay.io/jetstack/cert-manager-controller
