@@ -1,5 +1,0 @@
-image:
-  repository: <%= @versions["gpii-dataloader"].split('@')[0] %>
-  checksum: <%= @versions["gpii-dataloader"].split('@')[1] %>
-
-couchdbUrl: "http://<%= @secrets["couchdb_user"] %>:<%= @secrets["couchdb_password"] %>@couchdb-lb.gpii.svc.cluster.local:5984/gpii"

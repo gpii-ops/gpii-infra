@@ -13,7 +13,6 @@ GPII infrastructure comes in a few "flavors".
 
 * [Google Cloud Platform (GCP)](gcp/) *(stable, most users want this)*
 * [Common plumbing](common/) *(mostly for admins)*
-* [Amazon Web Services (AWS)](aws/) *(DEPRECATED)*
 
 ## Other documents
 
