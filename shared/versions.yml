@@ -11,7 +11,7 @@ exekube:
     tag: 0.9.11-google_gpii.0
   generated:
     repository: gcr.io/gpii-common-prd/gpii__exekube
-    sha: sha256:284dd03fad21e38e353e63083b35c7f371fccd261e2783d788956bbc4c25f628
+    sha: sha256:20131cdaa65075d337889f0fb501dfd20016721c88c35578099ec4c7cadb0e6d
     tag: 0.9.11-google_gpii.0
 cert_manager:
   upstream:
@@ -59,7 +59,7 @@ ssl_cert_check:
     tag: 0.0.1-gpii.0
   generated:
     repository: gcr.io/gpii-common-prd/gpii__ssl-cert-check
-    sha: sha256:d0d1bdcf16380cf3a077caef1d72d03393fa4c0a256770711c429b46f9f9a3b3
+    sha: sha256:6b3dee2d1b35722a79ab39e8602a0fef9d28360821945a2de08cf9383eee9f0a
     tag: 0.0.1-gpii.0
 couchdb_prometheus_exporter:
   upstream:
