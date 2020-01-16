@@ -7,11 +7,11 @@
 ---
 exekube:
   upstream:
-    # The following comment is needed, so exekube version checker script
-    # can properly process this file as well, since it mentions image in different format:
-    #
-    # gpii/exekube:0.9.11-google_gpii.0
     repository: gpii/exekube
+    tag: 0.9.11-google_gpii.0
+  generated:
+    repository: gcr.io/gpii-common-prd/gpii__exekube
+    sha: sha256:284dd03fad21e38e353e63083b35c7f371fccd261e2783d788956bbc4c25f628
     tag: 0.9.11-google_gpii.0
 cert_manager:
   upstream:
