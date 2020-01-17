@@ -3,7 +3,7 @@
 # This script verifies that only one version of exekube is being used across the project
 
 EXCLUDE_DIRS=".git"
-IMAGE_REGEX="gpii/exekube:\d+\.\d+\.\d+-google_gpii\.\d+"
+IMAGE_REGEX="gcr.io/gpii-common-prd/gpii__exekube:\d+\.\d+\.\d+-google_gpii\.\d+"
 
 images=$(find . \( -name "$EXCLUDE_DIRS" -prune \) -o -type f -exec grep -h -o -E "$IMAGE_REGEX" {} \; | sort -u)
 images_count=$(echo "$images" | wc -l | awk '{ print $1 }')
