@@ -3,7 +3,7 @@ locals {
 }
 
 resource "google_monitoring_alert_policy" "disk_snapshots" {
-  depends_on = ["null_resource.wait_for_k8s_snapshots_lbm"]
+  depends_on = ["google_logging_metric.disks_createsnapshot"]
 
   display_name = "Snapshots are being created for all persistent volumes"
   combiner     = "OR"
@@ -54,30 +54,4 @@ resource "google_monitoring_alert_policy" "disk_snapshots" {
   notification_channels = ["${data.terraform_remote_state.alert_notification_channel.slack_notification_channel}", "${data.terraform_remote_state.alert_notification_channel.mail_notification_channel}"]
   user_labels           = {}
   enabled               = "true"
-}
-
-resource "null_resource" "wait_for_k8s_snapshots_lbm" {
-  depends_on = ["google_logging_metric.disks_createsnapshot"]
-
-  triggers = {
-    nonce = "${var.nonce}"
-  }
-
-  provisioner "local-exec" {
-    command = <<EOF
-      COUNT=1
-      MAX_RETRIES=60
-      SLEEP_SEC=5
-      ALERT_READY=false
-
-      while [ "$ALERT_READY" != 'true' ] && [ "$COUNT" -le "$MAX_RETRIES" ]; do
-        echo "Waiting for log based metric compute.disks.createSnapshot to be ready ($COUNT/$MAX_RETRIES)"
-        gcloud logging metrics describe compute.disks.createSnapshot > /dev/null
-        [ "$?" -eq 0 ] && ALERT_READY=true
-        # Sleep only if we're not ready
-        [ "$ALERT_READY" != 'true' ] && sleep "$SLEEP_SEC"
-        COUNT=$((COUNT+1))
-      done
-    EOF
-  }
 }
