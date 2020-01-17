@@ -51,7 +51,7 @@ variable "ci_dev_project_regex" {
 
 variable "service_apis" {
   default = [
-    "bigquery-json.googleapis.com",
+    "bigquery.googleapis.com",
     "bigquerystorage.googleapis.com",
     "binaryauthorization.googleapis.com",
     "cloudbilling.googleapis.com",
@@ -443,6 +443,24 @@ data "google_iam_policy" "combined" {
     ]
   }
 
+  # Permissions below should be removed once the ticket is closed.
+  # More info: https://issues.gpii.net/browse/GPII-4158
+  binding {
+    role = "roles/bigquery.admin"
+
+    members = [
+      "${local.service_accounts}",
+    ]
+  }
+
+  binding {
+    role = "roles/bigquery.dataEditor"
+
+    members = [
+      "serviceAccount:cloud-logs@system.gserviceaccount.com",
+    ]
+  }
+
   audit_config {
     service = "allServices"
 
@@ -524,6 +542,18 @@ resource "google_dns_managed_zone" "project" {
   depends_on = ["google_project_services.project",
     "google_project_iam_policy.project",
   ]
+}
+
+# Override NS record created by google_dns_managed_zone
+# to set proper TTL
+resource "google_dns_record_set" "project" {
+  name         = "${local.dnsname}."
+  managed_zone = "${google_dns_managed_zone.project.name}"
+  type         = "NS"
+  ttl          = 3600
+  project      = "${google_project.project.project_id}"
+  rrdatas      = ["${google_dns_managed_zone.project.name_servers}"]
+  depends_on   = ["google_dns_managed_zone.project"]
 }
 
 # Set the NS records in the parent zone of the parent project if the
