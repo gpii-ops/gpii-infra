@@ -91,7 +91,7 @@ dataloader:
     tag: 20191211142940-0af24fa
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
+    sha: sha256:57fec0a87838d7117cae821a5b9f75742db24947dae3550d1aa2d747c5936ede
     tag: 20191211142940-0af24fa
 flushtokens:
   upstream:
@@ -99,7 +99,7 @@ flushtokens:
     tag: 20191211142940-0af24fa
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
+    sha: sha256:57fec0a87838d7117cae821a5b9f75742db24947dae3550d1aa2d747c5936ede
     tag: 20191211142940-0af24fa
 flowmanager:
   upstream:
@@ -107,7 +107,7 @@ flowmanager:
     tag: 20191211142940-0af24fa
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
+    sha: sha256:57fec0a87838d7117cae821a5b9f75742db24947dae3550d1aa2d747c5936ede
     tag: 20191211142940-0af24fa
 k8s_snapshots:
   upstream:
@@ -131,7 +131,7 @@ preferences:
     tag: 20191211142940-0af24fa
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:1d10740602c8585ba5477631150b6b06a7ea4cfceb6423083955e5fb45b2af88
+    sha: sha256:57fec0a87838d7117cae821a5b9f75742db24947dae3550d1aa2d747c5936ede
     tag: 20191211142940-0af24fa
 service_account_assigner:
   upstream:
