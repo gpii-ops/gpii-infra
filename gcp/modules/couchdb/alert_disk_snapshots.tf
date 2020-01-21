@@ -3,8 +3,11 @@ locals {
 }
 
 resource "google_monitoring_alert_policy" "disk_snapshots" {
+  depends_on = ["google_logging_metric.disks_createsnapshot"]
+
   display_name = "Snapshots are being created for all persistent volumes"
   combiner     = "OR"
+  project      = "${var.project_id}"
 
   conditions = [
     {
@@ -48,9 +51,7 @@ resource "google_monitoring_alert_policy" "disk_snapshots" {
     },
   ]
 
-  notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
+  notification_channels = ["${data.terraform_remote_state.alert_notification_channel.slack_notification_channel}", "${data.terraform_remote_state.alert_notification_channel.mail_notification_channel}"]
   user_labels           = {}
   enabled               = "true"
-
-  depends_on = ["google_logging_metric.disks_createsnapshot"]
 }

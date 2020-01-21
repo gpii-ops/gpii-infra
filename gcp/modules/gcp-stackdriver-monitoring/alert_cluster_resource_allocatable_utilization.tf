@@ -1,6 +1,7 @@
 resource "google_monitoring_alert_policy" "cluster_resource_allocatable_utilization" {
   display_name = "K8s cluster allocatable resource utilization stays within 85% of capacity"
   combiner     = "OR"
+  project      = "${var.project_id}"
 
   conditions = [
     {

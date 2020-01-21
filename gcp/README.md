@@ -411,6 +411,36 @@ Addon manager `Reconcile` mode prevents us from making any modifications, so we 
 
 In case any of your new deployments fail with the error above, the reason is configuration drift in Istio sidecar injector. The solution is to restart sidecard injector pods, following [instructions](https://doc.istio.cn/en/help/ops/setup/injection/#x509-certificate-related-errors) from Istio documentation.
 
+### Istio components are failing to start - `x509: certificate signed by unknown authority`
+
+Check the logs from one of the failing pods if you observe following error:
+
+```
+2020-01-08T18:52:51.873253Z error mcp Failed to create a new MCP sink
+stream: rpc error: code = Unavailable desc = all SubConns are in
+TransientFailure, latest connection error: connection error: desc = "transport:
+authentication handshake failed: x509: certificate signed by unknown authority"
+```
+
+This issue is caused by certificates between Istio components being out of sync.
+This can happen when Root CA is rotated (historically root CA had a 1 year
+default lifetime, new root CAs have 10y... so don't expect to see this issue
+anytime soon).
+
+
+**To resolve this issue:**
+
+- Recreate (restart is not enough) all pods from `istio-galley` deployoment
+  (scaling to 0 and up is fine in this case).
+- Search for and recreate all pods that keep logging the above error after the
+  `istio-galley` pods have been recreated. Following Stackdriver filter can be
+  used:
+
+  ```
+  resource.type="k8s_container"
+  textPayload:"Failed to create a new MCP sink stream"
+  ```
+
 ## Common plumbing
 
 The environments that run in GCP need some initial resources that must be created by an administrator first. The [common part of this repository](../common) has the code and the instructions to do so.

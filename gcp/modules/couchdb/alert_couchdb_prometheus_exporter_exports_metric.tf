@@ -1,6 +1,9 @@
 resource "google_monitoring_alert_policy" "couchdb_prometheus_exporter_exports_metric" {
+  depends_on = ["module.couchdb"]
+
   display_name = "Pod `couchdb-prometheus-exporter` exports a metric"
   combiner     = "OR"
+  project      = "${var.project_id}"
 
   conditions {
     condition_absent {
@@ -22,6 +25,6 @@ resource "google_monitoring_alert_policy" "couchdb_prometheus_exporter_exports_m
     mime_type = "text/markdown"
   }
 
-  notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
+  notification_channels = ["${data.terraform_remote_state.alert_notification_channel.slack_notification_channel}", "${data.terraform_remote_state.alert_notification_channel.mail_notification_channel}"]
   enabled               = "true"
 }
