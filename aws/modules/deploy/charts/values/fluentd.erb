@@ -1,9 +1,0 @@
-elasticsearch:
-  ImageTag: "elasticsearch"
-  prefix: "<%= ENV["TF_VAR_environment"].tr('-.','_') %>_k8s_logs"
-  host: "<%= @secrets["fluent_elasticsearch_host"] %>"
-  port: "<%= @secrets["fluent_elasticsearch_port"] %>"
-  scheme: "<%= @secrets["fluent_elasticsearch_scheme"] %>"
-  user: "<%= @secrets["fluent_elasticsearch_user"] %>"
-  password: "<%= @secrets["fluent_elasticsearch_password"] %>"
- 

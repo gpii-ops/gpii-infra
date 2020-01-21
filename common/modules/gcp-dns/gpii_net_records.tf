@@ -788,6 +788,19 @@ resource "google_dns_record_set" "cname-www-gpii-net" {
   ]
 }
 
+# Requested in GPII-4299
+resource "google_dns_record_set" "cname-email-mg-gpii-net" {
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
+  name         = "email.mg.gpii.net."
+  type         = "CNAME"
+  ttl          = "3600"
+
+  rrdatas = [
+    "mailgun.org.",
+  ]
+}
+
 ### TXT ###
 
 resource "google_dns_record_set" "txt-_dmarc-gpii-net" {
@@ -863,6 +876,32 @@ resource "google_dns_record_set" "txt-test-gpii-net" {
   ]
 }
 
+# Requested in GPII-4299
+resource "google_dns_record_set" "txt-mg-gpii-net" {
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
+  name         = "mg.gpii.net."
+  type         = "TXT"
+  ttl          = "300"
+
+  rrdatas = [
+    "\"v=spf1 include:mailgun.org ~all\"",
+  ]
+}
+
+# Requested in GPII-4299
+resource "google_dns_record_set" "txt_domainkey-mg-gpii-net" {
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
+  name         = "mailo._domainkey.mg.gpii.net."
+  type         = "TXT"
+  ttl          = "300"
+
+  rrdatas = [
+    "\"v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA76K9JTgnLmp1+uvJB8wlmEx0PZBo84U/Bom0HnUPCUQtFTHu5N5yEqeg56sPI6rJb/maRsJSZ1LYU6o9mqBzumBJBzxESgB+PoVEbHjpx18Bj+cpFNkxsENJL\" \"NWTSSn0hxDB4Hk38rST3kn9M7+L6W/kDuQ+wGM3PCbiUs1Sw3X+olAwirAiscLUnwhKLHd/NobKNETjC5aokbak9O4+3GtKwXS3kY54DQx6fWKSvdcDvZMKnguklIG0twBPZ0y3ZSS7FFcHB2gfjJz+uvRo8hviOxqJT9smQ/P9AzfXp3m9Gwk73i850OooAMCZN5l3FIoBG7dV9iQiAPqhg2pbewIDAQAB\"",
+  ]
+}
+
 resource "google_dns_record_set" "mx-gpii-net" {
   count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
   managed_zone = "${google_dns_managed_zone.root_zone.name}"
@@ -891,5 +930,19 @@ resource "google_dns_record_set" "mx-lists-gpii-net" {
     "20 lists-gpii-net.p20.spamhero.net.",
     "30 lists-gpii-net.p30.spamhero.net.",
     "40 lists-gpii-net.p40.spamhero.net.",
+  ]
+}
+
+# Requested in GPII-4299
+resource "google_dns_record_set" "mg-gpii-net" {
+  count        = "${replace(var.organization_domain, "/^gpii.net/", "") == "" ? 1 : 0}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
+  name         = "mg.gpii.net."
+  type         = "MX"
+  ttl          = 3600
+
+  rrdatas = [
+    "10 mxa.mailgun.org.",
+    "10 mxb.mailgun.org.",
   ]
 }

@@ -28,11 +28,23 @@ provider "google" {
 resource "google_dns_managed_zone" "root_zone" {
   name        = "${replace(var.organization_domain, ".", "-")}"
   dns_name    = "${var.organization_domain}."
-  description = "root ${var.organization_domain} DNS zone"
+  description = "Root ${var.organization_domain} DNS zone"
 
   lifecycle {
     prevent_destroy = "true"
   }
+}
+
+# Override NS record created by google_dns_managed_zone
+# to set proper TTL
+resource "google_dns_record_set" "root_zone" {
+  name         = "${google_dns_managed_zone.root_zone.dns_name}"
+  managed_zone = "${google_dns_managed_zone.root_zone.name}"
+  type         = "NS"
+  ttl          = 3600
+  project      = "${var.project_id}"
+  rrdatas      = ["${google_dns_managed_zone.root_zone.name_servers}"]
+  depends_on   = ["google_dns_managed_zone.root_zone"]
 }
 
 # Only needed to create the NS registry of test.gpii.net in gpii.net zone
@@ -59,16 +71,26 @@ resource "google_dns_record_set" "ns_main" {
   rrdatas      = ["${google_dns_managed_zone.main.name_servers}"]
 }
 
-# This resource should be named "gcp_zone" but we are going to preserve this in order to avoid missmatching between AWS and GCP.
-# Once all the DNS is set at GCP we can rename this resource and apply the plan being sure that all the zones are well referenced.
 resource "google_dns_managed_zone" "main" {
   name        = "gcp-${replace(var.organization_domain, ".", "-")}"
   dns_name    = "gcp.${var.organization_domain}."
-  description = "gcp DNS zone"
+  description = "Main GCP part DNS zone"
 
   lifecycle {
     prevent_destroy = "true"
   }
+}
+
+# Override NS record created by google_dns_managed_zone
+# to set proper TTL
+resource "google_dns_record_set" "main" {
+  name         = "${google_dns_managed_zone.main.dns_name}"
+  managed_zone = "${google_dns_managed_zone.main.name}"
+  type         = "NS"
+  ttl          = 3600
+  project      = "${var.project_id}"
+  rrdatas      = ["${google_dns_managed_zone.main.name_servers}"]
+  depends_on   = ["google_dns_managed_zone.main"]
 }
 
 output "gcp_name_servers" {
