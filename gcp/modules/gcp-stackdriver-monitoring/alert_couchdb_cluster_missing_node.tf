@@ -4,20 +4,27 @@ resource "google_monitoring_alert_policy" "couchdb_missing_node" {
 
   conditions {
     condition_threshold {
-      filter          = "metric.type=\"logging.googleapis.com/user/couchdb_missing_node.error\" resource.type=\"k8s_container\""
+      filter          = "metric.type=\"logging.googleapis.com/user/${google_logging_metric.couchdb_missing_node.name}\" resource.type=\"k8s_container\""
       comparison      = "COMPARISON_GT"
-      threshold_value = 0
+      threshold_value = "1.0"
       duration        = "600s"
 
       aggregations {
-        alignment_period   = "60s"
-        per_series_aligner = "ALIGN_SUM"
+        alignment_period     = "60s"
+        per_series_aligner   = "ALIGN_SUM"
+        cross_series_reducer = "REDUCE_COUNT"
+
+        group_by_fields = [
+          "resource.label.pod_name",
+        ]
       }
 
-      denominator_filter = ""
+      trigger {
+        count = "1"
+      }
     }
 
-    display_name = "CouchDB node is missing in the cluster"
+    display_name = "More than one CouchDB node is missing for some CouchDB nodes"
   }
 
   documentation = {
@@ -27,6 +34,4 @@ resource "google_monitoring_alert_policy" "couchdb_missing_node" {
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
   enabled               = "true"
-
-  depends_on = ["google_logging_metric.couchdb_missing_node"]
 }
