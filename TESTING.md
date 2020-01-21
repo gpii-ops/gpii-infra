@@ -67,13 +67,9 @@ Run the installer you want to test.  When installation is finished, you will nee
    1. Restarting windows
    1. Opening PowerShell as an administrator and running `restart-service "morphic service"`
 
-#### Setting up the "Auto Key-in" Solution
+#### Setting Up Credentials
 
-If you wish to actually save material to the cloud, you will need to install the "auto key-in" installer and configure it (and your dev cloud) to work together.
-
-The installer can be found in [our Google Drive](https://drive.google.com/file/d/1A8aCa8E-jassEjp8FrVX6tZbXHDB1NWV/view?usp=sharing).  Please note, this installer is only meant for internal use and should never be distributed.  You must be logged in with a Google account that has permission to download the client.
-
-Once you have installed the auto-key-in installer, you will need to configure it to use credentials that can be found in your dev cloud rather than the default credentials, which are only available in staging and production.
+If you wish to actually save to the cloud, you will need to create credentials that can be used with your client:
 
 1. Check out the `universal` repository, i.e. `git clone https://github.com/GPII/universal`.
 1. Install the package's dependencies, i.e. `cd universal && npm install`.
@@ -84,11 +80,11 @@ Once you have installed the auto-key-in installer, you will need to configure it
    1. `"isCreatePrefsSafeAllowed": true,`
 1. From the `gcp/live/dev` directory in your copy of the `gpii-infra` repository, run `rake couchdb_ui`.  Keep the window open, you will need the information displayed onscreen in the next command.
 1. Upload the credentials you created using a command like:  `curl -d @couchDBData.json -H "Content-type: application/json" -X POST  http://ui:<PASSWORD>@localhost:35984/gpii/_bulk_docs`
-1. On the machine where your client is installed, replace the file `C:\ProgramData\Morphic Credentials\secret.txt` with the generated `secret.txt`.
+1. On the machine where your client is installed, save the `secret.txt` file you generated above to `C:\ProgramData\Morphic Credentials\secret.txt`.
 1. Restart, either by:
    1. Restarting windows
    1. Opening PowerShell as an administrator and running `restart-service "morphic service"`
-1. The Morphic icon in the task bar should now turn green shortly after startup.
+1. The Morphic icon in the task bar should now turn green shortly after startup. (The colours are different in some contrast schemes, you can also click "My Saved Settings" in the QSS.  If you're logged in, you will see a like to re-apply the preferences stored in the cloud.
 
 #### Viewing the Logs for a Single Login
 
