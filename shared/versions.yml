@@ -24,7 +24,7 @@ cert_manager:
 certmerge_operator:
   upstream:
     repository: gpii/certmerge-operator
-    tag: 0.0.3-gpii.0
+    tag: 0.0.3-gpii.1
   generated:
     repository: gcr.io/gpii-common-prd/gpii__certmerge-operator
     sha: sha256:0b794c687b07b078b6f10d451c81c2fb83bd3c93cf7540fe863910fac1a6d101
