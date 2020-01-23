@@ -1,14 +1,11 @@
-variable "nonce" {}
-
 resource "google_monitoring_alert_policy" "dns_modify" {
-  depends_on = ["google_logging_metric.dns_modify"]
-
   display_name = "CloudDNS audit log does not contain zone modification events"
   combiner     = "OR"
+  depends_on   = ["null_resource.wait_for_lbms"]
 
   conditions {
     condition_threshold {
-      filter          = "metric.type=\"logging.googleapis.com/user/servicemanagement.modify\" resource.type=\"dns_managed_zone\""
+      filter          = "metric.type=\"logging.googleapis.com/user/${google_logging_metric.dns_modify.name}\" resource.type=\"dns_managed_zone\""
       comparison      = "COMPARISON_GT"
       threshold_value = 0.0
       duration        = "0s"
