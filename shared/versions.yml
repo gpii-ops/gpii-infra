@@ -51,7 +51,7 @@ couchdb_init:
     tag: 3.9
   generated:
     repository: gcr.io/gpii-common-prd/alpine
-    sha: sha256:bf1684a6e3676389ec861c602e97f27b03f14178e5bc3f70dce198f9f160cce9
+    sha: sha256:ab3fe83c0696e3f565c9b4a734ec309ae9bd0d74c192de4590fd6dc2ef717815
     tag: 3.9
 ssl_cert_check:
   upstream:
