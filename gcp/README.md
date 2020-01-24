@@ -476,8 +476,6 @@ More details about which roles and permissions are set in the infrastructure can
 
 We use [Stackdriver Beta Monitoring](https://cloud.google.com/monitoring/kubernetes-engine/) to collect various system metrics, navigate through them with [Kubernetes Dashboard](https://app.google.stackdriver.com/kubernetes), and send alerts when they violate thresholds that are being set by [Stackdriver Alerting Policies](https://app.google.stackdriver.com/policies).
 
-Due to the lack of Terraform integration we use [Ruby client](https://github.com/gpii-ops/gpii-infra/blob/master/shared/rakefiles/stackdriver.rb) to apply / update / destroy Stackdriver's resource primitives from their [json configs](https://github.com/gpii-ops/gpii-infra/blob/master/gcp/modules/gcp-stackdriver-monitoring/resources).
-
 ### One-time Stackdriver Workspace setup
 
 See [Getting started: One-time Stackdriver Workspace setup](README.md#one-time-stackdriver-workspace-setup)
