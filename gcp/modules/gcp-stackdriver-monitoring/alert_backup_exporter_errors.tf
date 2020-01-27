@@ -19,15 +19,13 @@ resource "google_monitoring_alert_policy" "backup_exporter_errors" {
         ]
       }
 
-      denominator_filter       = ""
-      denominator_aggregations = []
+      denominator_filter = ""
     }
 
     display_name = "Backup-exporter process reports one or more errors"
   }
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
-  user_labels           = {}
   enabled               = "${(var.env == "prd" || var.env == "stg") ? true : false}"
 
   depends_on = ["google_logging_metric.backup_exporter_error"]

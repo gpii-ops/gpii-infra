@@ -23,7 +23,6 @@ resource "google_monitoring_alert_policy" "backup_exporter_snapshots" {
   }
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
-  user_labels           = {}
   enabled               = "${(var.env == "prd" || var.env == "stg") ? true : false}"
 
   depends_on = ["google_logging_metric.backup_exporter_snapshot_created"]

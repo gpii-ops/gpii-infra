@@ -12,11 +12,9 @@ resource "google_monitoring_alert_policy" "stackdriver_alertpolicy_modify" {
       aggregations {
         alignment_period   = "600s"
         per_series_aligner = "ALIGN_SUM"
-        group_by_fields    = []
       }
 
-      denominator_filter       = ""
-      denominator_aggregations = []
+      denominator_filter = ""
     }
 
     display_name = "Alert policy modification event found in Stackdriver audit log"
@@ -28,7 +26,6 @@ resource "google_monitoring_alert_policy" "stackdriver_alertpolicy_modify" {
   }
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
-  user_labels           = {}
   enabled               = "true"
 
   depends_on = ["google_logging_metric.stackdriver_alertpolicy_modify"]

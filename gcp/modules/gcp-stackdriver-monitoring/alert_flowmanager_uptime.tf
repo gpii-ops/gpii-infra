@@ -19,14 +19,12 @@ resource "google_monitoring_alert_policy" "flowmanager_uptime" {
         ]
       }
 
-      denominator_filter       = ""
-      denominator_aggregations = []
+      denominator_filter = ""
     }
 
     display_name = "Uptime Check on flowmanager.${var.domain_name} is failing"
   }
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
-  user_labels           = {}
   enabled               = true
 }

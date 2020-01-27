@@ -12,17 +12,14 @@ resource "google_monitoring_alert_policy" "container_cpu_limit_utilization" {
       aggregations {
         alignment_period   = "60s"
         per_series_aligner = "ALIGN_MEAN"
-        group_by_fields    = []
       }
 
-      denominator_filter       = ""
-      denominator_aggregations = []
+      denominator_filter = ""
     }
 
     display_name = "K8s container utilizes more than 85% of allowed CPU"
   }
 
   notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
-  user_labels           = {}
   enabled               = "true"
 }
