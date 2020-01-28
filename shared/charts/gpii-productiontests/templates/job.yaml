@@ -1,0 +1,79 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "productiontests.name" . }}
+  labels:
+    app: {{ template "productiontests.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ template "productiontests.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      shareProcessNamespace: true
+      containers:
+      - name: gpii-productiontests
+        image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
+        command: [ "/bin/sh", "-c" ]
+        args:
+          - GPII_COUCHDB_URL_ROOT=$(echo "${GPII_COUCHDB_URL}" | sed 's/[^\/]*$//g');
+            while true;
+            do
+              echo "Waiting for couchdb...";
+              RET_CODE=$(curl --write-out '%{http_code}' --silent --output /dev/null ${GPII_COUCHDB_URL_ROOT}/_up);
+              if [ "$RET_CODE" = '200' ]; then
+                break;
+              fi;
+              sleep 30;
+            done;
+            while true;
+            do
+              echo "Waiting for flowmanager...";
+              RET_CODE=$(curl --write-out '%{http_code}' --silent --output /dev/null ${GPII_CLOUD_URL}/ready);
+              if [ "$RET_CODE" = '200' ]; then
+                break;
+              fi;
+              sleep 30;
+            done;
+            npm run test:productionConfig;
+        env:
+        - name: GPII_COUCHDB_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "productiontests.name" . }}
+              key: couchdbUrl
+        - name: GPII_CLOUD_URL # Cloud based flowmanager
+          value: '{{ .Values.flowmanager.url }}'
+        - name: GPII_FLOWMANAGER_LISTEN_PORT # Local flowmanager
+          value: '{{ .Values.flowmanager.flowmanagerListenPort }}'
+      - name: istio-proxy-manager
+        image: "{{ .Values.image.repository }}@{{ .Values.image.checksum }}"
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 1337
+        command: [ "/bin/sh", "-c" ]
+        args:
+          - while ! ps -o user | grep node > /dev/null;
+            do
+              echo 'Waiting for npm run test:productionConfig to start...';
+              sleep 2;
+            done;
+            echo 'npm started.';
+            while ps -o user | grep node > /dev/null;
+            do
+              echo 'Waiting for npm run test:productionConfig to finish...';
+              sleep 2;
+            done;
+            echo 'npm run test:productionConfig finished.';
+            while pgrep pilot-agent > /dev/null;
+            do
+              echo 'Sending TERM to pilot-agent';
+              pkill pilot-agent;
+              sleep 2;
+            done;
+            echo 'pilot-agent terminated';
+      restartPolicy: Never

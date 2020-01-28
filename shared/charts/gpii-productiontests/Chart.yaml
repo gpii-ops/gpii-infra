@@ -1,0 +1,18 @@
+name: gpii-productiontests
+version: 0.1.0
+appVersion: 
+home: https://github.com/gpii-ops/gpii-infra
+description: GPII Production Configuration Tests Job.
+icon: https://gpii.net/sites/all/themes/gpii_main/logo.png
+keywords:
+  - gpii
+  - productiontests
+sources:
+  - https://github.com/gpii-ops/gpii-infra
+maintainers:
+  - name: amatas
+    email: alfredo@raisingthefloor.org
+  - name: natarajaya
+    email: sergey@raisingthefloor.org
+  - name: mrtyler
+    email: tyler@raisingthefloor.org

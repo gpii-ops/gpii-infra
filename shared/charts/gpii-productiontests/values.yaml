@@ -1,0 +1,23 @@
+# Default values for gpii-productiontests.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+couchdb:
+  url: "http://admin:password@couchdb-svc-couchdb.gpii.svc.cluster.local:5984/gpii"
+  labels:
+    app: couchdb
+  port: http-couchdb
+
+flowmanager:
+  url: http://flowmanager.gpii.svc.cluster.local:80
+  labels:
+      app: flowmanager
+  svcListenport: http
+  flowmanagerListenPort: 8080
+
+image:
+  repository: gpii/universal
+  checksum: sha256:8ac150765ea0e582ae6d4372b6029396df7409bdb55ee261bc58d5016a7c5c58
+  pullPolicy: IfNotPresent
+
+nameOverride: productiontests

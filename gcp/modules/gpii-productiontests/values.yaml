@@ -1,0 +1,9 @@
+image:
+  repository: ${productiontests_repository}
+  checksum: ${productiontests_checksum}
+
+couchdb:
+  url: "http://${couchdb_admin_username}:${couchdb_admin_password}@couchdb-svc-couchdb.gpii.svc.cluster.local:5984/gpii"
+
+flowmanager:
+  url: "http://flowmanager.gpii.svc.cluster.local:80"

@@ -109,6 +109,14 @@ flowmanager:
     repository: gcr.io/gpii-common-prd/gpii__universal
     sha: sha256:57fec0a87838d7117cae821a5b9f75742db24947dae3550d1aa2d747c5936ede
     tag: 20191211142940-0af24fa
+productiontests:
+  upstream:
+    repository: gpii/universal
+    tag: 20191211142940-0af24fa
+  generated:
+    repository: gcr.io/gpii-common-prd/gpii__universal
+    sha: sha256:57fec0a87838d7117cae821a5b9f75742db24947dae3550d1aa2d747c5936ede
+    tag: 20191211142940-0af24fa
 k8s_snapshots:
   upstream:
     repository: gpii/k8s-snapshots
