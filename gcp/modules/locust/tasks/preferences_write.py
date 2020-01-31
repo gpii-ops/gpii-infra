@@ -5,7 +5,7 @@ import json
 import time
 import string
 
-import on_failure
+from common import on_failure
 events.request_failure += on_failure
 
 def generate_random_username():
