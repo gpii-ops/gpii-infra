@@ -58,4 +58,38 @@ task :test_flowmanager => [:set_vars, :check_destroy_allowed] do
   Rake::Task[:test].invoke
 end
 
+desc "[TEST] Run Locust swarm simulating typical morphic client preferences read load"
+task :test_morphic_read => [:set_vars, :check_destroy_allowed] do
+  ENV["TF_VAR_locust_target_host"] = "https://flowmanager.#{ENV["TF_VAR_domain_name"]}"
+  ENV["TF_VAR_locust_target_app"] = "morphic_read"
+  ENV["TF_VAR_locust_script"] = "morphic_read.py"
+  ENV["TF_VAR_locust_users"] = "5"
+  ENV["TF_VAR_locust_hatch_rate"] = "5"
+  ENV["TF_VAR_locust_desired_total_rps"] = "3"
+  ENV["TF_VAR_locust_desired_median_response_time"] = "500"
+  ENV["TF_VAR_locust_desired_max_response_time"] = "1500"
+
+  Rake::Task[:set_compose_env].reenable
+  Rake::Task[:set_compose_env].invoke
+  Rake::Task[:test].reenable
+  Rake::Task[:test].invoke
+end
+
+desc "[TEST] Run Locust swarm simulating typical morphic client preferences write load"
+task :test_morphic_write => [:set_vars, :check_destroy_allowed] do
+  ENV["TF_VAR_locust_target_host"] = "https://flowmanager.#{ENV["TF_VAR_domain_name"]}"
+  ENV["TF_VAR_locust_target_app"] = "morphic_write"
+  ENV["TF_VAR_locust_script"] = "morphic_write.py"
+  ENV["TF_VAR_locust_users"] = "5"
+  ENV["TF_VAR_locust_hatch_rate"] = "5"
+  ENV["TF_VAR_locust_desired_total_rps"] = "3"
+  ENV["TF_VAR_locust_desired_median_response_time"] = "500"
+  ENV["TF_VAR_locust_desired_max_response_time"] = "1500"
+
+  Rake::Task[:set_compose_env].reenable
+  Rake::Task[:set_compose_env].invoke
+  Rake::Task[:test].reenable
+  Rake::Task[:test].invoke
+end
+
 # vim: et ts=2 sw=2:
