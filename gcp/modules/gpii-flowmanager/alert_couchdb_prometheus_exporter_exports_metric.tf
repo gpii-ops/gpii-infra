@@ -1,11 +1,6 @@
 resource "google_monitoring_alert_policy" "couchdb_prometheus_exporter_exports_metric" {
-  depends_on = [
-    "module.couchdb",
-    "null_resource.couchdb_enable_pv_backups",
-    "null_resource.couchdb_finish_cluster",
-    "null_resource.wait_for_lbms",
-  ]
-
+  # This alert must be created latest and removed before the couchdb module
+  depends_on   = ["null_resource.wait_for_lbms"]
   display_name = "Pod `couchdb-prometheus-exporter` exports a metric"
   combiner     = "OR"
   project      = "${var.project_id}"

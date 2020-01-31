@@ -3,8 +3,7 @@ locals {
 }
 
 resource "google_monitoring_alert_policy" "disk_snapshots" {
-  depends_on = ["null_resource.wait_for_lbms"]
-
+  depends_on   = ["null_resource.wait_for_lbms"]
   display_name = "Snapshots are being created for all persistent volumes"
   combiner     = "OR"
   project      = "${var.project_id}"

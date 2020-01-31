@@ -88,3 +88,14 @@ resource "google_storage_bucket" "backup_daisy_bkt" {
 
   force_destroy = true
 }
+
+data "terraform_remote_state" "alert_notification_channel" {
+  backend = "gcs"
+
+  config {
+    credentials    = "${var.serviceaccount_key}"
+    bucket         = "${var.project_id}-tfstate"
+    prefix         = "${var.env}/k8s/stackdriver/monitoring"
+    encryption_key = "${var.key_tfstate_encryption_key}"
+  }
+}

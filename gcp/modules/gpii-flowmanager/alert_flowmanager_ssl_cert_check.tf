@@ -1,4 +1,5 @@
 resource "google_monitoring_alert_policy" "ssl_cert_check" {
+  depends_on   = ["module.gpii-flowmanager"]
   display_name = "Flowmanager TLS cert is valid"
   combiner     = "OR"
 
@@ -45,7 +46,7 @@ resource "google_monitoring_alert_policy" "ssl_cert_check" {
     },
   ]
 
-  notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
+  notification_channels = ["${data.terraform_remote_state.alert_notification_channel.slack_notification_channel}", "${data.terraform_remote_state.alert_notification_channel.mail_notification_channel}"]
   enabled               = "true"
   count                 = "${(var.env == "prd" || var.env == "stg") ? 1 : 0}"
 }

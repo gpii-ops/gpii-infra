@@ -1,9 +1,5 @@
 resource "google_logging_metric" "disks_createsnapshot" {
-  depends_on = [
-    "module.couchdb",
-    "null_resource.couchdb_enable_pv_backups",
-    "null_resource.couchdb_finish_cluster",
-  ]
+  depends_on = ["module.gpii-flowmanager"]
 
   project = "${var.project_id}"
   name    = "compute.disks.createSnapshot"

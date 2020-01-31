@@ -1,4 +1,5 @@
 resource "google_monitoring_alert_policy" "container_cpu_limit_utilization" {
+  depends_on   = ["module.gpii-flowmanager"]
   display_name = "K8s container CPU utilization stays within 85% of limit"
   combiner     = "OR"
 
@@ -20,6 +21,6 @@ resource "google_monitoring_alert_policy" "container_cpu_limit_utilization" {
     display_name = "K8s container utilizes more than 85% of allowed CPU"
   }
 
-  notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
+  notification_channels = ["${data.terraform_remote_state.alert_notification_channel.slack_notification_channel}", "${data.terraform_remote_state.alert_notification_channel.mail_notification_channel}"]
   enabled               = "true"
 }
