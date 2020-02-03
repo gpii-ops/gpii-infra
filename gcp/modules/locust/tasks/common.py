@@ -15,18 +15,32 @@ class MorphicCommon:
                   }
               }
           }
+      },
+      {
+          "contexts": {
+              "gpii-default": {
+                  "preferences": {
+                      "http://registry.gpii.net/common/DPIScale": 2,
+                      "http://registry.gpii.net/common/highContrastTheme": "white-black",
+                      "http://registry.gpii.net/applications/com.microsoft.windows.colorFilters": {
+                          "FilterType": 4
+                      },
+                      "http://registry.gpii.net/common/volume": 0.713
+                  }
+              }
+          }
       }
     ]
 
     def __init__(self):
         self.username = "locust" + str(randint(1,10000))
 
-        client_id = os.getenv('LOCUST_CLIENT_ID')
+        client_id = os.getenv('MORPHIC_CLIENT_ID')
         if not client_id:
             client_id = '05388544-a7af-4377-a18a-b29ce68211c5'
         self.client_id = client_id
 
-        client_secret = os.getenv('LOCUST_CLIENT_SECRET')
+        client_secret = os.getenv('MORPHIC_CLIENT_SECRET')
         if not client_secret:
             client_secret = '19d93ac9-d274-499e-b85d-13c5ceda188e'
         self.client_secret = client_secret
