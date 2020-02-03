@@ -45,6 +45,18 @@ spec:
           value: "{{ .Values.service.internalPort }}"
         - name: TARGET_HOST
           value: {{ index .Values.master.config "target-host" | quote }}
+        {{- if .Values.morphic }}
+        - name: MORPHIC_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "locust.fullname" . }}
+              key: morphic_client_id
+        - name: MORPHIC_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "locust.fullname" . }}
+              key: morphic_client_secret
+        {{- end }}
         resources:
 {{ toYaml .Values.worker.resources | indent 10 }}
       restartPolicy: Always

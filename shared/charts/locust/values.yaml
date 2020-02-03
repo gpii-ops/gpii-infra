@@ -41,3 +41,7 @@ worker:
   target:
     labels:
     namespace: gpii
+
+# morphic:
+#   client_id:
+#   client_secret:
