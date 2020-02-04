@@ -235,6 +235,8 @@ gcp-stg:
     - rake
     - rake test_preferences_read
     - rake test_flowmanager
+    - rake test_morphic_write
+    - rake test_morphic_read
   after_script:
     # Clean up even if something failed.
     - cd gcp/live/stg
@@ -304,6 +306,8 @@ gcp-prd:
     - rake
     - rake test_preferences_read RAKE_REALLY_DESTROY_IN_PRD=true
     - rake test_flowmanager RAKE_REALLY_DESTROY_IN_PRD=true
+    - rake test_morphic_write RAKE_REALLY_DESTROY_IN_PRD=true
+    - rake test_morphic_read RAKE_REALLY_DESTROY_IN_PRD=true
   after_script:
     # Clean up even if something failed.
     - cd gcp/live/prd
