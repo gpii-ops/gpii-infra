@@ -11,6 +11,9 @@ variable "nonce" {}
 variable "locust_repository" {}
 variable "locust_tag" {}
 
+variable "uuid_morphic_client_id" {}
+variable "uuid_morphic_client_secret" {}
+
 resource "null_resource" "locust_copy_tasks" {
   triggers = {
     nonce = "${var.nonce}"
@@ -31,11 +34,13 @@ data "template_file" "locust_values" {
   template = "${file("values.yaml")}"
 
   vars {
-    locust_repository = "${var.locust_repository}"
-    locust_tag        = "${var.locust_tag}"
-    locust_workers    = "${var.locust_workers}"
-    target_host       = "${var.locust_target_host}"
-    locust_script     = "${var.locust_script}"
+    locust_repository     = "${var.locust_repository}"
+    locust_tag            = "${var.locust_tag}"
+    locust_workers        = "${var.locust_workers}"
+    target_host           = "${var.locust_target_host}"
+    locust_script         = "${var.locust_script}"
+    morphic_client_id     = "${var.uuid_morphic_client_id}"
+    morphic_client_secret = "${var.uuid_morphic_client_secret}"
   }
 }
 
