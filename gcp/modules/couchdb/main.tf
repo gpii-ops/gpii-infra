@@ -41,6 +41,8 @@ variable "secret_couchdb_admin_password" {}
 variable "secret_couchdb_admin_username" {}
 variable "secret_couchdb_auth_cookie" {}
 variable "key_tfstate_encryption_key" {}
+variable "uuid_morphic_client_id" {}
+variable "uuid_morphic_client_secret" {}
 
 # Default variables
 
@@ -70,6 +72,16 @@ data "template_file" "couchdb_values" {
     pv_capacity               = "${var.pv_capacity}"
     pv_storage_class          = "${var.pv_storage_class}"
     pv_provisioner            = "${var.pv_provisioner}"
+  }
+}
+
+data "template_file" "morphic_credentials" {
+  template = "${file("morphic_credentials.json")}"
+
+  vars {
+    morphic_client_id     = "${var.uuid_morphic_client_id}"
+    morphic_client_secret = "${var.uuid_morphic_client_secret}"
+    timestamp             = "${timestamp()}"
   }
 }
 
@@ -155,6 +167,12 @@ resource "null_resource" "couchdb_finish_cluster" {
         fi
         if [ "$STATUS" != '"Cluster is already finished"' ]; then
           sleep 10
+        else
+          curl -s -X PUT $COUCHDB_URL/${var.release_namespace} || true
+
+          echo '${data.template_file.morphic_credentials.rendered}' | curl -s -d @- \
+            -H "Content-type: application/json" \
+            -X POST $COUCHDB_URL/${var.release_namespace}/_bulk_docs || true
         fi
         RETRY_COUNT=$(($RETRY_COUNT+1))
       done
