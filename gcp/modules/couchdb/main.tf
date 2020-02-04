@@ -168,8 +168,9 @@ resource "null_resource" "couchdb_finish_cluster" {
         if [ "$STATUS" != '"Cluster is already finished"' ]; then
           sleep 10
         else
+          echo "Trying to create ${var.release_namespace} DB..."
           curl -s -X PUT $COUCHDB_URL/${var.release_namespace} || true
-
+          echo "Trying to load default morphic credentials into ${var.release_namespace} DB..."
           echo '${data.template_file.morphic_credentials.rendered}' | curl -s -d @- \
             -H "Content-type: application/json" \
             -X POST $COUCHDB_URL/${var.release_namespace}/_bulk_docs || true
