@@ -71,9 +71,10 @@ describe Secrets do
     fake_project_id = "fakeorg-fakecloud-fakeenv-fakeuser"
     fake_infra_region = "mars-north1"
     secrets = Secrets.new(fake_project_id, fake_infra_region)
-    secrets.populate_secrets(["secret_foo", "key_bar"])
+    secrets.populate_secrets(["secret_foo", "key_bar", "uuid_baz"])
 
     expect(ENV["TF_VAR_secret_foo"].length).to be(32)
+    expect(ENV["TF_VAR_uuid_baz"].length).to be(36)
 
     expect {
       decipher = OpenSSL::Cipher::AES.new(256, :CBC)
