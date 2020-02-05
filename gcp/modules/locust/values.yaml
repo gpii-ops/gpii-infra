@@ -14,3 +14,7 @@ worker:
 service:
   type: ClusterIP
   name: http-master-web
+
+morphic:
+  client_id: ${morphic_client_id}
+  client_secret: ${morphic_client_secret}

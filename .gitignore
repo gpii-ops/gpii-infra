@@ -16,3 +16,4 @@ shared/charts/locust/tasks/*
 tags
 vendor/
 __pycache__
+*.pyc

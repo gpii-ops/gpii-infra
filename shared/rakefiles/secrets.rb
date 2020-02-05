@@ -78,9 +78,9 @@ class Secrets
         collected_secrets[encryption_key] = module_secrets['secrets']
       end
       module_secrets['secrets'].each do |secret_name|
-        if !(secret_name.start_with?("secret_") || secret_name.start_with?("key_"))
+        if !(secret_name.start_with?("secret_") || secret_name.start_with?("key_") || secret_name.start_with?("uuid_"))
           raise "ERROR: Can not use secret with name '#{secret_name}' for module '#{module_name}'!\n \
-            Secret name must start with 'secret_' or 'key_'!"
+            Secret name must start with 'secret_', 'key_' or 'uuid_'!"
         elsif secrets_to_modules.include? secret_name
           raise "ERROR: Can not use secret with name '#{secret_name}' for module '#{module_name}'!\n \
             Secret '#{secret_name}' is already in use by module '#{secrets_to_modules[secret_name]}'!"
@@ -172,6 +172,8 @@ class Secrets
         if secret_name.start_with?("key_")
           key = OpenSSL::Cipher::AES256.new.encrypt.random_key
           secret_value = Base64.strict_encode64(key)
+        elsif secret_name.start_with?("uuid_")
+          secret_value = SecureRandom.uuid
         else
           secret_value = SecureRandom.hex
         end

@@ -37,3 +37,14 @@ Get DNS from target-host
 {{- $match := index .Values.master.config "target-host" | toString | regexFind "//.*[^:]" -}}
 {{- $match | trimAll "/" -}}
 {{- end -}}
+
+{{/*
+Create a random string if the supplied key does not exist
+*/}}
+{{- define "locust.defaultsecret" -}}
+{{- if . -}}
+{{- . | b64enc | quote -}}
+{{- else -}}
+{{- randAlphaNum 20 | b64enc | quote -}}
+{{- end -}}
+{{- end -}}

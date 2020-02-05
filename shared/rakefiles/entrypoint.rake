@@ -95,6 +95,8 @@ task :display_cluster_info => [:set_vars] do
   puts
   puts "Run `rake test_preferences_read` to execute Locust read tests for Preferences."
   puts "Run `rake test_preferences_write` to execute Locust write tests for Preferences."
+  puts "Run `rake test_morphic_read` to execute Locust tests for Flowmanager simulating morphic read load."
+  puts "Run `rake test_morphic_write` to execute Locust tests for Flowmanager simulating morphic write load."
   puts "Run `rake test_flowmanager` to execute Locust tests for Flowmanager."
   puts
   puts "Run `rake destroy` to delete all the expensive resources created by the deployment."
