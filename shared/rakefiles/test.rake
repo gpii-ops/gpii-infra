@@ -16,8 +16,8 @@ task :test_preferences_read => [:set_vars, :check_destroy_allowed] do
   ENV["TF_VAR_locust_target_host"] = "http://preferences.gpii.svc.cluster.local"
   ENV["TF_VAR_locust_target_app"] = "preferences"
   ENV["TF_VAR_locust_script"] = "preferences_read.py"
-  ENV["TF_VAR_locust_desired_median_response_time"] = "300"
-  ENV["TF_VAR_locust_desired_max_response_time"] = "1500"
+  ENV["TF_VAR_locust_desired_median_response_time"] = "500"
+  ENV["TF_VAR_locust_desired_max_response_time"] = "5000"
 
   Rake::Task[:set_compose_env].reenable
   Rake::Task[:set_compose_env].invoke
@@ -50,7 +50,7 @@ task :test_flowmanager => [:set_vars, :check_destroy_allowed] do
   ENV["TF_VAR_locust_users"] = "15"
   ENV["TF_VAR_locust_desired_total_rps"] = "5"
   ENV["TF_VAR_locust_desired_median_response_time"] = "500"
-  ENV["TF_VAR_locust_desired_max_response_time"] = "1500"
+  ENV["TF_VAR_locust_desired_max_response_time"] = "5000"
 
   Rake::Task[:set_compose_env].reenable
   Rake::Task[:set_compose_env].invoke
@@ -67,7 +67,7 @@ task :test_morphic_read => [:set_vars, :check_destroy_allowed] do
   ENV["TF_VAR_locust_hatch_rate"] = "5"
   ENV["TF_VAR_locust_desired_total_rps"] = "3"
   ENV["TF_VAR_locust_desired_median_response_time"] = "500"
-  ENV["TF_VAR_locust_desired_max_response_time"] = "1500"
+  ENV["TF_VAR_locust_desired_max_response_time"] = "5000"
 
   Rake::Task[:set_compose_env].reenable
   Rake::Task[:set_compose_env].invoke
@@ -84,7 +84,7 @@ task :test_morphic_write => [:set_vars, :check_destroy_allowed] do
   ENV["TF_VAR_locust_hatch_rate"] = "5"
   ENV["TF_VAR_locust_desired_total_rps"] = "3"
   ENV["TF_VAR_locust_desired_median_response_time"] = "500"
-  ENV["TF_VAR_locust_desired_max_response_time"] = "1500"
+  ENV["TF_VAR_locust_desired_max_response_time"] = "5000"
 
   Rake::Task[:set_compose_env].reenable
   Rake::Task[:set_compose_env].invoke
