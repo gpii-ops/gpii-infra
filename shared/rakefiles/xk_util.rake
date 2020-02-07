@@ -29,7 +29,7 @@ task :rotate_secret, [:encryption_key, :secret, :cmd] => [:configure, :configure
 
   Rake::Task["set_secrets"].invoke
   ENV["TF_VAR_#{args[:secret]}_rotated"] = ENV["TF_VAR_#{args[:secret]}"]
-  ENV["TF_VAR_#{args[:secret]}"] = ""
+  ENV["TF_VAR_#{args[:secret]}"] = ENV["#{args[:secret]}"].nil? ? "" : ENV["#{args[:secret]}"]
   rotate_secrets = true
   @secrets.set_secrets(rotate_secrets)
 
