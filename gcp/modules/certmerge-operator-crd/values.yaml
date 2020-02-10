@@ -4,3 +4,7 @@ secretLists:
   secretlist:
   - name: flowmanager-tls
     namespace: gpii
+  notify:
+  - name: istio-ingressgateway
+    namespace: istio-system
+    type: deployment
