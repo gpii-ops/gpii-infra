@@ -24,11 +24,11 @@ cert_manager:
 certmerge_operator:
   upstream:
     repository: gpii/certmerge-operator
-    tag: 0.0.3-gpii.1
+    tag: v0.0.3-gpii.2
   generated:
     repository: gcr.io/gpii-common-prd/gpii__certmerge-operator
-    sha: sha256:0b794c687b07b078b6f10d451c81c2fb83bd3c93cf7540fe863910fac1a6d101
-    tag: 0.0.3-gpii.0
+    sha: sha256:13876af5199de7fc7fbc785a206eaa2fa49c74dc5ec222682cc3ea9aa7c5235f
+    tag: v0.0.3-gpii.2
 cloud_sdk:
   upstream:
     repository: google/cloud-sdk
@@ -83,7 +83,7 @@ couchdb:
     tag: 2.3.1
   generated:
     repository: gcr.io/gpii-common-prd/couchdb
-    sha: sha256:6881d8f2da1da71cbdb417082e71f02df49026b80b80f85c9f0ea80a4776827d
+    sha: sha256:088fb3bc9c193ab4783e47d34f30f009eebabe305ea32280fb3ef0e44f8af8ab
     tag: 2.3.1
 dataloader:
   upstream:

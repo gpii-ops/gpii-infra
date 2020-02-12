@@ -1,6 +1,6 @@
 name: certmerge-operator-crd
-version: v0.1.0
-appVersion: v0.0.3
+version: v0.2.0
+appVersion: v0.0.3-gpii.2
 description: A Helm chart for certmerge-operator - CRD
 home: https://github.com/prune998/certmerge-operator
 keywords:

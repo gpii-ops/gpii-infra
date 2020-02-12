@@ -6,4 +6,8 @@ secretLists:
 #   secretlist:
 #   - name:
 #     namespace:
+#   norify:
+#   - name:
+#     namespace:
+#     type:
 # - ...

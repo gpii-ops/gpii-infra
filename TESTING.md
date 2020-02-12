@@ -4,21 +4,17 @@ This document describes pointers and notes for testing the GPII infrastructure i
 
 ## End-to-End Manual Testing Tutorial
 
-This section contains a tutorial to test the frontend GPII application against the backend. Relevant calls against the backend are noted after each action.
+This section contains a tutorial to test the frontend Morphic application against the backend. Relevant calls against the backend are noted after each action.
 
-### Testing login/logout and basic settings
+### Setting Up Morphic
+
+#### Using a Development Version of the Morphic Client
 
 1. Obtain a copy of the gpii/gpii-app repository:
 
 ```bash
 $ git clone https://github.com/GPII/gpii-app.git
 
-```
-
-Note that as of 9/19/2018, the full functionality that works against the cloud only exists on the `feds-audit` branch. Because of this, you should checkout that branch instead of working on master:
-
-```
-$ git checkout feds-audit
 ```
 
 2. Create a new configuration in `configs/app.cloud.json`, containing the following contents:
@@ -48,7 +44,7 @@ $ vagrant up
 4. When the machine is up and running, open a command prompt and run the application:
 
 ```
-$ cd c:\vagrant
+$ v:
 
 $ SET GPII_CLOUD_URL=http://flowmanager.<CLUSTER_DNS>
 
@@ -58,13 +54,41 @@ $ node_modules\.bin\electron . configs app.cloud
 
 ```
 
-5. Login using a user:
+#### Manual Installation and Configuration of the Morphic Client
 
-```
-$ curl http://localhost:8081/user/carla/proximityTriggered
-```
+You can find the Morphic Installers in our [shared Google Drive](https://drive.google.com/drive/u/1/folders/1nzXsW83qRejup3D_yVYO9t5i4lKN_p5G).  Please note, this link will only work if you are logged in using a Google account that has permission.
 
-On the backend, two calls should be registered against the cloud based flow manager. Use kubectl to view the logs on either the ingress controller or the flowmanager pods:
+Run the installer you want to test.  When installation is finished, you will need to manually configure the client to use your dev cloud.
+
+1. Edit `C:\Program Files (x86)\Morphic\windows\service.json5`
+1. Update the `GPII_CLOUD_URL` setting to point to your dev cloud, i.e. `https://flowmanager.<username>.dev.gcp.gpii.net`
+1. To avoid errors with the self-signed certificates used in a dev cloud, add a new `NODE_TLS_REJECT_UNAUTHORIZED` and set it to `0`. 
+1. Restart, either by:
+   1. Restarting windows
+   1. Opening PowerShell as an administrator and running `restart-service "morphic service"`
+
+#### Setting Up Credentials
+
+If you wish to actually save to the cloud, you will need to create credentials that can be used with your client:
+
+1. Check out the `universal` repository, i.e. `git clone https://github.com/GPII/universal`.
+1. Install the package's dependencies, i.e. `cd universal && npm install`.
+1. Generate auto-key in credentials, using a command like `cd scripts && GPII_CREDENTIALS_NAME="GPII Testers" GPII_CREDENTIALS_SITE=testers.gpii.net node generateCredentials.js`
+1. A directory will be created containing two files.  One is the CouchDB data for your credentials.  The other is the "secret" file for the client itself.
+1. Edit the generated `couchDBData.json` file and enable the two write settings:
+   1. `"isCreateGpiiKeyAllowed": true,`
+   1. `"isCreatePrefsSafeAllowed": true,`
+1. From the `gcp/live/dev` directory in your copy of the `gpii-infra` repository, run `rake couchdb_ui`.  Keep the window open, you will need the information displayed onscreen in the next command.
+1. Upload the credentials you created using a command like:  `curl -d @couchDBData.json -H "Content-type: application/json" -X POST  http://ui:<PASSWORD>@localhost:35984/gpii/_bulk_docs`
+1. On the machine where your client is installed, save the `secret.txt` file you generated above to `C:\ProgramData\Morphic Credentials\secret.txt`.
+1. Restart, either by:
+   1. Restarting windows
+   1. Opening PowerShell as an administrator and running `restart-service "morphic service"`
+1. The Morphic icon in the task bar should now turn green shortly after startup. (The colours are different in some contrast schemes, you can also click "My Saved Settings" in the QSS.  If you're logged in, you will see a like to re-apply the preferences stored in the cloud.
+
+#### Viewing the Logs for a Single Login
+
+When a user logs in, two calls should be registered against the cloud-based flow manager. You can use the `kubectl` command to view the logs on either the ingress controller or the flowmanager pods:
 
 ```
 $ kubectl logs -n gpii -l app=flowmanager
@@ -73,8 +97,7 @@ $ kubectl logs -n gpii -l app=flowmanager
 ...
 ```
 
-The above is a call to obtain an oauth bearer token to be used in subsequent calls.
-
+The first call logged above retrieves the OAuth bearer token used in subsequent calls.
 
 ```
 $ kubectl logs -n gpii -l app=flowmanager
@@ -83,27 +106,25 @@ $ kubectl logs -n gpii -l app=flowmanager
 ...
 ```
 
-The second call here was made to obtain the settings for the device.
+The second call logged above requests the settings for the device.
 
+### Testing Cloud Saves
 
-6. You can open morphic now on the taskbar and modify settings:
+For this to work, you must be logged in as a real user (see the "auto key in" installation instructions above).  The Morphic icon in the task bar should be green, and there should be no errors displayed.
 
-    a. Find the icon in your taskbar that looks like a gear. Left click on it and the QSS application will now appear. 
+Here is a basic example of changing and saving a setting:
 
-    b. Click on "Screen Zoom"
+    1. Click the Morphic icon (green gear) in your taskbar. The Quickset Strip (QSS) will appear. 
+    2. Click the "Screen Zoom" button, a sub-panel will open.
+    3. Click the "+ Larger" button in the sub-panel.
+    4. Click the "Save" button on the right side of the QSS.
+    5. Morphic should report "Your settings were saved to the Moprhic Cloud"
 
-    c. Click the "+ Larger" button
-
-    d. Click on "Save"
-
-    e. Morphic should report "Your settings were saved to the Moprhic Cloud"
-
-7. You should be able to verify that additional requests were made to the backend to store these preferences using the same kubectl commands from above.
-
+You should be able to verify that additional requests were made to the backend to store these preferences using the kubectl commands above.
 
 ### Production Config Tests
 
-Another way to exercise the frontend nodejs code against a cloud based backend is to run the productionConfigTests. As of September 10, 2018, these productionConfigTests only exercise login and logout. To execute them, run the following test script from the universal container. Make sure to use an appropriate version. Generally, the latest version can be found in `shared/versions.yml`, which is automatically kept up to date.
+Another way to exercise the front-end nodejs code against a cloud based backend is to run the productionConfigTests. As of September 10, 2018, these productionConfigTests only exercise login and logout. To execute them, run the following test script from the universal container. Make sure to use an appropriate version. Generally, the latest version can be found in `shared/versions.yml`, which is automatically kept up to date.
 
 ```
 $ docker run --rm --name productionConfigTests -e GPII_CLOUD_URL=https://flowmanager.<CLUSTER_DNS> gpii/universal@sha256:bc92279591c0ab60d11ecf55e43f783cd7cb92a0bc2fea6661054a065bbb2e49 node tests/ProductionConfigTests.js
@@ -117,7 +138,7 @@ $ docker run --rm --name productionConfigTests -e GPII_CLOUD_URL=https://flowman
 
 ```
 
-On the backend, we should expect the following log entres to be made for the ingress:
+On the backend, we should expect the following log entries to be made for the ingress:
 
 ```
 10.16.0.2 - [10.16.0.2] - - [10/Sep/2018:14:19:51 +0000] "POST /access_token HTTP/1.1" 200 90 "-" "-" 312 0.146 [gpii-flowmanager-80] 10.17.1.10:8081 90 0.113 200 7c63c0b04856e04bad6872e8f28884f1
@@ -180,6 +201,17 @@ In addition, the flowmanager calls the preferences server and similar logs entri
 ```
 
 The above functionality is a limited test suite that needs to be expanded to be more complete. Work is being tracked in [GPII-3333](https://issues.gpii.net/browse/GPII-3333) for that.
+
+## Performance Testing
+
+Currently, the "preferences read" tests are run regularly against production, and as part of the [continuous deployment pipeline](CI-CD.md).
+
+When you are testing changes to the cloud, you are expected to run the same  tests and confirm that:
+
+1. Performance is not unacceptably degraded by your changes.
+2. There are no unexpected errors introduced by your changes.
+
+See the "Locust" section of the [README](README.md) for more details on running these tests.
 
 ## Security Testing
 

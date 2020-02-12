@@ -185,12 +185,22 @@ See [CI-CD.md#running-in-non-dev-environments](../CI-CD.md#running-manually-in-n
 
 ### I want to deploy a new version of universal to production
 
-1. Find the [docker-gpii-universal-master MultiJob](https://ci.gpii.net/view/Docker/job/docker-gpii-universal-master/) that built the version you want to deploy.
+1. Find the [docker-gpii-universal-master MultiJob](https://ci.gpii.net/view/Docker/job/docker-gpii-universal-master/) that was built for the version you want to deploy (typically the container image will contain the short version of the associated commit hash).
 1. Find the `docker-gpii-universal-master-release` Job and look for `CALCULATED_TAG`, e.g. `CALCULATED_TAG=20190522142238-4a52f56`.
 1. Edit `gpii-infra/shared/versions.yml`.
    * Find your component and edit the `upstream.tag` field to the `CALCULATED_TAG` you found.
       * E.g., `201901021213-aaaaaaa -> 20190522142238-4a52f56`
-1. Create a [pull request against gpii-infra](https://github.com/gpii-ops/gpii-infra/pulls) containing your `versions.yml` change.
+1. Calculate the correct sha for the new container image using the gpii-version-updater package:
+   1. Clone https://github.com/gpii-ops/gpii-version-updater/ in the same directory as your gpii-infra clone.
+      * The `gpii-version-updater` clone and the `gpii-infra` clone should be siblings in the same directory (there are some references to `../gpii-infra`).
+   1. `cd gpii-version-updater`
+   1. Follow the steps at [gpii-version-updater: Installing on host](https://github.com/gpii-ops/gpii-version-updater/#installing-on-host) (or [gpii-version-updater: Running in a container](https://github.com/gpii-ops/gpii-version-updater/#running-in-a-container).
+   1. `rake sync`
+1. Deploy the updated container version to your dev cloud, i.e:
+   1. `cd gcp/live/dev`
+   2. `rake`
+1. Test the new container, including performance tests, automated acceptance tests, and manual QA using a Morphic client.  See [the testing documentation](./TESTING.md) for details.CI
+1. Create a [pull request against gpii-infra](https://github.com/gpii-ops/gpii-infra/pulls) containing the container tag changes you made to `versions.yml`.  Although it's not harmful to also include the updated `sha` values, it's best to omit those from the pull.
 1. Be prepared to coordinate deployment with the Ops team.
    * When is a good time for you and the Ops team to deploy this change?
    * Does the deployment require any special handling?
@@ -447,7 +457,7 @@ The environments that run in GCP need some initial resources that must be create
 
 ## Continuous Integration / Continuous Delivery
 
-See [CI-CD.md](../CI-CD.md).
+See [Continuous Integration / Continuous Delivery](../CI-CD.md).
 
 ## Authentication workflow
 

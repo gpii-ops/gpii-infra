@@ -32,3 +32,12 @@ data:
       gcloud -q compute images delete "image-disk-${snapshot}"
       gsutil -q mv "gs://${INTERMEDIATE_BUCKET}/${TIMESTAMP}-${snapshot}.tar.gz" "gs://${DESTINATION_BUCKET}/${TIMESTAMP}-${snapshot}.tar.gz"
     done
+    # Remove old resources
+    OLD_INSTANCES=$(gcloud compute instances list --format="value[separator=';'](name)" --filter=name=inst-image-export-export-disk-image-export-image-export)
+    for instance in ${OLD_INSTANCES}; do 
+      gcloud -q compute instances delete ${image} --delete-disks=all --zone "{{ .Values.infraRegion }}-{{ .Values.zone }}"
+    done
+    OLD_IMAGES=$(gcloud compute images list --format="value[separator=';'](name)" --filter=name=image-disk-pv-database-storage-couchdb-couchdb-)
+    for image in ${OLD_IMAGES}; do 
+      gcloud -q compute images delete ${image}
+    done
