@@ -24,7 +24,7 @@ variable "node_count" {
 }
 
 variable "expected_gke_version_prefix" {
-  default = "1.13"
+  default = "1.1"
 }
 
 variable "infra_region" {}
