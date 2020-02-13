@@ -90,7 +90,7 @@ dataloader:
     repository: gpii/universal
     tag: 20200212091514-ea0aa05
   generated:
-    repository: gpii/universal
+    repository: gcr.io/gpii-common-prd/gpii__universal
     sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
     tag: 20200212091514-ea0aa05
 flushtokens:
@@ -98,7 +98,7 @@ flushtokens:
     repository: gpii/universal
     tag: 20200212091514-ea0aa05
   generated:
-    repository: gpii/universal
+    repository: gcr.io/gpii-common-prd/gpii__universal
     sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
     tag: 20200212091514-ea0aa05
 flowmanager:
@@ -106,7 +106,7 @@ flowmanager:
     repository: gpii/universal
     tag: 20200212091514-ea0aa05
   generated:
-    repository: gpii/universal
+    repository: gcr.io/gpii-common-prd/gpii__universal
     sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
     tag: 20200212091514-ea0aa05
 productiontests:
@@ -115,7 +115,7 @@ productiontests:
     tag: 20200212091514-ea0aa05
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:57fec0a87838d7117cae821a5b9f75742db24947dae3550d1aa2d747c5936ede
+    sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
     tag: 20200212091514-ea0aa05
 k8s_snapshots:
   upstream:
@@ -138,7 +138,7 @@ preferences:
     repository: gpii/universal
     tag: 20200212091514-ea0aa05
   generated:
-    repository: gpii/universal
+    repository: gcr.io/gpii-common-prd/gpii__universal
     sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
     tag: 20200212091514-ea0aa05
 service_account_assigner:
