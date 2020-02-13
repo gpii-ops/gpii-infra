@@ -1,6 +1,4 @@
 resource "google_logging_metric" "dns_modify" {
-  depends_on = ["google_dns_record_set.flowmanager-dns"]
-
   name   = "dns.modify"
   filter = "resource.type=\"dns_managed_zone\" AND (protoPayload.methodName=\"dns.changes.create\" OR protoPayload.methodName=\"dns.managedZones.delete\" OR protoPayload.methodName=\"dns.managedZones.patch\" OR protoPayload.methodName=\"dns.managedZones.update\")"
 

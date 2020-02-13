@@ -3,7 +3,6 @@ locals {
 }
 
 resource "google_monitoring_uptime_check_config" "this" {
-  depends_on   = ["null_resource.wait_for_lbms"]
   count        = "${length(local.uptime_checks)}"
   provider     = "google-beta"
   display_name = "${element(local.uptime_checks, count.index)}-https"

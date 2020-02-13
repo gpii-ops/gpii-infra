@@ -1,5 +1,4 @@
 resource "google_monitoring_alert_policy" "container_cpu_limit_utilization" {
-  depends_on   = ["module.gpii-flowmanager"]
   display_name = "K8s container CPU utilization stays within 85% of limit"
   combiner     = "OR"
 
