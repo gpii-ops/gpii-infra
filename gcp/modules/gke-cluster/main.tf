@@ -81,7 +81,7 @@ module "gke_cluster" {
   # This is temporary till 1.13.11-gke.15 or newer is released as default
   # fixes security vulnerabilities https://istio.io/news/security/istio-security-2019-007/
   # kubernetes_version = "${data.external.gke_version_assert.result.version}"
-  kubernetes_version = "1.13.11-gke.15"
+  kubernetes_version = "1.13.12-gke.25"
 
   region = "${var.infra_region}"
 
