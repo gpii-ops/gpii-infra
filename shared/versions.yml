@@ -88,35 +88,35 @@ couchdb:
 dataloader:
   upstream:
     repository: gpii/universal
-    tag: 20191211142940-0af24fa
+    tag: 20200212091514-ea0aa05
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:57fec0a87838d7117cae821a5b9f75742db24947dae3550d1aa2d747c5936ede
-    tag: 20191211142940-0af24fa
+    sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
+    tag: 20200212091514-ea0aa05
 flushtokens:
   upstream:
     repository: gpii/universal
-    tag: 20191211142940-0af24fa
+    tag: 20200212091514-ea0aa05
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:57fec0a87838d7117cae821a5b9f75742db24947dae3550d1aa2d747c5936ede
-    tag: 20191211142940-0af24fa
+    sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
+    tag: 20200212091514-ea0aa05
 flowmanager:
   upstream:
     repository: gpii/universal
-    tag: 20191211142940-0af24fa
+    tag: 20200212091514-ea0aa05
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:57fec0a87838d7117cae821a5b9f75742db24947dae3550d1aa2d747c5936ede
-    tag: 20191211142940-0af24fa
+    sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
+    tag: 20200212091514-ea0aa05
 productiontests:
   upstream:
     repository: gpii/universal
-    tag: 20191211142940-0af24fa
+    tag: 20200212091514-ea0aa05
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:57fec0a87838d7117cae821a5b9f75742db24947dae3550d1aa2d747c5936ede
-    tag: 20191211142940-0af24fa
+    sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
+    tag: 20200212091514-ea0aa05
 k8s_snapshots:
   upstream:
     repository: gpii/k8s-snapshots
@@ -136,11 +136,11 @@ locust:
 preferences:
   upstream:
     repository: gpii/universal
-    tag: 20191211142940-0af24fa
+    tag: 20200212091514-ea0aa05
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:57fec0a87838d7117cae821a5b9f75742db24947dae3550d1aa2d747c5936ede
-    tag: 20191211142940-0af24fa
+    sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
+    tag: 20200212091514-ea0aa05
 service_account_assigner:
   upstream:
     repository: gpii/service-account-assigner
