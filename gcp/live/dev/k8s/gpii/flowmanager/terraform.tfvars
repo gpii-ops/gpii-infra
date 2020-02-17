@@ -9,6 +9,7 @@ terragrunt = {
       "../../kube-system/cert-manager",
       "../couchdb",
       "../istio",
+      "../preferences",
     ]
   }
 
@@ -19,8 +20,7 @@ terragrunt = {
 
 # ↓ Module configuration (empty means all default)
 
-cert_issuer_name     = "letsencrypt-staging"
-
+cert_issuer_name  = "letsencrypt-staging"
 replica_count     = 2
 requests_cpu      = "250m"
 requests_memory   = "256Mi"

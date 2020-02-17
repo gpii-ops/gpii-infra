@@ -20,6 +20,6 @@ resource "google_monitoring_alert_policy" "pod_volume_utilization" {
     display_name = "K8s pod utilizes more than 85% of persistent volume capacity"
   }
 
-  notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
+  notification_channels = ["${data.terraform_remote_state.alert_notification_channel.slack_notification_channel}", "${data.terraform_remote_state.alert_notification_channel.mail_notification_channel}"]
   enabled               = "true"
 }

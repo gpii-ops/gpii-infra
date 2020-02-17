@@ -2,6 +2,20 @@ terraform {
   backend "gcs" {}
 }
 
+provider "google-beta" {
+  project     = "${var.project_id}"
+  credentials = "${var.serviceaccount_key}"
+}
+
+# Cloud Resource Manager system account to exclude in IAM modification LBM
+variable "crm_sa" {
+  default = "one-platform-tenant-manager@system.gserviceaccount.com"
+}
+
+variable "organization_id" {}
+
+variable "common_project_id" {}
+
 variable "env" {}
 variable "serviceaccount_key" {}
 variable "project_id" {}
@@ -25,6 +39,8 @@ variable "limits_memory" {}
 variable "secret_couchdb_admin_username" {}
 
 variable "secret_couchdb_admin_password" {}
+
+variable "key_tfstate_encryption_key" {}
 
 provider "google" {
   project     = "${var.project_id}"
@@ -67,4 +83,15 @@ module "gpii-flowmanager" {
   release_values_rendered = "${data.template_file.flowmanager_values.rendered}"
 
   chart_name = "${var.charts_dir}/gpii-flowmanager"
+}
+
+data "terraform_remote_state" "alert_notification_channel" {
+  backend = "gcs"
+
+  config {
+    credentials    = "${var.serviceaccount_key}"
+    bucket         = "${var.project_id}-tfstate"
+    prefix         = "${var.env}/k8s/stackdriver/monitoring"
+    encryption_key = "${var.key_tfstate_encryption_key}"
+  }
 }

@@ -2,7 +2,6 @@ resource "google_monitoring_alert_policy" "servicemanagement_modify" {
   depends_on   = ["null_resource.wait_for_lbms"]
   display_name = "Service management log does not contain API enabling / disabling events"
   combiner     = "OR"
-  project      = "${var.project_id}"
 
   conditions {
     condition_threshold {
@@ -27,6 +26,6 @@ resource "google_monitoring_alert_policy" "servicemanagement_modify" {
     mime_type = "text/markdown"
   }
 
-  notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
+  notification_channels = ["${data.terraform_remote_state.alert_notification_channel.slack_notification_channel}", "${data.terraform_remote_state.alert_notification_channel.mail_notification_channel}"]
   enabled               = "true"
 }

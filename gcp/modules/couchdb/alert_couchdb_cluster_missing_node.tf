@@ -1,8 +1,14 @@
 resource "google_monitoring_alert_policy" "couchdb_missing_node" {
+  depends_on = [
+    "module.couchdb",
+    "null_resource.couchdb_enable_pv_backups",
+    "null_resource.couchdb_finish_cluster",
+    "null_resource.wait_for_lbms",
+  ]
+
   display_name = "CouchDB nodes are visible by the cluster"
   combiner     = "OR"
   project      = "${var.project_id}"
-  depends_on   = ["null_resource.wait_for_lbms"]
 
   conditions = [
     {
