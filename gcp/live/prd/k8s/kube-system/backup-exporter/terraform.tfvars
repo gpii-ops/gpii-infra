@@ -8,6 +8,7 @@ terragrunt = {
   dependencies {
     paths = [
       "../k8s-snapshots",
+      "../../stackdriver/monitoring",
     ]
   }
 
