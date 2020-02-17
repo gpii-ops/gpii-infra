@@ -4,7 +4,7 @@ resource "google_monitoring_alert_policy" "backup_exporter_snapshots" {
 
   conditions {
     condition_absent {
-      filter   = "metric.type=\"${google_logging_metric.backup_exporter_snapshot_created.name}\" resource.type=\"k8s_container\""
+      filter   = "metric.type=\"logging.googleapis.com/user/${google_logging_metric.backup_exporter_snapshot_created.name}\" resource.type=\"k8s_container\""
       duration = "43200s"
 
       aggregations {

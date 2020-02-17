@@ -2,6 +2,7 @@ terraform {
   backend "gcs" {}
 }
 
+variable "env" {}
 variable "secrets_dir" {}
 variable "charts_dir" {}
 variable "cloud_sdk_repository" {}
@@ -9,6 +10,8 @@ variable "cloud_sdk_tag" {}
 
 # `destination_bucket` - The destination GCS bucket, i.e "gpii-backup-external-prd".
 variable "destination_bucket" {}
+
+variable "key_tfstate_encryption_key" {}
 
 variable "project_id" {}
 
