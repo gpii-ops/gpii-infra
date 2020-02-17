@@ -1,7 +1,7 @@
 resource "google_monitoring_alert_policy" "cluster_resource_allocatable_utilization" {
+  depends_on   = ["null_resource.wait_for_lbms"]
   display_name = "K8s cluster allocatable resource utilization stays within 85% of capacity"
   combiner     = "OR"
-  project      = "${var.project_id}"
 
   conditions = [
     {
@@ -50,6 +50,6 @@ resource "google_monitoring_alert_policy" "cluster_resource_allocatable_utilizat
     },
   ]
 
-  notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
+  notification_channels = ["${data.terraform_remote_state.alert_notification_channel.slack_notification_channel}", "${data.terraform_remote_state.alert_notification_channel.mail_notification_channel}"]
   enabled               = "true"
 }
