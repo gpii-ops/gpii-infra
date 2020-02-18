@@ -1,6 +1,7 @@
 resource "google_monitoring_alert_policy" "backup_exporter_snapshots" {
   display_name = "Backup-exporter snapshots are ok for 12 hours"
   combiner     = "OR"
+  depends_on   = ["null_resource.wait_for_lbms"]
 
   conditions {
     condition_absent {

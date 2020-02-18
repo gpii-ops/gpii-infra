@@ -1,6 +1,7 @@
 resource "google_monitoring_alert_policy" "backup_exporter_errors" {
   display_name = "Backup-exporter process does not report one or more errors"
   combiner     = "OR"
+  depends_on   = ["null_resource.wait_for_lbms"]
 
   conditions {
     condition_threshold {
