@@ -4,7 +4,7 @@ resource "google_monitoring_alert_policy" "backup_exporter_errors" {
 
   conditions {
     condition_threshold {
-      filter          = "metric.type=\"logging.googleapis.com/user/backup_exporter.error\" resource.type=\"k8s_container\""
+      filter          = "metric.type=\"${google_logging_metric.backup_exporter_error.name}\" resource.type=\"k8s_container\""
       comparison      = "COMPARISON_GT"
       threshold_value = 0.0
       duration        = "900s"
@@ -25,8 +25,6 @@ resource "google_monitoring_alert_policy" "backup_exporter_errors" {
     display_name = "Backup-exporter process reports one or more errors"
   }
 
-  notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
+  notification_channels = ["${data.terraform_remote_state.alert_notification_channel.slack_notification_channel}", "${data.terraform_remote_state.alert_notification_channel.mail_notification_channel}"]
   enabled               = "${(var.env == "prd" || var.env == "stg") ? true : false}"
-
-  depends_on = ["google_logging_metric.backup_exporter_error"]
 }

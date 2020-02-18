@@ -1,7 +1,7 @@
 resource "google_monitoring_alert_policy" "dns_modify" {
+  depends_on   = ["null_resource.wait_for_lbms"]
   display_name = "CloudDNS audit log does not contain zone modification events"
   combiner     = "OR"
-  depends_on   = ["null_resource.wait_for_lbms"]
 
   conditions {
     condition_threshold {
@@ -26,6 +26,8 @@ resource "google_monitoring_alert_policy" "dns_modify" {
     mime_type = "text/markdown"
   }
 
-  notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
-  enabled               = "true"
+  notification_channels = ["${data.terraform_remote_state.alert_notification_channel.slack_notification_channel}", "${data.terraform_remote_state.alert_notification_channel.mail_notification_channel}"]
+
+  # Disabled on ephemeral clusters to avoid noise on recreation
+  enabled = "${(var.env == "prd" || var.env == "stg") ? "true" : "false"}"
 }

@@ -1,11 +1,11 @@
 resource "google_monitoring_alert_policy" "gke_cluster_create" {
+  depends_on   = ["null_resource.wait_for_lbms"]
   display_name = "GKE audit log does not contain cluster creation events"
   combiner     = "OR"
-  depends_on   = ["google_logging_metric.gke_cluster_create"]
 
   conditions {
     condition_threshold {
-      filter          = "metric.type=\"logging.googleapis.com/user/gke_cluster.create\" resource.type=\"global\""
+      filter          = "metric.type=\"logging.googleapis.com/user/${google_logging_metric.gke_cluster_create.name}\" resource.type=\"global\""
       comparison      = "COMPARISON_GT"
       threshold_value = 0.0
       duration        = "0s"
@@ -26,8 +26,6 @@ resource "google_monitoring_alert_policy" "gke_cluster_create" {
     mime_type = "text/markdown"
   }
 
-  notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
+  notification_channels = ["${data.terraform_remote_state.alert_notification_channel.slack_notification_channel}", "${data.terraform_remote_state.alert_notification_channel.mail_notification_channel}"]
   enabled               = "true"
-
-  depends_on = ["google_logging_metric.gke_cluster_create"]
 }

@@ -1,4 +1,5 @@
 resource "google_monitoring_alert_policy" "flowmanager_uptime" {
+  depends_on   = ["google_dns_record_set.flowmanager-dns"]
   display_name = "Uptime check on `flowmanager.${var.domain_name}` is green"
   combiner     = "OR"
 
@@ -25,6 +26,6 @@ resource "google_monitoring_alert_policy" "flowmanager_uptime" {
     display_name = "Uptime Check on flowmanager.${var.domain_name} is failing"
   }
 
-  notification_channels = ["${google_monitoring_notification_channel.email.name}", "${google_monitoring_notification_channel.alerts_slack.*.name}"]
+  notification_channels = ["${data.terraform_remote_state.alert_notification_channel.slack_notification_channel}", "${data.terraform_remote_state.alert_notification_channel.mail_notification_channel}"]
   enabled               = true
 }

@@ -24,11 +24,11 @@ cert_manager:
 certmerge_operator:
   upstream:
     repository: gpii/certmerge-operator
-    tag: 0.0.3-gpii.1
+    tag: v0.0.3-gpii.2
   generated:
     repository: gcr.io/gpii-common-prd/gpii__certmerge-operator
-    sha: sha256:0b794c687b07b078b6f10d451c81c2fb83bd3c93cf7540fe863910fac1a6d101
-    tag: 0.0.3-gpii.0
+    sha: sha256:13876af5199de7fc7fbc785a206eaa2fa49c74dc5ec222682cc3ea9aa7c5235f
+    tag: v0.0.3-gpii.2
 cloud_sdk:
   upstream:
     repository: google/cloud-sdk
@@ -83,40 +83,40 @@ couchdb:
     tag: 2.3.1
   generated:
     repository: gcr.io/gpii-common-prd/couchdb
-    sha: sha256:6881d8f2da1da71cbdb417082e71f02df49026b80b80f85c9f0ea80a4776827d
+    sha: sha256:088fb3bc9c193ab4783e47d34f30f009eebabe305ea32280fb3ef0e44f8af8ab
     tag: 2.3.1
 dataloader:
   upstream:
     repository: gpii/universal
-    tag: 20191211142940-0af24fa
+    tag: 20200212091514-ea0aa05
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:57fec0a87838d7117cae821a5b9f75742db24947dae3550d1aa2d747c5936ede
-    tag: 20191211142940-0af24fa
+    sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
+    tag: 20200212091514-ea0aa05
 flushtokens:
   upstream:
     repository: gpii/universal
-    tag: 20191211142940-0af24fa
+    tag: 20200212091514-ea0aa05
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:57fec0a87838d7117cae821a5b9f75742db24947dae3550d1aa2d747c5936ede
-    tag: 20191211142940-0af24fa
+    sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
+    tag: 20200212091514-ea0aa05
 flowmanager:
   upstream:
     repository: gpii/universal
-    tag: 20191211142940-0af24fa
+    tag: 20200212091514-ea0aa05
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:57fec0a87838d7117cae821a5b9f75742db24947dae3550d1aa2d747c5936ede
-    tag: 20191211142940-0af24fa
+    sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
+    tag: 20200212091514-ea0aa05
 productiontests:
   upstream:
     repository: gpii/universal
-    tag: 20191211142940-0af24fa
+    tag: 20200212091514-ea0aa05
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:57fec0a87838d7117cae821a5b9f75742db24947dae3550d1aa2d747c5936ede
-    tag: 20191211142940-0af24fa
+    sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
+    tag: 20200212091514-ea0aa05
 k8s_snapshots:
   upstream:
     repository: gpii/k8s-snapshots
@@ -136,11 +136,11 @@ locust:
 preferences:
   upstream:
     repository: gpii/universal
-    tag: 20191211142940-0af24fa
+    tag: 20200212091514-ea0aa05
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:57fec0a87838d7117cae821a5b9f75742db24947dae3550d1aa2d747c5936ede
-    tag: 20191211142940-0af24fa
+    sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
+    tag: 20200212091514-ea0aa05
 service_account_assigner:
   upstream:
     repository: gpii/service-account-assigner
