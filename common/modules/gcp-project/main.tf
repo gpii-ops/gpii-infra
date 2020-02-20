@@ -349,7 +349,7 @@ data "google_iam_policy" "combined" {
   }
 
   binding {
-    role = "roles/logging.logViewer"
+    role = "roles/logging.viewer"
 
     members = [
       "${local.stg_log_viewers}",
