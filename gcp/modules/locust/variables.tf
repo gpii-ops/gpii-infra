@@ -41,3 +41,11 @@ variable "locust_desired_max_response_time" {
 variable "locust_desired_num_failures" {
   default = 0
 }
+
+variable "locust_wait_for_target" {
+  default = "true"
+}
+
+variable "locust_worker_target_labels" {
+  default = ""
+}

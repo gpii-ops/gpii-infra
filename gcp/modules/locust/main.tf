@@ -13,6 +13,8 @@ variable "locust_tag" {}
 
 variable "uuid_morphic_client_id" {}
 variable "uuid_morphic_client_secret" {}
+variable "secret_couchdb_admin_password" {}
+variable "secret_couchdb_admin_username" {}
 
 resource "null_resource" "locust_copy_tasks" {
   triggers = {
@@ -41,6 +43,10 @@ data "template_file" "locust_values" {
     locust_script         = "${var.locust_script}"
     morphic_client_id     = "${var.uuid_morphic_client_id}"
     morphic_client_secret = "${var.uuid_morphic_client_secret}"
+    basic_auth_user       = "${var.secret_couchdb_admin_username}"
+    basic_auth_password   = "${var.secret_couchdb_admin_password}"
+    wait_for_target       = "${var.locust_wait_for_target}"
+    worker_target_labels  = "${var.locust_worker_target_labels}"
   }
 }
 
