@@ -36,17 +36,17 @@ data "template_file" "locust_values" {
   template = "${file("values.yaml")}"
 
   vars {
-    locust_repository         = "${var.locust_repository}"
-    locust_tag                = "${var.locust_tag}"
-    locust_workers            = "${var.locust_workers}"
-    target_host               = "${var.locust_target_host}"
-    locust_script             = "${var.locust_script}"
-    morphic_client_id         = "${var.uuid_morphic_client_id}"
-    morphic_client_secret     = "${var.uuid_morphic_client_secret}"
-    basic_auth_user           = "${var.secret_couchdb_admin_username}"
-    basic_auth_password       = "${var.secret_couchdb_admin_password}"
-    wait_for_target           = "${var.locust_wait_for_target}"
-    worker_target_labels_app  = "${var.locust_worker_target_labels_app}"
+    locust_repository        = "${var.locust_repository}"
+    locust_tag               = "${var.locust_tag}"
+    locust_workers           = "${var.locust_workers}"
+    target_host              = "${var.locust_target_host}"
+    locust_script            = "${var.locust_script}"
+    morphic_client_id        = "${var.uuid_morphic_client_id}"
+    morphic_client_secret    = "${var.uuid_morphic_client_secret}"
+    basic_auth_user          = "${var.secret_couchdb_admin_username}"
+    basic_auth_password      = "${var.secret_couchdb_admin_password}"
+    wait_for_target          = "${var.locust_wait_for_target}"
+    worker_target_labels_app = "${var.locust_worker_target_labels_app}"
   }
 }
 
