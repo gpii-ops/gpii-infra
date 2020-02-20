@@ -10,9 +10,11 @@ worker:
   replicaCount: ${locust_workers}
   config:
     locust-script: /locust-tasks/${locust_script}
+  %{ if worker_target_labels_app != "" }
   target:
     labels:
-      ${worker_target_labels}
+      app: ${worker_target_labels_app}
+  %{ endif }
 
 service:
   type: ClusterIP

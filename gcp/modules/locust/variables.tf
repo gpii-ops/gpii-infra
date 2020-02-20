@@ -46,6 +46,6 @@ variable "locust_wait_for_target" {
   default = "true"
 }
 
-variable "locust_worker_target_labels" {
+variable "locust_worker_target_labels_app" {
   default = ""
 }
