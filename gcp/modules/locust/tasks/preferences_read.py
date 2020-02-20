@@ -6,11 +6,15 @@ events.request_failure += on_failure
 
 class PreferencesReadTasks(TaskSet):
 
-  _keys = ["carla", "vladimir", "wayne", "omar", "nvda"]
+  def on_start(self):
+    self.common = MorphicCommon()
 
   @task
   def get_pref_by_key(self):
-      self.client.get("/preferences/" + random.choice(self._keys))
+      self.client.get(
+        "/preferences/" + random.choice(self.common.default_docs),
+        name = "/preferences/ID"
+      )
 
 
 class PreferencesReadWarmer(HttpLocust):

@@ -33,7 +33,7 @@ class MorphicReadTasks(TaskSequence):
       )
 
 
-class FlowmanagerWarmer(HttpLocust):
+class MorphicWarmer(HttpLocust):
   task_set = MorphicReadTasks
   min_wait = 500
   max_wait = 1000
