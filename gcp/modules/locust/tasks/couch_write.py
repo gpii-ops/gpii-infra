@@ -17,6 +17,7 @@ class CouchWriteTasks(TaskSet):
       self.client.post(
         "/" + self.common.db_name,
         json = data,
+        auth = (self.common.basic_auth_user, self.common.basic_auth_password),
         headers = { "Content-Type": "application/json" }
       )
 
