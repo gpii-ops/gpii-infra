@@ -35,6 +35,10 @@ variable "organization_id" {}
 
 variable "serviceaccount_key" {}
 
+variable "stg_log_viewers" {
+  default = "group:web-developers@raisingthefloor.org"
+}
+
 # Id of the project which owns the credentials used by the provider
 variable "project_id" {}
 
@@ -345,6 +349,14 @@ data "google_iam_policy" "combined" {
   }
 
   binding {
+    role = "roles/logging.viewer"
+
+    members = [
+      "${local.stg_log_viewers}",
+    ]
+  }
+
+  binding {
     role = "roles/logging.logWriter"
 
     members = [
@@ -502,6 +514,9 @@ locals {
 
   # Project owners will be empty list if var.project_owner is empty string ""
   project_owners = "${compact(list(var.project_owner))}"
+
+  # Groups that can see the logs in staging.
+  stg_log_viewers = "${compact(list(var.project_name == "stg" ? var.stg_log_viewers : ""))}"
 
   # stg, prd, dev, and the projects that matches the ci_dev_project_regex variable are managed
   # by the CI so they should have the service account and the permissions attached to it
