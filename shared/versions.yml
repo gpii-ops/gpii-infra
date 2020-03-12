@@ -157,3 +157,11 @@ kiali:
     repository: gcr.io/gpii-common-prd/quay.io__kiali__kiali
     sha: sha256:8304fc943df04168c68f0e6098b968337c36229c6dc9341286a27179d03b2767
     tag: v1.5.0
+kube_state_metrics:
+  upstream:
+    repository: quay.io/coreos/kube-state-metrics
+    tag: v1.9.5
+  generated:
+    repository: quay.io/coreos/kube-state-metrics
+    tag: v1.9.5
+    sha: sha256:8304fc943df04168c68f0e6098b968337c36229c6dc9341286a27179d03b2767
