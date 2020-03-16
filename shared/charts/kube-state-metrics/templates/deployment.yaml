@@ -23,7 +23,7 @@ spec:
       containers:
       - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         args:
-          - '--collectors=configmaps,horizontalpodautoscalers,namespaces,pods,ingresses,limitranges,nodes,certificatesigningrequests,cronjobs,deployments,persistentvolumes,jobs,secrets,statefulsets,persistentvolumeclaims,services,storageclasses,poddisruptionbudgets,volumeattachments,daemonsets,endpoints,networkpolicies,replicasets,replicationcontrollers,resourcequotas'
+        - "--collectors={{ include "helm-toolkit.utils.joinListWithComma" .Values.collectors }}"
         livenessProbe:
           httpGet:
             path: /healthz

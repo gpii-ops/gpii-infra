@@ -9,3 +9,30 @@ prometheus_to_sd:
     repository: gcr.io/google-containers/prometheus-to-sd
     tag: v0.5.1
     pullPolicy: IfNotPresent
+
+collectors:
+  - configmaps
+  - horizontalpodautoscalers
+  - namespaces
+  - pods
+  - ingresses
+  - limitranges
+  - nodes
+  - certificatesigningrequests
+  - cronjobs
+  - deployments
+  - persistentvolumes
+  - jobs
+  - secrets
+  - statefulsets
+  - persistentvolumeclaims
+  - services
+  - storageclasses
+  - poddisruptionbudgets
+  - volumeattachments
+  - daemonsets
+  - endpoints
+  - networkpolicies
+  - replicasets
+  - replicationcontrollers
+  - resourcequotas
