@@ -24,6 +24,7 @@ spec:
       - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         args:
         - "--collectors={{ include "helm-toolkit.utils.joinListWithComma" .Values.collectors }}"
+        - "--metric-blacklist={{ include "helm-toolkit.utils.joinListWithComma" .Values.metric_blacklist }}"
         livenessProbe:
           httpGet:
             path: /healthz

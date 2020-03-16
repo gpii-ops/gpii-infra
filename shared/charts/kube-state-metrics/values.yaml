@@ -36,3 +36,6 @@ collectors:
   - replicasets
   - replicationcontrollers
   - resourcequotas
+
+metric_blacklist:
+  - kube_pod_labels
