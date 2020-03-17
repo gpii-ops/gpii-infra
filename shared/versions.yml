@@ -75,8 +75,8 @@ prometheus_to_sd:
     tag: v0.9.2
   generated:
     repository: gcr.io/gpii-common-prd/gcr.io__google-containers__prometheus-to-sd
-    sha: sha256:14f37ba6eef9ca91cb1ffa71a7a23550f3b074003b60fc0974b4206dc81e0d85
-    tag: v0.5.1
+    sha: sha256:a8b6a60fe96e29507b1c864e0be2b668502e5c3c979f3d338c4cc14228c46ca8
+    tag: v0.9.2
 couchdb:
   upstream:
     repository: couchdb
@@ -162,6 +162,6 @@ kube_state_metrics:
     repository: quay.io/coreos/kube-state-metrics
     tag: v1.9.5
   generated:
-    repository: quay.io/coreos/kube-state-metrics
+    repository: gcr.io/gpii-common-prd/quay.io__coreos__kube-state-metrics
+    sha: sha256:9d29333ad1cc8e14b26e40daea3739cec21b765f6077c6764546779deec3f54b
     tag: v1.9.5
-    sha: sha256:8304fc943df04168c68f0e6098b968337c36229c6dc9341286a27179d03b2767
