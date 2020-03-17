@@ -1,0 +1,41 @@
+# Default values for certmerge-operator
+image:
+  repository: quay.io/coreos/kube-state-metrics
+  tag: v1.9.5
+  pullPolicy: IfNotPresent
+
+prometheus_to_sd:
+  image:
+    repository: gcr.io/google-containers/prometheus-to-sd
+    tag: v0.5.1
+    pullPolicy: IfNotPresent
+
+collectors:
+  - configmaps
+  - horizontalpodautoscalers
+  - namespaces
+  - pods
+  - ingresses
+  - limitranges
+  - nodes
+  - certificatesigningrequests
+  - cronjobs
+  - deployments
+  - persistentvolumes
+  - jobs
+  - secrets
+  - statefulsets
+  - persistentvolumeclaims
+  - services
+  - storageclasses
+  - poddisruptionbudgets
+  - volumeattachments
+  - daemonsets
+  - endpoints
+  - networkpolicies
+  - replicasets
+  - replicationcontrollers
+  - resourcequotas
+
+metric_blacklist:
+  - kube_pod_labels

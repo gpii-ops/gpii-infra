@@ -1,0 +1,8 @@
+image:
+  repository: ${kube_state_metrics_repository}
+  tag: ${kube_state_metrics_tag}
+
+prometheus_to_sd:
+  image:
+    repository: ${prometheus_to_sd_repository}
+    tag: ${prometheus_to_sd_tag}
