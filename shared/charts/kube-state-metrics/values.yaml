@@ -11,31 +11,9 @@ prometheus_to_sd:
     pullPolicy: IfNotPresent
 
 collectors:
-  - configmaps
-  - horizontalpodautoscalers
-  - namespaces
-  - pods
-  - ingresses
-  - limitranges
-  - nodes
-  - certificatesigningrequests
-  - cronjobs
   - deployments
-  - persistentvolumes
-  - jobs
-  - secrets
   - statefulsets
-  - persistentvolumeclaims
-  - services
-  - storageclasses
-  - poddisruptionbudgets
-  - volumeattachments
-  - daemonsets
-  - endpoints
-  - networkpolicies
   - replicasets
-  - replicationcontrollers
-  - resourcequotas
 
 metric_blacklist:
   - kube_pod_labels
