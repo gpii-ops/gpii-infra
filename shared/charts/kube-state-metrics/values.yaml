@@ -17,3 +17,5 @@ collectors:
 
 metric_blacklist:
   - kube_pod_labels
+  - kube_deployment_labels
+  - kube_replicaset_labels
