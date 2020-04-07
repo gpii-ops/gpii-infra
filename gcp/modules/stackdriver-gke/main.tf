@@ -13,6 +13,6 @@ resource "kubernetes_config_map" "metadata-agent-config" {
   }
 
   data = {
-    "NannyConfiguration" = "apiVersion: nannyconfig/v1alpha1\nkind: NannyConfiguration\nbaseMemory: 50Mi"
+    "NannyConfiguration" = "apiVersion: nannyconfig/v1alpha1\nkind: NannyConfiguration\nbaseMemory: 50Mi\nbaseCPU: 80m"
   }
 }
