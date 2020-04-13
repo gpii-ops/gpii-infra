@@ -91,32 +91,32 @@ dataloader:
     tag: 20200330152413-ad461d9
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
-    tag: 20200212091514-ea0aa05
+    sha: sha256:466698ad0221b64042c4b6ec6c4b10075a33502300d8c9943fba20b71202626f
+    tag: 20200330152413-ad461d9
 flushtokens:
   upstream:
     repository: gpii/universal
     tag: 20200330152413-ad461d9
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
-    tag: 20200212091514-ea0aa05
+    sha: sha256:466698ad0221b64042c4b6ec6c4b10075a33502300d8c9943fba20b71202626f
+    tag: 20200330152413-ad461d9
 flowmanager:
   upstream:
     repository: gpii/universal
     tag: 20200330152413-ad461d9
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
-    tag: 20200212091514-ea0aa05
+    sha: sha256:466698ad0221b64042c4b6ec6c4b10075a33502300d8c9943fba20b71202626f
+    tag: 20200330152413-ad461d9
 productiontests:
   upstream:
     repository: gpii/universal
     tag: 20200330152413-ad461d9
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
-    tag: 20200212091514-ea0aa05
+    sha: sha256:466698ad0221b64042c4b6ec6c4b10075a33502300d8c9943fba20b71202626f
+    tag: 20200330152413-ad461d9
 k8s_snapshots:
   upstream:
     repository: gpii/k8s-snapshots
@@ -139,8 +139,8 @@ preferences:
     tag: 20200330152413-ad461d9
   generated:
     repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
-    tag: 20200212091514-ea0aa05
+    sha: sha256:466698ad0221b64042c4b6ec6c4b10075a33502300d8c9943fba20b71202626f
+    tag: 20200330152413-ad461d9
 service_account_assigner:
   upstream:
     repository: gpii/service-account-assigner
