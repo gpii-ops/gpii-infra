@@ -360,6 +360,15 @@ task :display_scc_findings => [:configure] do
   sh "gcloud alpha scc findings list #{ENV["ORGANIZATION_ID"]} --filter 'state = \"ACTIVE\"'"
 end
 
+# This task displays all containers with any critical vulnerability
+task :display_image_vulnerabilities => [:configure] do
+  sh "gcloud beta container images list --format='value(name)' \
+      | xargs -n1 -I '{}' gcloud beta container images list-tags '{}' \
+          --show-occurrences --format=json \
+          --filter='vuln_counts.CRITICAL > 0' \
+      | jq '.[] | {\"image\": .DISCOVERY[].resourceUrl, \"vuln_counts\": .vuln_counts }'"
+end
+
 # This task forwards Kiali port
 task :kiali_ui => [:configure] do
   sh "/rakefiles/scripts/kiali_ui.sh"
