@@ -83,7 +83,7 @@ couchdb:
     tag: 2.3.1
   generated:
     repository: gcr.io/gpii-common-prd/couchdb
-    sha: sha256:26a1962d06a5e5be965e517c69d2452c82edf335208ed51360d3493724591e2c
+    sha: sha256:039eeb1b0601bc78bb7be9d292af08822986da2ad344568b3548afb424125884
     tag: 2.3.1
 dataloader:
   upstream:
