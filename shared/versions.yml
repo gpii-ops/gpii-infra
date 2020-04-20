@@ -87,36 +87,36 @@ couchdb:
     tag: 2.3.1
 dataloader:
   upstream:
-    repository: gpii/universal
-    tag: 20200212091514-ea0aa05
+    repository: herrclown/vagrant-universal
+    tag: latest
   generated:
-    repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
-    tag: 20200212091514-ea0aa05
+    repository: herrclown/vagrant-universal
+    sha: sha256:7dd6c799a739bde65bdc663b55277cff54c3d984921e75724362d5097491d35f
+    tag: latest
 flushtokens:
   upstream:
-    repository: gpii/universal
-    tag: 20200212091514-ea0aa05
+    repository: herrclown/vagrant-universal
+    tag: latest
   generated:
-    repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
-    tag: 20200212091514-ea0aa05
+    repository: herrclown/vagrant-universal
+    sha: sha256:7dd6c799a739bde65bdc663b55277cff54c3d984921e75724362d5097491d35f
+    tag: latest
 flowmanager:
   upstream:
-    repository: gpii/universal
-    tag: 20200212091514-ea0aa05
+    repository: herrclown/vagrant-universal
+    tag: latest
   generated:
-    repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
-    tag: 20200212091514-ea0aa05
+    repository: herrclown/vagrant-universal
+    sha: sha256:7dd6c799a739bde65bdc663b55277cff54c3d984921e75724362d5097491d35f
+    tag: latest
 productiontests:
   upstream:
-    repository: gpii/universal
-    tag: 20200212091514-ea0aa05
+    repository: herrclown/vagrant-universal
+    tag: latest
   generated:
-    repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
-    tag: 20200212091514-ea0aa05
+    repository: herrclown/vagrant-universal
+    sha: sha256:7dd6c799a739bde65bdc663b55277cff54c3d984921e75724362d5097491d35f
+    tag: latest
 k8s_snapshots:
   upstream:
     repository: gpii/k8s-snapshots
@@ -135,12 +135,12 @@ locust:
     tag: 0.9.0-gpii.6
 preferences:
   upstream:
-    repository: gpii/universal
-    tag: 20200212091514-ea0aa05
+    repository: herrclown/vagrant-universal
+    tag: latest
   generated:
-    repository: gcr.io/gpii-common-prd/gpii__universal
-    sha: sha256:63bf912e819f2cd346b8cfee2d733214e5008cc9c7ea2663927ea48624a8f958
-    tag: 20200212091514-ea0aa05
+    repository: herrclown/vagrant-universal
+    sha: sha256:7dd6c799a739bde65bdc663b55277cff54c3d984921e75724362d5097491d35f
+    tag: latest
 service_account_assigner:
   upstream:
     repository: gpii/service-account-assigner
