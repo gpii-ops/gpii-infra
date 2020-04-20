@@ -1,0 +1,12 @@
+name: kube-state-metrics
+version: v0.1.1
+appVersion: v1.9.5
+description: A Helm chart for kube-state-metrics
+home: https://github.com/kubernetes/kube-state-metrics
+keywords:
+  - kube-state-metrics
+  - k8s
+  - kubernetes
+  - metrics
+sources:
+  - https://github.com/kubernetes/kube-state-metrics

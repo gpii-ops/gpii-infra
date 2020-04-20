@@ -39,3 +39,8 @@ desc "[ONLY ADMIN] Display SCC findings"
 task :display_scc_findings => [:set_vars] do
   sh "#{@exekube_cmd} rake display_scc_findings"
 end
+
+desc "[ONLY ADMIN] Display Container Image Vulnerabilities"
+task :display_image_vulnerabilities => [:set_vars] do
+  sh "#{@exekube_cmd} rake display_image_vulnerabilities"
+end

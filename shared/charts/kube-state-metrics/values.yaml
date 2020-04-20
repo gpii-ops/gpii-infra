@@ -1,0 +1,21 @@
+# Default values for certmerge-operator
+image:
+  repository: quay.io/coreos/kube-state-metrics
+  tag: v1.9.5
+  pullPolicy: IfNotPresent
+
+prometheus_to_sd:
+  image:
+    repository: gcr.io/google-containers/prometheus-to-sd
+    tag: v0.5.1
+    pullPolicy: IfNotPresent
+
+collectors:
+  - deployments
+  - statefulsets
+  - replicasets
+
+metric_blacklist:
+  - kube_pod_labels
+  - kube_deployment_labels
+  - kube_replicaset_labels

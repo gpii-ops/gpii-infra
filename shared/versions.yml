@@ -72,18 +72,18 @@ couchdb_prometheus_exporter:
 prometheus_to_sd:
   upstream:
     repository: gcr.io/google-containers/prometheus-to-sd
-    tag: v0.5.1
+    tag: v0.9.2
   generated:
     repository: gcr.io/gpii-common-prd/gcr.io__google-containers__prometheus-to-sd
-    sha: sha256:14f37ba6eef9ca91cb1ffa71a7a23550f3b074003b60fc0974b4206dc81e0d85
-    tag: v0.5.1
+    sha: sha256:a8b6a60fe96e29507b1c864e0be2b668502e5c3c979f3d338c4cc14228c46ca8
+    tag: v0.9.2
 couchdb:
   upstream:
     repository: couchdb
     tag: 2.3.1
   generated:
     repository: gcr.io/gpii-common-prd/couchdb
-    sha: sha256:656e2c997f18809251f90979f85e414cdca7292512b6260afec6801e4f1020df
+    sha: sha256:039eeb1b0601bc78bb7be9d292af08822986da2ad344568b3548afb424125884
     tag: 2.3.1
 dataloader:
   upstream:
@@ -157,3 +157,11 @@ kiali:
     repository: gcr.io/gpii-common-prd/quay.io__kiali__kiali
     sha: sha256:8304fc943df04168c68f0e6098b968337c36229c6dc9341286a27179d03b2767
     tag: v1.5.0
+kube_state_metrics:
+  upstream:
+    repository: quay.io/coreos/kube-state-metrics
+    tag: v1.9.5
+  generated:
+    repository: gcr.io/gpii-common-prd/quay.io__coreos__kube-state-metrics
+    sha: sha256:9d29333ad1cc8e14b26e40daea3739cec21b765f6077c6764546779deec3f54b
+    tag: v1.9.5
