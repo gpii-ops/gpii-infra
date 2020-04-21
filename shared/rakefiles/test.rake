@@ -18,6 +18,11 @@ task :test_preferences_read => [:set_vars, :check_destroy_allowed] do
   ENV["TF_VAR_locust_script"] = "preferences_read.py"
   ENV["TF_VAR_locust_desired_median_response_time"] = "500"
   ENV["TF_VAR_locust_desired_max_response_time"] = "3000"
+  ENV["TF_VAR_locust_desired_total_rps"] = "3"
+  ENV["TF_VAR_locust_users"] = "10"
+  ENV["TF_VAR_locust_desired_total_rps"] = "5"
+  ENV["TF_VAR_locust_worker_target_labels_app"] = "preferences"
+  ENV["TF_VAR_locust_wait_for_target"] = "true"
 
   Rake::Task[:set_compose_env].reenable
   Rake::Task[:set_compose_env].invoke
@@ -30,11 +35,13 @@ task :test_preferences_write => [:set_vars, :check_destroy_allowed] do
   ENV["TF_VAR_locust_target_host"] = "http://preferences.gpii.svc.cluster.local"
   ENV["TF_VAR_locust_target_app"] = "preferences_write"
   ENV["TF_VAR_locust_script"] = "preferences_write.py"
-  ENV["TF_VAR_locust_desired_total_rps"] = "10"
   ENV["TF_VAR_locust_desired_median_response_time"] = "2000"
   ENV["TF_VAR_locust_desired_max_response_time"] = "3000"
-  ENV["TF_VAR_locust_users"] = "25"
+  ENV["TF_VAR_locust_desired_total_rps"] = "3"
+  ENV["TF_VAR_locust_users"] = "10"
   ENV["TF_VAR_locust_hatch_rate"] = "5"
+  ENV["TF_VAR_locust_worker_target_labels_app"] = "preferences"
+  ENV["TF_VAR_locust_wait_for_target"] = "true"
 
   Rake::Task[:set_compose_env].reenable
   Rake::Task[:set_compose_env].invoke
@@ -85,6 +92,44 @@ task :test_morphic_write => [:set_vars, :check_destroy_allowed] do
   ENV["TF_VAR_locust_desired_total_rps"] = "3"
   ENV["TF_VAR_locust_desired_median_response_time"] = "500"
   ENV["TF_VAR_locust_desired_max_response_time"] = "3000"
+
+  Rake::Task[:set_compose_env].reenable
+  Rake::Task[:set_compose_env].invoke
+  Rake::Task[:test].reenable
+  Rake::Task[:test].invoke
+end
+
+desc "[TEST] Run Locust swarm with CouchDB read tasks"
+task :test_couch_read => [:set_vars, :check_destroy_allowed] do
+  ENV["TF_VAR_locust_target_host"] = "http://couchdb-svc-couchdb.gpii.svc.cluster.local:5984"
+  ENV["TF_VAR_locust_target_app"] = "couch_read"
+  ENV["TF_VAR_locust_script"] = "couch_read.py"
+  ENV["TF_VAR_locust_users"] = "10"
+  ENV["TF_VAR_locust_hatch_rate"] = "5"
+  ENV["TF_VAR_locust_desired_total_rps"] = "50"
+  ENV["TF_VAR_locust_desired_median_response_time"] = "200"
+  ENV["TF_VAR_locust_desired_max_response_time"] = "500"
+  ENV["TF_VAR_locust_worker_target_labels_app"] = "couchdb"
+  ENV["TF_VAR_locust_wait_for_target"] = "false"
+
+  Rake::Task[:set_compose_env].reenable
+  Rake::Task[:set_compose_env].invoke
+  Rake::Task[:test].reenable
+  Rake::Task[:test].invoke
+end
+
+desc "[TEST] Run Locust swarm with CouchDB write tasks"
+task :test_couch_write => [:set_vars, :check_destroy_allowed] do
+  ENV["TF_VAR_locust_target_host"] = "http://couchdb-svc-couchdb.gpii.svc.cluster.local:5984"
+  ENV["TF_VAR_locust_target_app"] = "couch_write"
+  ENV["TF_VAR_locust_script"] = "couch_write.py"
+  ENV["TF_VAR_locust_users"] = "10"
+  ENV["TF_VAR_locust_hatch_rate"] = "5"
+  ENV["TF_VAR_locust_desired_total_rps"] = "50"
+  ENV["TF_VAR_locust_desired_median_response_time"] = "200"
+  ENV["TF_VAR_locust_desired_max_response_time"] = "500"
+  ENV["TF_VAR_locust_worker_target_labels_app"] = "couchdb"
+  ENV["TF_VAR_locust_wait_for_target"] = "false"
 
   Rake::Task[:set_compose_env].reenable
   Rake::Task[:set_compose_env].invoke

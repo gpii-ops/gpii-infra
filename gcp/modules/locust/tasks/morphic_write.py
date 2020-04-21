@@ -38,7 +38,7 @@ class MorphicWriteTasks(TaskSequence):
       )
 
 
-class FlowmanagerWarmer(HttpLocust):
+class MorphicWarmer(HttpLocust):
   task_set = MorphicWriteTasks
   min_wait = 500
   max_wait = 1000

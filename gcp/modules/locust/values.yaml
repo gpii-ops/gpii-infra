@@ -10,6 +10,11 @@ worker:
   replicaCount: ${locust_workers}
   config:
     locust-script: /locust-tasks/${locust_script}
+  %{ if worker_target_labels_app != "" }
+  target:
+    labels:
+      app: ${worker_target_labels_app}
+  %{ endif }
 
 service:
   type: ClusterIP
@@ -18,3 +23,9 @@ service:
 morphic:
   client_id: ${morphic_client_id}
   client_secret: ${morphic_client_secret}
+
+basic_auth:
+  user: ${basic_auth_user}
+  password: ${basic_auth_password}
+
+wait_for_target: "${wait_for_target}"

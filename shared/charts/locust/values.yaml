@@ -42,6 +42,14 @@ worker:
     labels:
     namespace: gpii
 
+## Workers will expect 200 from target
+## before joining the master, if this set to true
+wait_for_target: "true"
+
 # morphic:
 #   client_id:
 #   client_secret:
+
+# basic_auth:
+#  user:
+#  password:
