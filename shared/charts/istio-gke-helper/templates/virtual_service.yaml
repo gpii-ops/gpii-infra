@@ -15,17 +15,6 @@ spec:
   - mesh
   hosts:
   - {{ $host }}
-  tcp:
-  - match:
-    - gateways:
-      - istio-egressgateway
-      port: 443
-    route:
-    - destination:
-        host: {{ $host }}
-        port:
-          number: 443
-      weight: 100
   tls:
   - match:
     - gateways:
@@ -39,4 +28,16 @@ spec:
         port:
           number: 443
         subset: tls-{{ $host | replace "." "-" }}
+  - match:
+    - gateways:
+      - istio-egressgateway
+      port: 443
+      sni_hosts:
+      - {{ $host }}
+    route:
+    - destination:
+        host: {{ $host }}
+        port:
+          number: 443
+      weight: 100
 {{- end }}

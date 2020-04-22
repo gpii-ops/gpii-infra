@@ -13,13 +13,4 @@ spec:
   host: istio-egressgateway.istio-system.svc.cluster.local
   subsets:
   - name: tls-{{ $host | replace "." "-" }}
-    trafficPolicy:
-      loadBalancer:
-        simple: ROUND_ROBIN
-      portLevelSettings:
-      - port:
-          number: 443
-        tls:
-          mode: ISTIO_MUTUAL
-          sni: {{ $host }}
 {{- end }}
