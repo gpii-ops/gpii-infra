@@ -45,8 +45,6 @@ spec:
           value: "{{ .Values.service.internalPort }}"
         - name: TARGET_HOST
           value: {{ index .Values.master.config "target-host" | quote }}
-        - name: WAIT_FOR_TARGET
-          value: "{{ .Values.wait_for_target }}"
         {{- if .Values.morphic }}
         - name: MORPHIC_CLIENT_ID
           valueFrom:
@@ -58,18 +56,6 @@ spec:
             secretKeyRef:
               name: {{ template "locust.fullname" . }}
               key: morphic_client_secret
-        {{- end }}
-        {{- if .Values.basic_auth }}
-        - name: BASIC_AUTH_USER
-          valueFrom:
-            secretKeyRef:
-              name: {{ template "locust.fullname" . }}
-              key: basic_auth_user
-        - name: BASIC_AUTH_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ template "locust.fullname" . }}
-              key: basic_auth_password
         {{- end }}
         resources:
 {{ toYaml .Values.worker.resources | indent 10 }}
