@@ -14,11 +14,11 @@ variable "secrets_dir" {}
 variable "charts_dir" {}
 variable "nonce" {}
 variable "couchdb_helper_repository" {}
-variable "couchdb_helper_tag" {}
+variable "couchdb_helper_checksum" {}
 variable "couchdb_init_repository" {}
-variable "couchdb_init_tag" {}
+variable "couchdb_init_checksum" {}
 variable "couchdb_repository" {}
-variable "couchdb_tag" {}
+variable "couchdb_checksum" {}
 
 # Terragrunt variables
 
@@ -59,11 +59,11 @@ data "template_file" "couchdb_values" {
     couchdb_admin_password    = "${var.secret_couchdb_admin_password}"
     couchdb_auth_cookie       = "${var.secret_couchdb_auth_cookie}"
     couchdb_helper_repository = "${var.couchdb_helper_repository}"
-    couchdb_helper_tag        = "${var.couchdb_helper_tag}"
+    couchdb_helper_sha        = "${var.couchdb_helper_checksum}"
     couchdb_init_repository   = "${var.couchdb_init_repository}"
-    couchdb_init_tag          = "${var.couchdb_init_tag}"
+    couchdb_init_sha          = "${var.couchdb_init_checksum}"
     couchdb_repository        = "${var.couchdb_repository}"
-    couchdb_tag               = "${var.couchdb_tag}"
+    couchdb_sha               = "${var.couchdb_checksum}"
     replica_count             = "${var.replica_count}"
     requests_cpu              = "${var.requests_cpu}"
     requests_memory           = "${var.requests_memory}"
