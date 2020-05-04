@@ -204,6 +204,10 @@ verify_binaries
 print_header "Reading current set of replicas"
 COUCHDB_REPLICAS="$(kubectl -n "${COUCHDB_NAMESPACE}" get statefulset "${COUCHDB_STATEFULSET_NAME}" -o jsonpath='{.status.replicas}')"
 
+# Check that number of replicas is greater than 0
+[ "${COUCHDB_REPLICAS}" -gt 0 ] \
+  || fail "Number of CouchDB replicase (${COUCHDB_REPLICAS}) must be greater than 0"
+
 # If not supplied read set of latest snapshots
 if [ "${COUCHDB_SOURCE_SNAPSHOTS}" = '' ]; then
   print_header "Reading latest set of snapshots"
@@ -236,7 +240,7 @@ scale_and_wait statefulset "${COUCHDB_STATEFULSET_NAME}" "${COUCHDB_NAMESPACE}" 
 
 # Wait for pods to disappear
 print "Waiting for all pods to terminate"
-kubectl wait pods -l="${COUCHDB_POD_FILTER}" -n "${COUCHDB_NAMESPACE}" --for=delete --timeout="$((MAX_RETRIES * SLEEP))s"
+kubectl wait pods -l="${COUCHDB_POD_FILTER}" -n "${COUCHDB_NAMESPACE}" --for=delete --timeout="$((MAX_RETRIES * SLEEP))s" || true
 
 # Scale K8s snapshots to 0
 print_header "Scaling down k8s-snapshots"
