@@ -234,6 +234,10 @@ print_header "Reading CouchDB volume names"
 COUCHDB_PVS="$(kubectl -n "${COUCHDB_NAMESPACE}" get pvc -l "${COUCHDB_PVC_FILTER}" \
                  --sort-by '.metadata.name' -o json | jq -re '.items[].spec.volumeName')"
 
+# Check that number of PVs matches number of replicas
+[ "$(echo "${COUCHDB_PVS}" | wc -w | awk '{$1=$1};1')" = "${COUCHDB_REPLICAS}" ] \
+  || fail "Number of CouchDB Persistent Volumes (${COUCHDB_PVS}) does not match number of replicas (${COUCHDB_REPLICAS})"
+
 # Scale CouchDB to 0
 print_header "Scaling down CouchDB"
 scale_and_wait statefulset "${COUCHDB_STATEFULSET_NAME}" "${COUCHDB_NAMESPACE}" 0
