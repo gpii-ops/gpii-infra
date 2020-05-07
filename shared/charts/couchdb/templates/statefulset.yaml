@@ -23,7 +23,11 @@ spec:
     spec:
       initContainers:
         - name: init-copy
+          {{ if .Values.initImage.sha }}
+          image: "{{ .Values.initImage.repository }}@{{ .Values.initImage.sha }}"
+          {{ else }}
           image: "{{ .Values.initImage.repository }}:{{ .Values.initImage.tag }}"
+          {{ end }}
           command: ['sh','-c','cp /tmp/chart.ini /default.d; ls -lrt /default.d;']
           volumeMounts:
           - name: config
@@ -32,7 +36,11 @@ spec:
             mountPath: /default.d
       containers:
         - name: couchdb
+          {{ if .Values.image.sha }}
+          image: "{{ .Values.image.repository }}@{{ .Values.image.sha }}"
+          {{ else }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          {{ end }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http-couchdb
@@ -108,7 +116,11 @@ spec:
           - name: database-storage
             mountPath: /opt/couchdb/data
         - name: couchdb-statefulset-assembler
+          {{ if .Values.helperImage.sha }}
+          image: "{{ .Values.helperImage.repository }}@{{ .Values.helperImage.sha }}"
+          {{ else }}
           image: "{{ .Values.helperImage.repository }}:{{ .Values.helperImage.tag }}"
+          {{ end }}
           imagePullPolicy: {{ .Values.helperImage.pullPolicy }}
           env:
             - name: COUCHDB_CLUSTER_SIZE

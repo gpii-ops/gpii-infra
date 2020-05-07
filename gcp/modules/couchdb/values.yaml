@@ -6,15 +6,15 @@ cookieAuthSecret: ${couchdb_auth_cookie}
 
 helperImage:
   repository: ${couchdb_helper_repository}
-  tag: ${couchdb_helper_tag}
+  sha: ${couchdb_helper_sha}
 
 initImage:
   repository: ${couchdb_init_repository}
-  tag: ${couchdb_init_tag}
+  sha: ${couchdb_init_sha}
 
 image:
   repository: ${couchdb_repository}
-  tag: ${couchdb_tag}
+  sha: ${couchdb_sha}
 
 persistentVolume:
   enabled: true
