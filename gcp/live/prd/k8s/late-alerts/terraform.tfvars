@@ -9,6 +9,7 @@ terragrunt = {
       "../cluster",
       "../stackdriver/monitoring",
       "../gpii/flowmanager",
+      "../kube-system/kube-state-metrics"
     ]
   }
 
