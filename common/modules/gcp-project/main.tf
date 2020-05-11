@@ -377,6 +377,15 @@ data "google_iam_policy" "combined" {
     ]
   }
 
+  # Needed by stackdriver-metadata-agent-cluster-level
+  binding {
+    role = "roles/stackdriver.resourceMetadata.writer"
+
+    members = [
+      "serviceAccount:${google_service_account.gke_cluster_node.email}",
+    ]
+  }
+
   binding {
     role = "roles/monitoring.viewer"
 
