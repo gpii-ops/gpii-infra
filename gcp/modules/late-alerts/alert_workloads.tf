@@ -30,13 +30,11 @@ resource "google_monitoring_alert_policy" "k8s_workloads" {
       duration           = "300s"
 
       aggregations {
-        alignment_period   = "60s"
-        per_series_aligner = "ALIGN_NONE"
+        alignment_period = "60s"
       }
 
       denominator_aggregations {
-        alignment_period   = "60s"
-        per_series_aligner = "ALIGN_NONE"
+        alignment_period = "60s"
       }
     }
 
@@ -52,13 +50,11 @@ resource "google_monitoring_alert_policy" "k8s_workloads" {
       duration           = "300s"
 
       aggregations {
-        alignment_period   = "60s"
-        per_series_aligner = "ALIGN_NONE"
+        alignment_period = "60s"
       }
 
       denominator_aggregations {
-        alignment_period   = "60s"
-        per_series_aligner = "ALIGN_NONE"
+        alignment_period = "60s"
       }
     }
 
