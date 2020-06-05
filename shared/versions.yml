@@ -8,7 +8,7 @@
 exekube:
   upstream:
     repository: gpii/exekube
-    tag: 0.9.11-google_gpii.0
+    tag: 0.9.12-google_gpii.0
   generated:
     repository: gcr.io/gpii-common-prd/gpii__exekube
     sha: sha256:20131cdaa65075d337889f0fb501dfd20016721c88c35578099ec4c7cadb0e6d
