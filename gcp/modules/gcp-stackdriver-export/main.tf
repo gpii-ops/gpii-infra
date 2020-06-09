@@ -64,5 +64,6 @@ module "gcp_stackdriver_export" {
   exported_logs_storage_region = "${var.infra_region}"
   exported_logs_expire_after   = "${var.exported_logs_expire_after}"
 
-  exported_logs_encryption_key = "${lookup(data.terraform_remote_state.secret-mgmt.encryption_keys, "gcp-stackdriver-export")}"
+  exported_logs_encryption_key    = "${lookup(data.terraform_remote_state.secret-mgmt.encryption_keys, "gcp-stackdriver-export")}"
+  exported_logs_access_log_bucket = "${var.project_id}-access-logs"
 }
