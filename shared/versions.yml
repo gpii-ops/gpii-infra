@@ -91,7 +91,7 @@ dataloader:
     tag: latest
   generated:
     repository: herrclown/vagrant-universal
-    sha: sha256:436bb85db15112e95e62faea62a406914e14711735d20a5a2309ad68e094c88c
+    sha: sha256:5a916baef49a5061796875a7625edcc615c02a1085b7269c52ab5d9bbc0e78b0
     tag: latest
 flushtokens:
   upstream:
@@ -99,7 +99,7 @@ flushtokens:
     tag: latest
   generated:
     repository: herrclown/vagrant-universal
-    sha: sha256:436bb85db15112e95e62faea62a406914e14711735d20a5a2309ad68e094c88c
+    sha: sha256:5a916baef49a5061796875a7625edcc615c02a1085b7269c52ab5d9bbc0e78b0
     tag: latest
 flowmanager:
   upstream:
@@ -107,7 +107,7 @@ flowmanager:
     tag: latest
   generated:
     repository: herrclown/vagrant-universal
-    sha: sha256:436bb85db15112e95e62faea62a406914e14711735d20a5a2309ad68e094c88c
+    sha: sha256:5a916baef49a5061796875a7625edcc615c02a1085b7269c52ab5d9bbc0e78b0
     tag: latest
 productiontests:
   upstream:
@@ -115,7 +115,7 @@ productiontests:
     tag: latest
   generated:
     repository: herrclown/vagrant-universal
-    sha: sha256:436bb85db15112e95e62faea62a406914e14711735d20a5a2309ad68e094c88c
+    sha: sha256:5a916baef49a5061796875a7625edcc615c02a1085b7269c52ab5d9bbc0e78b0
     tag: latest
 k8s_snapshots:
   upstream:
@@ -139,7 +139,7 @@ preferences:
     tag: latest
   generated:
     repository: herrclown/vagrant-universal
-    sha: sha256:436bb85db15112e95e62faea62a406914e14711735d20a5a2309ad68e094c88c
+    sha: sha256:5a916baef49a5061796875a7625edcc615c02a1085b7269c52ab5d9bbc0e78b0
     tag: latest
 service_account_assigner:
   upstream:
