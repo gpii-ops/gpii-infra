@@ -8,11 +8,11 @@
 exekube:
   upstream:
     repository: gpii/exekube
-    tag: 0.9.11-google_gpii.0
+    tag: 0.9.12-google_gpii.0
   generated:
     repository: gcr.io/gpii-common-prd/gpii__exekube
-    sha: sha256:20131cdaa65075d337889f0fb501dfd20016721c88c35578099ec4c7cadb0e6d
-    tag: 0.9.11-google_gpii.0
+    sha: sha256:5e4e792ea41e83fc62c2a775fbf6d65ddb1523760e6c8733aab41d853854c055
+    tag: 0.9.12-google_gpii.0
 cert_manager:
   upstream:
     repository: quay.io/jetstack/cert-manager-controller
@@ -83,7 +83,7 @@ couchdb:
     tag: 2.3.1
   generated:
     repository: gcr.io/gpii-common-prd/couchdb
-    sha: sha256:13bcfa1f89f9a98c32c644f74c07da9b5df75af1d1b5f84fa7b9f3d5cb524f7f
+    sha: sha256:867a17fde08568ac4c429c523e06a1c85bbce5257d32c82c41d6de781fafce64
     tag: 2.3.1
 dataloader:
   upstream:
