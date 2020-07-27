@@ -117,6 +117,7 @@ data "google_iam_policy" "combined" {
 
     members = [
       "${local.service_accounts}",
+      "${local.project_owners}",
     ]
   }
 
