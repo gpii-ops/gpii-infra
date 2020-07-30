@@ -11,8 +11,8 @@ exekube:
     tag: 0.9.13-google_gpii.0
   generated:
     repository: gcr.io/gpii-common-prd/gpii__exekube
-    sha: sha256:5e4e792ea41e83fc62c2a775fbf6d65ddb1523760e6c8733aab41d853854c055
-    tag: 0.9.12-google_gpii.0
+    sha: sha256:ab8df8af3a80eaaed2d6b6a087fb633912e6aca2cebcddc5bde6b0195c6e07f8
+    tag: 0.9.13-google_gpii.0
 cert_manager:
   upstream:
     repository: quay.io/jetstack/cert-manager-controller
