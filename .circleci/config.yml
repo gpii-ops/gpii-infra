@@ -1,7 +1,7 @@
 # https://circleci.com/blog/circleci-hacks-reuse-yaml-in-your-circleci-config-with-yaml/
 default_docker: &default_docker
   docker:
-  - image: gcr.io/gpii-common-prd/gpii__exekube:0.9.12-google_gpii.0
+  - image: gcr.io/gpii-common-prd/gpii__exekube:0.9.13-google_gpii.0
 
 version: 2
 jobs:
