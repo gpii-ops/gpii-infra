@@ -120,7 +120,7 @@ resource "google_dns_record_set" "a-gpii-net" {
   ttl          = "3600"
 
   rrdatas = [
-    "71.13.162.139",
+    "47.45.17.107",
   ]
 }
 
