@@ -22,3 +22,4 @@ egress:
   httpsHosts:
     - cloudtrace.googleapis.com
     - monitoring.googleapis.com
+    - raw.githubusercontent.com
